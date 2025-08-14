@@ -13,7 +13,7 @@ from django.conf import settings
 from django.utils.translation import gettext as _
 
 from drf_resource.utils.local import local
-from drf_resource.utils.request import get_request
+from drf_resource.utils import get_request
 from core.errors.common import UserInfoMissing
 
 

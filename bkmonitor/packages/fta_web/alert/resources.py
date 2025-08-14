@@ -82,7 +82,7 @@ from constants.data_source import DataSourceLabel, DataTypeLabel, UnifyQueryData
 from drf_resource import Resource, api, resource
 from drf_resource.exceptions import CustomException
 from drf_resource.utils.common import count_md5
-from drf_resource.utils.request import get_request
+from drf_resource.utils import get_request
 from core.errors.alert import AIOpsMultiAnomlayDetectError, AlertNotFoundError
 from core.unit import load_unit
 from fta_web import constants

@@ -17,7 +17,7 @@ from bkmonitor.iam import Permission
 from bkmonitor.iam.action import ActionEnum
 from bkmonitor.views import serializers
 from drf_resource import Resource
-from drf_resource.utils.request import get_request
+from drf_resource.utils import get_request
 
 logger = logging.getLogger(__name__)
 

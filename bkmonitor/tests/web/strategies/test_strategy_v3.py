@@ -11,7 +11,7 @@ specific language governing permissions and limitations under the License.
 import mock
 from django.test import TestCase
 from bkmonitor.action.serializers.strategy import *  # noqa
-from bkmonitor.models import UserGroup, DutyArrange, StrategyModel
+from bkmonitor.models import StrategyModel
 from bkmonitor.strategy.new_strategy import Strategy
 from drf_resource.exceptions import CustomException
 from monitor_web.strategies.resources.v2 import SaveStrategyV2Resource

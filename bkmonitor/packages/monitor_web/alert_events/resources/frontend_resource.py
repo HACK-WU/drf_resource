@@ -65,7 +65,7 @@ from constants.strategy import (
     SourceType,
 )
 from drf_resource import Resource, api, resource
-from drf_resource.utils.request import get_request
+from drf_resource.utils import get_request
 from core.errors.event import (
     AggmethodIsRealtimeError,
     EventNotExist,

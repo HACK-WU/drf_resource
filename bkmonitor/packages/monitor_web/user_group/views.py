@@ -18,7 +18,7 @@ from bkmonitor.iam import ActionEnum
 from bkmonitor.iam.drf import BusinessActionPermission
 from bkmonitor.models import DutyPlan, DutyRule, DutyRuleSnap, UserGroup
 from drf_resource import resource
-from drf_resource.utils.request import get_request
+from drf_resource.utils import get_request
 from drf_resource.viewsets import ResourceRoute, ResourceViewSet
 
 

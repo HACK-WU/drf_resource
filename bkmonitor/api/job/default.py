@@ -17,7 +17,7 @@ from rest_framework import serializers
 
 from bkm_space.validate import validate_bk_biz_id
 from drf_resource.contrib.api import APIResource
-from drf_resource.utils.request import get_request
+from drf_resource.utils import get_request
 from core.errors.alarm_backends import EmptyAssigneeError
 from core.errors.iam import APIPermissionDeniedError
 

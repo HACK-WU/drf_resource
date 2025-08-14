@@ -53,7 +53,7 @@ from constants.common import (
 from drf_resource import api, resource
 from drf_resource.exceptions import CustomException
 from drf_resource.utils.common import count_md5
-from drf_resource.utils.request import get_request
+from drf_resource.utils import get_request
 from core.errors.user_group import DutyRuleNameExist, UserGroupNameExist
 
 

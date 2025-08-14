@@ -41,7 +41,7 @@ from constants.alert import EventStatus
 from drf_resource import Resource, api
 from drf_resource.cache import CacheType
 from drf_resource.contrib.cache import CacheResource
-from drf_resource.utils.request import get_request
+from drf_resource.utils import get_request
 from core.errors.api import BKAPIError
 from monitor.models import UserConfig
 from monitor_web.grafana.permissions import DashboardPermission

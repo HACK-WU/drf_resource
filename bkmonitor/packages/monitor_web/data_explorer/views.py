@@ -23,7 +23,7 @@ from rest_framework.viewsets import ModelViewSet
 from bkmonitor.iam import ActionEnum, Permission
 from bkmonitor.iam.drf import BusinessActionPermission
 from drf_resource import resource
-from drf_resource.utils.request import get_request
+from drf_resource.utils import get_request
 from drf_resource.viewsets import ResourceRoute, ResourceViewSet
 from monitor_web.data_explorer.serializers import (
     BulkDeleteFavoriteSerializer,

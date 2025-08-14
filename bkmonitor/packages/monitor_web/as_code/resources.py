@@ -63,7 +63,7 @@ from bkmonitor.views import serializers
 from constants.strategy import DATALINK_SOURCE
 from drf_resource import Resource, api
 from drf_resource.tasks import step
-from drf_resource.utils.request import get_request
+from drf_resource.utils import get_request
 from monitor_web.commons.report.resources import send_frontend_report_event
 from monitor_web.grafana.utils import get_org_id
 
