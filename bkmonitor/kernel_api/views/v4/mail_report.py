@@ -28,7 +28,7 @@ from bkmonitor.models import RenderImageTask, ReportItems
 from bkmonitor.utils.common_utils import to_dict
 from bkmonitor.views import serializers
 from drf_resource import Resource, resource
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 from drf_resource.viewsets import ResourceRoute, ResourceViewSet
 
 

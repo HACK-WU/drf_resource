@@ -38,7 +38,7 @@ from bkmonitor.views import serializers
 from constants.shield import ScopeType, ShieldCategory, ShieldStatus
 from drf_resource import resource
 from drf_resource.base import Resource
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 from core.errors.shield import DuplicateQuickShieldError, ShieldNotExist
 from fta_web.alert.handlers.base import AlertDimensionFormatter
 from monitor_web.alert_events.resources import EventDimensionMixin

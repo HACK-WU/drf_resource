@@ -27,7 +27,7 @@ from bkmonitor.views import serializers
 from drf_resource import CacheResource, api, resource
 from drf_resource.base import Resource
 from drf_resource.cache import CacheType
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 from core.errors.api import BKAPIError
 from monitor_web.commons.biz.func_control import CM
 

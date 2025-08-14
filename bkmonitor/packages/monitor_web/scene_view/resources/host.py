@@ -24,7 +24,7 @@ from bkmonitor.share.api_auth_resource import ApiAuthResource
 from bkmonitor.utils.ip import is_v6
 from constants.data_source import DataSourceLabel, DataTypeLabel
 from drf_resource import Resource, api, resource
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 from monitor_web.constants import AGENT_STATUS
 
 

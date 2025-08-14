@@ -24,7 +24,7 @@ from bkmonitor.views import serializers
 from constants.cmdb import TargetNodeType, TargetObjectType
 from drf_resource import api, resource
 from drf_resource.base import Resource
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 from core.errors.api import BKAPIError
 from core.errors.collecting import (
     CollectConfigNotExist,

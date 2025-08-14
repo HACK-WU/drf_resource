@@ -54,7 +54,7 @@ from bkmonitor.utils.time_tools import get_datetime_range
 from common.log import logger
 from constants.apm import OtlpKey, SpanKindKey, TelemetryDataType
 from drf_resource import api, resource
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 
 tracer = trace.get_tracer(__name__)
 

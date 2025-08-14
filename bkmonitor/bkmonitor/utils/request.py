@@ -14,7 +14,7 @@ import json
 from constants.cmdb import BIZ_ID_FIELD_NAMES
 from constants.common import SourceApp
 from drf_resource.utils.local import local
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 
 
 def get_source_app(request=None):

@@ -17,7 +17,7 @@ from bkmonitor.share.utils import check_api_permission
 from drf_resource import Resource
 from drf_resource.exceptions import CustomException
 from drf_resource.tools import format_serializer_errors
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 
 logger = logging.getLogger(__name__)
 

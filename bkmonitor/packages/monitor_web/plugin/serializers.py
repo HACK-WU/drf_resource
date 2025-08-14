@@ -20,7 +20,7 @@ from bkmonitor.utils.serializers import (
     MetricJsonSerializer,
     StrictCharField,
 )
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 from monitor_web.commons.data_access import PluginDataAccessor
 from monitor_web.models.plugin import (
     CollectorPluginConfig,

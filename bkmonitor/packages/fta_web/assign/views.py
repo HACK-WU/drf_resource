@@ -19,7 +19,7 @@ from bkmonitor.iam.drf import BusinessActionPermission, IAMPermission
 from bkmonitor.models import AlertAssignGroup, AlertAssignRule
 from constants.action import GLOBAL_BIZ_ID
 from drf_resource import resource
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 from drf_resource.viewsets import ResourceRoute, ResourceViewSet
 
 logger = logging.getLogger("root")

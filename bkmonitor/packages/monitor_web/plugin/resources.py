@@ -40,7 +40,7 @@ from constants.result_table import (
 )
 from drf_resource import Resource, api, resource
 from drf_resource.tasks import step
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 from core.errors.api import BKAPIError
 from core.errors.export_import import ExportImportError
 from core.errors.plugin import (

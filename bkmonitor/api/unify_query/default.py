@@ -20,7 +20,7 @@ from rest_framework import serializers
 from bkm_space.utils import bk_biz_id_to_space_uid, parse_space_uid
 from drf_resource import Resource
 from drf_resource.utils.local import local
-from drf_resource.utils import get_request
+from drf_resource.utils.request import get_request
 from core.errors.api import BKAPIError
 
 logger = logging.getLogger("bkmonitor")
