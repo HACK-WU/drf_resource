@@ -1,51 +1,49 @@
-![](docs/resource/img/logo.png)
+# 🚧 drf_resource：DRF资源化框架（开发中）
+
+🌟 **从蓝鲸 `bk_resource` 剥离的核心能力** → 让DRF项目也能享受声明式API开发体验！
+
 ---
-[![license](https://img.shields.io/badge/license-mit-brightgreen.svg?style=flat)](https://github.com/TencentBlueKing/bk-monitor/blob/master/LICENSE.txt)
-[![Release Version](https://img.shields.io/badge/release-V4.2.628-brightgreen.svg)](https://github.com/TencentBlueKing/bk-monitor/releases)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/TencentBlueKing/bk-monitor/pulls)
+
+## 🌱 项目目标
+
+将 `bk_resource` 的核心能力抽离成独立框架 → **彻底解除蓝鲸框架依赖**[3]
 
 
-[English](README_EN.md) | 简体中文
 
-> **重要提示**: `master` 分支在开发过程中可能处于 *不稳定或者不可用状态* 。
-请通过 [releases](https://github.com/TencentBlueKing/bk-monitor/releases) 而非 `master` 去获取稳定的二进制文件。
+## 🚀 核心进展
 
-蓝鲸智云监控平台(BLUEKING-MONITOR)是蓝鲸智云官方推出的一款监控平台产品，除了具有丰富的数据采集能力，大规模的数据处理能力，简单易用，还提供更多的平台扩展能力。依托于蓝鲸 PaaS，有别于传统的 CS 结构，在整个蓝鲸生态中可以形成监控的闭环能力。
+● 已完成项目初始化与基础框架搭建[1]
+● 正在优化 `resource` 模块自动发现机制 → 简化配置[4]
+● 保留蓝鲸开发体验，但去掉所有蓝鲸专属依赖
 
-致力于满足不同的监控场景需求和能力，提高监控的及时性、准确性、智能化，为在线业务保驾护航。
+---
 
-## Overview
-* [设计理念](docs/overview/design.md)
-* [架构设计](docs/overview/architecture.md)
-* [代码目录](docs/overview/code_framework.md)
+## ⚙️ 快速使用（预览版）
 
-## Features
+```python
+# resources.py
+from drf_resource import Resource
 
-TODO
+class QuickResource(Resource):
+    def perform_request(self, name="DRF"):
+        return {"hello": name}
+```
 
+👉 自动映射到 `/api/quick/` (参数自动校验 ✨)
 
-## Getting Started
-* [下载与编译](https://bk.tencent.com/download_version_list/)
-* [安装部署](https://bk.tencent.com/docs/markdown/ZH/DeploymentGuides/7.1/install-co-suite.md)
+---
 
-## Support
-- [产品文档](https://bk.tencent.com/docs/document/6.0/134/6143)
-- [蓝鲸论坛](https://bk.tencent.com/s-mart/community)
+## 📌 贡献指引
 
-## BlueKing Community
-* [BK-CMDB](https://github.com/Tencent/bk-cmdb)：蓝鲸配置平台（蓝鲸 CMDB）是一个面向资产及应用的企业级配置管理平台。
-- [BK-CI](https://github.com/Tencent/bk-ci)：蓝鲸持续集成平台是一个开源的持续集成和持续交付系统，可以轻松将你的研发流程呈现到你面前。
-- [BK-BCS](https://github.com/Tencent/bk-bcs)：蓝鲸容器管理平台是以容器技术为基础，为微服务业务提供编排管理的基础服务平台。
-- [BK-BCS-SaaS](https://github.com/Tencent/bk-bcs-saas)：蓝鲸容器管理平台 SaaS 基于原生 Kubernetes 和 Mesos 自研的两种模式，提供给用户高度可扩展、灵活易用的容器产品服务。
-- [BK-PaaS](https://github.com/Tencent/bk-PaaS)：蓝鲸 PaaS 平台是一个开放式的开发平台，让开发者可以方便快捷地创建、开发、部署和管理 SaaS 应用。
-- [BK-SOPS](https://github.com/Tencent/bk-sops)：标准运维（SOPS）是通过可视化的图形界面进行任务流程编排和执行的系统，是蓝鲸体系中一款轻量级的调度编排类 SaaS 产品。
+本项目**早期阶段**，急需：
 
-## Contributing
-如果你有好的意见或建议，欢迎给我们提 Issues 或 Pull Requests，为蓝鲸开源社区贡献力量。关于 bk-monitor 分支管理、Issue 以及 PR 规范，
-请阅读 [Contributing Guide](docs/CONTRIBUTING.md)。
+- 🐞 测试反馈 & Bug报告
+- 🔍 自动发现机制优化[4]
+- 🌐 更多DRF生态兼容性支持
 
-[腾讯开源激励计划](https://opensource.tencent.com/contribution) 鼓励开发者的参与和贡献，期待你的加入。
+---
 
+> ✨ **设计原则**：**保持核心轻量** · 不做蓝鲸的第二个影子
+> 🚧 **重要提示**：API可能变动，**不建议生产环境使用**
 
-## License
-项目基于 MIT 协议， 详细请参考 [LICENSE](LICENSE.txt) 。
+[正在活跃开发中] → ⭐ 欢迎试用 & 提PR！
