@@ -36,7 +36,7 @@ from bkmonitor.utils.grafana import fetch_biz_panels, fetch_panel_title_ids
 from constants.report import GRAPH_ID_REGEX, GroupId, StaffChoice
 from drf_resource import CacheResource, api, resource
 from drf_resource.base import Resource
-from drf_resource.cache import CacheType
+from core.cache import CacheType
 from drf_resource.exceptions import CustomException
 from drf_resource.utils.request import get_request
 

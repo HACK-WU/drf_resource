@@ -14,7 +14,7 @@ from rest_framework import serializers
 
 from apm_web.handlers.log_handler import ServiceLogHandler
 from apm_web.handlers.service_handler import ServiceHandler
-from drf_resource.cache import CacheType
+from core.cache import CacheType
 from core.cache import using_cache
 from constants.apm import Vendor
 from drf_resource import Resource, api

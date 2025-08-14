@@ -39,7 +39,7 @@ from bkmonitor.views import serializers
 from bkmonitor.views.serializers import BusinessOnlySerializer
 from constants.alert import EventStatus
 from drf_resource import Resource, api
-from drf_resource.cache import CacheType
+from core.cache import CacheType
 from drf_resource.contrib.cache import CacheResource
 from drf_resource.utils.request import get_request
 from core.errors.api import BKAPIError

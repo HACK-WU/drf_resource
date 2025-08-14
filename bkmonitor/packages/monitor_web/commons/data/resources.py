@@ -13,7 +13,7 @@ specific language governing permissions and limitations under the License.
 from django.conf import settings
 from django.utils.translation import gettext as _
 
-from drf_resource.cache import CacheType
+from core.cache import CacheType
 from core.cache import using_cache
 from bkmonitor.utils.common_utils import safe_int
 from bkmonitor.views import serializers

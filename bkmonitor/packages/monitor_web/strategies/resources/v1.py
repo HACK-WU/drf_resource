@@ -45,7 +45,7 @@ from constants.strategy import (
 )
 from drf_resource import Resource, api, resource
 from drf_resource.exceptions import CustomException
-from drf_resource.management import ResourceNotRegistered
+from drf_resource.management.exceptions import ResourceNotRegistered
 from drf_resource.utils.request import get_request
 from core.errors.strategy import StrategyNotExist
 from core.unit import load_unit
