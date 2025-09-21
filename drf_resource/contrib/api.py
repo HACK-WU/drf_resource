@@ -40,9 +40,10 @@ BK_USERNAME_FIELD = "bk_username"
 APIPermissionDeniedCodeList = ["9900403", "35999999"]
 
 
-class APIResource(six.with_metaclass(abc.ABCMeta, CacheResource)):
+class APIResource(CacheResource):
     """
     API类型的Resource
+    直接继承 CacheResource，利用 ResourceMeta 的自动注册机制
     """
 
     TIMEOUT = 60

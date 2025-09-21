@@ -28,6 +28,7 @@ from drf_resource.tools import (
     get_serializer_fields,
     render_schema,
 )
+from drf_resource.registry import ResourceMeta
 
 tracer = trace.get_tracer(__name__)
 logger = logging.getLogger(__name__)
@@ -67,7 +68,7 @@ Resource的执行流程：
 """
 
 
-class Resource(six.with_metaclass(abc.ABCMeta, object)):
+class Resource(six.with_metaclass(ResourceMeta, object)):
     RequestSerializer = None
     ResponseSerializer = None
 
@@ -82,6 +83,11 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
     # 支持记录请求参数(settings开启：ENABLE_RESOURCE_DATA_COLLECT后，
     # 记录所有`support_data_collect`为True的resource请求)
     support_data_collect = True
+    
+    # 自动注册配置
+    auto_register = True  # 是否自动注册，默认为 True
+    register_name = None  # 自定义注册名称
+    register_module = None  # 自定义注册模块路径
 
     def __init__(self, context=None):
         self.RequestSerializer, self.ResponseSerializer = self._search_serializer_class()

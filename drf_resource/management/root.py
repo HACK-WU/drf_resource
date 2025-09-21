@@ -24,7 +24,7 @@ from drf_resource.management.exceptions import (
     ResourceModuleNotRegistered,
     ResourceNotRegistered,
 )
-from drf_resource.management.finder import API_DIR, ResourceFinder, ResourcePath
+from drf_resource.registry import resource_registry
 
 logger = logging.getLogger(__name__)
 
@@ -328,21 +328,24 @@ class ResourceManager(tuple):
 
 
 def setup():
+    """
+    初始化新的自动注册机制
+    替代原有的文件扫描机制，通过元类和装饰器实现自动注册
+    """
     global __setup__
     if __setup__:
         return
-
-    finder = ResourceFinder()
-    for path in finder.resource_path:  # type: ResourcePath
-        # print(path)
-        # >> web.plugin: unloaded  # unloaded 表示资源未注册
-        install_resource(path)
-
+    
+    # 同步注册表到 ResourceManager
+    resource_registry.sync_to_manager()
+    
     __setup__ = True
-    resource.__finder__ = finder
+    
+    # 清理旧的机制引用
+    resource_registry.clear_legacy()
 
 
-def install_resource(rs_path: ResourcePath):
+def install_resource(rs_path):
     """
     # 示例代码：展示如何使用已经注册的资源
     # 假设我们有一个资源模块路径为 'plugin.resources'
@@ -483,17 +486,71 @@ def is_adapter(dotted_path):
     return "adapter" in dotted_path.split(".")
 
 
+# ============================================================================
+# 以下函数已废弃，使用新的自动注册机制替代
+# 保留这些函数仅为了向后兼容，将在后续版本中移除
+# ============================================================================
+
+def install_resource(rs_path):
+    """
+    【已废弃】原有的资源安装函数
+    新的自动注册机制不再需要手动安装资源
+    """
+    import warnings
+    warnings.warn(
+        "install_resource is deprecated. Resources are now auto-registered via metaclass.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    pass
+
+
+def install_adapter(rs_path):
+    """
+    【已废弃】原有的适配器安装函数  
+    新的自动注册机制不再需要手动安装适配器
+    """
+    import warnings
+    warnings.warn(
+        "install_adapter is deprecated. Adapters are now auto-registered via decorators.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    pass
+
+
+def is_api(dotted_path):
+    """
+    【已废弃】判断是否为API路径
+    新机制通过模块路径自动识别
+    """
+    return 'api' in dotted_path.split('.')
+
+
+def is_adapter(dotted_path):
+    """
+    【已废弃】判断是否为适配器路径  
+    新机制通过模块路径自动识别
+    """
+    return "adapter" in dotted_path.split(".")
+
+
+# ============================================================================
+# 已废弃的工具函数，保留用于向后兼容
+# ============================================================================
+
 def path_to_dotted(path) -> str:
     """
-    将文件路径转换为带点的字符串格式。
+    【已废弃】将文件路径转换为带点的字符串格式
+    新机制不再依赖文件路径转换
     """
-    # 使用os.sep来确保跨平台兼容性，移除空字符串以避免不必要的点
     return ".".join([p for p in path.split(os.sep) if p])
 
 
 def camel_to_underscore(camel_str):
     """
-    将驼峰式字符串转换为下划线格式。
+    【保留】将驼峰式字符串转换为下划线格式
+    这个函数仍然被新的命名推导机制使用
     """
     return inflection.underscore(camel_str)
 

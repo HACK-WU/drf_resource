@@ -10,8 +10,44 @@ specific language governing permissions and limitations under the License.
 """
 
 from drf_resource.base import Resource
-from drf_resource.contrib import APIResource, CacheResource
 from drf_resource.management.root import adapter, api, resource
+from drf_resource.decorators import (
+    register_resource,
+    register_function,
+    register_as,
+    conditional_register,
+    batch_register,
+    unregister_resource,
+    list_registered_resources,
+    get_resource_info,
+)
+from drf_resource.registry import resource_registry
+
+# 延迟导入 contrib 模块以避免 Django 依赖
+APIResource = None
+CacheResource = None
+
+def _load_contrib_classes():
+    """延迟加载 contrib 类"""
+    global APIResource, CacheResource
+    if APIResource is None or CacheResource is None:
+        try:
+            from drf_resource.contrib import APIResource as _APIResource, CacheResource as _CacheResource
+            APIResource = _APIResource
+            CacheResource = _CacheResource
+        except ImportError:
+            pass
+    return APIResource, CacheResource
+
+# 动态属性访问
+def __getattr__(name):
+    if name == 'APIResource':
+        api_res, _ = _load_contrib_classes()
+        return api_res
+    elif name == 'CacheResource':
+        _, cache_res = _load_contrib_classes()
+        return cache_res
+    raise AttributeError(f"module '{__name__}' has no attribute '{name__}'")
 
 __author__ = "蓝鲸智云"
 __copyright__ = "Copyright (c)   2012-2021 Tencent BlueKing. All Rights Reserved."
@@ -32,4 +68,20 @@ __doc__ = """
         # 调用adapter.cc 既可访问对应文件下的resource，
         # 如果在${platform}/resources.py里面有相同定义，会重载default.py下的resource
     """
-__all__ = ["Resource", "CacheResource", "APIResource", "adapter", "api", "resource"]
+__all__ = [
+    "Resource", 
+    "adapter", 
+    "api", 
+    "resource",
+    "register_resource",
+    "register_function",
+    "register_as",
+    "conditional_register",
+    "batch_register",
+    "unregister_resource",
+    "list_registered_resources",
+    "get_resource_info",
+    "resource_registry",
+    "APIResource",
+    "CacheResource",
+]

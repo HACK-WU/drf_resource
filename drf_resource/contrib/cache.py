@@ -17,9 +17,10 @@ from drf_resource.base import Resource
 from drf_resource.cache import CacheTypeItem, using_cache
 
 
-class CacheResource(six.with_metaclass(abc.ABCMeta, Resource)):
+class CacheResource(Resource):
     """
     支持缓存的resource，开发环境下缓存默认不生效。
+    直接继承 Resource，利用 ResourceMeta 的自动注册机制
     """
 
     # 缓存类型，启用缓存需要设置cache_type或backend_cache_type属性
