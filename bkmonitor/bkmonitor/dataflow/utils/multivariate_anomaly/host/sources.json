@@ -1,0 +1,64 @@
+[
+    {
+        "result_table_id": "system.cpu_detail",
+        "access_metrics": [
+            "usage"
+        ]
+    },
+    {
+        "result_table_id": "system.disk",
+        "access_metrics": [
+            "in_use"
+        ]
+    },
+    {
+        "result_table_id": "system.env",
+        "access_metrics": [
+            "procs"
+        ]
+    },
+    {
+        "result_table_id": "system.io",
+        "access_metrics": [
+            "util"
+        ]
+    },
+    {
+        "result_table_id": "system.load",
+        "access_metrics": [
+            "load5"
+        ]
+    },
+    {
+        "result_table_id": "system.mem",
+        "access_metrics": [
+            "pct_used",
+            "psc_pct_used"
+        ]
+    },
+    {
+        "result_table_id": "system.net",
+        "access_metrics": [
+            "speed_recv",
+            "speed_sent"
+        ]
+    },
+    {
+        "result_table_id": "system.proc",
+        "access_metrics": [
+            "cpu_usage_pct"
+        ]
+    },
+    {
+        "result_table_id": "system.swap",
+        "access_metrics": [
+            "pct_used"
+        ]
+    },
+    {
+        "result_table_id": "system.inode",
+        "access_metrics": [
+            "used"
+        ]
+    }
+]

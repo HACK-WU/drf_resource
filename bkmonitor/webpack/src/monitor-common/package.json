@@ -1,0 +1,17 @@
+{
+  "name": "monitor-common",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".eslintrc.js",
+  "scripts": {
+    "prettier": "prettier --write . '!**/*.{css,scss,less}'",
+    "lint": "eslint --fix ./",
+    "fix": "npm run prettier && npm run lint"
+  },
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "vue": "v2-latest"
+  }
+}
