@@ -299,9 +299,9 @@ class ResourceRegistry:
 
         # 注册到相应的根管理器
         # 支持快捷调用：resource.alert
-        setattr(root_manager, shortcut_name, shortcut)
+        root_manager.setattr_with_path(shortcut_name, shortcut)
         # 支持完整路径调用：resource.monitor_web.strategy.alert
-        setattr(root_manager, module_path, shortcut)
+        root_manager.setattr_with_path(module_path, shortcut)
 
         # 保存快捷方式引用
         self._shortcuts[module_path] = shortcut

@@ -8,16 +8,13 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-import os
 import inspect
 import logging
-import inflection
+import os
 from contextlib import contextmanager
 from importlib import import_module
-from typing import Optional
 
-from django.conf import settings
-
+import inflection
 from drf_resource.base import Resource
 from drf_resource.management.exceptions import (
     ResourceModuleConflict,
@@ -30,39 +27,6 @@ logger = logging.getLogger(__name__)
 
 # 判断是否DRFResource是否已经初始化
 __setup__ = False
-__doc__ = """
-自动发现项目下resource和adapter和api
-    cc
-    ├── adapter
-    │   ├── default.py
-    │       ├── community
-    │       │       └── resources.py
-    │       └── enterprise
-    │           └── resources.py
-    └── resources.py
-    使用:
-        # api: 代表基于ESB/APIGW调用的接口调用
-        # api.$module.$api_name
-            api.bkdata.query_data -> api/bkdata/default.py: QueryDataResource
-        # resource: 基于业务逻辑的封装
-        resource.plugin -> plugin/resources.py
-            resource.plugin.install_plugin -> plugin/resources.py: InstallPluginResource
-        # adapter: 针对不同版本的逻辑差异进行的封装
-        adapter.cc -> cc/adapter/default.py -> cc/adapter/${platform}/resources.py
-        # 调用adapter.cc 即可访问对应文件下的resource，
-        # 如果在${platform}/resources.py里面有相同定义，会重载default.py下的resource
-        
-        
-    补充：
-        1、如果已经存在resource.py或者default.py或者resources目录，那么会自动将此文件作为最终的resource资源文件。
-        此时，与resource.py同级的目录下还存在其他的resource.py 需要手动导入到当前的resource.py中才会生效。
-        
-        2、drf_resource要求包含resource.py或者default.py或者resources目录的目录(dir_name)名称必须是唯一的，
-        因为目录名称会作为resource的快捷方式名称，而快捷方式名称必须是唯一的。
-        如果存在多个相同的名称(dir_name)，可以尝试在dir_name的父目录下创建在创建一个resource.py文件，从而将dir_name父目录的名称作为快捷方式名称。
-        此时就不会发生冲突。但注意一定要将当前的resource.py导入到dir_name父目录的resource.py中。
-        
-    """
 
 
 @contextmanager
@@ -127,7 +91,7 @@ class ResourceShortcut(object):
     def _setup(self):
         """
         私有方法，用于动态设置资源。
-    
+
         本方法尝试导入指定路径下的模块，并自动检测模块中的资源类和函数。
         对于每个检测到的资源类（非抽象且继承自Resource的类），创建一个实例并作为当前实例的属性。
         对于每个函数，直接绑定为当前实例的属性。
@@ -212,7 +176,14 @@ class ResourceManager(tuple):
     ResourceManager 类继承自 tuple，用于管理资源的层级结构。
     它允许动态添加子资源，并维护资源间的父子关系。
     底层使用 tuple 作为底层数据结构。
+
+    新功能：
+    - 支持快捷调用方式：resource.alert
+    - 支持完整路径调用方式：resource.monitor_web.strategy.alert
+    - 自动创建中间层级节点
+    - 路径冲突检测和错误处理
     """
+
     __parent__ = None  # 父资源引用，用于维护资源层级关系
 
     def __contains__(self, item):
@@ -230,8 +201,8 @@ class ResourceManager(tuple):
     def __getattr__(self, name):
         """
         重写 __getattr__ 方法，用于动态添加或获取子资源。
-        如果是设置阶段，尝试从转换后的对象中获取属性，如果未找到则抛出异常。
-        否则，创建新的 ResourceManager 实例作为子资源，并将其绑定到当前资源。
+        如果是设置阶段，优先检查直接设置的属性，然后尝试从转换后的对象中获取属性。
+        如果未找到则抛出异常。否则，创建新的 ResourceManager 实例作为子资源。
 
         参数:
         - name: 属性名
@@ -239,15 +210,21 @@ class ResourceManager(tuple):
         返回:
         - ResourceManager 或其他类型: 动态添加的子资源或获取的属性值
         """
-        # 快捷方式挂载完成后，如果获取不到相关Resource类，会抛出异常
+        # 快捷方式挂载完成后，优先检查直接设置的属性
         if __setup__:
-            # # 如果name不存在当前的self中，尝试从self的最后一个子资源中获取。
-            got = getattr(self.transform(), name, None)
-            if got is None:
-                raise ResourceModuleNotRegistered(
-                    'module: "%s" is not registered, maybe not in `INSTALLED_APPS` ?' % name
-                )
-            return got
+            # 先检查是否有直接设置的属性（通过 setattr_with_path 设置的）
+            if hasattr(super(ResourceManager, self), name):
+                return super(ResourceManager, self).__getattribute__(name)
+
+            # 如果没有直接设置的属性，尝试从转换后的对象中获取
+            transform_result = self.transform()
+            if transform_result is not None:
+                got = getattr(transform_result, name, None)
+                if got is not None:
+                    return got
+
+            # 如果都没找到，抛出异常
+            raise ResourceModuleNotRegistered('module: "%s" is not registered, maybe not in `INSTALLED_APPS` ?' % name)
 
         # 创建新的子资源实例,并将当当前self的内容添加到子资源中。
         # 然后给当前self(这个元组)添加name属性，指向新创建的子资源。
@@ -326,6 +303,81 @@ class ResourceManager(tuple):
         """
         return self.transform()(*args, **kwargs)
 
+    def setattr_with_path(self, name: str, value) -> None:
+        """
+        支持包含点号的完整路径属性设置。
+        这个方法可以处理两种注册方式：
+        1. 快捷调用方式：resource.alert
+        2. 完整路径调用方式：resource.monitor_web.strategy.alert
+
+        参数:
+        - name: 属性名，可能包含点号的完整路径
+        - value: 要设置的值，通常是 ResourceShortcut 实例
+
+        抛出:
+        - ResourceModuleConflict: 当路径冲突时
+        - ValueError: 当路径格式不正确时
+        """
+        if not name or not isinstance(name, str):
+            raise ValueError("Attribute name must be a non-empty string")
+
+        # 如果名称不包含点号，直接设置
+        if '.' not in name:
+            # 检查冲突
+            if hasattr(self, name):
+                existing_attr = getattr(self, name)
+                # 如果已存在同名的 ResourceShortcut，抛出冲突异常
+                if hasattr(existing_attr, '_path'):
+                    raise ResourceModuleConflict(
+                        f"Resource conflict: '{name}' already exists with path '{existing_attr._path}'"
+                    )
+
+            # 直接设置属性
+            object.__setattr__(self, name, value)
+            return
+
+        # 处理包含点号的完整路径
+        path_segments = name.split('.')
+        current_manager = self
+
+        # 遍历路径段，除了最后一个
+        for segment in path_segments[:-1]:
+            if not segment:  # 跳过空段
+                continue
+
+            # 检查是否已存在该段
+            if hasattr(current_manager, segment):
+                next_manager = getattr(current_manager, segment)
+                # 如果已经是 ResourceShortcut，不能再创建子节点
+                if hasattr(next_manager, '_path'):
+                    raise ResourceModuleConflict(
+                        f"Cannot create path '{name}': segment '{segment}' is already a ResourceShortcut"
+                    )
+                # 如果不是 ResourceManager，也不能继续
+                if not isinstance(next_manager, ResourceManager):
+                    raise ValueError(f"Cannot create path '{name}': segment '{segment}' is not a ResourceManager")
+                current_manager = next_manager
+            else:
+                # 创建新的中间节点
+                new_manager = ResourceManager(current_manager + (segment,))
+                object.__setattr__(current_manager, segment, new_manager)
+                new_manager.__parent__ = current_manager
+                current_manager = new_manager
+
+        # 设置最后一个段的值
+        final_segment = path_segments[-1]
+        if not final_segment:
+            raise ValueError(f"Invalid path '{name}': cannot end with a dot")
+
+        # 检查最终段的冲突
+        if hasattr(current_manager, final_segment):
+            existing_attr = getattr(current_manager, final_segment)
+            if hasattr(existing_attr, '_path'):
+                raise ResourceModuleConflict(f"Resource conflict: '{final_segment}' already exists at path '{name}'")
+
+        # 设置最终值
+        object.__setattr__(current_manager, final_segment, value)
+
 
 def setup():
     """
@@ -335,188 +387,14 @@ def setup():
     global __setup__
     if __setup__:
         return
-    
+
     # 同步注册表到 ResourceManager
     resource_registry.sync_to_manager()
-    
+
     __setup__ = True
-    
+
     # 清理旧的机制引用
     resource_registry.clear_legacy()
-
-
-def install_resource(rs_path):
-    """
-    # 示例代码：展示如何使用已经注册的资源
-    # 假设我们有一个资源模块路径为 'plugin.resources'
-    # 并且该模块中有一个资源类 'InstallPluginResource'
-
-    # 使用示例
-    # 1. 获取资源模块
-    plugin_resource = resource.plugin
-
-    # 2. 调用资源类的方法
-    # 假设 InstallPluginResource 类中有一个方法 install_plugin
-    result = plugin_resource.install_plugin(param1=value1, param2=value2)
-
-
-    补充说明： Resource类分为两种类型，一种是APIResource，主要用于发送API请求，一种是Resource,主要用于业务逻辑.
-        - 如果dotted_path以api.开头，那么该资源类为APIResource，否则为Resource
-    """
-    # 获取资源路径的点分隔表示形式
-    dotted_path: str = rs_path.path
-    # 初始化资源和端点变量,表示当前字资源(路径上的某个点)所对应的ResourceManager实例
-    # 而resource是所有_resource的根节点
-    _resource: Optional[ResourceManager, ResourceShortcut] = None
-    endpoint: Optional[str] = None
-
-    # 如果路径指向的是API或适配器资源，则调用install_adapter函数处理
-    if is_api(dotted_path) or is_adapter(dotted_path):
-        return install_adapter(rs_path)
-
-    # 分割资源路径，逐段处理
-    for p in dotted_path.split("."):
-        # 如果父资源是一个快捷方式，则无法再产生ResourceManger实例，所以直接跳过
-        if isinstance(_resource, ResourceShortcut):
-            logger.debug("ignored: {}".format(dotted_path))
-            rs_path.ignored()
-            return
-        # 只有第一次获取时，是从resource中获取,此时会产生一个初始的ResourceManage实例作为字资源，而当前resource就是该子资源的父资源
-        # 从第二次开始，就是从_resource中获取，里面已经记录了父资源。
-        # 这里挂载完之后，每个resource及其子资源都是一个ResourceManager实例。
-        # 经过后续处理之后，最后一个子资源，也就是endpoint，将会被覆盖变为一个ResourceShortcut实例，从而实现快捷方式的功能。
-        _resource = getattr(_resource or resource, p)
-        endpoint = p
-
-    # 如果资源成功获取到
-    if _resource:
-        try:
-            resource_module = ResourceShortcut(".".join(_resource))
-            logger.debug("success: {}".format(dotted_path))
-            rs_path.loaded()
-        except ResourceNotRegistered:
-            # 如果资源未注册，记录警告日志并标记路径错误
-            logger.warning("failed: {}".format(dotted_path))
-            rs_path.error()
-            return
-
-        # 尝试从resource中获取快捷方式,如果获取到并且也是ResourceShortcut，则抛出冲突异常，证明同名资源已经存在
-        shortcut = getattr(resource, endpoint)
-        if isinstance(shortcut, ResourceShortcut):
-            raise ResourceModuleConflict(
-                "resources conflict:\n>>> {}\n<<< {}".format(shortcut._path, ".".join(_resource))
-            )
-        # 设置资源的快捷方式
-        # 挂载完整的路径，比如有资源"a.b.c.get_user_info",a和b都是ResourceManager实例，c是ResourceShortcut实例,
-        # 所以可以使用完整路径调用，比如resource.a.b.c.get_user_info进行调用
-        setattr(_resource.__parent__, endpoint, resource_module)
-        # 挂载快捷方式，可以直接通过快捷方式调用，比如resource.c.get_user_info进行调用
-        setattr(resource, endpoint, resource_module)
-
-
-def install_adapter(rs_path):
-    """
-    根据给定的资源路径安装适配器。
-
-    该函数负责根据资源路径（rs_path）来安装相应的适配器。适配器可以是API资源适配器，
-    也可以是适配器资源快捷方式，具体取决于路径是否指向API目录。
-
-    参数:
-    - rs_path: 资源路径对象，包含待安装适配器的路径信息。
-
-    返回值:
-    无直接返回值，但会通过rs_path.error()记录错误，或通过rs_path.loaded()标记加载成功。
-    """
-    # 获取资源路径的点分隔格式
-    dotted_path = rs_path.path
-    # 初始化适配器类为AdapterResourceShortcut
-    adapter_cls = AdapterResourceShortcut
-    # adapter 和 api 代码结构一致， 唯一区别是entry不同，adapter多了一层`adapter`目录
-    if is_api(dotted_path):
-        # 如果是API路径，进行特殊处理
-        api_root = path_to_dotted(API_DIR)
-        result = dotted_path[(len(API_DIR) + 1):].split(".", 1)
-        if len(result) == 2:
-            rs, ada = result
-        else:
-            rs = result[0]
-            ada = ""
-        rs = "{}.{}".format(api_root, rs)
-        adapter_cls = APIResourceShortcut
-    else:
-        # 分割非API路径，适配器路径应包含"adapter"目录
-        rs, ada = [path.strip(".") for path in dotted_path.split("adapter")]
-
-    try:
-        # 创建默认适配器实例
-        default_adapter = adapter_cls(rs)
-        # 获取默认适配器定义的方法列表
-        defined_method = default_adapter.list_method()
-    except ImportError as e:
-        # 如果导入失败，记录错误并返回
-        logger.warning("error: {}\n{}".format(dotted_path, e))
-        rs_path.error()
-        return
-
-    # 如果适配器路径以PLATFORM开头，加载平台特定的适配器
-    if ada.startswith(settings.PLATFORM):
-        platform_adapter = ResourceShortcut(dotted_path)
-        # load method from platform adapter to default adapter
-        for method in defined_method:
-            if method in platform_adapter.list_method():
-                default_adapter.reload_method(method, getattr(platform_adapter, method))
-
-    # 根据路径类型确定适配器的根路径
-    root = adapter
-    if is_api(dotted_path):
-        root = api
-    # 在适配器或API的命名空间内注册加载的适配器
-    setattr(root, rs.split(".")[-1], default_adapter)
-    # 记录成功加载的日志
-    logger.debug("success: {}".format(dotted_path))
-    # 标记资源路径为已加载
-    rs_path.loaded()
-
-
-def is_api(dotted_path):
-    return dotted_path.startswith(path_to_dotted(API_DIR))
-
-
-def is_adapter(dotted_path):
-    return "adapter" in dotted_path.split(".")
-
-
-# ============================================================================
-# 以下函数已废弃，使用新的自动注册机制替代
-# 保留这些函数仅为了向后兼容，将在后续版本中移除
-# ============================================================================
-
-def install_resource(rs_path):
-    """
-    【已废弃】原有的资源安装函数
-    新的自动注册机制不再需要手动安装资源
-    """
-    import warnings
-    warnings.warn(
-        "install_resource is deprecated. Resources are now auto-registered via metaclass.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    pass
-
-
-def install_adapter(rs_path):
-    """
-    【已废弃】原有的适配器安装函数  
-    新的自动注册机制不再需要手动安装适配器
-    """
-    import warnings
-    warnings.warn(
-        "install_adapter is deprecated. Adapters are now auto-registered via decorators.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    pass
 
 
 def is_api(dotted_path):
@@ -529,7 +407,7 @@ def is_api(dotted_path):
 
 def is_adapter(dotted_path):
     """
-    【已废弃】判断是否为适配器路径  
+    【已废弃】判断是否为适配器路径
     新机制通过模块路径自动识别
     """
     return "adapter" in dotted_path.split(".")
@@ -538,6 +416,7 @@ def is_adapter(dotted_path):
 # ============================================================================
 # 已废弃的工具函数，保留用于向后兼容
 # ============================================================================
+
 
 def path_to_dotted(path) -> str:
     """
