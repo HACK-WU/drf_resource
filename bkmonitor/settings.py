@@ -11,16 +11,18 @@ specific language governing permissions and limitations under the License.
 import logging
 import os
 import sys
+from pathlib import Path
+
+import pymysql
 
 import monkey
 from config.tools.environment import ENVIRONMENT, ROLE
 
-try:
-    import MySQLdb
-except ImportError:
-    import pymysql
-    pymysql.install_as_MySQLdb()
+pymysql.install_as_MySQLdb()
 
+# 将外层的drf_resource包加入到sys.path
+drf_resource_path = Path(__file__).parent.parent.resolve()
+sys.path.append(str(drf_resource_path))
 
 # settings加载顺序 config.default -> blueapps.patch -> config.{env} -> config.role.{role}
 

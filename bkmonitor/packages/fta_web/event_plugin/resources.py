@@ -8,7 +8,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-import abc
 import logging
 import time
 import traceback
@@ -19,6 +18,9 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
 from django.utils.translation import gettext as _
+from drf_resource import Resource, api, resource
+from drf_resource.exceptions import CustomException
+from drf_resource.tools import format_serializer_errors
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -39,9 +41,6 @@ from bkmonitor.utils.cipher import transform_data_id_to_token
 from bkmonitor.utils.serializers import StringSplitListField
 from bkmonitor.utils.template import jinja_render
 from bkmonitor.utils.time_tools import utc2biz_str
-from drf_resource import Resource, api, resource
-from drf_resource.exceptions import CustomException
-from drf_resource.tools import format_serializer_errors
 from core.errors.event_plugin import (
     DataIDNotSetError,
     GetKafkaConfigError,
@@ -54,7 +53,7 @@ from monitor_web.custom_report.resources import ProxyHostInfo
 logger = logging.getLogger("kernel_api")
 
 
-class BaseEventPluginResource(Resource, metaclass=abc.ABCMeta):
+class BaseEventPluginResource(Resource):
     @staticmethod
     def clean_data(instance, data):
         fields = []

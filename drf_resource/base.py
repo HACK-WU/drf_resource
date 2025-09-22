@@ -13,62 +13,27 @@ specific language governing permissions and limitations under the License.
 import abc
 import logging
 
-import six
 from django.db import models
 from django.utils.translation import gettext as _
-from opentelemetry import trace
-from opentelemetry.trace.status import Status, StatusCode
-
-from bkmonitor.utils.request import get_request_username
-from bkmonitor.utils.thread_backend import ThreadPool
 from drf_resource.exceptions import CustomException, record_exception
+from drf_resource.registry import ResourceMeta
 from drf_resource.tasks import run_perform_request
 from drf_resource.tools import (
     format_serializer_errors,
     get_serializer_fields,
     render_schema,
 )
-from drf_resource.registry import ResourceMeta
+from opentelemetry import trace
+from opentelemetry.trace.status import Status, StatusCode
+
+from bkmonitor.utils.request import get_request_username
+from bkmonitor.utils.thread_backend import ThreadPool
 
 tracer = trace.get_tracer(__name__)
 logger = logging.getLogger(__name__)
 
 
-__doc__ = """
-Non-ORM for DRF 的架构：
-serializers -> resources -> views
-
-各模块的职责
-serializers: 负责请求数据与返回数据的校验，包括简单的数据渲染
-resources: 此处编写业务逻辑（工作重点）
-views: 定义请求方法、使用到的Resource、是否分页、鉴权等配置（几乎没有代码量）
-
-Resource定义：
-对传入的数据进行特定处理并返回处理后的数据，这样的处理单元称为Resource
-可以通过继承Resource类来实现自定义的Resource
-
-Resource的执行流程：
-1. 新建Resource实例
-2. 若用户未手动设置需要用到的RequestSerializer及ResponseSerializer，
-   则根据命名规则自动查找可用的serializers，并进行设置
-3. 调用request方法，并传入请求参数(request_data)
-4. 调用request_serializer(如果有)对request_data进行数据校验，
-   返回validated_request_data
-5. 用户自行实现perform_request方法，根据validated_request_data，通过用户编写的业务
-   逻辑，生成返回结果response_data
-6. 调用response_serializer(如果有)对response_data进行数据校验，
-   返回validated_response_data
-7. 将validated_response_data交给上层的views，由views进行最后的数据渲染及返回到前端
-
-为了Resource能够正确搜索到其对应的serializers，需要遵循以下命名规则：
-某Resource名称为: TestResource
-其对应的request serializer应命名为: TestRequestSerializer
-其对应的response serializer应命名为: TestResponseSerializer
-
-"""
-
-
-class Resource(six.with_metaclass(ResourceMeta, object)):
+class Resource(metaclass=ResourceMeta):
     RequestSerializer = None
     ResponseSerializer = None
 
@@ -83,7 +48,7 @@ class Resource(six.with_metaclass(ResourceMeta, object)):
     # 支持记录请求参数(settings开启：ENABLE_RESOURCE_DATA_COLLECT后，
     # 记录所有`support_data_collect`为True的resource请求)
     support_data_collect = True
-    
+
     # 自动注册配置
     auto_register = True  # 是否自动注册，默认为 True
     register_name = None  # 自定义注册名称

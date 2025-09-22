@@ -1,18 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
-Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
-Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
-You may obtain a copy of the License at http://opensource.org/licenses/MIT
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-specific language governing permissions and limitations under the License.
-"""
-
-import abc
-
-import six
-
 from drf_resource.base import Resource
 from drf_resource.cache import CacheTypeItem, using_cache
 
@@ -22,6 +8,9 @@ class CacheResource(Resource):
     支持缓存的resource，开发环境下缓存默认不生效。
     直接继承 Resource，利用 ResourceMeta 的自动注册机制
     """
+
+    # 不进行自动注册
+    auto_register = False
 
     # 缓存类型，启用缓存需要设置cache_type或backend_cache_type属性
     cache_type = None
