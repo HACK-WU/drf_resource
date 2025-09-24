@@ -16,7 +16,6 @@ from typing import List, Set
 from django.apps import apps
 from django.conf import settings
 from django.contrib.staticfiles.finders import BaseFinder
-
 from drf_resource.management.exceptions import ErrorSettingsWithResourceDirs
 
 logger = logging.getLogger(__name__)
@@ -31,7 +30,9 @@ if API_DIR not in RESOURCE_DIRS:
     RESOURCE_DIRS.append(API_DIR)
 
 # 查找resource模块时将会忽略的目录
-RESOURCE_IGNORE_DIRS = getattr(settings, "RESOURCE_IGNORE_DIRS", ["__pycache__", "migrations", "test"])
+RESOURCE_IGNORE_DIRS = getattr(
+    settings, "RESOURCE_IGNORE_DIRS", ["__pycache__", "migrations", "test"]
+)
 
 
 class ResourceFinder(BaseFinder):
@@ -47,7 +48,9 @@ class ResourceFinder(BaseFinder):
 
         # 查询每个应用的resources模块
         for app_config in app_configs:
-            self.resource_path += self.find(app_config.path, root_path=os.path.dirname(app_config.path))
+            self.resource_path += self.find(
+                app_config.path, root_path=os.path.dirname(app_config.path)
+            )
             app_path_directories.append(app_config.path)
 
         # 查询settings中配置的额外资源模块目录
@@ -98,13 +101,22 @@ class ResourceFinder(BaseFinder):
             if found_paths is None:
                 found_paths = []
 
-            root, dirs, files = next(os.walk(target_path))
+            try:
+                # 使用try-except来处理可能的StopIteration异常
+                walk_generator = os.walk(target_path)
+                root, dirs, files = next(walk_generator)
+            except (StopIteration, OSError):
+                # 如果目录不存在或无法访问，返回空的found_paths
+                return found_paths
 
             # 忽略指定的目录
             if os.path.basename(root) in RESOURCE_IGNORE_DIRS:
                 return found_paths
 
-            if any(item in ["resources", "resources.py", "default.py"] for item in dirs + files):
+            if any(
+                item in ["resources", "resources.py", "default.py"]
+                for item in dirs + files
+            ):
                 found_paths.append(root)
                 return found_paths
 

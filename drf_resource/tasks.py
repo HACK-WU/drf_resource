@@ -9,14 +9,22 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-
 import logging
 from functools import wraps
 
 from celery import shared_task
 from celery.result import AsyncResult
 
-from bkmonitor.utils.user import set_local_username
+# 条件导入，避免在独立使用drf_resource时出错
+try:
+    from bkmonitor.utils.user import set_local_username
+except ImportError:
+
+    def set_local_username(username):
+        """Mock function for standalone usage"""
+        pass
+
+
 from drf_resource.exceptions import CustomException
 
 logger = logging.getLogger(__name__)
@@ -77,7 +85,9 @@ def query_task_result(task_id):
             message = e.message
             data = e.data
         except Exception as e:
-            logger.exception("Caught exception when running async resource task : %s" % e)
+            logger.exception(
+                "Caught exception when running async resource task : %s" % e
+            )
             message = "%s" % e
             data = None
 

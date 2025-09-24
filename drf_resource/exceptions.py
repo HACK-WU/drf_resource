@@ -21,8 +21,67 @@ from rest_framework import status
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
-from core.errors import Error, ErrorDetails
-from core.errors.common import DrfApiError, HTTP404Error, UnknownError
+
+# 如果没有core模块，创建简单的替代类
+class Error(Exception):
+    status_code = 500
+    code = 3300002
+    name = "自定义异常"
+    message = "自定义异常"
+    data = None
+    error_details = None
+
+    def __init__(self, context=None, data=None, extra=None):
+        self.data = data
+        self.extra = extra or {}
+        if context and "msg" in context:
+            self.message = context["msg"]
+        super().__init__(self.message)
+
+
+class ErrorDetails:
+    def __init__(
+        self,
+        exc_type=None,
+        exc_code=None,
+        overview=None,
+        detail=None,
+        popup_message=None,
+    ):
+        self.exc_type = exc_type
+        self.exc_code = exc_code
+        self.overview = overview
+        self.detail = detail
+        self.popup_message = popup_message
+
+    def to_dict(self):
+        return {
+            "exc_type": self.exc_type,
+            "exc_code": self.exc_code,
+            "overview": self.overview,
+            "detail": self.detail,
+            "popup_message": self.popup_message,
+        }
+
+
+class DrfApiError:
+    code = 4000000
+    name = "DRF API错误"
+
+    @staticmethod
+    def drf_error_processor(detail):
+        return str(detail)
+
+
+class HTTP404Error:
+    code = 4040000
+    name = "404错误"
+
+
+class UnknownError:
+    code = 5000000
+    name = "未知错误"
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +110,23 @@ def custom_exception_handler(exc, context):
     """
     针对CustomException返回的错误进行特殊处理，增加了传递数据的特性
     """
-    from bkmonitor.utils.common_utils import failed
+    # 条件导入
+    try:
+        from bkmonitor.utils.common_utils import failed
+    except ImportError:
+
+        def failed(
+            exc, error_code=None, error_name=None, exc_type=None, popup_type=None
+        ):
+            return {
+                "result": False,
+                "code": error_code or 500,
+                "name": error_name or "错误",
+                "message": str(exc),
+                "data": None,
+                "error_details": {},
+            }
+
     response = None
     if isinstance(exc, Error):
         headers = {}
@@ -146,18 +221,26 @@ def record_exception(
         if out_limit and out_limit > 0:
             out_frames = out_frames[:out_limit]
         for item in reversed(out_frames):
-            row.append('  File "{}", line {}, in {}\n'.format(item.filename, item.lineno, item.function))
+            row.append(
+                '  File "{}", line {}, in {}\n'.format(
+                    item.filename, item.lineno, item.function
+                )
+            )
             for line in item.code_context:
                 if line:
-                    row.append('    {}\n'.format(line.strip()))
+                    row.append("    {}\n".format(line.strip()))
 
         for item in inspect.getinnerframes(tb):
-            row.append('  File "{}", line {}, in {}\n'.format(item.filename, item.lineno, item.function))
+            row.append(
+                '  File "{}", line {}, in {}\n'.format(
+                    item.filename, item.lineno, item.function
+                )
+            )
             for line in item.code_context:
                 if line:
-                    row.append('    {}\n'.format(line.strip()))
+                    row.append("    {}\n".format(line.strip()))
 
-        stacktrace = ''.join(row)
+        stacktrace = "".join(row)
     except Exception:  # pylint: disable=broad-except
         # workaround for python 3.4, format_exc can raise
         # an AttributeError if the __context__ on

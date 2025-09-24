@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ redoc_settings.title }} - ReDoc</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .custom-header {
+            padding: 20px;
+            background: #667eea;
+            background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .custom-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+        }
+        
+        .custom-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="custom-header">
+        <h1>{{ redoc_settings.title }}</h1>
+        <p>基于 ReDoc 的API文档</p>
+    </div>
+    
+    <div id="redoc-container"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js"></script>
+    <script>
+        Redoc.init('{{ redoc_settings.schema_url }}', {
+            scrollYOffset: 0,
+            hideDownloadButton: false,
+            theme: {
+                colors: {
+                    primary: {
+                        main: '#667eea'
+                    }
+                },
+                typography: {
+                    fontSize: '14px',
+                    headings: {
+                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }
+                }
+            }
+        }, document.getElementById('redoc-container'));
+    </script>
+</body>
+</html>

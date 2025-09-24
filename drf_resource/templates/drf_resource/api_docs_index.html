@@ -1,0 +1,478 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if docs_data %}{{ docs_data.title }}{% else %}API文档{% endif %}</title>
+    <style>
+        /* 内联CSS样式，与之前的HTML生成器相同 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-links {
+            margin-top: 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-right: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .content {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 20px;
+        }
+
+        .api-module {
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .module-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .module-title {
+            font-size: 1.3rem;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .module-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .api-list {
+            padding: 0;
+        }
+
+        .api-item {
+            list-style: none;
+            border-bottom: 1px solid #f1f3f4;
+            padding: 15px 20px;
+            transition: background-color 0.2s;
+        }
+
+        .api-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .api-item:last-child {
+            border-bottom: none;
+        }
+
+        .api-method {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-right: 10px;
+        }
+
+        .method-get { background: #d4edda; color: #155724; }
+        .method-post { background: #d1ecf1; color: #0c5460; }
+        .method-put { background: #fff3cd; color: #856404; }
+        .method-delete { background: #f8d7da; color: #721c24; }
+
+        .api-name {
+            font-weight: 600;
+            color: #495057;
+            text-decoration: none;
+        }
+
+        .api-name:hover {
+            color: #007bff;
+        }
+
+        .api-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .api-tags {
+            margin-top: 8px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #e9ecef;
+            color: #495057;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            margin-right: 5px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .filter-item {
+            display: block;
+            margin-bottom: 5px;
+            color: #6c757d;
+            text-decoration: none;
+            padding: 5px 0;
+            transition: color 0.2s;
+        }
+
+        .filter-item:hover {
+            color: #007bff;
+        }
+
+        .stats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .deprecated {
+            opacity: 0.6;
+            position: relative;
+        }
+
+        .deprecated::after {
+            content: ' (已废弃)';
+            color: #dc3545;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 20px;
+                position: static;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            {% if docs_data %}
+            <h1>{{ docs_data.title }}</h1>
+            <p>{{ docs_data.description }}</p>
+            <div style="margin-top: 15px; font-size: 0.9rem;">
+                版本: {{ docs_data.version }} | 
+                共 {{ docs_data.stats.total_modules }} 个模块 | 
+                {{ docs_data.stats.total_apis }} 个API
+            </div>
+            {% else %}
+            <h1>API文档</h1>
+            <p>DRF Resource框架API文档</p>
+            {% endif %}
+            
+            <!-- 导航链接 -->
+            <div class="nav-links">
+                <a href="swagger/">Swagger UI</a>
+                <a href="redoc/">ReDoc</a>
+                <a href="openapi.json">OpenAPI JSON</a>
+                <a href="api-data.json">文档数据</a>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="error-message">
+            <h3>错误</h3>
+            <p>{{ error }}</p>
+        </div>
+        {% elif not docs_data %}
+        <div class="error-message">
+            <h3>暂无数据</h3>
+            <p>未找到任何API资源，请检查配置或联系管理员。</p>
+        </div>
+        {% else %}
+        <div class="main-layout">
+            <!-- 侧边栏 -->
+            <div class="sidebar">
+                <!-- 搜索框 -->
+                <input type="text" id="searchBox" class="search-box" placeholder="搜索API...">
+                
+                <!-- 统计信息 -->
+                <div class="stats">
+                    <div class="stat-item">
+                        <span>API模块:</span>
+                        <span>{{ docs_data.stats.total_modules }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>API接口:</span>
+                        <span>{{ docs_data.stats.total_apis }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>分类:</span>
+                        <span>{{ docs_data.stats.categories|length }}</span>
+                    </div>
+                </div>
+
+                <!-- 分类过滤 -->
+                <div class="filter-section">
+                    <div class="filter-title">按分类筛选</div>
+                    <a href="#" class="filter-item category-filter active" data-category="all">全部</a>
+                    {% for category in docs_data.stats.categories %}
+                    <a href="#" class="filter-item category-filter" data-category="{{ category }}">{{ category }}</a>
+                    {% endfor %}
+                </div>
+
+                <!-- 标签过滤 -->
+                {% if docs_data.all_tags %}
+                <div class="filter-section">
+                    <div class="filter-title">按标签筛选</div>
+                    {% for tag in docs_data.all_tags|slice:":10" %}
+                    <a href="#" class="filter-item tag-filter" data-tag="{{ tag }}">{{ tag }}</a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 主内容 -->
+            <div class="content">
+                {% for module_name, module_info in docs_data.modules.items %}
+                <div class="api-module" id="module-{{ module_name }}">
+                    <div class="module-header">
+                        <h2 class="module-title">{{ module_info.display_name|default:module_name }}</h2>
+                        {% if module_info.description %}
+                        <p class="module-description">{{ module_info.description }}</p>
+                        {% endif %}
+                        {% if module_info.base_url %}
+                        <div style="margin-top: 8px; font-size: 0.85rem; color: #6c757d;">
+                            基础URL: <code>{{ module_info.base_url }}</code>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <ul class="api-list">
+                        {% for api_info in module_info.apis %}
+                        <li class="api-item {% if api_info.deprecated %}deprecated{% endif %}" 
+                            data-category="{{ api_info.category }}"
+                            data-tags="{{ api_info.tags|join:',' }}">
+                            
+                            <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <div>
+                                        <span class="api-method method-{{ api_info.method|lower }}">
+                                            {{ api_info.method }}
+                                        </span>
+                                        <a href="{% url 'api_docs:api_detail' module_name=module_name api_name=api_info.name %}" 
+                                           class="api-name">{{ api_info.display_name }}</a>
+                                    </div>
+                                    
+                                    {% if api_info.description %}
+                                    <p class="api-description">{{ api_info.description }}</p>
+                                    {% endif %}
+                                    
+                                    <div style="margin-top: 5px; font-size: 0.8rem; color: #6c757d;">
+                                        <code>{{ api_info.action }}</code>
+                                        {% if api_info.rate_limit %}
+                                        | 限流: {{ api_info.rate_limit }}
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if api_info.tags %}
+                                    <div class="api-tags">
+                                        {% for tag in api_info.tags %}
+                                        <span class="tag">{{ tag }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div style="text-align: right; font-size: 0.8rem; color: #6c757d;">
+                                    <div>{{ api_info.version }}</div>
+                                    {% if api_info.deprecated %}
+                                    <div style="color: #dc3545;">已废弃</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // API文档交互功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 搜索功能
+            const searchBox = document.getElementById('searchBox');
+            if (searchBox) {
+                searchBox.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const apiItems = document.querySelectorAll('.api-item');
+                    
+                    apiItems.forEach(item => {
+                        const apiName = item.querySelector('.api-name').textContent.toLowerCase();
+                        const apiDesc = item.querySelector('.api-description');
+                        const description = apiDesc ? apiDesc.textContent.toLowerCase() : '';
+                        
+                        if (apiName.includes(searchTerm) || description.includes(searchTerm)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            }
+            
+            // 分类过滤
+            const categoryFilters = document.querySelectorAll('.category-filter');
+            categoryFilters.forEach(filter => {
+                filter.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const category = this.dataset.category;
+                    
+                    // 移除其他active状态
+                    categoryFilters.forEach(f => f.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 过滤API
+                    const apiItems = document.querySelectorAll('.api-item');
+                    apiItems.forEach(item => {
+                        if (category === 'all' || item.dataset.category === category) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // 标签过滤
+            const tagFilters = document.querySelectorAll('.tag-filter');
+            tagFilters.forEach(filter => {
+                filter.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const tag = this.dataset.tag;
+                    
+                    const apiItems = document.querySelectorAll('.api-item');
+                    apiItems.forEach(item => {
+                        const tags = item.dataset.tags ? item.dataset.tags.split(',') : [];
+                        if (tags.includes(tag)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

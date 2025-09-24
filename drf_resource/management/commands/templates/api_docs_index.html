@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ docs_data.title }}</title>
+    <link rel="stylesheet" href="static/api_docs.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>{{ docs_data.title }}</h1>
+            <p>{{ docs_data.description }}</p>
+            <div style="margin-top: 15px; font-size: 0.9rem;">
+                版本: {{ docs_data.version }} | 
+                共 {{ docs_data.stats.total_modules }} 个模块 | 
+                {{ docs_data.stats.total_apis }} 个API
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <!-- 侧边栏 -->
+            <div class="sidebar">
+                <!-- 搜索框 -->
+                <input type="text" id="searchBox" class="search-box" placeholder="搜索API...">
+                
+                <!-- 统计信息 -->
+                <div class="stats">
+                    <div class="stat-item">
+                        <span>API模块:</span>
+                        <span>{{ docs_data.stats.total_modules }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>API接口:</span>
+                        <span>{{ docs_data.stats.total_apis }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>分类:</span>
+                        <span>{{ docs_data.stats.categories|length }}</span>
+                    </div>
+                </div>
+
+                <!-- 分类过滤 -->
+                <div class="filter-section">
+                    <div class="filter-title">按分类筛选</div>
+                    <a href="#" class="filter-item category-filter active" data-category="all">全部</a>
+                    {% for category in docs_data.stats.categories %}
+                    <a href="#" class="filter-item category-filter" data-category="{{ category }}">{{ category }}</a>
+                    {% endfor %}
+                </div>
+
+                <!-- 标签过滤 -->
+                {% if docs_data.all_tags %}
+                <div class="filter-section">
+                    <div class="filter-title">按标签筛选</div>
+                    {% for tag in docs_data.all_tags[:10] %}
+                    <a href="#" class="filter-item tag-filter" data-tag="{{ tag }}">{{ tag }}</a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 主内容 -->
+            <div class="content">
+                {% for module_name, module_info in docs_data.modules.items() %}
+                <div class="api-module" id="module-{{ module_name }}">
+                    <div class="module-header">
+                        <h2 class="module-title">{{ module_info.display_name or module_name }}</h2>
+                        {% if module_info.description %}
+                        <p class="module-description">{{ module_info.description }}</p>
+                        {% endif %}
+                        {% if module_info.base_url %}
+                        <div style="margin-top: 8px; font-size: 0.85rem; color: #6c757d;">
+                            基础URL: <code>{{ module_info.base_url }}</code>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <ul class="api-list">
+                        {% for api_info in module_info.apis %}
+                        <li class="api-item {% if api_info.deprecated %}deprecated{% endif %}" 
+                            data-category="{{ api_info.category }}"
+                            data-tags="{{ api_info.tags|join(',') }}">
+                            
+                            <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <div>
+                                        <span class="api-method method-{{ api_info.method.lower() }}">
+                                            {{ api_info.method }}
+                                        </span>
+                                        <a href="api/{{ module_name }}_{{ api_info.name }}.html" 
+                                           class="api-name">{{ api_info.display_name }}</a>
+                                    </div>
+                                    
+                                    {% if api_info.description %}
+                                    <p class="api-description">{{ api_info.description }}</p>
+                                    {% endif %}
+                                    
+                                    <div style="margin-top: 5px; font-size: 0.8rem; color: #6c757d;">
+                                        <code>{{ api_info.action }}</code>
+                                        {% if api_info.rate_limit %}
+                                        | 限流: {{ api_info.rate_limit }}
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if api_info.tags %}
+                                    <div class="api-tags">
+                                        {% for tag in api_info.tags %}
+                                        <span class="tag">{{ tag }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div style="text-align: right; font-size: 0.8rem; color: #6c757d;">
+                                    <div>{{ api_info.version }}</div>
+                                    {% if api_info.deprecated %}
+                                    <div style="color: #dc3545;">已废弃</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script src="static/api_docs.js"></script>
+</body>
+</html>

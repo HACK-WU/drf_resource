@@ -9,7 +9,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-
 import json
 import logging
 from collections import OrderedDict
@@ -18,7 +17,17 @@ from django.utils.encoding import force_str
 from rest_framework import serializers
 from rest_framework.fields import empty
 
-from bkmonitor.utils.text import camel_to_underscore
+# 条件导入，避免在独立使用drf_resource时出错
+try:
+    from bkmonitor.utils.text import camel_to_underscore
+except ImportError:
+    import re
+
+    def camel_to_underscore(name):
+        """将驼峰命名转换为下划线命名"""
+        s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+        return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +84,12 @@ def field_to_schema(field):
     elif isinstance(field, serializers.Serializer):
         type_params = {
             "type": FieldType.OBJECT,
-            "properties": OrderedDict([(key, field_to_schema(value)) for key, value in list(field.fields.items())]),
+            "properties": OrderedDict(
+                [
+                    (key, field_to_schema(value))
+                    for key, value in list(field.fields.items())
+                ]
+            ),
         }
     # elif isinstance(field, serializers.ManyRelatedField):
     #     type_params = {
@@ -139,15 +153,24 @@ def render_schema(fields, parent="", using_source=False):
             real_name = "{}={}".format(real_name, field["default"])
         if not field["required"]:
             real_name = "[%s]" % real_name
-        print_list.append("{{{}}} {} {}".format(real_type, real_name, field["description"]))
+        print_list.append(
+            "{{{}}} {} {}".format(real_type, real_name, field["description"])
+        )
 
-        if field["type"] == FieldType.ARRAY and field["items"]["type"] == FieldType.OBJECT:
+        if (
+            field["type"] == FieldType.ARRAY
+            and field["items"]["type"] == FieldType.OBJECT
+        ):
             print_list += render_schema(
-                fields=list(field["items"]["properties"].values()), parent=origin_name, using_source=using_source
+                fields=list(field["items"]["properties"].values()),
+                parent=origin_name,
+                using_source=using_source,
             )
         elif field["type"] == FieldType.OBJECT:
             print_list += render_schema(
-                fields=list(field["properties"].values()), parent=origin_name, using_source=using_source
+                fields=list(field["properties"].values()),
+                parent=origin_name,
+                using_source=using_source,
             )
     return print_list
 
@@ -168,9 +191,13 @@ def _format_serializer_errors_core(errors, fields, params):
             label = field.field_name
             if isinstance(field_errors, dict):
                 if hasattr(field, "child"):
-                    sub_format = _format_serializer_errors_core(field_errors, field.child.fields, params)
+                    sub_format = _format_serializer_errors_core(
+                        field_errors, field.child.fields, params
+                    )
                 else:
-                    sub_format = _format_serializer_errors_core(field_errors, field.fields, params)
+                    sub_format = _format_serializer_errors_core(
+                        field_errors, field.fields, params
+                    )
                 sub_message += sub_format
             elif isinstance(field_errors, list):
                 for error in field_errors:
@@ -184,7 +211,9 @@ def _format_serializer_errors_core(errors, fields, params):
 
 def format_serializer_errors(serializer):
     try:
-        message = _format_serializer_errors_core(serializer.errors, serializer.fields, serializer.get_initial())
+        message = _format_serializer_errors_core(
+            serializer.errors, serializer.fields, serializer.get_initial()
+        )
     except Exception as e:
         logger.warning("序列化器错误信息格式化失败，原因: {}".format(e))
         return serializer.errors

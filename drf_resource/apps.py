@@ -11,6 +11,7 @@ specific language governing permissions and limitations under the License.
 
 from django.apps import AppConfig
 
+from .documentation.settings import API_DOCS_SETTINGS
 from .management.root import setup
 
 
@@ -42,5 +43,21 @@ class DRFResourceConfig(AppConfig):
                 adapter.cc -> cc/adapter/default.py -> cc/adapter/${platform}/resources.py
                 # 调用adapter.cc 即可访问对应文件下的resource，
                 # 如果在${platform}/resources.py里面有相同定义，会重载default.py下的resource
-            """
+        """
         setup()
+
+        # 如果启用了API文档自动生成，则在setup完成后触发文档生成
+        if API_DOCS_SETTINGS.get("ENABLED", False) and API_DOCS_SETTINGS.get(
+            "AUTO_GENERATE", True
+        ):
+            try:
+                from .documentation.generator import DocumentationGenerator
+
+                generator = DocumentationGenerator()
+                # 收集API资源信息（不生成文件，只做初始化）
+                generator.collect_api_resources()
+            except Exception as e:
+                import logging
+
+                logger = logging.getLogger(__name__)
+                logger.warning(f"API文档自动生成失败: {e}")

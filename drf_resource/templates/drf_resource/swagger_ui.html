@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ swagger_settings.title }} - Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        
+        body {
+            margin:0;
+            background: #fafafa;
+        }
+        
+        .swagger-ui .topbar {
+            background-color: #667eea;
+            background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .swagger-ui .topbar .download-url-wrapper .select-label {
+            color: #fff;
+        }
+        
+        .swagger-ui .topbar .download-url-wrapper input[type=text] {
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        .custom-header {
+            padding: 20px;
+            background: #667eea;
+            background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .custom-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+        }
+        
+        .custom-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="custom-header">
+        <h1>{{ swagger_settings.title }}</h1>
+        <p>{{ swagger_settings.description }}</p>
+        <p>版本: {{ swagger_settings.version }}</p>
+    </div>
+    
+    <div id="swagger-ui"></div>
+    
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: '{{ swagger_settings.schema_url }}',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                validatorUrl: null,
+                docExpansion: "list",
+                defaultModelsExpandDepth: 1,
+                defaultModelExpandDepth: 1,
+                displayRequestDuration: true,
+                filter: true,
+                showExtensions: true,
+                showCommonExtensions: true,
+                tryItOutEnabled: true
+            });
+        };
+    </script>
+</body>
+</html>
