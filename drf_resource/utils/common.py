@@ -85,3 +85,75 @@ def _stable_order_key(x: Any) -> str:
     except Exception:
         # 极端情况下用内存ID（避免崩溃，但需接受可能不稳定）
         return f"id:{id(x)}"
+
+
+class ErrorDetails:
+    """
+    错误详情信息类
+
+    用于封装标准化的错误详情信息，包含错误类型、错误码、错误概述、详情和弹框类型。
+    """
+
+    def __init__(self, exc_type=None, exc_code=None, overview=None, detail=None, popup_message="warning"):
+        """
+        初始化错误详情
+
+        :param exc_type: 错误类型
+        :param exc_code: 错误码
+        :param overview: 错误概述
+        :param detail: 错误详情
+        :param popup_message: 错误弹框类型，"warning" 为黄色，"danger"/"error" 为红色
+        """
+        self.exc_type = exc_type
+        self.exc_code = exc_code
+        self.overview = overview
+        self.detail = detail
+        self.popup_message = popup_message
+
+    def to_dict(self):
+        """
+        将错误详情转换为字典格式
+
+        :return: 包含错误详情的字典
+        """
+        return {
+            "type": self.exc_type,
+            "code": self.exc_code,
+            "overview": str(self.overview) if self.overview else None,
+            "detail": str(self.detail) if self.detail else None,
+            "popup_message": self.popup_message,
+        }
+
+
+def failed(message="", error_code=None, error_name=None, exc_type=None, popup_type=None, **options):
+    """
+    生成标准化错误响应字典
+
+    :param message: 错误信息，可以是任何类型，会被转换为字符串
+    :param error_code: 错误编码
+    :param error_name: 错误名称
+    :param exc_type: 错误类型
+    :param popup_type: 弹窗类型（"danger" 为红框，"warning" 为黄框）
+    :param options: 附加的键值对，将包含在响应字典中
+    :return: 包含错误响应的字典，键包括：'code'、'name'、'result'、'message'、'data'、'msg'、'error_details'
+    """
+    if not isinstance(message, str):
+        message = str(message)
+
+    result = {
+        "code": error_code,
+        "name": error_name,
+        "result": False,
+        "message": message,
+        "data": {},
+        "msg": message,
+        "error_details": ErrorDetails(
+            exc_type=exc_type,
+            exc_code=error_code,
+            overview=message,
+            detail=message,
+            popup_message=popup_type if popup_type else "warning",
+        ).to_dict(),
+    }
+    result.update(**options)
+    return result
