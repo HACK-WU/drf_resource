@@ -20,14 +20,13 @@ from django.http import StreamingHttpResponse
 from django.utils import translation
 from django.utils.translation import gettext as _
 from drf_resource.contrib.cache import CacheResource
+from drf_resource.contrib.metrics import metrics
+from drf_resource.errors.api import BKAPIError
+from drf_resource.errors.iam import APIPermissionDeniedError
+from drf_resource.utils.auth import get_bk_login_ticket
 from drf_resource.utils.request import get_request
 from drf_resource.utils.user import make_userinfo
 from requests.exceptions import HTTPError, ReadTimeout
-
-from core.errors.api import BKAPIError
-from core.errors.iam import APIPermissionDeniedError
-from core.prometheus import metrics
-from core.utils import get_bk_login_ticket
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +97,9 @@ class APIResource(six.with_metaclass(abc.ABCMeta, CacheResource)):
 
     def __init__(self, *args, **kwargs):
         super(APIResource, self).__init__(*args, **kwargs)
-        assert self.method.upper() in ["GET", "POST", "PUT", "DELETE", "PATCH"], _("method仅支持GET或POST或PUT或DELETE或PATCH")
+        assert self.method.upper() in ["GET", "POST", "PUT", "DELETE", "PATCH"], _(
+            "method仅支持GET或POST或PUT或DELETE或PATCH"
+        )
         self.method = self.method.upper()
         self.session = requests.session()
 
@@ -120,7 +121,7 @@ class APIResource(six.with_metaclass(abc.ABCMeta, CacheResource)):
         else:
             request = get_request(peaceful=True)
             user_info = make_userinfo()
-            self.bk_username = user_info.get('bk_username')
+            self.bk_username = user_info.get("bk_username")
             if request and not getattr(request, "external_user", None):
                 user_info.update(get_bk_login_ticket(request))
             validated_request_data.update(user_info)
@@ -138,7 +139,10 @@ class APIResource(six.with_metaclass(abc.ABCMeta, CacheResource)):
             headers["blueking-language"] = language
 
         # 添加调用凭证
-        auth_params = {"bk_app_code": settings.APP_CODE, "bk_app_secret": settings.SECRET_KEY}
+        auth_params = {
+            "bk_app_code": settings.APP_CODE,
+            "bk_app_secret": settings.SECRET_KEY,
+        }
         if getattr(self, "bk_username", None):
             auth_params["bk_username"] = self.bk_username
         else:
@@ -189,7 +193,9 @@ class APIResource(six.with_metaclass(abc.ABCMeta, CacheResource)):
                     stream=is_stream,
                 )
             else:
-                non_file_data, file_data = self.split_request_data(validated_request_data)
+                non_file_data, file_data = self.split_request_data(
+                    validated_request_data
+                )
 
                 if not file_data:
                     # 不存在文件数据，则按照json方式去请求
@@ -203,15 +209,32 @@ class APIResource(six.with_metaclass(abc.ABCMeta, CacheResource)):
                 result = self.session.request(**kwargs)
         except ReadTimeout as error:
             # 上报API调用失败统计指标
-            self.report_api_failure_metric(error_code=getattr(error, 'code', 0), exception_type=type(error).__name__)
-            raise BKAPIError(system_name=self.module_name, url=self.action, result=_("接口返回结果超时"))
+            self.report_api_failure_metric(
+                error_code=getattr(error, "code", 0),
+                exception_type=type(error).__name__,
+            )
+            raise BKAPIError(
+                system_name=self.module_name,
+                url=self.action,
+                result=_("接口返回结果超时"),
+            )
 
         try:
             result.raise_for_status()
         except HTTPError as err:
-            logger.exception("【模块：{}】请求APIGW错误：{}，请求url: {} ".format(self.module_name, err, request_url))
-            self.report_api_failure_metric(error_code=getattr(err, 'code', 0), exception_type=type(err).__name__)
-            raise BKAPIError(system_name=self.module_name, url=self.action, result=str(err.response.content))
+            logger.exception(
+                "【模块：{}】请求APIGW错误：{}，请求url: {} ".format(
+                    self.module_name, err, request_url
+                )
+            )
+            self.report_api_failure_metric(
+                error_code=getattr(err, "code", 0), exception_type=type(err).__name__
+            )
+            raise BKAPIError(
+                system_name=self.module_name,
+                url=self.action,
+                result=str(err.response.content),
+            )
 
         if is_stream:
             return self.handle_stream_response(result)
@@ -224,10 +247,14 @@ class APIResource(six.with_metaclass(abc.ABCMeta, CacheResource)):
         ret_code = result_json.get("code")
         # 权限中心无权限结构特殊处理
         if ret_code and str(ret_code) in APIPermissionDeniedCodeList:
-            self.report_api_failure_metric(error_code=ret_code, exception_type=APIPermissionDeniedError.__name__)
+            self.report_api_failure_metric(
+                error_code=ret_code, exception_type=APIPermissionDeniedError.__name__
+            )
 
             permission = {}
-            if "permission" in result_json and isinstance(result_json["permission"], dict):
+            if "permission" in result_json and isinstance(
+                result_json["permission"], dict
+            ):
                 permission = result_json["permission"]
             elif isinstance(result_json.get("data"), dict):
                 permission = result_json["data"].get("permission") or {}
@@ -243,24 +270,38 @@ class APIResource(six.with_metaclass(abc.ABCMeta, CacheResource)):
             errors = result_json.get("errors", "")
             if errors:
                 msg = f"{msg}(detail:{errors})"
-            request_id = result_json.pop("request_id", "") or result.headers.get("x-bkapi-request-id", "")
+            request_id = result_json.pop("request_id", "") or result.headers.get(
+                "x-bkapi-request-id", ""
+            )
             logger.error(
-                "【Module: " + self.module_name + "】【Action: " + self.action + "】(%s) get error：%s",
+                "【Module: "
+                + self.module_name
+                + "】【Action: "
+                + self.action
+                + "】(%s) get error：%s",
                 request_id,
                 msg,
                 extra=dict(module_name=self.module_name, url=request_url),
             )
-            self.report_api_failure_metric(error_code=ret_code, exception_type=BKAPIError.__name__)
+            self.report_api_failure_metric(
+                error_code=ret_code, exception_type=BKAPIError.__name__
+            )
             # 调试使用
             # msg = u"【模块：%s】接口【%s】返回结果错误：%s###%s" % (
             #     self.module_name, request_url, validated_request_data, result_json)
-            raise BKAPIError(system_name=self.module_name, url=self.action, result=result_json)
+            raise BKAPIError(
+                system_name=self.module_name, url=self.action, result=result_json
+            )
 
         # 渲染数据
         if self.IS_STANDARD_FORMAT:
-            response_data = self.render_response_data(validated_request_data, result_json.get("data"))
+            response_data = self.render_response_data(
+                validated_request_data, result_json.get("data")
+            )
         else:
-            response_data = self.render_response_data(validated_request_data, result_json)
+            response_data = self.render_response_data(
+                validated_request_data, result_json
+            )
 
         return response_data
 
@@ -275,11 +316,13 @@ class APIResource(six.with_metaclass(abc.ABCMeta, CacheResource)):
                 code=error_code,
                 role=settings.ROLE,
                 exception=exception_type,
-                user_name=getattr(self, 'bk_username', ''),
+                user_name=getattr(self, "bk_username", ""),
             ).inc()
             metrics.report_all()
         except Exception as err:  # pylint: disable=broad-except
-            logger.exception(f"Failed to report api_failed_requests metrics,error:{err}")
+            logger.exception(
+                f"Failed to report api_failed_requests metrics,error:{err}"
+            )
 
     @property
     def label(self):
@@ -317,11 +360,13 @@ class APIResource(six.with_metaclass(abc.ABCMeta, CacheResource)):
                 if not line:
                     continue
 
-                result = line.decode('utf-8') + '\n\n'
+                result = line.decode("utf-8") + "\n\n"
                 yield result
 
         # 返回 StreamingHttpResponse
-        sr = StreamingHttpResponse(event_stream(), content_type="text/event-stream; charset=utf-8")
+        sr = StreamingHttpResponse(
+            event_stream(), content_type="text/event-stream; charset=utf-8"
+        )
         sr.headers["Cache-Control"] = "no-cache"
         sr.headers["X-Accel-Buffering"] = "no"
         return sr
