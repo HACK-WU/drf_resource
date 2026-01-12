@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,10 +8,9 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import os
-from typing import Tuple
 
 
-def get_es7_settings(fta=True) -> Tuple[str, int, int, str, str]:
+def get_es7_settings(fta=True) -> tuple[str, int, int, str, str]:
     if fta:
         host = os.getenv("BKAPP_FTA_ES7_HOST") or os.getenv("BK_FTA_ES7_HOST") or "es7.service.consul"
         rest_port = int(os.getenv("BKAPP_FTA_ES7_REST_PORT") or os.getenv("BK_FTA_ES7_REST_PORT") or "9200")

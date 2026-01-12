@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云PaaS平台社区版 (BlueKing PaaS Community
 Edition) available.
@@ -22,12 +21,12 @@ def uniqid():
 
 def node_uniqid():
     uid = uniqid()
-    return "n%s" % uid[1:]
+    return f"n{uid[1:]}"
 
 
 def line_uniqid():
     uid = uniqid()
-    return "l%s" % uid[1:]
+    return f"l{uid[1:]}"
 
 
 def tree_skeleton():

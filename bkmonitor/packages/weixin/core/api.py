@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,7 +19,7 @@ from common.log import logger
 from . import settings as weixin_settings
 
 
-class API(object, six.with_metaclass(abc.ABCMeta)):
+class API(six.with_metaclass(abc.ABCMeta)):
     """API请求工具"""
 
     timeout = 10
@@ -37,7 +36,7 @@ class API(object, six.with_metaclass(abc.ABCMeta)):
             resp = resp.json()
             return resp
         except Exception as error:
-            logger.error("requests get url:{} error: {}".format(_http_url, error))
+            logger.error(f"requests get url:{_http_url} error: {error}")
             return {}
 
     def http_post(self, _http_url, params=None, data=None, json=None, **kwargs):
@@ -51,7 +50,7 @@ class API(object, six.with_metaclass(abc.ABCMeta)):
             resp = resp.json()
             return resp
         except Exception as error:
-            logger.error("requests post url:{} data: {} params: {} error {}".format(_http_url, data, params, error))
+            logger.error(f"requests post url:{_http_url} data: {data} params: {params} error {error}")
             return {}
 
 
@@ -59,18 +58,18 @@ class ApiMixin(API):
     """公共方法"""
 
     def http_get(self, _http_url, **kwargs):
-        data = super(ApiMixin, self).http_get(_http_url, **kwargs)
+        data = super().http_get(_http_url, **kwargs)
         # 企业微信和微信的接口返回格式不一致，这里做兼容处理
         if data.get("errcode") and data.get("errcode") != 0:
-            logger.error("weixin api (url: {}) return error: {}".format(_http_url, data))
+            logger.error(f"weixin api (url: {_http_url}) return error: {data}")
             return {}
         return data
 
     def http_post(self, _http_url, **kwargs):
-        data = super(ApiMixin, self).http_post(_http_url, **kwargs)
+        data = super().http_post(_http_url, **kwargs)
         # 企业微信和微信的接口返回格式不一致，这里做兼容处理
         if data.get("errcode") and data.get("errcode") != 0:
-            logger.error("weixin api (url: {}) return error: {}".format(_http_url, data))
+            logger.error(f"weixin api (url: {_http_url}) return error: {data}")
             return {}
         return data
 
@@ -84,7 +83,7 @@ class WeiXinApi(ApiMixin):
     WEIXIN_GET_USER_INFO_URL = "https://api.weixin.qq.com/sns/userinfo"
 
     def __init__(self):
-        super(WeiXinApi, self).__init__()
+        super().__init__()
         self.app_id = weixin_settings.WEIXIN_APP_ID
         self.secret = weixin_settings.WEIXIN_APP_SECRET
 
@@ -123,7 +122,7 @@ class QyWeiXinApi(ApiMixin):
     QY_WEIXIN_CONVERT_TO_OPENID = f"{weixin_settings.WEIXIN_QY_API_DOMAIN}/cgi-bin/user/convert_to_openid"
 
     def __init__(self):
-        super(QyWeiXinApi, self).__init__()
+        super().__init__()
         self.app_id = weixin_settings.WEIXIN_APP_ID
         self.secret = weixin_settings.WEIXIN_APP_SECRET
 

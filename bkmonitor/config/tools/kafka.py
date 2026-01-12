@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,10 +9,9 @@ specific language governing permissions and limitations under the License.
 """
 
 import os
-from typing import List, Tuple
 
 
-def get_kafka_settings() -> Tuple[List[str], int]:
+def get_kafka_settings() -> tuple[list[str], int]:
     host = [os.environ.get("BK_MONITOR_KAFKA_HOST", "kafka.service.consul")]
     port = int(os.environ.get("BK_MONITOR_KAFKA_PORT", 9092))
     return host, port

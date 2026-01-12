@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,7 +21,7 @@ datapoint0 = DataPoint(0, 100000000, "", "item", {"ip": "127.0.0.1"})
 datapoint1 = DataPoint(1, 100000000, "", "item", {"ip": "127.0.0.1"})
 
 
-class TestPingUnreachable(object):
+class TestPingUnreachable:
     def test_ping_unreachable_none(self):
         detect_engine = PingUnreachable(config={})
         assert len(detect_engine.detect(datapoint0)) == 0

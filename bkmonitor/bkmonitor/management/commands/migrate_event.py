@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from datetime import datetime, timedelta, timezone
 
 from django.core.management.base import BaseCommand
@@ -100,7 +99,7 @@ class Command(BaseCommand):
                             # 其他信息，包含origin_alarm和策略快照
                             "extra_info": {"origin_alarm": event.origin_alarm, "strategy": origin_strategy},
                             # 告警ID
-                            "id": "{}{}".format(int(event.create_time.timestamp()), event.id),
+                            "id": f"{int(event.create_time.timestamp())}{event.id}",
                             # 是否已确认
                             "is_ack": event.is_ack,
                             # 是否屏蔽

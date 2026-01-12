@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ specific language governing permissions and limitations under the License.
 import json
 import logging
 import time
-from typing import List, Optional
 
 import influxdb
 from bkcrypto.contrib.django.fields import SymmetricTextField
@@ -48,7 +46,7 @@ class InfluxDBTool:
             logger.info("publish redis successfully, channel: %s, msg: %s", constants.INFLUXDB_KEY_PREFIX, key)
 
     @classmethod
-    def clean_redis_config(cls, key: str, exist_list: List):
+    def clean_redis_config(cls, key: str, exist_list: list):
         """清理不存在的数据"""
         # 获取 redis 中指定 key 的数据
         redis_key = f"{constants.INFLUXDB_KEY_PREFIX}:{key}"
@@ -74,7 +72,7 @@ class InfluxDBTool:
 class InfluxDBTagInfo(models.Model, InfluxDBTool):
     """influxDB集群tag分区配置"""
 
-    CONSUL_PREFIX_PATH = "%s/influxdb_info/tag_info" % config.CONSUL_PATH
+    CONSUL_PREFIX_PATH = f"{config.CONSUL_PATH}/influxdb_info/tag_info"
     # 当前仅支持单个tag
     TagKeyFormat = "{}/{}/{}=={}"
 
@@ -131,7 +129,7 @@ class InfluxDBTagInfo(models.Model, InfluxDBTool):
         for info in delete_list:
             data = info.__dict__
             info.delete()
-            logger.info("delete tag info:{}".format(data))
+            logger.info(f"delete tag info:{data}")
 
         for item in items:
             obj, created = cls.objects.update_or_create(
@@ -143,9 +141,9 @@ class InfluxDBTagInfo(models.Model, InfluxDBTool):
                 defaults=item,
             )
             if created:
-                logger.info("create new tag info:{}".format(str(item)))
+                logger.info(f"create new tag info:{str(item)}")
             else:
-                logger.info("update tag info to:{}".format(str(item)))
+                logger.info(f"update tag info to:{str(item)}")
 
     @classmethod
     def put_into_consul(cls, path, data):
@@ -213,9 +211,9 @@ class InfluxDBTagInfo(models.Model, InfluxDBTool):
                 if key_map["cluster_name"] not in clusters.keys():
                     clusters[key_map["cluster_name"]] = True
                 hash_consul.delete(key)
-                logger.info("tag info:{} deleted in consul".format(key))
+                logger.info(f"tag info:{key} deleted in consul")
             else:
-                logger.info("key:{} has {} result,not delete".format(key, length))
+                logger.info(f"key:{key} has {length} result,not delete")
         for cluster in clusters.keys():
             cls.notify_consul_changed(cls.CONSUL_PREFIX_PATH, cluster)
 
@@ -330,7 +328,7 @@ class InfluxDBTagInfo(models.Model, InfluxDBTool):
         return base
 
     def get_path(self):
-        return "{}/{}/{}".format(self.CONSUL_PREFIX_PATH, self.cluster_name, self.generate_tag_key())
+        return f"{self.CONSUL_PREFIX_PATH}/{self.cluster_name}/{self.generate_tag_key()}"
 
     def get_redis_field(self):
         return f"{self.cluster_name}/{self.generate_tag_key()}"
@@ -348,7 +346,7 @@ class InfluxDBClusterInfo(models.Model, InfluxDBTool):
     """influxDB存储集群后台信息"""
 
     DEFAULT_CLUSTER_NAME = "default"
-    CONSUL_PREFIX_PATH = "%s/influxdb_info/cluster_info" % config.CONSUL_PATH
+    CONSUL_PREFIX_PATH = f"{config.CONSUL_PATH}/influxdb_info/cluster_info"
 
     host_name = models.CharField("主机名", max_length=128)
     cluster_name = models.CharField("归属集群名", max_length=128)
@@ -380,7 +378,7 @@ class InfluxDBClusterInfo(models.Model, InfluxDBTool):
         for info in delete_list:
             data = info.__dict__
             info.delete()
-            logger.info("delete cluster info:{}".format(data))
+            logger.info(f"delete cluster info:{data}")
 
         for item in items:
             obj, created = cls.objects.update_or_create(
@@ -389,9 +387,9 @@ class InfluxDBClusterInfo(models.Model, InfluxDBTool):
                 defaults=item,
             )
             if created:
-                logger.info("create new cluster info:{}".format(str(item)))
+                logger.info(f"create new cluster info:{str(item)}")
             else:
-                logger.info("update cluster info to:{}".format(str(item)))
+                logger.info(f"update cluster info to:{str(item)}")
 
     @classmethod
     def is_default_cluster_exists(cls):
@@ -420,9 +418,9 @@ class InfluxDBClusterInfo(models.Model, InfluxDBTool):
             length = len(cls.objects.filter(cluster_name=name))
             if length == 0:
                 hash_consul.delete(key)
-                logger.info("cluster info:{} deleted in consul".format(key))
+                logger.info(f"cluster info:{key} deleted in consul")
             else:
-                logger.info("cluster:{} has {} result,not delete".format(key, length))
+                logger.info(f"cluster:{key} has {length} result,not delete")
 
     @classmethod
     def clean_redis_cluster_config(cls):
@@ -448,7 +446,7 @@ class InfluxDBClusterInfo(models.Model, InfluxDBTool):
             info_list = info_list.filter(cluster_name=cluster_name)
 
         total_count = info_list.count()
-        logger.debug("total find->[{}] info to refresh with cluster_name->[{}]".format(total_count, cluster_name))
+        logger.debug(f"total find->[{total_count}] info to refresh with cluster_name->[{cluster_name}]")
 
         # 2. 构建需要刷新的字典信息
         refresh_dict = {}
@@ -467,18 +465,18 @@ class InfluxDBClusterInfo(models.Model, InfluxDBTool):
             ]
             val = {"host_list": host_name_list, "unreadable_host_list": unreadable_host_list}
             hash_consul.put(key=consul_path, value=val)
-            logger.debug("consul path->[{}] is refresh with value->[{}] success.".format(consul_path, host_name_list))
+            logger.debug(f"consul path->[{consul_path}] is refresh with value->[{host_name_list}] success.")
 
             # TODO: 待推送 redis 数据稳定后，删除推送 consul 功能
             super().push_to_redis(constants.INFLUXDB_CLUSTER_INFO_KEY, cluster_name, json.dumps(val))
 
-        logger.info("all influxDB cluster info is refresh to consul success count->[%s]." % total_count)
+        logger.info(f"all influxDB cluster info is refresh to consul success count->[{total_count}].")
 
 
 class InfluxDBHostInfo(models.Model, InfluxDBTool):
     """influxDB存储集群主机信息"""
 
-    CONSUL_PATH = "%s/influxdb_info/host_info" % config.CONSUL_PATH
+    CONSUL_PATH = f"{config.CONSUL_PATH}/influxdb_info/host_info"
 
     host_name = models.CharField("主机名", max_length=128, primary_key=True)
 
@@ -534,7 +532,7 @@ class InfluxDBHostInfo(models.Model, InfluxDBTool):
             if valid_message:
                 # 脱敏
                 item["password"] = "xxxx"
-                raise CustomException("host->{} check valid failed,reason->{}".format(item, valid_message))
+                raise CustomException(f"host->{item} check valid failed,reason->{valid_message}")
 
         # 整理删除主机信息
         delete_list = []
@@ -550,7 +548,7 @@ class InfluxDBHostInfo(models.Model, InfluxDBTool):
             data = info.__dict__
             info.delete()
             data["password"] = "xxxx"
-            logger.info("delete host info:{}".format(data))
+            logger.info(f"delete host info:{data}")
 
         # 新增或更新主机信息
         for item in items:
@@ -558,9 +556,9 @@ class InfluxDBHostInfo(models.Model, InfluxDBTool):
             # 脱敏
             item["password"] = "xxxx"
             if created:
-                logger.info("create new host info:{}".format(str(item)))
+                logger.info(f"create new host info:{str(item)}")
             else:
-                logger.info("update host info to:{}".format(str(item)))
+                logger.info(f"update host info to:{str(item)}")
 
     @classmethod
     def check_host_valid(cls, item):
@@ -633,7 +631,7 @@ class InfluxDBHostInfo(models.Model, InfluxDBTool):
         """
         # 1. 判断是否存在重名的主机信息
         if cls.objects.filter(host_name=host_name).exists():
-            logger.error("try to create host_name->[%s] but is exists and nothing will do." % host_name)
+            logger.error(f"try to create host_name->[{host_name}] but is exists and nothing will do.")
             raise ValueError(_("主机信息[%s]已经存在，请确认") % host_name)
 
         host_info = {"host_name": host_name, "domain_name": domain_name, "port": port}
@@ -642,11 +640,11 @@ class InfluxDBHostInfo(models.Model, InfluxDBTool):
             host_info["username"] = username
             host_info["password"] = password
             # 密码为了脱敏，不实际打印
-            logger.debug("host->[{}] create with password->[xxxx] username->[{}]".format(host_name, username))
+            logger.debug(f"host->[{host_name}] create with password->[xxxx] username->[{username}]")
 
         # 3. 创建并返回
         new_host_info = cls.objects.create(**host_info)
-        logger.info("new host->[{}] is create id->[{}]".format(host_name, new_host_info.pk))
+        logger.info(f"new host->[{host_name}] is create id->[{new_host_info.pk}]")
 
         return new_host_info
 
@@ -664,9 +662,9 @@ class InfluxDBHostInfo(models.Model, InfluxDBTool):
         # 如果用户名和密码有配置，需要配置生效使用
         if self.username or self.password:
             client.switch_user(username=self.username, password=self.password)
-            logger.debug("host->[{}] is set with username and password.".format(self.domain_name))
+            logger.debug(f"host->[{self.domain_name}] is set with username and password.")
 
-        duration_str = "{}d".format(settings.TS_DATA_SAVED_DAYS)
+        duration_str = f"{settings.TS_DATA_SAVED_DAYS}d"
 
         for db in client.get_list_database():
             # 判断该db是否在需要刷新的set当中
@@ -689,7 +687,7 @@ class InfluxDBHostInfo(models.Model, InfluxDBTool):
                         # 判断出合理的shard再对RP进行修改
                         shard_duration = InfluxDBHostInfo.judge_shard(duration_str)
                     except ValueError as e:
-                        logger.error("host->[{}] update default rp failed: [{}]".format(self.host_name, e))
+                        logger.error(f"host->[{self.host_name}] update default rp failed: [{e}]")
                         break
                     client.alter_retention_policy(
                         name=rp["name"],
@@ -704,7 +702,7 @@ class InfluxDBHostInfo(models.Model, InfluxDBTool):
                         )
                     )
                     break
-        logger.info("host->[{}] check all database default rp success.".format(self.host_name))
+        logger.info(f"host->[{self.host_name}] check all database default rp success.")
         return True
 
     @classmethod
@@ -725,9 +723,9 @@ class InfluxDBHostInfo(models.Model, InfluxDBTool):
             length = len(cls.objects.filter(host_name=name))
             if length == 0:
                 hash_consul.delete(key)
-                logger.info("host info:{} deleted in consul".format(key))
+                logger.info(f"host info:{key} deleted in consul")
             else:
-                logger.info("host:{} has {} result,not delete".format(key, length))
+                logger.info(f"host:{key} has {length} result,not delete")
 
     @classmethod
     def clean_redis_host_config(cls):
@@ -747,7 +745,7 @@ class InfluxDBHostInfo(models.Model, InfluxDBTool):
 
         hash_consul.put(key=self.consul_config_path, value=self.consul_config)
 
-        logger.info("host->[%s] refresh consul config success." % self.host_name)
+        logger.info(f"host->[{self.host_name}] refresh consul config success.")
 
         # 推送到redis
         super().push_to_redis(constants.INFLUXDB_HOST_INFO_KEY, self.host_name, json.dumps(self.consul_config))
@@ -856,7 +854,7 @@ class InfluxDBProxyStorage(BaseModel, InfluxDBTool):
         logger.warn("delete consul path: %s", json.dumps(list(diff_service_names)))
 
     @classmethod
-    def push(cls, service_name: Optional[str] = None):
+    def push(cls, service_name: str | None = None):
         """推送数据到 consul & redis"""
         objs = cls.objects.all()
         # 过滤指定的 proxy 集群
@@ -884,12 +882,12 @@ class InfluxDBProxyStorage(BaseModel, InfluxDBTool):
         logger.info("push proxy cluster storage info successfully")
 
     @classmethod
-    def push_to_redis(cls, field: str, val: List[str], is_publish: Optional[bool] = True):
+    def push_to_redis(cls, field: str, val: list[str], is_publish: bool | None = True):
         """推送数据到 redis"""
         super().push_to_redis(constants.INFLUXDB_PROXY_STORAGE_INFO_KEY, field, json.dumps(val), is_publish)
 
     @classmethod
-    def push_to_consul(cls, key: str, val: List[str], client: Optional[consul_tools.HashConsul] = None):
+    def push_to_consul(cls, key: str, val: list[str], client: consul_tools.HashConsul | None = None):
         """推送数据到 consul
 
         TODO: 是否可以不用推送 consul?

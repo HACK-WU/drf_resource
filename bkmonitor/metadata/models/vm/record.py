@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import json
 import logging
-from typing import Dict, List, Optional
 
 from django.db import models
 from django.db.models.fields import DateTimeField
@@ -52,7 +50,7 @@ class AccessVMRecord(models.Model):
         verbose_name_plural = "接入VM记录表"
 
     @classmethod
-    def refresh_vm_router(cls, table_id: Optional[str] = None):
+    def refresh_vm_router(cls, table_id: str | None = None):
         """刷新查询 vm 需要的路由"""
         logger.info("start refresh vm router")
         # 过滤到数据
@@ -117,7 +115,7 @@ class SpaceVMInfo(BaseModel):
         verbose_name = "空间接入 VM 信息"
         verbose_name_plural = "空间接入 VM 信息"
 
-    def to_dict(self, fields: Optional[List] = None, exclude: Optional[List] = None) -> Dict:
+    def to_dict(self, fields: list | None = None, exclude: list | None = None) -> dict:
         data = {}
         for f in self._meta.concrete_fields + self._meta.many_to_many:
             value = f.value_from_object(self)

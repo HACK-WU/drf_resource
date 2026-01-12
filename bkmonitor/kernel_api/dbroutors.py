@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 from django.conf import settings
 
 
-class KernelAPIRouter(object):
+class KernelAPIRouter:
     routers = {"monitor_api": settings.BACKEND_DATABASE_NAME, "metadata": settings.BACKEND_DATABASE_NAME}
 
     def db_for_read(self, model, **hints):

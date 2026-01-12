@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -17,10 +16,10 @@ from bkmonitor.event_plugin.serializers import HttpPullPluginSerializer, HttpPus
 from bkmonitor.models import EventPluginInstance
 from bkmonitor.models.fta.constant import PluginType
 
-_manager_registry: Dict[str, Type[BaseEventPluginManager]] = {}
+_manager_registry: dict[str, type[BaseEventPluginManager]] = {}
 
 
-def register_manager(plugin_type: str, manager_cls: Type[BaseEventPluginManager]):
+def register_manager(plugin_type: str, manager_cls: type[BaseEventPluginManager]):
     _manager_registry[plugin_type] = manager_cls
 
 
@@ -36,7 +35,7 @@ def get_manager(
         raise ValueError("must provide param `plugin` or `plugin_id`")
 
     if plugin_type not in _manager_registry:
-        raise ValueError("unsupported plugin type: %s" % plugin_type)
+        raise ValueError(f"unsupported plugin type: {plugin_type}")
 
     manager_cls = _manager_registry[plugin_type]
     return manager_cls(plugin_inst)
@@ -45,7 +44,7 @@ def get_manager(
 def get_serializer(plugin_type: str, *args, **kwargs) -> EventPluginSerializer:
     serializer_cls = plugin_serializers.get(plugin_type)
     if not serializer_cls:
-        raise ValueError("unsupported plugin type: %s" % plugin_type)
+        raise ValueError(f"unsupported plugin type: {plugin_type}")
     return serializer_cls(*args, **kwargs)
 
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import functools
 import time
 
@@ -7,7 +6,7 @@ from prometheus_client import Gauge
 from prometheus_client.exposition import generate_latest
 
 
-class MetricCollector(object):
+class MetricCollector:
     def __init__(self):
         self.register_metrics = set()
 
@@ -20,7 +19,7 @@ MC = MetricCollector()
 
 class Metric(Gauge):
     def __init__(self, *args, run_every=5 * 60, **kwargs):
-        super(Metric, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.last_update_time = 0
         self.name = self._name
         self.run_every = run_every

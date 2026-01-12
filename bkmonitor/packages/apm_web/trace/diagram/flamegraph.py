@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional, Union
 
 from apm_web.handlers.trace_handler.base import TraceHandler
 from apm_web.trace.diagram.base import SpanNode, TraceTree, TreeBuildingConfig
@@ -19,7 +18,7 @@ class FlamegraphDiagrammer:
         return trace_diff_to_flamegraph(base, comp)
 
 
-def get_last_parallel_sibling_id(span: SpanNode) -> Optional[str]:
+def get_last_parallel_sibling_id(span: SpanNode) -> str | None:
     """Get last sibling id in a parallel group"""
     if not span.parallel:
         return None
@@ -100,7 +99,7 @@ def aggregations_to_info(aggregation: dict) -> list:
     return info
 
 
-def trace_to_flamegraph(trace_data: list, forced_config: Optional[TreeBuildingConfig] = None) -> dict:
+def trace_to_flamegraph(trace_data: list, forced_config: TreeBuildingConfig | None = None) -> dict:
     """Convert trace detail to flamegraph data"""
     flamegraph_data = []
 
@@ -142,7 +141,7 @@ def make_diff_info_from_span_node(span_node: SpanNode, diff_mark: DiffMark):
 
 
 def drain_parallel_from_node(
-    node: Union[SpanNode, DiffNode], global_elements: list, mark: Optional[DiffMark] = None
+    node: SpanNode | DiffNode, global_elements: list, mark: DiffMark | None = None
 ) -> dict:
     """Drain parallel from union node"""
 

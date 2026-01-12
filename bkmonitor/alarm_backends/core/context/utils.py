@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -47,7 +46,7 @@ def collect_info_dumps(collect_info):
     :param collect_info: 汇总信息
     :return: str
     """
-    return ";".join(["{}:{}".format(key, collect_info[key]) for key in collect_info])
+    return ";".join([f"{key}:{collect_info[key]}" for key in collect_info])
 
 
 def get_target_dimension_keys(agg_dimensions, scenario):

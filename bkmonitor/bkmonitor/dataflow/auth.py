@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 
 import json
 import logging
-from typing import List
 
 from django.conf import settings
 
@@ -27,7 +25,7 @@ def check_has_permission(project_id, rt_id):
         has_permission = api.bkdata.auth_projects_data_check(project_id=project_id, result_table_id=rt_id)
     except BKAPIError:
         logger.exception(
-            "check whether the project({}) has the permission of ({}) table, error.".format(project_id, rt_id)
+            f"check whether the project({project_id}) has the permission of ({rt_id}) table, error."
         )
         return False
 
@@ -61,14 +59,14 @@ def ensure_has_permission_with_rt_id(bk_username, rt_id, project_id=None):
             #     }
             # )
         except Exception:  # noqa
-            logger.exception("failed to grant permission({})".format(rt_id))
+            logger.exception(f"failed to grant permission({rt_id})")
             return False
         logger.info("grant permission successfully(%s), result:%s", rt_id, result)
 
     return True
 
 
-def batch_add_permission(project_id: int, bk_biz_id: int, table_id_list: List) -> bool:
+def batch_add_permission(project_id: int, bk_biz_id: int, table_id_list: list) -> bool:
     """批量检查项目是否有结果表的权限"""
     project_id = project_id or settings.BK_DATA_PROJECT_ID
     # 如果检测异常，则全量再授权一次

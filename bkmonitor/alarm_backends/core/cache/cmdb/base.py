@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -159,10 +158,10 @@ class CMDBCacheManager(CacheManager):
         cls.cache.delete(cls.CACHE_KEY)
 
 
-class RefreshByBizMixin(object):
+class RefreshByBizMixin:
     @classmethod
     def get_biz_cache_key(cls):
-        return "{}.biz".format(cls.CACHE_KEY)
+        return f"{cls.CACHE_KEY}.biz"
 
     @classmethod
     @abc.abstractmethod
@@ -201,7 +200,7 @@ class RefreshByBizMixin(object):
                 objs = cls.refresh_by_biz(bk_biz_id)
             except Exception as e:
                 # 如果接口调用异常，则不更新
-                cls.logger.exception("get data by biz fail, bk_biz_id: {}, {}".format(bk_biz_id, e))
+                cls.logger.exception(f"get data by biz fail, bk_biz_id: {bk_biz_id}, {e}")
                 exc = e
             else:
                 # 更新对象缓存
@@ -241,8 +240,8 @@ class RefreshByBizMixin(object):
         metrics.ALARM_CACHE_TASK_TIME.labels("0", cls.type, "None").observe(time.time() - start_time)
 
         cls.logger.info(
-            "cache_key({}) refresh CMDB data finished, amount: updated: {}, removed: {}, "
-            "removed_biz: {}".format(cls.CACHE_KEY, len(new_keys), len(deleted_keys), len(deleted_biz_ids))
+            f"cache_key({cls.CACHE_KEY}) refresh CMDB data finished, amount: updated: {len(new_keys)}, removed: {len(deleted_keys)}, "
+            f"removed_biz: {len(deleted_biz_ids)}"
         )
 
     @classmethod

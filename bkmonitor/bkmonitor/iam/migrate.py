@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-from typing import List
 
 from django.conf import settings
 from iam.api.http import http_post
@@ -24,11 +22,11 @@ from bkmonitor.iam.action import ActionMeta
 
 class ApiBatchAuthRequest(OldApiBatchAuthRequest):
     def __init__(self, *args, expired_at=None, **kwargs):
-        super(ApiBatchAuthRequest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.expired_at = expired_at
 
     def to_dict(self):
-        request_dict = super(ApiBatchAuthRequest, self).to_dict()
+        request_dict = super().to_dict()
         if self.expired_at is not None:
             request_dict["expired_at"] = self.expired_at
         return request_dict
@@ -104,8 +102,7 @@ class PolicyMigrator:
                     results.append(self.grant_resource_chunked(resource, chunk))
         except Exception as e:  # pylint: disable=broad-except
             print(
-                "grant permission error for action[%s], subject[%s]: %s"
-                % (resource["actions"][0]["id"], resource["subject"], e)
+                "grant permission error for action[{}], subject[{}]: {}".format(resource["actions"][0]["id"], resource["subject"], e)
             )
         return results
 
@@ -117,7 +114,7 @@ class PolicyMigrator:
             raise AuthAPIError(message)
         return _data
 
-    def expression_to_resource_paths(self, expression, paths: List):
+    def expression_to_resource_paths(self, expression, paths: list):
         """
         将权限表达式转换为资源路径
         """

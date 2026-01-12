@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,7 @@ specific language governing permissions and limitations under the License.
 import os
 import socket
 import threading
-from typing import Collection
+from collections.abc import Collection
 
 import MySQLdb
 from celery.signals import beat_init, worker_process_init
@@ -43,7 +42,7 @@ from bkmonitor.utils.common_utils import get_local_ip
 
 class LazyBatchSpanProcessor(BatchSpanProcessor):
     def __init__(self, *args, **kwargs):
-        super(LazyBatchSpanProcessor, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # 停止默认线程
         self.done = True
         with self.condition:
@@ -56,7 +55,7 @@ class LazyBatchSpanProcessor(BatchSpanProcessor):
         if self.worker_thread is None:
             self.worker_thread = threading.Thread(target=self.worker, daemon=True)
             self.worker_thread.start()
-        super(LazyBatchSpanProcessor, self).on_end(span)
+        super().on_end(span)
 
     def shutdown(self) -> None:
         self.done = True

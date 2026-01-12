@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,8 @@ specific language governing permissions and limitations under the License.
 
 import abc
 import copy
-from typing import Any, Dict, List, Mapping, Optional, Type
+from typing import Any
+from collections.abc import Mapping
 
 from django.db.models import Q
 
@@ -21,7 +21,7 @@ from bkmonitor.data_source import dict_to_q
 
 class MetricGroupRegistry:
 
-    _GROUPS: Dict[str, Type["BaseMetricGroup"]] = {}
+    _GROUPS: dict[str, type["BaseMetricGroup"]] = {}
 
     @classmethod
     def register(cls, invocation_cls):
@@ -38,12 +38,12 @@ class MetricGroupRegistry:
         group_name: str,
         bk_biz_id: int,
         app_name: str,
-        group_by: Optional[List[str]] = None,
-        filter_dict: Optional[Dict[str, Any]] = None,
+        group_by: list[str] | None = None,
+        filter_dict: dict[str, Any] | None = None,
         **kwargs,
     ):
         if group_name not in cls._GROUPS:
-            raise ValueError("{} not found".format(group_name))
+            raise ValueError(f"{group_name} not found")
         return cls._GROUPS[group_name](bk_biz_id, app_name, group_by, filter_dict, **kwargs)
 
 
@@ -68,23 +68,23 @@ class BaseMetricGroup(metaclass=MetricGroupMeta):
         self,
         bk_biz_id: int,
         app_name: str,
-        group_by: Optional[List[str]] = None,
-        filter_dict: Optional[Dict[str, Any]] = None,
-        metric_helper: Optional[MetricHelper] = None,
-        pre_calculate_helper: Optional[PreCalculateHelper] = None,
+        group_by: list[str] | None = None,
+        filter_dict: dict[str, Any] | None = None,
+        metric_helper: MetricHelper | None = None,
+        pre_calculate_helper: PreCalculateHelper | None = None,
         **kwargs,
     ):
-        self.group_by: List[str] = copy.deepcopy(group_by or [])
-        self.filter_dict: Dict[str, Any] = filter_dict or {}
+        self.group_by: list[str] = copy.deepcopy(group_by or [])
+        self.filter_dict: dict[str, Any] = filter_dict or {}
         self.metric_helper: MetricHelper = metric_helper or MetricHelper(bk_biz_id, app_name)
-        self.pre_calculate_helper: Optional[PreCalculateHelper] = pre_calculate_helper
+        self.pre_calculate_helper: PreCalculateHelper | None = pre_calculate_helper
 
     @abc.abstractmethod
-    def handle(self, calculation_type: str, **kwargs) -> List[Dict[str, Any]]:
+    def handle(self, calculation_type: str, **kwargs) -> list[dict[str, Any]]:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def query_config(self, calculation_type: str, **kwargs) -> Dict[str, Any]:
+    def query_config(self, calculation_type: str, **kwargs) -> dict[str, Any]:
         raise NotImplementedError
 
     def _filter_dict_to_q(self) -> Q:

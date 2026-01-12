@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -249,7 +248,7 @@ class UptimeCheckTaskListResource(Resource):
         th_list = []
         end = arrow.utcnow().timestamp
         for protocol, data in query_group.items():
-            data_label = "{}_{}".format(UPTIME_CHECK_DB, protocol.lower())
+            data_label = f"{UPTIME_CHECK_DB}_{protocol.lower()}"
             for period, task_id_list in data.items():
                 where = [{"key": "task_id", "method": "contains", "value": task_id_list}]
 
@@ -318,7 +317,7 @@ class GenerateYamlConfigResource(Resource):
                 data["config"], default_flow_style=False, encoding="utf-8", allow_unicode=True
             )
         except Exception as e:
-            logger.error("生成yaml配置文件时出错：%s" % e)
+            logger.error(f"生成yaml配置文件时出错：{e}")
             raise CustomException(_("生成yaml配置文件时出错：%s") % e)
 
         return yaml_content
@@ -372,7 +371,7 @@ class TestTaskResource(Resource):
                     pass
             invalid_nodes.append(f'{plugin["inner_ip"] or plugin["inner_ipv6"]}-{plugin["bk_cloud_id"]}')
         if invalid_nodes:
-            raise CustomException("部分节点版本校验失败，推荐升级至v3.5.0以上版本:%s" % ",".join(invalid_nodes))
+            raise CustomException("部分节点版本校验失败，推荐升级至v3.5.0以上版本:{}".format(",".join(invalid_nodes)))
 
         success = []
         # 如果是非公共业务节点，则直接对这个主机列表进行下发测试
@@ -665,8 +664,8 @@ class GenerateSubConfigResource(Resource):
                 "labels": labels,
                 "bk_biz_id": 0 if data["test"] else bk_biz_id,
                 "period": "{}s".format(config["period"]),
-                "available_duration": "{}ms".format(available_duration),
-                "timeout": "{}ms".format(timeout),
+                "available_duration": f"{available_duration}ms",
+                "timeout": f"{timeout}ms",
                 "target_host_list": target_host_list,
                 "target_port": config["port"],
                 "response": self.encode_data_with_prefix(config.get("response", "")),
@@ -682,8 +681,8 @@ class GenerateSubConfigResource(Resource):
                 "labels": labels,
                 "bk_biz_id": 0 if data["test"] else bk_biz_id,
                 "period": "{}s".format(config["period"]),
-                "available_duration": "{}ms".format(available_duration),
-                "timeout": "{}ms".format(timeout),
+                "available_duration": f"{available_duration}ms",
+                "timeout": f"{timeout}ms",
                 "target_host_list": target_host_list,
                 "target_port": config["port"],
                 "request_format": config.get("request_format", "hex"),
@@ -725,8 +724,8 @@ class GenerateSubConfigResource(Resource):
                 # 是否进行证书校验
                 "insecure_skip_verify": not auth.get("insecure_skip_verify", False),
                 "disable_keep_alives": False,
-                "available_duration": "{}ms".format(available_duration),
-                "timeout": "{}ms".format(timeout),
+                "available_duration": f"{available_duration}ms",
+                "timeout": f"{timeout}ms",
                 "dns_check_mode": config.get("dns_check_mode", "single"),
                 "target_ip_type": config.get("target_ip_type", 0),
                 "steps": [
@@ -740,7 +739,7 @@ class GenerateSubConfigResource(Resource):
                         "response_code": config.get("response_code", ""),
                         # available_duration 参数在step下(样例配置文件)
                         # 但从采集器代码看，还是在上层
-                        "available_duration": "{}ms".format(available_duration),
+                        "available_duration": f"{available_duration}ms",
                     }
                 ],
             }
@@ -764,8 +763,8 @@ class GenerateSubConfigResource(Resource):
                 "max_rtt": "3000ms" if data["test"] else "{}ms".format(config["max_rtt"]),
                 "total_num": 1 if data["test"] else config["total_num"],
                 "size": config["size"],
-                "available_duration": "{}ms".format(available_duration),
-                "timeout": "{}ms".format(timeout),
+                "available_duration": f"{available_duration}ms",
+                "timeout": f"{timeout}ms",
                 "target_host_list": target_host_list,
                 "node_list": config.get("node_list", []),
                 "output_fields": config.get("output_fields", settings.UPTIMECHECK_OUTPUT_FIELDS),
@@ -818,7 +817,7 @@ class TaskDataResource(Resource):
                 "monitor_field": monitor_field,
                 "time_step": 0,
                 "interval": task.config["period"],
-                "result_table_id": "{}_{}_{}".format(str(task.bk_biz_id), UPTIME_CHECK_DB, task.protocol.lower()),
+                "result_table_id": f"{str(task.bk_biz_id)}_{UPTIME_CHECK_DB}_{task.protocol.lower()}",
             }
 
             if monitor_field == "available":
@@ -954,7 +953,7 @@ class TaskDetailResource(Resource):
             "interval": task.get_period(),
             "filter_dict": {"task_id": task_id},
             "monitor_field": monitor_field,
-            "result_table_id": "{}_{}_{}".format(str(bk_biz_id), UPTIME_CHECK_DB, protocol),
+            "result_table_id": f"{str(bk_biz_id)}_{UPTIME_CHECK_DB}_{protocol}",
             "group_by_list": ["ip", "bk_cloud_id"],
             "use_short_series_name": True,
             "unit": unit,
@@ -1013,7 +1012,7 @@ class TaskDetailResource(Resource):
         except EmptyQueryException as e:
             raise EmptyQueryException(e.message)
         except Exception as e:
-            err_msg = _("生成图表时发生异常: %s" % e)
+            err_msg = _("生成图表时发生异常: {}".format(e))
             logger.exception(err_msg)
             raise CustomException(err_msg)
 
@@ -1524,7 +1523,7 @@ class UpdateTaskRunningStatusResource(Resource):
     """
 
     def __init__(self):
-        super(UpdateTaskRunningStatusResource, self).__init__()
+        super().__init__()
 
     def check_single_task_status(self, subscription_id):
         while True:
@@ -1533,13 +1532,13 @@ class UpdateTaskRunningStatusResource(Resource):
             try:
                 status_result = api.node_man.batch_task_result(subscription_id=subscription_id)
             except BKAPIError as e:
-                logger.error("请求节点管理任务{}执行结果接口:batch_task_result失败: {}".format(subscription_id, e))
+                logger.error(f"请求节点管理任务{subscription_id}执行结果接口:batch_task_result失败: {e}")
                 return
             log = []
             nodeman_task_id = ""
             if len(status_result) == 0:
-                logger.info("celery period task: 订阅任务%s正在启用中" % subscription_id)
-                logger.info("error_log: %s" % log)
+                logger.info(f"celery period task: 订阅任务{subscription_id}正在启用中")
+                logger.info(f"error_log: {log}")
                 return UptimeCheckTask.Status.STARTING, log, nodeman_task_id
             for item in status_result:
                 if item["status"] in [CollectStatus.RUNNING, CollectStatus.PENDING]:
@@ -1557,12 +1556,12 @@ class UpdateTaskRunningStatusResource(Resource):
                                         log.append(sub_step["ex_data"])
             else:
                 if error_count == 0:
-                    logger.info("celery period task: 订阅任务%s正在运行中" % subscription_id)
-                    logger.info("error_log: %s" % log)
+                    logger.info(f"celery period task: 订阅任务{subscription_id}正在运行中")
+                    logger.info(f"error_log: {log}")
                     return UptimeCheckTask.Status.RUNNING, log, nodeman_task_id
                 else:
-                    logger.info("celery period task: 订阅任务%s启动失败" % subscription_id)
-                    logger.info("error_log: %s" % log)
+                    logger.info(f"celery period task: 订阅任务{subscription_id}启动失败")
+                    logger.info(f"error_log: {log}")
                     return UptimeCheckTask.Status.START_FAILED, log, nodeman_task_id
 
     def perform_request(self, task_id):
@@ -1595,7 +1594,7 @@ class BatchUpdateTaskRunningStatusResource(Resource):
     """周期更新任务状态，用于celery周期任务"""
 
     def __init__(self):
-        super(BatchUpdateTaskRunningStatusResource, self).__init__()
+        super().__init__()
 
     @staticmethod
     def check_task_status(subscription_id_list):
@@ -1615,7 +1614,7 @@ class BatchUpdateTaskRunningStatusResource(Resource):
                     [{"subscription_id": s_id} for s_id in subscription_ids]
                 )
             except BKAPIError as e:
-                logger.error("请求节点管理任务执行结果接口失败: {}".format(e))
+                logger.error(f"请求节点管理任务执行结果接口失败: {e}")
                 return
             for index, subscription_id in enumerate(subscription_ids):
                 result[subscription_id] = status_result[index][0].get("status")
@@ -1628,7 +1627,7 @@ class BatchUpdateTaskRunningStatusResource(Resource):
             status = subscription_status.get(subscription_id)
             # 如果没有获取到状态，则跳过
             if not status:
-                logger.info("celery period task: 订阅任务%s未能获取状态" % subscription_id)
+                logger.info(f"celery period task: 订阅任务{subscription_id}未能获取状态")
                 return None
             if status in [CollectStatus.RUNNING, CollectStatus.PENDING]:
                 return UptimeCheckTask.Status.STARTING
@@ -1699,7 +1698,7 @@ class FrontPageDataResource(Resource):
                 "time_end": end,
                 "monitor_field": "available",
                 "series_name": task.name,
-                "result_table_id": "{}_{}_{}".format(str(task.bk_biz_id), UPTIME_CHECK_DB, task.protocol.lower()),
+                "result_table_id": f"{str(task.bk_biz_id)}_{UPTIME_CHECK_DB}_{task.protocol.lower()}",
                 "unit": "percentunit",
                 "conversion": 1,
                 "time_step": 0,
@@ -2158,7 +2157,7 @@ class FileImportUptimeCheckResource(Resource):
             node_lsit = [x for x in self.all_uptime_check_node if x.name in name_set]
             if len(node_lsit) != len(name_set):
                 error_node = name_set - set([node.name for node in node_lsit] if len(node_lsit) > 0 else [])
-                raise CustomException(_("当前业务下不存在拨测节点[%s]" % ";".join(error_node)))
+                raise CustomException(_("当前业务下不存在拨测节点[{}]".format(";".join(error_node))))
 
             return [node.id for node in node_lsit]
         else:
@@ -2761,7 +2760,7 @@ class ImportUptimeCheckTaskResource(Resource):
                             "solution_type": "job",
                             "solution_is_enable": False,
                             "monitor_id": 0,
-                            "where_sql": "(task_id={})".format(task_obj.id),
+                            "where_sql": f"(task_id={task_obj.id})",
                             "task_id": task_obj.id,
                             "bk_biz_id": task_obj.bk_biz_id,
                         }

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import json
-from typing import List
 
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy as _lazy
@@ -42,7 +40,7 @@ class AlertLogHandler:
         self.alert = AlertDocument.get(alert_id)
         self.log_records = []
 
-    def search(self, operate_list: List = None, offset: int = None, limit: int = None):
+    def search(self, operate_list: list = None, offset: int = None, limit: int = None):
         self.log_records = []
 
         search_object = (

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -18,7 +17,7 @@ from django.utils.functional import cached_property
 from alarm_backends.core.cache import key
 
 
-class Checkpoint(object):
+class Checkpoint:
     def __init__(self, strategy_group_key, client=None):
         self.strategy_group_key = strategy_group_key
 

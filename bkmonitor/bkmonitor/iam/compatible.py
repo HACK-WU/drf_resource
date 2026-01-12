@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -64,10 +63,10 @@ class CompatibleIAM(IAM):
 
     def _do_policy_query(self, request, with_resources=True):
         if not self.in_compatibility_mode():
-            return super(CompatibleIAM, self)._do_policy_query(request, with_resources)
+            return super()._do_policy_query(request, with_resources)
 
         data = request.to_dict()
-        logger.debug("the request: %s" % data)
+        logger.debug(f"the request: {data}")
 
         # NOTE: 不向服务端传任何resource, 用于统一类资源的批量鉴权
         # 将会返回所有策略, 然后遍历资源列表和策略列表, 逐一计算
@@ -109,10 +108,10 @@ class CompatibleIAM(IAM):
 
     def _do_policy_query_by_actions(self, request, with_resources=True):
         if not self.in_compatibility_mode():
-            return super(CompatibleIAM, self)._do_policy_query_by_actions(request, with_resources)
+            return super()._do_policy_query_by_actions(request, with_resources)
 
         data = request.to_dict()
-        logger.debug("the request: %s" % data)
+        logger.debug(f"the request: {data}")
 
         # NOTE: 不向服务端传任何resource, 用于统一类资源的批量鉴权
         # 将会返回所有策略, 然后遍历资源列表和策略列表, 逐一计算

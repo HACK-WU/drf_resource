@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 
 
 import logging
-from typing import Dict
 
 from django.utils.translation import gettext as _
 
@@ -92,7 +90,7 @@ class AgentEvent(GSEBaseAlarmEventRecord):
     TITLE = _("AGENT心跳丢失-GSE")
 
     def __init__(self, raw_data, strategies):
-        super(AgentEvent, self).__init__(raw_data, strategies)
+        super().__init__(raw_data, strategies)
 
     def flat(self):
         try:
@@ -134,5 +132,5 @@ class AgentEvent(GSEBaseAlarmEventRecord):
         return _("GSE AGENT 失联")
 
     @property
-    def filter_dimensions(self) -> Dict:
+    def filter_dimensions(self) -> dict:
         return {"agent_version": self.dimensions.get("agent_version", "")}

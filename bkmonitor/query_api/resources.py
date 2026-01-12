@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +7,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from typing import List
 
 from elasticsearch5.exceptions import ConnectionError
 from rest_framework.exceptions import APIException
@@ -45,7 +43,7 @@ class GetEsDataResource(Resource):
 
     def perform_request(self, validated_request_data):
         try:
-            index_names: List[str] = validated_request_data.get("index_names") or []
+            index_names: list[str] = validated_request_data.get("index_names") or []
             if index_names:
                 index: str = ",".join(index_names)
             else:
@@ -59,6 +57,6 @@ class GetEsDataResource(Resource):
         except ConnectionError as conn_err:
             domain_name = validated_request_data["datasource_info"]["domain_name"]
             port = validated_request_data["datasource_info"]["port"]
-            raise APIException("connect hosts:{}:{} error, message is {}.".format(domain_name, port, conn_err))
+            raise APIException(f"connect hosts:{domain_name}:{port} error, message is {conn_err}.")
         except Exception as err:
-            raise Exception("call get_es_data api failed, error message is {}".format(err))
+            raise Exception(f"call get_es_data api failed, error message is {err}")

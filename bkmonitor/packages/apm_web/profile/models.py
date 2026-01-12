@@ -11,7 +11,6 @@ specific language governing permissions and limitations under the License.
 # sources: profile.proto
 # plugin: python-betterproto
 from dataclasses import dataclass
-from typing import List
 
 import betterproto
 
@@ -26,19 +25,19 @@ class Profile(Message):
     # [["allocations","count"], ["space","bytes"]], If one of the values
     # represents the number of events represented by the sample, by convention it
     # should be at index 0 and use sample_type.unit == "count".
-    sample_type: List["ValueType"] = betterproto.message_field(1)
+    sample_type: list["ValueType"] = betterproto.message_field(1)
     # The set of samples recorded in this profile.
-    sample: List["Sample"] = betterproto.message_field(2)
+    sample: list["Sample"] = betterproto.message_field(2)
     # Mapping from address ranges to the image/binary/library mapped into that
     # address range.  mapping[0] will be the main binary.
-    mapping: List["Mapping"] = betterproto.message_field(3)
+    mapping: list["Mapping"] = betterproto.message_field(3)
     # Locations referenced by samples.
-    location: List["Location"] = betterproto.message_field(4)
+    location: list["Location"] = betterproto.message_field(4)
     # Functions referenced by locations.
-    function: List["Function"] = betterproto.message_field(5)
+    function: list["Function"] = betterproto.message_field(5)
     # A common table for strings referenced by various messages. string_table[0]
     # must always be "".
-    string_table: List[str] = betterproto.string_field(6)
+    string_table: list[str] = betterproto.string_field(6)
     # frames with Function.function_name fully matching the following regexp will
     # be dropped from the samples, along with their successors.
     drop_frames: int = betterproto.int64_field(7)
@@ -59,7 +58,7 @@ class Profile(Message):
     # not be used to store any machine-readable information, it is only for
     # human-friendly content. The profile must stay functional if this field is
     # cleaned.
-    comment: List[int] = betterproto.int64_field(13)
+    comment: list[int] = betterproto.int64_field(13)
     # Index into the string table of the type of the preferred sample value. If
     # unset, clients should default to the last sample value.
     default_sample_type: int = betterproto.int64_field(14)
@@ -84,13 +83,13 @@ class Sample(betterproto.Message):
 
     # The ids recorded here correspond to a Profile.location.id. The leaf is at
     # location_id[0].
-    location_id: List[int] = betterproto.uint64_field(1)
+    location_id: list[int] = betterproto.uint64_field(1)
     # The type and unit of each value is defined by the corresponding entry in
     # Profile.sample_type. All samples must have the same number of values, the
     # same as the length of Profile.sample_type. When aggregating multiple
     # samples into a single sample, the result has a list of values that is the
     # element-wise sum of the lists of the originals.
-    value: List[int] = betterproto.int64_field(2)
+    value: list[int] = betterproto.int64_field(2)
     # label includes additional context for this sample. It can include things
     # like a thread id, allocation size, etc. NOTE: While possible, having
     # multiple values for the same label key is strongly discouraged and should
@@ -98,7 +97,7 @@ class Sample(betterproto.Message):
     # for multi-value labels. And an even more discouraged case is having a
     # string label and a numeric label of the same name on a sample.  Again,
     # possible to express, but should not be used.
-    label: List["Label"] = betterproto.message_field(3)
+    label: list["Label"] = betterproto.message_field(3)
 
 
 @dataclass
@@ -164,7 +163,7 @@ class Location(betterproto.Message):
     # entry represents the caller into which the preceding entries were inlined.
     # E.g., if memcpy() is inlined into printf:    line[0].function_name ==
     # "memcpy"    line[1].function_name == "printf"
-    line: List["Line"] = betterproto.message_field(4)
+    line: list["Line"] = betterproto.message_field(4)
     # Provides an indication that multiple symbols map to this location's
     # address, for example due to identical code folding by the linker. In that
     # case the line information above represents one of the multiple symbols.

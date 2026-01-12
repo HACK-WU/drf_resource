@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 DATA_META = {"scope_type": "biz", "scope_id": 2, "bk_biz_id": 2}
 
 API_TOPO_TREES_REQUEST = {"all_scope": False, "scope_list": [{"scope_type": "biz", "scope_id": "2"}]}

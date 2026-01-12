@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -42,13 +41,13 @@ class TableSpace(CheckStep):
         try:
             res = requests.get(api_url, auth=(settings.RABBITMQ_USER, settings.RABBITMQ_PASS))
             if res.status_code > 300:
-                return ManagementAPIError("RabbitMQ management API call failed: code[]" % res.status_code, self.story)
+                return ManagementAPIError("RabbitMQ management API call failed: code[]", self.story)
             queue_list = res.json()
             if "error" in queue_list:
                 self.story.error("get RabbitMQ info from api {} error: {}".format(api_url, queue_list["error"]))
                 return
         except Exception as e:
-            self.story.error("get RabbitMQ info from api {} error: {}".format(api_url, e))
+            self.story.error(f"get RabbitMQ info from api {api_url} error: {e}")
             return
 
         problems = []

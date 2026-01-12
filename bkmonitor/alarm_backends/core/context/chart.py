@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,7 +14,6 @@ import json
 import logging
 import os
 import tempfile
-from typing import Optional
 
 import arrow
 import pytz
@@ -36,7 +34,7 @@ from core.unit import load_unit
 logger = logging.getLogger("fta_action.run")
 
 
-async def render_html(html_file_path: str) -> Optional[bytes]:
+async def render_html(html_file_path: str) -> bytes | None:
     """
     渲染html字符串为图片
     """

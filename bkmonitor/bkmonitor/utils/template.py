@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -35,7 +34,7 @@ from constants.action import NoticeWay
 logger = logging.getLogger(__name__)
 
 
-class NoticeRowRenderer(object):
+class NoticeRowRenderer:
     """
     行渲染器
     """
@@ -100,7 +99,7 @@ class NoticeRowRenderer(object):
         return "\n".join(lines)
 
 
-class CustomTemplateRenderer(object):
+class CustomTemplateRenderer:
     """
     自定义模板渲染器
     """
@@ -150,7 +149,7 @@ class CustomTemplateRenderer(object):
         return content
 
 
-class CustomOperateTemplateRenderer(object):
+class CustomOperateTemplateRenderer:
     """
     自定义处理记录模板渲染器
     """
@@ -163,7 +162,7 @@ class CustomOperateTemplateRenderer(object):
         return content
 
 
-class Jinja2Renderer(object):
+class Jinja2Renderer:
     """
     Jinja2渲染器
     """
@@ -188,7 +187,7 @@ class Jinja2Renderer(object):
         )
 
 
-class AlarmNoticeTemplate(object):
+class AlarmNoticeTemplate:
     """
     通知模板
     """
@@ -232,7 +231,7 @@ class AlarmNoticeTemplate(object):
         :return: 模板消息
         """
         raw_template = get_template(template_path)
-        with open(raw_template.template.filename, "r", encoding="utf-8") as f:
+        with open(raw_template.template.filename, encoding="utf-8") as f:
             return f.read()
 
     @staticmethod
@@ -264,17 +263,17 @@ class AlarmNoticeTemplate(object):
         try:
             return cls.get_template_source(template_path)
         except TemplateDoesNotExist:
-            logger.info("use empty template because {} not exists".format(template_path))
+            logger.info(f"use empty template because {template_path} not exists")
         except Exception as e:
-            logger.info("use default template because {} load fail, {}".format(template_path, e))
+            logger.info(f"use default template because {template_path} load fail, {e}")
         template_path = cls.get_default_path(template_path, language_suffix)
 
         try:
             return cls.get_template_source(template_path)
         except TemplateDoesNotExist:
-            logger.info("use empty template because {} not exists".format(template_path))
+            logger.info(f"use empty template because {template_path} not exists")
         except Exception as e:
-            logger.info("use empty template because {} load fail, {}".format(template_path, e))
+            logger.info(f"use empty template because {template_path} load fail, {e}")
         return ""
 
 
@@ -339,14 +338,14 @@ class UndefinedSilently(Undefined):
 
 class LocalOverridingCodeGenerator(CodeGenerator):
     def visit_Template(self, *args, **kwargs):
-        super(LocalOverridingCodeGenerator, self).visit_Template(*args, **kwargs)
+        super().visit_Template(*args, **kwargs)
         overrides = getattr(self.environment, '_codegen_overrides', {})
 
         if overrides:
             self.writeline('')
 
         for name, override in overrides.items():
-            self.writeline('{} = {}'.format(name, override))
+            self.writeline(f'{name} = {override}')
 
 
 class DynAutoEscapeEnvironment(Environment):
@@ -356,7 +355,7 @@ class DynAutoEscapeEnvironment(Environment):
         escape_func = kwargs.pop('escape_func', None)
         markup_class = kwargs.pop('markup_class', None)
 
-        super(DynAutoEscapeEnvironment, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # we need to disable constant-evaluation at compile time, because it
         # calls jinja's own escape function.

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,8 @@ specific language governing permissions and limitations under the License.
 import datetime
 import itertools
 import logging
-from typing import Any, Dict, Iterable, List, Set, Tuple, Union
+from typing import Any
+from collections.abc import Iterable
 
 from django.db import transaction
 from django.db.models import Max
@@ -222,11 +222,11 @@ class MonitorInfoResource(CacheResource):
 
         # 如果所有模块均正常，返回综合描述
         if all([item["status"] == MonitorStatus.NORMAL for item in list(result_data.values())]):
-            id__strategy_map: Dict[int, Any] = {}
-            disabled_strategies: List[Dict[str, Union[str, int]]] = []
-            no_target_strategies: List[Dict[str, Union[str, int]]] = []
-            time_warning_strategies: List[Dict[str, Union[str, int]]] = []
-            notice_warning_strategies: List[Dict[str, Union[str, int]]] = []
+            id__strategy_map: dict[int, Any] = {}
+            disabled_strategies: list[dict[str, str | int]] = []
+            no_target_strategies: list[dict[str, str | int]] = []
+            time_warning_strategies: list[dict[str, str | int]] = []
+            notice_warning_strategies: list[dict[str, str | int]] = []
             for strategy in StrategyModel.objects.filter(bk_biz_id=bk_biz_id).values("id", "name", "is_enabled"):
                 id__strategy_map[strategy["id"]] = strategy
                 # 检查策略是否禁用
@@ -246,7 +246,7 @@ class MonitorInfoResource(CacheResource):
 
             # TODO: 这里需要根据新版自愈进行调整
             # 检查通知时间
-            action_list: List[Dict[str, Any]] = Action.objects.filter(
+            action_list: list[dict[str, Any]] = Action.objects.filter(
                 strategy_id__in=list(id__strategy_map.keys())
             ).values("strategy_id", "config")
             for action in action_list:
@@ -258,7 +258,7 @@ class MonitorInfoResource(CacheResource):
                     )
 
             # 检查通知方式
-            notice_groups: List[Dict[str, Any]] = NoticeGroup.objects.filter(bk_biz_id=bk_biz_id).values(
+            notice_groups: list[dict[str, Any]] = NoticeGroup.objects.filter(bk_biz_id=bk_biz_id).values(
                 "id", "name", "notice_way"
             )
             for group in notice_groups:
@@ -300,7 +300,7 @@ class GetFunctionShortcutResource(Resource):
         limit = serializers.IntegerField(label="限制", default=10)
 
     @classmethod
-    def get_recent_shortcuts(cls, username: str, functions: List[str], limit: int = 10):
+    def get_recent_shortcuts(cls, username: str, functions: list[str], limit: int = 10):
         """
         获取最近访问的快捷方式
         """
@@ -330,7 +330,7 @@ class GetFunctionShortcutResource(Resource):
                 org_ids_to_biz_id = {org.id: org.name for org in Org.objects.filter(id__in=org_ids)}
 
                 # 确定已存在的仪表盘
-                exists_dashboards: Dict[Tuple[str, str], Dashboard] = {
+                exists_dashboards: dict[tuple[str, str], Dashboard] = {
                     (org_ids_to_biz_id[dashboard.org_id], dashboard.uid): dashboard
                     for dashboard in dashboards
                     if dashboard.org_id in org_ids_to_biz_id
@@ -357,7 +357,7 @@ class GetFunctionShortcutResource(Resource):
                 apps = {app.application_id: app for app in Application.objects.filter(application_id__in=app_ids)}
 
                 # 获取服务信息
-                app_services: Dict[int, Set[str]] = {}
+                app_services: dict[int, set[str]] = {}
                 for app in apps.values():
                     services = ServiceHandler.list_services(app)
                     app_services[app.application_id] = {service["topo_key"] for service in services}
@@ -424,7 +424,7 @@ class GetFunctionShortcutResource(Resource):
         return result
 
     @classmethod
-    def get_favorite_shortcuts(cls, username: str, functions: List[str], limit: int = 10):
+    def get_favorite_shortcuts(cls, username: str, functions: list[str], limit: int = 10):
         """
         获取收藏的快捷方式
         """
@@ -450,15 +450,15 @@ class GetFunctionShortcutResource(Resource):
                 dashboards = Dashboard.objects.filter(id__in=starred_dashboard_ids)
 
                 # 获取业务ID与 Grafana Org 的映射
-                org_id_to_biz_id: Dict[int, int] = {
+                org_id_to_biz_id: dict[int, int] = {
                     org.id: int(org.name)
                     for org in Org.objects.filter(id__in=[dashboard.org_id for dashboard in dashboards])
                     if org.name.strip().lstrip('-').isdigit()
                 }
 
                 # 获取仪表盘权限
-                allowed_bk_biz_ids: Set[int] = set()
-                allowed_dashboard_ids: Set[Tuple[int, str]] = set()
+                allowed_bk_biz_ids: set[int] = set()
+                allowed_dashboard_ids: set[tuple[int, str]] = set()
                 for bk_biz_id in org_id_to_biz_id.values():
                     ok, role, dashboard_permissions = DashboardPermission.has_permission(request, None, bk_biz_id)
                     if not ok:
@@ -498,7 +498,7 @@ class GetFunctionShortcutResource(Resource):
                 )
 
                 # 获取应用名称
-                apps: Dict[int, Application] = {
+                apps: dict[int, Application] = {
                     app.application_id: app
                     for app in Application.objects.filter(
                         application_id__in=[int(config.level_key) for config in apm_configs]
@@ -506,7 +506,7 @@ class GetFunctionShortcutResource(Resource):
                 }
 
                 # 获取当前服务，去除过期服务
-                app_services: Dict[int, Set[str]] = {}
+                app_services: dict[int, set[str]] = {}
                 for app in apps.values():
                     services = ServiceHandler.list_services(app)
                     app_services[app.application_id] = {service["topo_key"] for service in services}
@@ -566,7 +566,7 @@ class GetFunctionShortcutResource(Resource):
             result.append({"function": function, "name": name, "items": items})
         return result
 
-    def perform_request(self, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def perform_request(self, params: dict[str, Any]) -> list[dict[str, Any]]:
         """
         返回结果示例
         [{
@@ -596,7 +596,7 @@ class GetFunctionShortcutResource(Resource):
             result = self.get_favorite_shortcuts(username, params["functions"])
 
         # 批量获取业务名称
-        bk_biz_ids: Set[int] = {item["bk_biz_id"] for record in result for item in record["items"]}
+        bk_biz_ids: set[int] = {item["bk_biz_id"] for record in result for item in record["items"]}
         biz_id_name_map = {}
         for biz_id in bk_biz_ids:
             space = SpaceApi.get_space_detail(bk_biz_id=biz_id)
@@ -631,7 +631,7 @@ class AddAccessRecordResource(Resource):
         class MetricRetrieveConfigSerializer(serializers.Serializer):
             favorite_record_id = serializers.IntegerField(label="收藏记录ID")
 
-        def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
             if attrs["function"] == "dashboard":
                 attrs["config"] = self.DashboardConfigSerializer(data=attrs["config"]).validate(attrs["config"])
                 attrs["id"] = attrs["config"]["dashboard_uid"]
@@ -642,7 +642,7 @@ class AddAccessRecordResource(Resource):
                 raise serializers.ValidationError(f"unsupported function: {attrs['function']}")
             return attrs
 
-    def perform_request(self, params: Dict[str, Any]) -> None:
+    def perform_request(self, params: dict[str, Any]) -> None:
         request = get_request(peaceful=True)
         if not request:
             return
@@ -700,7 +700,7 @@ class GetAlarmGraphConfigResource(Resource):
     class RequestSerializer(serializers.Serializer):
         bk_biz_id = serializers.IntegerField(label="业务ID", required=False)
 
-    def perform_request(self, params: Dict[str, Any]) -> None:
+    def perform_request(self, params: dict[str, Any]) -> None:
         request = get_request(peaceful=True)
         if not request:
             return
@@ -804,7 +804,7 @@ class SaveAlarmGraphConfigResource(Resource):
 
             return attrs
 
-    def perform_request(self, params: Dict[str, Any]) -> None:
+    def perform_request(self, params: dict[str, Any]) -> None:
         request = get_request(peaceful=True)
         if not request:
             return
@@ -842,7 +842,7 @@ class DeleteAlarmGraphConfigResource(Resource):
     class RequestSerializer(serializers.Serializer):
         bk_biz_id = serializers.IntegerField(label="业务ID")
 
-    def perform_request(self, params: Dict[str, Any]) -> None:
+    def perform_request(self, params: dict[str, Any]) -> None:
         request = get_request(peaceful=True)
         if not request:
             return
@@ -861,7 +861,7 @@ class SaveAlarmGraphBizIndexResource(Resource):
     class RequestSerializer(serializers.Serializer):
         bk_biz_ids = serializers.ListField(child=serializers.IntegerField(), label="业务ID列表")
 
-    def perform_request(self, params: Dict[str, Any]) -> None:
+    def perform_request(self, params: dict[str, Any]) -> None:
         request = get_request(peaceful=True)
         if not request:
             return

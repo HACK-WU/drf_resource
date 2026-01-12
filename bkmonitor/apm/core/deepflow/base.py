@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -118,7 +117,7 @@ class EBPFHandler:
                 if isinstance(tem_value, dict):
                     attrs.update(tem_value)
             except Exception as e:
-                logger.info("merge_value_to_attrs_map, value: {}, exception: {}".format(value, e))
+                logger.info(f"merge_value_to_attrs_map, value: {value}, exception: {e}")
 
     @classmethod
     def put_bool_value_to_map(cls, attrs: dict, key: str, value):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-import typing
 
 from bkm_ipchooser import constants, types
 from bkm_ipchooser.api import BkApi
@@ -10,8 +8,8 @@ from bkm_ipchooser.handlers.topo_handler import TopoHandler
 class HostHandler:
     @staticmethod
     def details_base(
-        scope_list: types.ScopeList, host_property_filter: typing.Dict
-    ) -> typing.List[types.FormatHostInfo]:
+        scope_list: types.ScopeList, host_property_filter: dict
+    ) -> list[types.FormatHostInfo]:
         """
         获取主机详情
         :param scope_list: 资源范围数组
@@ -46,10 +44,10 @@ class HostHandler:
     def check(
         cls,
         scope_list: types.ScopeList,
-        ip_list: typing.List[str],
-        ipv6_list: typing.List[str],
-        key_list: typing.List[str],
-    ) -> typing.List[types.FormatHostInfo]:
+        ip_list: list[str],
+        ipv6_list: list[str],
+        key_list: list[str],
+    ) -> list[types.FormatHostInfo]:
         """
         根据输入的`IP`/`IPv6`/`主机名`/`host_id`等关键字信息获取真实存在的机器信息。
         :param scope_list: 资源范围数组
@@ -61,10 +59,10 @@ class HostHandler:
         if not scope_list:
             return []
 
-        inner_ip_set: typing.Set[str] = set()
-        bk_host_id_set: typing.Set[int] = set()
-        bk_host_name_set: typing.Set[str] = set()
-        cloud_inner_ip_set: typing.Set[str] = set()
+        inner_ip_set: set[str] = set()
+        bk_host_id_set: set[int] = set()
+        bk_host_name_set: set[str] = set()
+        cloud_inner_ip_set: set[str] = set()
 
         for ip_or_cloud_ip in ip_list:
             # 按分隔符切割，获取切割后长度
@@ -112,8 +110,8 @@ class HostHandler:
 
     @classmethod
     def details(
-        cls, scope_list: types.ScopeList, host_list: typing.List[types.FormatHostInfo]
-    ) -> typing.List[types.FormatHostInfo]:
+        cls, scope_list: types.ScopeList, host_list: list[types.FormatHostInfo]
+    ) -> list[types.FormatHostInfo]:
         """
         根据主机关键信息获取机器详情信息
         :param scope_list: 资源范围数组

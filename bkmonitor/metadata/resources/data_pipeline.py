@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 from collections import OrderedDict
-from typing import Optional
 
 from django.utils.translation import gettext as _
 from rest_framework import serializers
@@ -42,7 +40,7 @@ class ListDataPipeline(Resource):
         page_size = serializers.IntegerField(default=constants.DEFAULT_PAGE_SIZE, label="每页的条数")
         page = serializers.IntegerField(default=constants.MIN_PAGE_NUM, min_value=constants.MIN_PAGE_NUM, label="页数")
 
-        def validate_is_enable(self, is_enable: str) -> Optional[bool]:
+        def validate_is_enable(self, is_enable: str) -> bool | None:
             if is_enable == "all":
                 return None
             if is_enable == "true":

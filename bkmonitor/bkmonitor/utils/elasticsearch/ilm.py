@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -70,7 +69,7 @@ class ILM:
     @property
     def index_re(self):
         """获取这个存储的正则匹配内容"""
-        pattern = r"{}_(?P<datetime>\d+)_(?P<index>\d+)".format(self.index_name)
+        pattern = rf"{self.index_name}_(?P<datetime>\d+)_(?P<index>\d+)"
         return re.compile(pattern)
 
     def index_exist(self):
@@ -230,7 +229,7 @@ class ILM:
                     )
 
             finally:
-                logger.info("all operations for index->[{}] gap->[{}] now is done.".format(self.index_name, now_gap))
+                logger.info(f"all operations for index->[{self.index_name}] gap->[{now_gap}] now is done.")
                 now_gap += self.slice_gap
 
         return {
@@ -399,19 +398,19 @@ class ILM:
     @property
     def write_alias_re(self):
         """获取写入别名的正则匹配"""
-        pattern = r"write_(?P<datetime>\d+)_{}".format(self.index_name)
+        pattern = rf"write_(?P<datetime>\d+)_{self.index_name}"
         return re.compile(pattern)
 
     @property
     def old_write_alias_re(self):
         """获取旧版写入别名的正则匹配"""
-        pattern = r"{}_(?P<datetime>\d+)_write".format(self.index_name)
+        pattern = rf"{self.index_name}_(?P<datetime>\d+)_write"
         return re.compile(pattern)
 
     @property
     def read_alias_re(self):
         """获取读取别名的正则匹配"""
-        pattern = r"{}_(?P<datetime>\d+)_read".format(self.index_name)
+        pattern = rf"{self.index_name}_(?P<datetime>\d+)_read"
         return re.compile(pattern)
 
     def get_alias_datetime_str(self, alias_name):
@@ -619,7 +618,7 @@ class ILM:
                 current_mapping = es_mappings["properties"]
 
         except (KeyError, elasticsearch5.NotFoundError, elasticsearch6.NotFoundError, elasticsearch.NotFoundError):
-            logger.info("index_name->[{}] is not exists, will think the mapping is not same.".format(index_name))
+            logger.info(f"index_name->[{index_name}] is not exists, will think the mapping is not same.")
             return False, should_create
 
         # 判断字段列表是否一致的: _type在ES7.x版本后取消
@@ -645,19 +644,15 @@ class ILM:
 
                 if field_config == "type" and current_value is None:
                     logger.info(
-                        "index_name->[{}] index->[{}] field->[{}] config->[{}] database->[{}] es config is None, "
-                        "so nothing will do.".format(
-                            self.index_name, index_name, field_name, field_config, database_value
-                        )
+                        f"index_name->[{self.index_name}] index->[{index_name}] field->[{field_name}] config->[{field_config}] database->[{database_value}] es config is None, "
+                        "so nothing will do."
                     )
                     continue
 
                 if database_value != current_value:
                     logger.info(
-                        "index_name->[{}] index->[{}] field->[{}] config->[{}] database->[{}] es->[{}] is "
-                        "not the same, ".format(
-                            self.index_name, index_name, field_name, field_config, database_value, current_value
-                        )
+                        f"index_name->[{self.index_name}] index->[{index_name}] field->[{field_name}] config->[{field_config}] database->[{database_value}] es->[{current_value}] is "
+                        "not the same, "
                     )
                     return False, should_create
 
@@ -665,7 +660,7 @@ class ILM:
         if field_diff_set:
             return False, should_create
 
-        logger.debug("index_name->[{}] index->[{}] field config same.".format(self.index_name, index_name))
+        logger.debug(f"index_name->[{self.index_name}] index->[{index_name}] field config same.")
         return True, should_create
 
     def reallocate_index(self):
@@ -793,7 +788,7 @@ class ILM:
             logger.exception("reindex [%s]->[%s] call reindex failed: %s", old_index_name, new_index_name, e)
             return
 
-        print("reindex [{}]->[{}] reindex result: {}".format(old_index_name, new_index_name, reindex_result))
+        print(f"reindex [{old_index_name}]->[{new_index_name}] reindex result: {reindex_result}")
         logger.info("reindex [%s]->[%s] reindex result: %s", old_index_name, new_index_name, reindex_result)
 
         if not delete_old_docs:
@@ -807,5 +802,5 @@ class ILM:
             logger.exception("reindex [%s]->[%s] call delete_by_query failed: %s", old_index_name, new_index_name, e)
             return
 
-        print("reindex [{}]->[{}] delete old document result: {}".format(old_index_name, new_index_name, delete_result))
+        print(f"reindex [{old_index_name}]->[{new_index_name}] delete old document result: {delete_result}")
         logger.info("reindex [%s]->[%s] delete old document result: %s", old_index_name, new_index_name, delete_result)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -21,14 +20,14 @@ from .plugin import LanguageEnum
 class Help:
     help_md_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "help_md_new")
 
-    def __init__(self, context: typing.Dict[str, typing.Any]):
+    def __init__(self, context: dict[str, typing.Any]):
         self.env: Environment = Environment(loader=FileSystemLoader(searchpath=self.help_md_path))
-        self.context: typing.Dict[str, str] = context
+        self.context: dict[str, str] = context
         self.context.update(FieldManager.get_context(ScopeType.OPEN.value))
 
     def get_help_md(self, plugin_id: str, language: str, deployment_id: str) -> str:
 
-        context: typing.Dict[str, typing.Any] = copy.deepcopy(self.context)
+        context: dict[str, typing.Any] = copy.deepcopy(self.context)
         if language == LanguageEnum.GOLANG.id:
             # Go OTLP SDK 不能传 schema，OT SDK 设计如此，所以引导也不加
             context["access_config"]["otlp"]["endpoint"] = context["access_config"]["otlp"]["endpoint"].replace(
@@ -38,7 +37,7 @@ class Help:
                 "http_endpoint"
             ].replace("http://", "")
 
-        rendered_context: typing.Dict[str, str] = {}
+        rendered_context: dict[str, str] = {}
         for field, val in context.items():
             if isinstance(val, str):
                 # 对 string 字段先渲染一遍

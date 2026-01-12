@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -51,7 +50,7 @@ from monitor_web.strategies.constant import EVENT_METRIC_ID
 logger = logging.getLogger(__name__)
 
 
-class StrategyConfig(object):
+class StrategyConfig:
     # 需要的字段
     STRATEGY_FIELDS = [
         "id",
@@ -238,7 +237,7 @@ class StrategyConfig(object):
             # 对id,name做特殊处理，增加前缀
             model_name = model_obj.__class__.__name__
             if field in ["id", "name"] and model_name in cls.INSTANCE_DISPLAY_NAME:
-                key = "{}_{}".format(cls.INSTANCE_DISPLAY_NAME[model_name], field)
+                key = f"{cls.INSTANCE_DISPLAY_NAME[model_name]}_{field}"
                 dict_obj[key] = value
 
     @staticmethod
@@ -457,9 +456,7 @@ class StrategyConfig(object):
                     api.metadata.full_cmdb_node_info(table_id=rt_query.result_table_id)
                 except Exception:  # noqa
                     logger.exception(
-                        "create cmdb node info error, strategy_id({}), result_table_id({})".format(
-                            self.id, rt_query.result_table_id
-                        )
+                        f"create cmdb node info error, strategy_id({self.id}), result_table_id({rt_query.result_table_id})"
                     )
                     continue
 

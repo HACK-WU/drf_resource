@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -252,13 +251,13 @@ class ActionInstanceContext(BaseContextObject):
     @cached_property
     def action_id(self):
         """ES存储的处理记录id"""
-        return "{}{}".format(int(self.parent.action.create_time.timestamp()), self.parent.action.id)
+        return f"{int(self.parent.action.create_time.timestamp())}{self.parent.action.id}"
 
     @cached_property
     def detail_link(self):
         if self.parent.is_external_channel:
             return None
-        return '<a target="_blank" href="{detail_url}">{detail_url}<a>'.format(detail_url=self.detail_url)
+        return f'<a target="_blank" href="{self.detail_url}">{self.detail_url}<a>'
 
     @cached_property
     def opt_content_markdown(self):
@@ -316,14 +315,14 @@ class ActionInstanceContent(ActionInstanceContext):
             if content_type in settings.MD_SUPPORTED_NOTICE_WAYS:
                 # 所有支持markdown语法的通知方式，默认用markdown格式
                 content_type = "markdown"
-            if hasattr(self, "{}_{}".format(item, content_type)):
-                value = object.__getattribute__(self, "{}_{}".format(item, content_type))
+            if hasattr(self, f"{item}_{content_type}"):
+                value = object.__getattribute__(self, f"{item}_{content_type}")
             else:
-                value = super(ActionInstanceContent, self).__getattribute__(item)
+                value = super().__getattribute__(item)
 
             if value is None:
                 return ""
             else:
                 return NoticeRowRenderer.format(content_type, self.Labels[item][content_type], value)
 
-        return super(ActionInstanceContent, self).__getattribute__(item)
+        return super().__getattribute__(item)

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import logging
-from typing import Dict, List
 
 from bkm_ipchooser import constants, types
 from bkm_ipchooser.api import BkApi
@@ -10,6 +8,7 @@ from bkm_ipchooser.tools.batch_request import batch_request, request_multi_threa
 from bkm_space.api import SpaceApi
 from bkm_space.define import SpaceTypeEnum
 from bkm_space.utils import bk_biz_id_to_space_uid
+import builtins
 
 logger = logging.getLogger("bkm_ipchooser")
 
@@ -27,7 +26,7 @@ class DynamicGroupHandler:
             self.bk_biz_id = space.bk_biz_id
         self.meta = BaseHandler.get_meta_data(self.bk_biz_id)
 
-    def list(self, dynamic_group_list: List[Dict] = None) -> List[types.DynamicGroup]:
+    def list(self, dynamic_group_list: list[dict] = None) -> list[types.DynamicGroup]:
         """获取动态分组列表"""
         if self.bk_biz_id < 0:
             return []
@@ -43,7 +42,7 @@ class DynamicGroupHandler:
         BaseHandler.sort_by_name(groups)
         return self._format_dynamic_groups(groups)
 
-    def _format_dynamic_groups(cls, groups: List[Dict]) -> List[Dict]:
+    def _format_dynamic_groups(cls, groups: builtins.list[dict]) -> builtins.list[dict]:
         """格式化获取动态分组列表的返回"""
         groups = [
             {
@@ -61,7 +60,7 @@ class DynamicGroupHandler:
         ]
         return groups
 
-    def execute(self, dynamic_group_id: str, start: int, page_size: int) -> Dict:
+    def execute(self, dynamic_group_id: str, start: int, page_size: int) -> dict:
         """执行动态分组"""
         result = {"start": start, "page_size": page_size, "total": 0, "data": []}
 
@@ -98,7 +97,7 @@ class DynamicGroupHandler:
         result["data"] = host_list
         return result
 
-    def agent_statistics(self, dynamic_group_list: List[Dict] = None):
+    def agent_statistics(self, dynamic_group_list: builtins.list[dict] = None):
         dynamic_group_ids = [dynamic_group["id"] for dynamic_group in dynamic_group_list]
         params = {"bk_biz_id": self.bk_biz_id, "no_request": True}
         groups = batch_request(func=BkApi.search_dynamic_group, params=params)

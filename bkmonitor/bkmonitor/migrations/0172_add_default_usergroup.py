@@ -1,4 +1,4 @@
-from django.db import migrations, models
+from django.db import migrations
 
 
 def add_user_group(apps, schema_editor):

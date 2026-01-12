@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 import time
 
 
-class TimeStats(object):
+class TimeStats:
     """
     时间诊断
     """
@@ -35,8 +34,8 @@ class TimeStats(object):
     def stop(self):
         self._end = time.time()
         if self._slug:
-            self.info.append("{}.{}: {}".format(self._bucket, self._slug[-1], (self._end - self._split[-1])))
-        self.info.insert(0, "{}.total: {}".format(self._bucket, (self._end - self._start)))
+            self.info.append(f"{self._bucket}.{self._slug[-1]}: {self._end - self._split[-1]}")
+        self.info.insert(0, f"{self._bucket}.total: {self._end - self._start}")
         self._split.append(self._end)
 
     def split(self, slug):
@@ -44,7 +43,7 @@ class TimeStats(object):
         if slug == "stop":
             return self.stop()
         if self._slug:
-            self.info.append("{}.{}: {}".format(self._bucket, self._slug[-1], (_timing - self._split[-1])))
+            self.info.append(f"{self._bucket}.{self._slug[-1]}: {_timing - self._split[-1]}")
         self._slug.append(slug)
         self._split.append(_timing)
 

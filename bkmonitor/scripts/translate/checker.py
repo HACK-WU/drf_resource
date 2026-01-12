@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ specific language governing permissions and limitations under the License.
 
 import ast
 import re
-import sys
 from collections import defaultdict
 
 import pycodestyle
@@ -40,12 +38,12 @@ StringRegex = r"[\u4e00-\u9fff]"  # noqa
 
 ImportPath = "django.utils.translation"
 ImportNames = ["gettext", "pgettext", "ngettext", "npgettext"]
-LazyImportNames = ["{}_lazy".format(name) for name in ImportNames] + ["gettext_noop"]
+LazyImportNames = [f"{name}_lazy" for name in ImportNames] + ["gettext_noop"]
 
 
 class TranslateFuncFinder(ast.NodeVisitor):
     def __init__(self, *args, **kwargs):
-        super(TranslateFuncFinder, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.trans_func_names = set()
         self.lazy_trans_func_names = set()
 
@@ -74,7 +72,7 @@ class TranslateFinder(ast.NodeVisitor):
         :param args:
         :param kwargs:
         """
-        super(TranslateFinder, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.errors = defaultdict(list)
         self.words = []
         self.trans_func_names = trans_func_names
@@ -91,7 +89,7 @@ class TranslateFinder(ast.NodeVisitor):
 
         in_func = False
         while not isinstance(parent, ast.Module):
-            if isinstance(parent, (ast.Lambda, ast.FunctionDef)):
+            if isinstance(parent, ast.Lambda | ast.FunctionDef):
                 in_func = True
                 break
 
@@ -108,7 +106,7 @@ class TranslateFinder(ast.NodeVisitor):
 
         in_assign = False
         while not isinstance(parent, ast.Module):
-            if isinstance(parent, (ast.Assign, ast.Return)):
+            if isinstance(parent, ast.Assign | ast.Return):
                 in_assign = True
                 break
 
@@ -169,7 +167,7 @@ class TranslateFinder(ast.NodeVisitor):
             self.errors["no_trans"].append(node)
 
 
-class TranslateChecker(object):
+class TranslateChecker:
     options = None
     name = "flake8-translate-checker"
     version = __version__

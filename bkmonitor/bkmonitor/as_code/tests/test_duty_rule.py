@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,7 +28,7 @@ def setup():
 
 
 def test_duty_parse(setup):
-    with open(f"{DATA_PATH}/normal_rule.yaml", "r") as f:
+    with open(f"{DATA_PATH}/normal_rule.yaml") as f:
         code_config = yaml.safe_load(f.read())
     p = DutyRuleParser(bk_biz_id=2)
     code_config = p.check(code_config)

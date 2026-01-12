@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import json
 import time
-from typing import List
 
 from kafka.consumer.fetcher import ConsumerRecord
 
@@ -21,7 +19,7 @@ from core.prometheus import metrics
 
 
 @app.task(ignore_result=True, queue="celery_alert_builder")
-def run_alert_builder(topic_data_id, bootstrap_server, events: List[ConsumerRecord]):
+def run_alert_builder(topic_data_id, bootstrap_server, events: list[ConsumerRecord]):
     builder = AlertBuilder()
     exc = None
     builder.logger.info("[alert.builder] start, total(%s) events", len(events))
@@ -53,7 +51,7 @@ def run_alert_builder(topic_data_id, bootstrap_server, events: List[ConsumerReco
 
 
 @app.task(ignore_result=True, queue="celery_alert_builder")
-def dedupe_events_to_alerts(events: List[Event]):
+def dedupe_events_to_alerts(events: list[Event]):
     builder = AlertBuilder()
     try:
         builder.dedupe_events_to_alerts(events)

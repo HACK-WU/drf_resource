@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -55,7 +54,7 @@ class BKConsul(consul.Consul):
         """
         # 如果不需要使用tls，直接返回
         if not using_settings:
-            super(BKConsul, self).__init__(scheme=scheme, verify=verify, cert=cert, port=port, **kwargs)
+            super().__init__(scheme=scheme, verify=verify, cert=cert, port=port, **kwargs)
             return
 
         # 判断是否存在consul的证书认证配置
@@ -90,4 +89,4 @@ class BKConsul(consul.Consul):
             if kwargs.get("host") == "127.0.0.1":
                 kwargs["host"] = "localhost"
 
-        super(BKConsul, self).__init__(scheme=scheme, verify=verify, cert=cert, port=port, **kwargs)
+        super().__init__(scheme=scheme, verify=verify, cert=cert, port=port, **kwargs)

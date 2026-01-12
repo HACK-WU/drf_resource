@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -36,7 +35,7 @@ class Node(six.with_metaclass(abc.ABCMeta, object)):
     DEFAULT_FRONTEND_OFFSET = 100  # 下一个节点和上一个节点之间的x/y两个方向上的偏移
 
     def __init__(self, parent=None, *args, **kwargs):
-        if isinstance(parent, (list, tuple)):
+        if isinstance(parent, list | tuple):
             self.parent_list = parent
         else:
             self.parent_list = [parent] if parent else []
@@ -98,8 +97,8 @@ class Node(six.with_metaclass(abc.ABCMeta, object)):
             for p in self.parent_list:
                 from_links.append(
                     {
-                        "source": {"node_id": p.node_id, "id": "ch_{}".format(p.node_id), "arrow": "Right"},
-                        "target": {"id": "bk_node_{}".format(int(time.time() * 1000)), "arrow": "Left"},
+                        "source": {"node_id": p.node_id, "id": f"ch_{p.node_id}", "arrow": "Right"},
+                        "target": {"id": f"bk_node_{int(time.time() * 1000)}", "arrow": "Left"},
                     }
                 )
         return {
@@ -117,9 +116,9 @@ class Node(six.with_metaclass(abc.ABCMeta, object)):
             result = api.bkdata.update_data_flow_node(**params)
             self.node_id = node_id
         except Exception as e:  # noqa
-            logger.exception("update node({}) to flow({}) failed".format(self.name, flow_id))
+            logger.exception(f"update node({self.name}) to flow({flow_id}) failed")
             raise DataFlowNodeUpdateFailed(node_name=self.name, err=e)
-        logger.info("update node({}) to flow({}) success, result:({})".format(self.name, flow_id, result))
+        logger.info(f"update node({self.name}) to flow({flow_id}) success, result:({result})")
 
     def create(self, flow_id):
         params = self.get_api_params(flow_id=flow_id)
@@ -127,6 +126,6 @@ class Node(six.with_metaclass(abc.ABCMeta, object)):
             result = api.bkdata.add_data_flow_node(**params)
             self.node_id = result["node_id"]
         except Exception as e:  # noqa
-            logger.exception("add node({}) to flow({}) failed".format(self.name, flow_id))
+            logger.exception(f"add node({self.name}) to flow({flow_id}) failed")
             raise DataFlowNodeCreateFailed(node_name=self.name, err=e)
-        logger.info("add node({}) to flow({}) success, result:({})".format(self.name, flow_id, result))
+        logger.info(f"add node({self.name}) to flow({flow_id}) success, result:({result})")

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 import logging
 import time
 from functools import partial
-from typing import Any, Dict, List
+from typing import Any
 
 from django.core.exceptions import EmptyResultSet
 from django.db.models import Count, Q, QuerySet
@@ -178,7 +177,7 @@ class TimeSeriesMetric(Resource):
         ]
 
     @staticmethod
-    def filter_conditions(metrics: QuerySet, conditions: Dict):
+    def filter_conditions(metrics: QuerySet, conditions: dict):
         """
         查询过滤
         """
@@ -245,7 +244,7 @@ class TimeSeriesMetric(Resource):
 
         custom_event_data_ids = set()
         data_source_dict = {}
-        metric_configs: List[Dict] = []
+        metric_configs: list[dict] = []
 
         for metric in metrics:
             if (metric.data_source_label, metric.data_type_label) not in self.DisplayDataSource:
@@ -512,13 +511,13 @@ class GetVariableValue(Resource):
         return new_labels, new_values
 
     @staticmethod
-    def get_host_count(bk_biz_id: int, target_type: str) -> Dict[int, int]:
+    def get_host_count(bk_biz_id: int, target_type: str) -> dict[int, int]:
         """
         获取主机数量，比如集群或者模块的主机数量
         """
         host_count = {}
 
-        def collect(trees: List[Dict[str, Any]]):
+        def collect(trees: list[dict[str, Any]]):
             for node in trees:
                 if node["object_id"] == target_type:
                     host_count[node["instance_id"]] = node["count"]
@@ -549,7 +548,7 @@ class GetVariableValue(Resource):
         elif type == "service_instance":
             instances = api.cmdb.get_service_instance_by_topo_node(bk_biz_id=bk_biz_id)
         else:
-            raise ValidationError("type({}) not exists".format(type))
+            raise ValidationError(f"type({type}) not exists")
 
         value_dict = {}
 
@@ -854,7 +853,7 @@ class GetVariableValue(Resource):
         return query_params
 
     @staticmethod
-    def dimension_translate(bk_biz_id: int, params: dict, dimensions: List):
+    def dimension_translate(bk_biz_id: int, params: dict, dimensions: list):
         """
         维度翻译
         """
@@ -962,7 +961,7 @@ class GetVariableValue(Resource):
             }
 
         if scope_type not in query_processor:
-            raise ValidationError("type({}) not exists".format(scope_type))
+            raise ValidationError(f"type({scope_type}) not exists")
 
         result = query_processor[scope_type](bk_biz_id=params["bk_biz_id"], params=params["params"])
         return result

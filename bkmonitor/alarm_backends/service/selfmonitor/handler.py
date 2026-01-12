@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -27,7 +26,7 @@ class SelfMonitorHandler(base.BaseHandler):
     def __init__(self, self_monitor_type, *args, **kwargs):
         self.self_monitor_type = self_monitor_type
 
-        super(SelfMonitorHandler, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def handle(self):
         self_monitor_cls = SELF_MONITOR_TO_CLASS_MAP.get(self.self_monitor_type)

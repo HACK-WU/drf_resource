@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,8 @@ specific language governing permissions and limitations under the License.
 """
 import datetime
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Any
+from collections.abc import Iterable
 
 import arrow
 from django.db.models import Q
@@ -39,7 +39,7 @@ class MetricHelper:
 
     MAX_DATA_LIMIT: int = 24 * 60 * 30
 
-    USING: Tuple[str, str] = (DataTypeLabel.TIME_SERIES, DataSourceLabel.CUSTOM)
+    USING: tuple[str, str] = (DataTypeLabel.TIME_SERIES, DataSourceLabel.CUSTOM)
 
     TIME_FIELD: str = "time"
 
@@ -50,7 +50,7 @@ class MetricHelper:
     def q(self) -> QueryConfigBuilder:
         return QueryConfigBuilder(self.USING).table(self.table_id).time_field(self.TIME_FIELD)
 
-    def time_range_qs(self, start_time: Optional[int] = None, end_time: Optional[int] = None) -> UnifyQuerySet:
+    def time_range_qs(self, start_time: int | None = None, end_time: int | None = None) -> UnifyQuerySet:
         start_time, end_time = self._get_time_range(start_time, end_time)
         return UnifyQuerySet().start_time(start_time).end_time(end_time)
 
@@ -58,22 +58,22 @@ class MetricHelper:
         self,
         metric_field: str,
         field: str,
-        filter_dict: Optional[Dict[str, Any]] = None,
+        filter_dict: dict[str, Any] | None = None,
         limit: int = MAX_OPTION_LIMIT,
-        start_time: Optional[int] = None,
-        end_time: Optional[int] = None,
-    ) -> List[str]:
+        start_time: int | None = None,
+        end_time: int | None = None,
+    ) -> list[str]:
         q: QueryConfigBuilder = (
             self.q.filter(dict_to_q(filter_dict or {}) or Q())
             .metric(field=metric_field, method="count")
             .tag_values(field)
         )
 
-        option_values: Set[str] = set()
+        option_values: set[str] = set()
         qs: UnifyQuerySet = self.time_range_qs(start_time, end_time).add_query(q).limit(limit)
         try:
             for bucket in qs:
-                value: Optional[str] = bucket.get(field)
+                value: str | None = bucket.get(field)
                 if value:
                     option_values.add(value)
         except Exception:  # noqa
@@ -83,24 +83,24 @@ class MetricHelper:
         return list(option_values)
 
     def fetch_field_option_values(
-        self, params_list: List[Dict[str, Any]], start_time: Optional[int] = None, end_time: Optional[int] = None
-    ) -> Dict[Tuple[str, str], List[str]]:
-        def _collect(_metric_field: str, _field: str, _filter_dict: Optional[Dict[str, Any]] = None):
+        self, params_list: list[dict[str, Any]], start_time: int | None = None, end_time: int | None = None
+    ) -> dict[tuple[str, str], list[str]]:
+        def _collect(_metric_field: str, _field: str, _filter_dict: dict[str, Any] | None = None):
             group_option_values_map[(_metric_field, _field)] = self.get_field_option_values(
                 _metric_field, _field, filter_dict=_filter_dict, start_time=start_time, end_time=end_time
             )
 
-        group_option_values_map: Dict[Tuple[str, str], List[str]] = {}
+        group_option_values_map: dict[tuple[str, str], list[str]] = {}
         ThreadPool().map_ignore_exception(
             _collect, [(params["metric_field"], params["field"], params.get("filter_dict")) for params in params_list]
         )
         return group_option_values_map
 
     def get_field_option_values_by_groups(
-        self, params_list: List[Dict[str, Any]], start_time: Optional[int] = None, end_time: Optional[int] = None
-    ) -> List[str]:
-        option_values: Set[str] = set()
-        group_option_values_map: Dict[Tuple[str, str], List[str]] = self.fetch_field_option_values(
+        self, params_list: list[dict[str, Any]], start_time: int | None = None, end_time: int | None = None
+    ) -> list[str]:
+        option_values: set[str] = set()
+        group_option_values_map: dict[tuple[str, str], list[str]] = self.fetch_field_option_values(
             params_list, start_time, end_time
         )
         for params in params_list:
@@ -108,7 +108,7 @@ class MetricHelper:
         return list(option_values)
 
     @classmethod
-    def _get_time_range(cls, start_time: Optional[int] = None, end_time: Optional[int] = None):
+    def _get_time_range(cls, start_time: int | None = None, end_time: int | None = None):
         now: int = int(datetime.datetime.now().timestamp())
         # 最早查询起始时间
         earliest_start_time: int = now - int(cls.MAX_TIME_DURATION.total_seconds())
@@ -129,7 +129,7 @@ class MetricHelper:
         return start_time, end_time
 
     @classmethod
-    def get_interval(cls, start_time: Optional[int] = None, end_time: Optional[int] = None):
+    def get_interval(cls, start_time: int | None = None, end_time: int | None = None):
         start_time, end_time = cls._get_time_range(start_time, end_time)
         return (end_time - start_time) // cls.TIME_FIELD_ACCURACY
 
@@ -227,32 +227,32 @@ class MetricHelper:
 class PreCalculateHelper:
     """指标预计算工具类"""
 
-    def __init__(self, config: Dict[str, Any]):
-        self._config: Dict[str, Any] = config
+    def __init__(self, config: dict[str, Any]):
+        self._config: dict[str, Any] = config
 
     def _is_enabled(self) -> bool:
         """启用预计算时返回 True，默认启用"""
         return self._config.get("enabled", True)
 
-    def router(self, table_id: str, metric: str, used_labels: Iterable[str]) -> Dict[str, Any]:
+    def router(self, table_id: str, metric: str, used_labels: Iterable[str]) -> dict[str, Any]:
         """将原始指标路由到预计算指标
         :param table_id: 原结果表
         :param metric: 原指标
         :param used_labels: 本次计算使用到的维度
         :return:
         """
-        result: Dict[str, Any] = {"table_id": table_id, "metric": metric, "is_hit": False}
+        result: dict[str, Any] = {"table_id": table_id, "metric": metric, "is_hit": False}
         if not self._is_enabled():
             return result
 
         try:
-            pre_cal_metric_infos: List[Dict[str, Any]] = self._config["metrics"][metric]
+            pre_cal_metric_infos: list[dict[str, Any]] = self._config["metrics"][metric]
         except KeyError:
             return result
 
-        used_labels: Set[str] = set(used_labels)
+        used_labels: set[str] = set(used_labels)
         for metric_info in pre_cal_metric_infos:
-            drop_labels: Set[str] = set(metric_info.get("drop_labels") or [])
+            drop_labels: set[str] = set(metric_info.get("drop_labels") or [])
             if used_labels & drop_labels:
                 continue
 

@@ -23,7 +23,7 @@ def read_profile(name: str = "simple", category: str = "") -> dict:
     if category:
         cases_prefix += f"/{category}"
 
-    with open(f"{cases_prefix}/{name}.json", "r") as f:
+    with open(f"{cases_prefix}/{name}.json") as f:
         trace_list = json.loads(f.read())
 
     _CACHE[(name, category)] = trace_list

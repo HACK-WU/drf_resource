@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -45,7 +44,7 @@ def update_plugin_manager(mocker):
     return plugin_manager
 
 
-class TestScriptManager(object):
+class TestScriptManager:
     def test_get_collector_json(self, mocker, update_plugin_manager):
         plugin_params = {
             "meta.yaml": yaml.dump({"scripts": {"windows": {"type": "bat", "filename": "test_plugin.bat"}}})

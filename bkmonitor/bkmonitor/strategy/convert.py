@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -14,7 +13,6 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 from itertools import chain
-from typing import List
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -128,7 +126,7 @@ class UptimeCheckConvert:
                         continue
 
                     # task_id的值转为字符型
-                    if condition_msg["key"] == "task_id" and isinstance(condition_msg["value"], (tuple, list)):
+                    if condition_msg["key"] == "task_id" and isinstance(condition_msg["value"], tuple | list):
                         condition_msg["value"] = [str(task_id) for task_id in condition_msg["value"]]
 
                     if not new_condition and "condition" in condition_msg:
@@ -192,7 +190,7 @@ class CMDBTopoNodeAggConvert:
                     continue
 
                 origin_result_table_id: str = query_config.result_table_id
-                origin_dimension: List[str] = query_config.agg_dimension.copy()
+                origin_dimension: list[str] = query_config.agg_dimension.copy()
 
                 # 判断是否已经进行了转换
                 if len(set(origin_dimension) & set(SPLIT_DIMENSIONS)) == 2:
@@ -301,9 +299,7 @@ class CMDBTopoNodeAggConvertWithBKData:
                     api.metadata.full_cmdb_node_info(table_id=rt_query.result_table_id)
                 except Exception:  # noqa
                     logger.exception(
-                        "create cmdb node info error, strategy_id({}), result_table_id({})".format(
-                            strategy.id, rt_query.result_table_id
-                        )
+                        f"create cmdb node info error, strategy_id({strategy.id}), result_table_id({rt_query.result_table_id})"
                     )
                     continue
 
@@ -314,7 +310,7 @@ class CMDBTopoNodeAggConvertWithBKData:
         pass
 
 
-class AIOPSWithBkdataConvert(object):
+class AIOPSWithBkdataConvert:
     """
     aiops策略配置转换
     """

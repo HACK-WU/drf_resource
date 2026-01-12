@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -27,7 +26,7 @@ class BaseQuery:
         self.application = Application.objects.filter(bk_biz_id=bk_biz_id, app_name=app_name).get()
         self.metrics_table = self.application.metric_result_table_id
 
-    def get_metric(self, metric_clz: Type[MetricHandler], params=None, **kwargs):
+    def get_metric(self, metric_clz: type[MetricHandler], params=None, **kwargs):
         if not params:
             params = self.common_params()
 

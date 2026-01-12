@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -40,7 +39,7 @@ class ApiAuthResource(Resource):
             return request_data
 
         # model类型的数据需要特殊处理
-        if isinstance(request_data, (models.Model, models.QuerySet)):
+        if isinstance(request_data, models.Model | models.QuerySet):
             request_serializer = self.RequestSerializer(request_data, many=self.many_request_data)
             self._request_serializer = request_serializer
             validated_request_data = request_serializer.data
@@ -50,7 +49,7 @@ class ApiAuthResource(Resource):
             is_valid_request = request_serializer.is_valid()
             if not is_valid_request:
                 logger.error(
-                    "Resource[{}] 请求参数格式错误：%s".format(self.get_resource_name()),
+                    f"Resource[{self.get_resource_name()}] 请求参数格式错误：%s",
                     format_serializer_errors(request_serializer),
                 )
                 raise CustomException(

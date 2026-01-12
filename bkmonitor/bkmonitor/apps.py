@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -84,7 +83,7 @@ class Config(AppConfig):
                         },
                     )
                 except Exception as err:  # pylint: disable=broad-except
-                    print("start continues profiling failed: %s" % err)
+                    print(f"start continues profiling failed: {err}")
 
 
 def _refresh_cache_node(sender, **kwargs):

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from django.conf import settings
 from django.core.cache import cache
@@ -60,17 +59,17 @@ def get_biz_ids_by_space_ids(space_type, space_ids):
 
 
 def list_spaces(
-    space_type_id: Optional[str] = None,
-    space_id: Optional[str] = None,
-    space_name: Optional[str] = None,
-    id: Optional[int] = None,
-    is_exact: Optional[bool] = False,
-    is_detail: Optional[bool] = False,
-    page: Optional[int] = DEFAULT_PAGE,
-    page_size: Optional[int] = DEFAULT_PAGE_SIZE,
-    exclude_platform_space: Optional[bool] = True,
-    include_resource_id: Optional[bool] = False,
-) -> Dict:
+    space_type_id: str | None = None,
+    space_id: str | None = None,
+    space_name: str | None = None,
+    id: int | None = None,
+    is_exact: bool | None = False,
+    is_detail: bool | None = False,
+    page: int | None = DEFAULT_PAGE,
+    page_size: int | None = DEFAULT_PAGE_SIZE,
+    exclude_platform_space: bool | None = True,
+    include_resource_id: bool | None = False,
+) -> dict:
     """查询空间实例信息
 
     :param space_type_id: 空间类型ID
@@ -159,7 +158,7 @@ def list_spaces(
     return space_info
 
 
-def _filter_space_resource_by_page(spaces: List) -> Dict:
+def _filter_space_resource_by_page(spaces: list) -> dict:
     """过滤关联空间资源
     :param spaces: 空间列表
     :return: 过滤到的空间资源数据
@@ -197,8 +196,8 @@ def _filter_space_resource_by_page(spaces: List) -> Dict:
 
 
 def get_space_detail(
-    space_type_id: Optional[str] = None, space_id: Optional[str] = None, id: Optional[int] = None
-) -> Dict:
+    space_type_id: str | None = None, space_id: str | None = None, id: int | None = None
+) -> dict:
     """查询空间的详情， 包含基本属性及关联的资源信息
 
     :param space_type_id: 空间类型 ID
@@ -236,7 +235,7 @@ def get_space_detail(
     return detail
 
 
-def get_dimension_values(space_type_id: str, space_id: str, resource_type: Optional[str] = None) -> List:
+def get_dimension_values(space_type_id: str, space_id: str, resource_type: str | None = None) -> list:
     """获取资源的维度数据"""
     space_resources = SpaceResource.objects.filter(space_type_id=space_type_id, space_id=space_id)
     if resource_type:
@@ -253,9 +252,9 @@ def create_space(
     space_id: str,
     space_type_id: str,
     space_name: str,
-    resources: Optional[List] = None,
-    space_code: Optional[str] = "",
-) -> Dict:
+    resources: list | None = None,
+    space_code: str | None = "",
+) -> dict:
     """创建空间
 
     如果需要关联资源，则创建关联资源信息
@@ -348,7 +347,7 @@ def create_space(
 
 
 def bulk_create_space_data_source(
-    space_type: str, space_id: str, data_id_list: List, from_authorization: Optional[bool] = True
+    space_type: str, space_id: str, data_id_list: list, from_authorization: bool | None = True
 ):
     """批量创建空间和数据源关系"""
     bulk_create_records = []
@@ -362,7 +361,7 @@ def bulk_create_space_data_source(
     SpaceDataSource.objects.bulk_create(bulk_create_records, batch_size=BULK_CREATE_BATCH_SIZE)
 
 
-def authorize_data_id_list(space_type: str, space_id: str, data_id_list: List):
+def authorize_data_id_list(space_type: str, space_id: str, data_id_list: list):
     """针对指定类型授权特定的数据源"""
     logger.info(
         "start to authorize data id, space_type: %s, space_id: %s, data_id_list: %s",
@@ -450,8 +449,8 @@ def create_bksaas_space_resource(space_type: str, space_id: str, creator: str):
 
 @atomic(config.DATABASE_CONNECTION_NAME)
 def update_space(
-    updater: str, space_type_id: str, space_id: str, space_name: str, space_code: str, resources: List
-) -> Dict:
+    updater: str, space_type_id: str, space_id: str, space_name: str, space_code: str, resources: list
+) -> dict:
     """更新空间信息
 
     :param updater: 更新者
@@ -574,7 +573,7 @@ def merge_space(src_space_type_id: str, src_space_id: str, dst_space_type_id, ds
     src_space_obj.save(update_fields=["status"])
 
 
-def disable_space(spaces: List[Dict]):
+def disable_space(spaces: list[dict]):
     """禁用空间
 
     现阶段只是设置状态为disabled
@@ -590,7 +589,7 @@ def disable_space(spaces: List[Dict]):
     return [s.to_dict() for s in filtered_spaces]
 
 
-def get_platform_data_id_list() -> List:
+def get_platform_data_id_list() -> list:
     """获取平台级 data id"""
     return list(
         DataSource.objects.filter(is_platform_data_id=True, space_type_id=SpaceTypes.ALL.value).values_list(
@@ -599,7 +598,7 @@ def get_platform_data_id_list() -> List:
     )
 
 
-def get_space_data_id_list(space_type_id: str) -> List:
+def get_space_data_id_list(space_type_id: str) -> list:
     """获取空间级 data id
 
     也就是允许相同空间类型下的空间访问
@@ -611,13 +610,13 @@ def get_space_data_id_list(space_type_id: str) -> List:
     )
 
 
-def get_platform_result_table_id_list() -> List:
+def get_platform_result_table_id_list() -> list:
     """获取平台级及空间级的结果表 ID"""
     data_id_list = get_platform_data_id_list()
     return list(DataSourceResultTable.objects.filter(bk_data_id__in=data_id_list).values_list("table_id", flat=True))
 
 
-def get_result_table_data_id_dict(data_id_list: Optional[List] = None, table_id: Optional[str] = None) -> Dict:
+def get_result_table_data_id_dict(data_id_list: list | None = None, table_id: str | None = None) -> dict:
     """通过 data id 获取结果表映射"""
     qs = DataSourceResultTable.objects.all()
     if data_id_list:
@@ -627,26 +626,26 @@ def get_result_table_data_id_dict(data_id_list: Optional[List] = None, table_id:
     return {d["table_id"]: d["bk_data_id"] for d in qs.values("table_id", "bk_data_id")}
 
 
-def get_platform_result_table_list() -> List:
+def get_platform_result_table_list() -> list:
     """获取平台级的结果表信息"""
     result_table_id_list = get_platform_result_table_id_list()
     return ResultTable.objects.filter(table_id__in=result_table_id_list).values("table_id", "schema_type", "data_label")
 
 
-def get_result_table_list(filter_platform: Optional[bool] = False, table_id_list: Optional[List] = None) -> List:
+def get_result_table_list(filter_platform: bool | None = False, table_id_list: list | None = None) -> list:
     """过滤结果表数据"""
     if filter_platform:
         return get_platform_result_table_list()
     return ResultTable.objects.filter(table_id__in=table_id_list).values("table_id", "schema_type", "data_label")
 
 
-def get_platform_result_table_field_list(tag: str = "metric") -> List:
+def get_platform_result_table_field_list(tag: str = "metric") -> list:
     """获取平台级的结果表指标属性信息"""
     result_table_id_list = get_platform_result_table_id_list()
     return ResultTableField.objects.filter(table_id__in=result_table_id_list, tag=tag).values("table_id", "field_name")
 
 
-def get_data_id_list_by_biz_id(bk_biz_id: int) -> List:
+def get_data_id_list_by_biz_id(bk_biz_id: int) -> list:
     """获取业务下的 data id
 
     仅为归属业务下的 data id
@@ -658,7 +657,7 @@ def get_data_id_list_by_biz_id(bk_biz_id: int) -> List:
     return DataSourceResultTable.objects.filter(table_id__in=table_id_list).values_list("bk_data_id", flat=True)
 
 
-def get_metadata_project_dict(project_id: Optional[str] = None, desire_all_data: Optional[bool] = False) -> Dict:
+def get_metadata_project_dict(project_id: str | None = None, desire_all_data: bool | None = False) -> dict:
     """获取 metadata 中存储的项目数据"""
     project_cluster = BCSClusterInfo.objects.filter(status="running")
     data = []
@@ -678,7 +677,7 @@ def get_metadata_project_dict(project_id: Optional[str] = None, desire_all_data:
     return project_cluster
 
 
-def get_data_id_by_cluster(cluster_id: Optional[str] = None, desire_all_data: Optional[bool] = False) -> Dict:
+def get_data_id_by_cluster(cluster_id: str | None = None, desire_all_data: bool | None = False) -> dict:
     """通过集群获取数据源"""
     # 获取相应的记录
     bcs_cluster = BCSClusterInfo.objects.filter(status="running")
@@ -709,7 +708,7 @@ def get_data_id_by_cluster(cluster_id: Optional[str] = None, desire_all_data: Op
     return cluster_data_id_dict
 
 
-def get_shared_cluster_namespaces(cluster_id: str, project_code: str) -> List:
+def get_shared_cluster_namespaces(cluster_id: str, project_code: str) -> list:
     """获取共享集群的命名空间信息"""
     # 通过 project manager api 项目使用获取共享集群的命名空间
     try:
@@ -719,7 +718,7 @@ def get_shared_cluster_namespaces(cluster_id: str, project_code: str) -> List:
         return []
 
 
-def get_project_clusters(project_id: str) -> List:
+def get_project_clusters(project_id: str) -> list:
     """获取项目下的集群列表"""
     try:
         return api.bcs_cluster_manager.get_project_clusters(project_id=project_id)
@@ -749,7 +748,7 @@ def get_space_shared_namespaces(space_id: str):
 
 
 @atomic(config.DATABASE_CONNECTION_NAME)
-def create_bkcc_spaces(biz_list: List) -> bool:
+def create_bkcc_spaces(biz_list: list) -> bool:
     """创建业务对应的空间信息
 
     NOTE: 业务类型，不需要关联资源
@@ -776,7 +775,7 @@ def create_bkcc_spaces(biz_list: List) -> bool:
 
 
 @atomic(config.DATABASE_CONNECTION_NAME)
-def create_bkcc_space_data_source(biz_data_id_dict: Dict):
+def create_bkcc_space_data_source(biz_data_id_dict: dict):
     """批量创建空间和数据源的关系"""
     space_data_source, data_id_list = [], []
     # 添加归属空间的 data id 关联
@@ -801,7 +800,7 @@ def create_bkcc_space_data_source(biz_data_id_dict: Dict):
     set_data_source_space_type(data_id_list, SpaceTypes.BKCC.value)
 
 
-def add_cluster_data_id_list(space_type_id: str, space_id: str, cluster_data_id_list: List, is_shared: bool) -> List:
+def add_cluster_data_id_list(space_type_id: str, space_id: str, cluster_data_id_list: list, is_shared: bool) -> list:
     """添加集群下的data id
 
     针对共享集群时，data id为授权项目访问
@@ -829,10 +828,10 @@ def add_cluster_data_id_list(space_type_id: str, space_id: str, cluster_data_id_
 def compose_bcs_space_data_source(
     space_type_id: str,
     space_id: str,
-    data_id_list: List,
-    project_cluster_data_id_list: List,
-    shared_cluster_data_id_list: List,
-) -> List:
+    data_id_list: list,
+    project_cluster_data_id_list: list,
+    shared_cluster_data_id_list: list,
+) -> list:
     """处理重复的数据"""
     exist_data_id_list = []
     _data_id_set = set(project_cluster_data_id_list)
@@ -876,7 +875,7 @@ def compose_bcs_space_data_source(
     return data
 
 
-def create_bcs_spaces(project_list: List) -> bool:
+def create_bcs_spaces(project_list: list) -> bool:
     """创建容器对应的空间信息，需要检查业务下的 ID 及关联资源(业务和集群及命名空间)
 
     :param project_list: 项目相关信息，包含项目 ID、项目名称、项目 Code
@@ -984,11 +983,11 @@ def create_bcs_spaces(project_list: List) -> bool:
     return True
 
 
-def get_metadata_cluster_list() -> List:
+def get_metadata_cluster_list() -> list:
     return list(BCSClusterInfo.objects.filter(status="running").values_list("cluster_id", flat=True))
 
 
-def get_valid_bcs_projects() -> List:
+def get_valid_bcs_projects() -> list:
     """获取可用的 BKCI(BCS) 项目空间"""
     projects = (
         api.bcs_cc.batch_get_projects() if settings.ENABLE_BCS_CC_PROJECT_API else api.bcs.get_projects(kind="k8s")
@@ -1005,7 +1004,7 @@ def get_valid_bcs_projects() -> List:
     return valid_project_list
 
 
-def get_space_by_table_id(table_id: str) -> Dict[str, Any]:
+def get_space_by_table_id(table_id: str) -> dict[str, Any]:
     """通过结果表获取空间信息
 
     @param table_id: 结果表
@@ -1037,14 +1036,14 @@ def get_space_by_table_id(table_id: str) -> Dict[str, Any]:
     return {"space_type_id": sds.space_type_id, "space_id": sds.space_id, "is_all_space": False}
 
 
-def set_data_source_space_type(data_id_list: List, space_type_id: str):
+def set_data_source_space_type(data_id_list: list, space_type_id: str):
     """设置数据源的所属的空间类型"""
     DataSource.objects.filter(bk_data_id__in=data_id_list).update(space_type_id=space_type_id)
 
     logger.info("set data id: %s belong to space type: %s", json.dumps(data_id_list), space_type_id)
 
 
-def cached_ts_metric_data_id_list() -> List:
+def cached_ts_metric_data_id_list() -> list:
     """从缓存中读取 ts metric 对应的 data id
 
     NOTE: 设置超时时间为一小时
@@ -1058,7 +1057,7 @@ def cached_ts_metric_data_id_list() -> List:
     return data_id_list
 
 
-def cached_cluster_data_id_list() -> List:
+def cached_cluster_data_id_list() -> list:
     """从缓存中读取集群对应的 data id
 
     NOTE: 设置超时时间为一小时
@@ -1076,7 +1075,7 @@ def cached_cluster_data_id_list() -> List:
     return cluster_data_id_list
 
 
-def get_bkci_projects() -> List:
+def get_bkci_projects() -> list:
     """获取 bkci 的项目信息"""
     try:
         # 查询项目信息
@@ -1090,7 +1089,7 @@ def get_bkci_projects() -> List:
         return []
 
 
-def cached_cluster_k8s_data_id() -> List:
+def cached_cluster_k8s_data_id() -> list:
     """从缓存中读取集群内置的数据源 ID
 
     NOTE: 因为集群变动没有那么频繁，可以设置超时时间为1小时

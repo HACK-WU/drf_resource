@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import json
-from typing import List, Union
 
 from django.conf import settings
 from django.core.cache import caches
@@ -57,7 +55,7 @@ class InjectSpaceApi(space_api.AbstractSpaceApi):
         return SpaceDefine.from_dict(space_dict)
 
     @classmethod
-    def get_space_detail(cls, space_uid: str = "", bk_biz_id: int = 0) -> Union[None, SpaceDefine]:
+    def get_space_detail(cls, space_uid: str = "", bk_biz_id: int = 0) -> None | SpaceDefine:
         """
         查看具体空间实例详情
         :param space_uid: 空间唯一标识
@@ -96,13 +94,13 @@ class InjectSpaceApi(space_api.AbstractSpaceApi):
         return cls._init_space(space_info)
 
     @classmethod
-    def list_spaces(cls, refresh=False) -> List[SpaceDefine]:
+    def list_spaces(cls, refresh=False) -> list[SpaceDefine]:
         """
         查询空间列表
         """
-        ret: List[SpaceDefine] = local_mem.get("metadata:list_spaces", miss_cache)
+        ret: list[SpaceDefine] = local_mem.get("metadata:list_spaces", miss_cache)
         if ret is miss_cache or refresh:
-            ret: List[SpaceDefine] = [
+            ret: list[SpaceDefine] = [
                 SpaceDefine.from_dict(space_dict, cleaned=True)
                 for space_dict in cls.list_spaces_dict(using_cache=False)
             ]
@@ -110,7 +108,7 @@ class InjectSpaceApi(space_api.AbstractSpaceApi):
         return ret
 
     @classmethod
-    def list_spaces_dict(cls, using_cache=True) -> List[dict]:
+    def list_spaces_dict(cls, using_cache=True) -> list[dict]:
         """
         告警性能版本获取空间列表
         """
@@ -141,7 +139,7 @@ class InjectSpaceApi(space_api.AbstractSpaceApi):
             """
             cursor.execute(sql)
             columns = [col[0] for col in cursor.description]
-            spaces: List[dict] = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            spaces: list[dict] = [dict(zip(columns, row)) for row in cursor.fetchall()]
         # db 无数据， 开发环境给出提示， 生产环境不提示（正常部署不会出现该问题）
         if not spaces and settings.RUN_MODE == "DEVELOP":
             raise Exception(

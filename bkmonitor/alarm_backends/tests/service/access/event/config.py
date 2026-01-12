@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import arrow
 
-from api.cmdb.define import Host, TopoNode
+from api.cmdb.define import Host
 
 now = arrow.now()
 utc_now = now.to("utc")
@@ -84,7 +83,7 @@ AGENT_LOSE_DATA3 = {
 
 AGENT_LOSE_DATA_CLEAN = {
     "data": {
-        "record_id": "b3a0d98506ed48e358e9176dbe4d23c4.{}".format(utc_timestamp),
+        "record_id": f"b3a0d98506ed48e358e9176dbe4d23c4.{utc_timestamp}",
         "values": {"value": "", "time": utc_timestamp},
         "dimensions": {
             "bk_host_id": 2,
@@ -101,7 +100,7 @@ AGENT_LOSE_DATA_CLEAN = {
         3: {
             "anomaly_message": "GSE AGENT \u5931\u8054",
             "anomaly_time": arrow.get(utc_timestamp).format("YYYY-MM-DD HH:mm:ss"),
-            "anomaly_id": "b3a0d98506ed48e358e9176dbe4d23c4.{}.31.54.3".format(utc_timestamp),
+            "anomaly_id": f"b3a0d98506ed48e358e9176dbe4d23c4.{utc_timestamp}.31.54.3",
         }
     },
     "strategy_snapshot_key": "bk_monitor.ee[development].cache.strategy.snapshot.31.1572868513",
@@ -109,7 +108,7 @@ AGENT_LOSE_DATA_CLEAN = {
 
 AGENT_LOSE_DATA_CLEAN2 = {
     "data": {
-        "record_id": "8043faacbbd950898164a946faabe72c.{}".format(utc_timestamp),
+        "record_id": f"8043faacbbd950898164a946faabe72c.{utc_timestamp}",
         "values": {"value": "", "time": utc_timestamp},
         "dimensions": {
             "bk_host_id": 2,
@@ -126,7 +125,7 @@ AGENT_LOSE_DATA_CLEAN2 = {
         3: {
             "anomaly_message": "GSE AGENT \u5931\u8054",
             "anomaly_time": arrow.get(utc_timestamp).format("YYYY-MM-DD HH:mm:ss"),
-            "anomaly_id": "8043faacbbd950898164a946faabe72c.{}.31.54.3".format(utc_timestamp),
+            "anomaly_id": f"8043faacbbd950898164a946faabe72c.{utc_timestamp}.31.54.3",
         }
     },
     "strategy_snapshot_key": "bk_monitor.ee[development].cache.strategy.snapshot.31.1572868513",
@@ -237,7 +236,7 @@ PING_UNREACH_DATA = {
 
 PING_UNREACH_DATA_CLEAN = {
     "data": {
-        "record_id": "990d2ce882caacb380df66462c847d9a.{}".format(utc_timestamp),
+        "record_id": f"990d2ce882caacb380df66462c847d9a.{utc_timestamp}",
         "values": {"value": "", "time": utc_timestamp},
         "dimensions": {
             "bk_host_id": 2,
@@ -253,7 +252,7 @@ PING_UNREACH_DATA_CLEAN = {
         1: {
             "anomaly_message": "Ping不可达",
             "anomaly_time": arrow.get(utc_timestamp).format("YYYY-MM-DD HH:mm:ss"),
-            "anomaly_id": "990d2ce882caacb380df66462c847d9a.{}.35.58.1".format(utc_timestamp),
+            "anomaly_id": f"990d2ce882caacb380df66462c847d9a.{utc_timestamp}.35.58.1",
         }
     },
     "strategy_snapshot_key": "bk_monitor.ee[development].cache.strategy.snapshot.35.1572868637",
@@ -367,7 +366,7 @@ DISK_READ_ONLY_DATA = {
 
 DISK_READ_ONLY_DATA_CLEAN = {
     "data": {
-        "record_id": "990d2ce882caacb380df66462c847d9a.{}".format(utc_timestamp),
+        "record_id": f"990d2ce882caacb380df66462c847d9a.{utc_timestamp}",
         "values": {"value": "", "time": utc_timestamp},
         "dimensions": {
             "bk_host_id": 2,
@@ -386,7 +385,7 @@ DISK_READ_ONLY_DATA_CLEAN = {
         2: {
             "anomaly_message": ("磁盘(tmpfs-tmpfs(\\/sys\\/fs\\/cgroup), dev\\/vdb-ext4(\\/readonly_disk))只读告警"),
             "anomaly_time": arrow.get(utc_timestamp).format("YYYY-MM-DD HH:mm:ss"),
-            "anomaly_id": "990d2ce882caacb380df66462c847d9a.{}.31.55.2".format(utc_timestamp),
+            "anomaly_id": f"990d2ce882caacb380df66462c847d9a.{utc_timestamp}.31.55.2",
         }
     },
     "strategy_snapshot_key": "bk_monitor.ee[development].cache.strategy.snapshot.31.1572868543",
@@ -504,7 +503,7 @@ DISK_FULL_DATA = {
 
 DISK_FULL_DATA_CLEAN = {
     "data": {
-        "record_id": "990d2ce882caacb380df66462c847d9a.{}".format(utc_timestamp),
+        "record_id": f"990d2ce882caacb380df66462c847d9a.{utc_timestamp}",
         "values": {"value": "", "time": utc_timestamp},
         "dimensions": {
             "bk_host_id": 2,
@@ -523,7 +522,7 @@ DISK_FULL_DATA_CLEAN = {
         3: {
             "anomaly_message": "磁盘(/)剩余空间只有7%",
             "anomaly_time": arrow.get(utc_timestamp).format("YYYY-MM-DD HH:mm:ss"),
-            "anomaly_id": "990d2ce882caacb380df66462c847d9a.{}.31.64.3".format(utc_timestamp),
+            "anomaly_id": f"990d2ce882caacb380df66462c847d9a.{utc_timestamp}.31.64.3",
         }
     },
     "strategy_snapshot_key": "bk_monitor.ee[development].cache.strategy.snapshot.31.1573030943",
@@ -631,7 +630,7 @@ COREFILE_DATA = {
 
 COREFILE_DATA_CLEAN = {
     "data": {
-        "record_id": "990d2ce882caacb380df66462c847d9a.{}".format(utc_timestamp),
+        "record_id": f"990d2ce882caacb380df66462c847d9a.{utc_timestamp}",
         "values": {"value": "", "time": utc_timestamp},
         "dimensions": {
             "bk_host_id": 2,
@@ -647,7 +646,7 @@ COREFILE_DATA_CLEAN = {
         1: {
             "anomaly_message": "产生corefile：/data/corefile/core_101041_2019-11-04",
             "anomaly_time": arrow.get(utc_timestamp).format("YYYY-MM-DD HH:mm:ss"),
-            "anomaly_id": "990d2ce882caacb380df66462c847d9a.{}.31.57.1".format(utc_timestamp),
+            "anomaly_id": f"990d2ce882caacb380df66462c847d9a.{utc_timestamp}.31.57.1",
         }
     },
     "strategy_snapshot_key": "bk_monitor.ee[development].cache.strategy.snapshot.31.1572868604",
@@ -775,12 +774,12 @@ GSE_PROCESS_EVENT_DATA_CLEAN = {
             "agent_version": "v1",
         },
         "dimension_fields": ["bk_target_ip", "bk_target_cloud_id", "agent_version"],
-        "record_id": "53125324982b76cb0553900830ee940a.{}".format(1619171),
+        "record_id": f"53125324982b76cb0553900830ee940a.{1619171}",
     },
     "anomaly": {
         2: {
             "anomaly_time": arrow.get(utc_timestamp).format("YYYY-MM-DD HH:mm:ss"),
-            "anomaly_id": "53125324982b76cb0553900830ee940a.{}.31.449.2".format(1619171),
+            "anomaly_id": f"53125324982b76cb0553900830ee940a.{1619171}.31.449.2",
             "anomaly_message": "事件类型: 进程重启成功, 事件内容: check bkmonitorbeat not running, and restart it success",
         }
     },
@@ -788,7 +787,7 @@ GSE_PROCESS_EVENT_DATA_CLEAN = {
 }
 CUSTOM_STR_DATA_CLEAN = {
     "data": {
-        "record_id": "990d2ce882caacb380df66462c847d9a.{}".format(utc_timestamp),
+        "record_id": f"990d2ce882caacb380df66462c847d9a.{utc_timestamp}",
         "values": {"value": "This service is offline", "time": utc_timestamp},
         "dimensions": {
             "bk_host_id": 2,
@@ -804,7 +803,7 @@ CUSTOM_STR_DATA_CLEAN = {
         2: {
             "anomaly_message": "This service is offline",
             "anomaly_time": arrow.get(utc_timestamp).format("YYYY-MM-DD HH:mm:ss"),
-            "anomaly_id": "990d2ce882caacb380df66462c847d9a.{}.31.53.2".format(utc_timestamp),
+            "anomaly_id": f"990d2ce882caacb380df66462c847d9a.{utc_timestamp}.31.53.2",
         }
     },
     "strategy_snapshot_key": "bk_monitor.ee[development].cache.strategy.snapshot.31.1572868423",

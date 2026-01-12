@@ -10,7 +10,7 @@ specific language governing permissions and limitations under the License.
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Optional
 
 from apm_web.profile.diagrams.base import FunctionNode, FunctionTree
 from apm_web.profile.diagrams.tree_converter import TreeConverter
@@ -104,15 +104,15 @@ class DiffMark(Enum):
 
 @dataclass
 class DiffNode:
-    baseline: Optional[FunctionNode]
-    comparison: Optional[FunctionNode]
+    baseline: FunctionNode | None
+    comparison: FunctionNode | None
     mark: DiffMark
 
     parent: Optional["DiffNode"] = None
-    children: List["DiffNode"] = field(default_factory=list)
+    children: list["DiffNode"] = field(default_factory=list)
 
     @property
-    def delta(self) -> Optional[float]:
+    def delta(self) -> float | None:
         """Node delta as percentage."""
         if self.mark == DiffMark.CHANGED:
             if self.comparison.value > self.baseline.value:
@@ -158,6 +158,6 @@ class DiffNode:
 
 @dataclass
 class DiffTree:
-    root: Optional[DiffNode] = None
+    root: DiffNode | None = None
 
-    diff_node_map: Dict[str, DiffNode] = field(default_factory=dict)
+    diff_node_map: dict[str, DiffNode] = field(default_factory=dict)

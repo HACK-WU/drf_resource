@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
 import datetime
 import logging
 import operator
 import re
 import time
-import typing
 from collections import defaultdict
 from copy import deepcopy
 from functools import reduce
 from itertools import chain, product, zip_longest
-from typing import Any, Callable, DefaultDict, Dict, List, Optional, Tuple
+from typing import Any
+from collections.abc import Callable
 
 import arrow
 import pytz
@@ -102,7 +101,7 @@ class GetStrategyListV2Resource(Resource):
         convert_dashboard = serializers.BooleanField(required=False, default=True, label="是否转换仪表盘格式")
 
     @classmethod
-    def filter_by_ip(cls, ips: List[Dict], strategies: QuerySet, bk_biz_id: int = None) -> QuerySet:
+    def filter_by_ip(cls, ips: list[dict], strategies: QuerySet, bk_biz_id: int = None) -> QuerySet:
         """
         查询监控范围包含ip的策略
         """
@@ -131,12 +130,12 @@ class GetStrategyListV2Resource(Resource):
         items = ItemModel.objects.filter(strategy_id__in=strategy_ids)
 
         # 查询主机和拓扑树信息，构造拓扑链
-        hosts: List[Host] = api.cmdb.get_host_by_ip(bk_biz_id=bk_biz_id, ips=ips)
+        hosts: list[Host] = api.cmdb.get_host_by_ip(bk_biz_id=bk_biz_id, ips=ips)
         topo_tree: TopoTree = api.cmdb.get_topo_tree(bk_biz_id=bk_biz_id)
         topo_link = topo_tree.convert_to_topo_link()
 
         ips = set()
-        topo_nodes: typing.Set[Tuple[str, int]] = set()
+        topo_nodes: set[tuple[str, int]] = set()
         bk_module_ids = set()
         bk_set_ids = set()
 
@@ -152,13 +151,13 @@ class GetStrategyListV2Resource(Resource):
 
         # 根据主机集群ID查询集群模板
         if bk_set_ids:
-            sets: List[Set] = api.cmdb.get_set(bk_biz_id=bk_biz_id, bk_set_ids=bk_set_ids)
+            sets: list[Set] = api.cmdb.get_set(bk_biz_id=bk_biz_id, bk_set_ids=bk_set_ids)
             for _set in sets:
                 topo_nodes.add(("SET_TEMPLATE", _set.set_template_id))
 
         # 根据主机模块ID查询服务模板
         if bk_module_ids:
-            modules: List[Module] = api.cmdb.get_module(bk_biz_id=bk_biz_id, bk_module_ids=bk_module_ids)
+            modules: list[Module] = api.cmdb.get_module(bk_biz_id=bk_biz_id, bk_module_ids=bk_module_ids)
             for module in modules:
                 topo_nodes.add(("SERVICE_TEMPLATE", module.service_template_id))
 
@@ -217,7 +216,7 @@ class GetStrategyListV2Resource(Resource):
 
     @classmethod
     def filter_strategy_ids_by_label(
-        cls, filter_dict: dict, filter_strategy_ids_set: set, bk_biz_id: Optional[str] = None
+        cls, filter_dict: dict, filter_strategy_ids_set: set, bk_biz_id: str | None = None
     ):
         """过滤策略标签
 
@@ -257,7 +256,7 @@ class GetStrategyListV2Resource(Resource):
         """
         # 检查是否有数据源过滤条件
         if filter_dict["data_source"]:
-            data_sources: List[Tuple] = []
+            data_sources: list[tuple] = []
             # 遍历过滤条件中的每个数据源
             for data_source in filter_dict["data_source"]:
                 # 遍历数据类别以查找匹配的数据源类型
@@ -303,7 +302,7 @@ class GetStrategyListV2Resource(Resource):
 
     @classmethod
     def filter_strategy_ids_by_status(
-        cls, filter_dict: dict, filter_strategy_ids_set: set, bk_biz_id: Optional[str] = None
+        cls, filter_dict: dict, filter_strategy_ids_set: set, bk_biz_id: str | None = None
     ):
         """策略状态过滤"""
         if filter_dict["strategy_status"]:
@@ -344,7 +343,7 @@ class GetStrategyListV2Resource(Resource):
 
     @classmethod
     def filter_strategy_ids_by_event_group(
-        cls, filter_dict: dict, filter_strategy_ids_set: set, bk_biz_id: Optional[str] = None
+        cls, filter_dict: dict, filter_strategy_ids_set: set, bk_biz_id: str | None = None
     ):
         """过滤自定义事件组ID
 
@@ -394,7 +393,7 @@ class GetStrategyListV2Resource(Resource):
 
     @classmethod
     def filter_strategy_ids_by_series_group(
-        cls, filter_dict: dict, filter_strategy_ids_set: set, bk_biz_id: Optional[str] = None
+        cls, filter_dict: dict, filter_strategy_ids_set: set, bk_biz_id: str | None = None
     ):
         """过滤自定义指标ID
 
@@ -441,7 +440,7 @@ class GetStrategyListV2Resource(Resource):
 
     @classmethod
     def filter_strategy_ids_by_plugin_id(
-        cls, filter_dict: dict, filter_strategy_ids_set: set, bk_biz_id: Optional[str] = None
+        cls, filter_dict: dict, filter_strategy_ids_set: set, bk_biz_id: str | None = None
     ):
         # 无业务id，不支持搜索(RequestSerializer 明确bk_biz_id 必填)
         if not bk_biz_id:
@@ -518,7 +517,7 @@ class GetStrategyListV2Resource(Resource):
             filter_strategy_ids_set.intersection_update(set(level_strategy_ids))
 
     @classmethod
-    def filter_by_conditions(cls, conditions: List[Dict], strategies: QuerySet, bk_biz_id: int = None) -> QuerySet:
+    def filter_by_conditions(cls, conditions: list[dict], strategies: QuerySet, bk_biz_id: int = None) -> QuerySet:
         """
         按条件进行过滤
         conditions:[
@@ -596,7 +595,7 @@ class GetStrategyListV2Resource(Resource):
         filter_strategy_ids_set = set(strategies.values_list("id", flat=True).distinct())
 
         # 定义过滤方法列表，每个元组包含一个过滤方法和其参数
-        filter_methods: List[Tuple] = [
+        filter_methods: list[tuple] = [
             (cls.filter_strategy_ids_by_id, (filter_dict, filter_strategy_ids_set)),
             (cls.filter_strategy_ids_by_label, (filter_dict, filter_strategy_ids_set, bk_biz_id)),
             (cls.filter_strategy_ids_by_data_source, (filter_dict, filter_strategy_ids_set)),
@@ -827,7 +826,7 @@ class GetStrategyListV2Resource(Resource):
         )
 
     @classmethod
-    def filter_by_status(cls, status: str, filter_strategy_ids: List = None, bk_biz_id: int = None):
+    def filter_by_status(cls, status: str, filter_strategy_ids: list = None, bk_biz_id: int = None):
         """
         根据策略的状态过滤策略ID。
 
@@ -920,7 +919,7 @@ class GetStrategyListV2Resource(Resource):
         return strategy_ids
 
     @staticmethod
-    def get_shield_info(filter_strategy_ids: List = None, bk_biz_id: int = None):
+    def get_shield_info(filter_strategy_ids: list = None, bk_biz_id: int = None):
         shield_manager = ShieldDetectManager(bk_biz_id, "strategy")
         strategy_shield_info = defaultdict(dict)
         for strategy_id in filter_strategy_ids:
@@ -933,7 +932,7 @@ class GetStrategyListV2Resource(Resource):
         return strategy_shield_info
 
     @staticmethod
-    def get_user_group_list(strategy_ids: List[int], bk_biz_id: int):
+    def get_user_group_list(strategy_ids: list[int], bk_biz_id: int):
         """
         按告警处理组统计策略数量
         """
@@ -950,7 +949,7 @@ class GetStrategyListV2Resource(Resource):
         return user_group_list
 
     @staticmethod
-    def get_action_config_list(strategy_ids: List[int], bk_biz_id: int):
+    def get_action_config_list(strategy_ids: list[int], bk_biz_id: int):
         """
         按告警处理组统计策略数量
 
@@ -999,7 +998,7 @@ class GetStrategyListV2Resource(Resource):
         # 返回告警处理组及其关联策略数量的列表
         return action_config_list
 
-    def get_data_source_list(self, strategy_ids: List[int]):
+    def get_data_source_list(self, strategy_ids: list[int]):
         """
         按数据源统计策略数量
 
@@ -1043,7 +1042,7 @@ class GetStrategyListV2Resource(Resource):
         # 返回包含所有数据源及其策略数量的列表
         return data_source_list
 
-    def get_strategy_label_list(self, strategy_ids: List[int], bk_biz_id):
+    def get_strategy_label_list(self, strategy_ids: list[int], bk_biz_id):
         """
         按策略标签统计策略数量
 
@@ -1109,7 +1108,7 @@ class GetStrategyListV2Resource(Resource):
                 )
         return scenario_list
 
-    def get_strategy_status_list(self, strategy_ids: List[int], bk_biz_id: int):
+    def get_strategy_status_list(self, strategy_ids: list[int], bk_biz_id: int):
         """
         按策略状态统计策略数量
         """
@@ -1133,7 +1132,7 @@ class GetStrategyListV2Resource(Resource):
             status["count"] = len(data)
         return status_list
 
-    def get_alert_level_list(self, strategy_ids: List[int]):
+    def get_alert_level_list(self, strategy_ids: list[int]):
         """
         按告警级别统计策略数量
 
@@ -1169,7 +1168,7 @@ class GetStrategyListV2Resource(Resource):
         # 返回告警级别列表
         return alert_level_list
 
-    def get_invalid_type_list(self, strategy_ids: List[int]):
+    def get_invalid_type_list(self, strategy_ids: list[int]):
         """
         按策略失效类型统计策略数量
         """
@@ -1190,7 +1189,7 @@ class GetStrategyListV2Resource(Resource):
             )
         return invalid_type_list
 
-    def get_algorithm_type_list(self, strategy_ids: List[int]):
+    def get_algorithm_type_list(self, strategy_ids: list[int]):
         """
         按算法类型统计策略数量
         """
@@ -1213,7 +1212,7 @@ class GetStrategyListV2Resource(Resource):
             )
         return algorithm_type_list
 
-    def fill_metric_info(self, bk_biz_id: int, strategies: List[Dict]):
+    def fill_metric_info(self, bk_biz_id: int, strategies: list[dict]):
         """
         补充策略相关指标信息
         """
@@ -1327,7 +1326,7 @@ class GetStrategyListV2Resource(Resource):
                         or query_config.get("result_table_id", "")
                     )
 
-    def fill_shield_info(self, bk_biz_id, strategies: List[Dict], strategy_shield_info: Dict = None):
+    def fill_shield_info(self, bk_biz_id, strategies: list[dict], strategy_shield_info: dict = None):
         """
         补充策略屏蔽状态
         """
@@ -1337,7 +1336,7 @@ class GetStrategyListV2Resource(Resource):
         for strategy in strategies:
             strategy["shield_info"] = strategy_shield_info.get(strategy["id"])
 
-    def fill_allow_target(self, strategies: List[Dict]):
+    def fill_allow_target(self, strategies: list[dict]):
         """
         补充是否允许增删目标
         """
@@ -1608,7 +1607,7 @@ class GetMetricListV2Resource(Resource):
         page_size = serializers.IntegerField(required=False, label="每页数目")
 
     @classmethod
-    def filter_by_conditions(cls, metrics: QuerySet, params: Dict) -> QuerySet:
+    def filter_by_conditions(cls, metrics: QuerySet, params: dict) -> QuerySet:
         """
         按查询条件过滤指标
         """
@@ -1726,7 +1725,7 @@ class GetMetricListV2Resource(Resource):
         return metrics
 
     @classmethod
-    def page_filter(cls, metrics: QuerySet, params) -> Tuple[QuerySet, int]:
+    def page_filter(cls, metrics: QuerySet, params) -> tuple[QuerySet, int]:
         """
         分页过滤
         """
@@ -1929,7 +1928,7 @@ class GetMetricListV2Resource(Resource):
         return scenario_list
 
     @staticmethod
-    def get_metric_remarks(data_source_label: str, data_type_label: str, metric_field) -> List:
+    def get_metric_remarks(data_source_label: str, data_type_label: str, metric_field) -> list:
         """
         指标备注
         """
@@ -1964,7 +1963,7 @@ class GetMetricListV2Resource(Resource):
         return metric
 
     @classmethod
-    def get_promql_format_metric(cls, metric: Dict) -> str:
+    def get_promql_format_metric(cls, metric: dict) -> str:
         """
         获取promql风格的指标名
         """
@@ -1983,7 +1982,7 @@ class GetMetricListV2Resource(Resource):
         """
         指标数据
         """
-        metric_list: List[Dict] = []
+        metric_list: list[dict] = []
         for metric in metrics:
             metric: MetricListCache
 
@@ -2344,7 +2343,7 @@ class UpdatePartialStrategyV2Resource(Resource):
         return src
 
     @staticmethod
-    def update_labels(strategy: Strategy, labels: Dict):
+    def update_labels(strategy: Strategy, labels: dict):
         """
         更新策略标签，追加或者替换标签
         :param strategy: 需要更新标签的策略对象
@@ -2368,7 +2367,7 @@ class UpdatePartialStrategyV2Resource(Resource):
                                 }
                                 此时，现有标签将被新标签 "label2", "label3" 完全替换
         """
-        old_labels: List = strategy.labels
+        old_labels: list = strategy.labels
         # 1、如果有传append_keys，则表示要将新的标签追加到原有策略的标签中
         if labels.get("append_keys"):
             if "labels" in labels["append_keys"]:
@@ -2396,7 +2395,7 @@ class UpdatePartialStrategyV2Resource(Resource):
         return StrategyModel, ["is_enabled"], [strategy.instance]
 
     @staticmethod
-    def update_notice_group_list(strategy: Strategy, notice_group_list: List[int]):
+    def update_notice_group_list(strategy: Strategy, notice_group_list: list[int]):
         """
         更新告警组配置
         """
@@ -2408,7 +2407,7 @@ class UpdatePartialStrategyV2Resource(Resource):
         return StrategyActionConfigRelation, ["user_groups"], [action.instance, strategy.notice.instance]
 
     @staticmethod
-    def update_trigger_config(strategy: Strategy, trigger_config: Dict):
+    def update_trigger_config(strategy: Strategy, trigger_config: dict):
         """
         更新触发条件
         """
@@ -2440,7 +2439,7 @@ class UpdatePartialStrategyV2Resource(Resource):
         return StrategyActionConfigRelation, ["signal"], [strategy.notice.instance]
 
     @staticmethod
-    def update_recovery_config(strategy: Strategy, recovery_config: Dict):
+    def update_recovery_config(strategy: Strategy, recovery_config: dict):
         """
         更新告警恢复通知
         """
@@ -2450,7 +2449,7 @@ class UpdatePartialStrategyV2Resource(Resource):
         return DetectModel, ["recovery_config"], [detect.instance for detect in strategy.detects]
 
     @staticmethod
-    def update_target(strategy: Strategy, target: List[List[Dict]]):
+    def update_target(strategy: Strategy, target: list[list[dict]]):
         """
         更新监控目标
         """
@@ -2463,7 +2462,7 @@ class UpdatePartialStrategyV2Resource(Resource):
         return ItemModel, ["target"], [item.instance for item in strategy.items]
 
     @staticmethod
-    def update_algorithms(strategy: Strategy, algorithms: List[dict]):
+    def update_algorithms(strategy: Strategy, algorithms: list[dict]):
         """更新检测算法。"""
         for item in strategy.items:
             item.algorithms = [Algorithm(strategy.id, item.id, **data) for data in algorithms]
@@ -2482,7 +2481,7 @@ class UpdatePartialStrategyV2Resource(Resource):
         return StrategyActionConfigRelation, ["config"], [strategy.notice.instance]
 
     @staticmethod
-    def update_no_data_config(strategy: Strategy, no_data_config: Dict):
+    def update_no_data_config(strategy: Strategy, no_data_config: dict):
         for item in strategy.items:
             UpdatePartialStrategyV2Resource.update_dict_recursive(item.no_data_config, no_data_config)
 
@@ -2491,9 +2490,9 @@ class UpdatePartialStrategyV2Resource(Resource):
     @staticmethod
     def update_notice(
         strategy: Strategy,
-        notice: Dict,
-        relations: Dict[int, List[StrategyActionConfigRelation]],
-        action_configs: Dict[int, ActionConfig],
+        notice: dict,
+        relations: dict[int, list[StrategyActionConfigRelation]],
+        action_configs: dict[int, ActionConfig],
     ):
         """
         更新告警通知
@@ -2553,7 +2552,7 @@ class UpdatePartialStrategyV2Resource(Resource):
         )
 
     @staticmethod
-    def update_actions(strategy: Strategy, actions: List[Dict]):
+    def update_actions(strategy: Strategy, actions: list[dict]):
         new_actions = []
         for action in actions:
             slz = ActionRelation.Serializer(data=action)
@@ -2575,9 +2574,9 @@ class UpdatePartialStrategyV2Resource(Resource):
         return None, [], []
 
     @staticmethod
-    def get_relations(strategy_ids: List[int]):
+    def get_relations(strategy_ids: list[int]):
         action_config_ids = set()
-        relations: Dict[int, List[StrategyActionConfigRelation]] = defaultdict(list)
+        relations: dict[int, list[StrategyActionConfigRelation]] = defaultdict(list)
         related_query = StrategyActionConfigRelation.objects.filter(
             strategy_id__in=strategy_ids, relate_type=StrategyActionConfigRelation.RelateType.NOTICE
         )
@@ -2587,19 +2586,19 @@ class UpdatePartialStrategyV2Resource(Resource):
         return list(action_config_ids), relations
 
     @staticmethod
-    def get_action_configs(action_config_ids: List[int]):
+    def get_action_configs(action_config_ids: list[int]):
         action_query = ActionConfig.objects.filter(id__in=action_config_ids)
-        action_configs: Dict[int, ActionConfig] = {}
+        action_configs: dict[int, ActionConfig] = {}
         for action_config in action_query:
             action_configs[action_config.id] = action_config
         return action_configs
 
     @staticmethod
     def process_extra_data(
-        extra_create_or_update_datas: Dict[str, List[Dict[str, any]]],
+        extra_create_or_update_datas: dict[str, list[dict[str, any]]],
         key: str,
-        updates_data: DefaultDict[str, Dict[str, any]],
-        create_datas: DefaultDict[str, Dict[str, any]],
+        updates_data: defaultdict[str, dict[str, any]],
+        create_datas: defaultdict[str, dict[str, any]],
     ):
         extra_update_datas = extra_create_or_update_datas.get("update_data", [])
         extra_create_datas = extra_create_or_update_datas.get("create_data", [])
@@ -2623,7 +2622,7 @@ class UpdatePartialStrategyV2Resource(Resource):
 
     def perform_request(self, params):
         bk_biz_id = params["bk_biz_id"]
-        config: Dict = params["edit_data"]
+        config: dict = params["edit_data"]
         username = get_global_user()
         strategy_ids = params["ids"]
         strategies = StrategyModel.objects.filter(bk_biz_id=bk_biz_id, id__in=strategy_ids)
@@ -2785,7 +2784,7 @@ class GetTargetDetailWithCache(CacheResource):
 
         return self.get_target_detail(bk_biz_id, target)
 
-    def set_mapping(self, mapping: Dict) -> None:
+    def set_mapping(self, mapping: dict) -> None:
         """
         设置策略和监控目标的映射关系
         格式:{ strategy_id:(bk_biz_id,target) }
@@ -2804,7 +2803,7 @@ class GetTargetDetailWithCache(CacheResource):
         return False
 
     @classmethod
-    def get_target_detail(cls, bk_biz_id: int, target: List[List[Dict]]):
+    def get_target_detail(cls, bk_biz_id: int, target: list[list[dict]]):
         """
         target : [
                     [
@@ -3054,7 +3053,7 @@ class QueryConfigToPromql(Resource):
             return attrs
 
     @classmethod
-    def check(cls, unify_query_config: Dict, data_source_label: str = "bkmonitor") -> None:
+    def check(cls, unify_query_config: dict, data_source_label: str = "bkmonitor") -> None:
         """
         配置预处理，判断配置是否能够转换PromQL，调整部分配置以适应配置转换
         检测规则:
@@ -3125,7 +3124,7 @@ class PromqlToQueryConfig(Resource):
     # 支持聚合方法
     aggr_ops = {"sum", "avg", "mean", "max", "min", "count"}
     # 条件算符转换
-    condition_op_mapping: Dict[str, str] = {"req": "reg", "nreq": "nreg", "eq": "eq", "ne": "neq"}
+    condition_op_mapping: dict[str, str] = {"req": "reg", "nreq": "nreg", "eq": "eq", "ne": "neq"}
     # 指标ID正则
     re_metric_id = re.compile(r"([A-Za-z0-9_]+(:[A-Za-z0-9_]+)+)")
     # 内置k8s维度替换
@@ -3150,7 +3149,7 @@ class PromqlToQueryConfig(Resource):
         return seconds
 
     @classmethod
-    def check(cls, unify_query_config: Dict):
+    def check(cls, unify_query_config: dict):
         """
         配置预处理，判断配置是否符合预期
         检测规则:
@@ -3200,7 +3199,7 @@ class PromqlToQueryConfig(Resource):
         return unify_query_config
 
     @classmethod
-    def convert_to_query_config(cls, unify_query_config: Dict, query_config_format="strategy"):
+    def convert_to_query_config(cls, unify_query_config: dict, query_config_format="strategy"):
         """
         转换为监控查询参数
         """

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -18,7 +17,7 @@ from bkmonitor.models.metric_list_cache import MetricListCache
 from .data import BASE_METRICS, UPTIMECHECK_METRICS
 
 
-class TestGetMetricListResource(object):
+class TestGetMetricListResource:
     def test_get_label_metric_list(self, mocker):
         # 获取指定标签指标
         mocker.patch.object(QuerySet, "values", return_value=BASE_METRICS)

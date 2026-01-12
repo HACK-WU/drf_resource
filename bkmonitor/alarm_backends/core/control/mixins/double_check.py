@@ -9,7 +9,7 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, ClassVar
 
 from django.utils.module_loading import import_string
 from typing_extensions import Protocol
@@ -37,16 +37,16 @@ class DoubleCheckStrategy(Protocol):
     # 策略 ID 限定，若策略 ID 为空，则意味着不进行灰度匹配
     # Q: 为什么不和其他限定一样，使用 ClassVar？
     # A: 因为策略ID限定可能从 DB 配置中获取，ClassVar 进程唯一，无法动态修改
-    match_strategy_ids: List[int]
+    match_strategy_ids: list[int]
 
     # scope 限定: [(source, type),]，当不需要限定时，请手动指定为 []
-    data_scopes: ClassVar[List[Tuple[str, str]]]
+    data_scopes: ClassVar[list[tuple[str, str]]]
 
     # 聚合方法限定，不需要限定时为 None
-    match_agg_method: ClassVar[Optional[str]]
+    match_agg_method: ClassVar[str | None]
 
     # 检测算法匹配序列，越靠前的优先级越高
-    match_algorithms_type_sequence: ClassVar[List[str]]
+    match_algorithms_type_sequence: ClassVar[list[str]]
 
     def _check_data_scopes(self) -> bool:
         """检查数据范围"""
@@ -86,7 +86,7 @@ class DoubleCheckStrategy(Protocol):
     def get_best_match_algorithm(self) -> str:
         """获取最佳匹配算法"""
 
-        best_index: Optional[int] = None
+        best_index: int | None = None
         for type_ in self.item.algorithm_types:
             try:
                 index = self.match_algorithms_type_sequence.index(type_)
@@ -145,17 +145,17 @@ class DoubleCheckStrategy(Protocol):
 
         return self.check_extra()
 
-    def double_check(self, outputs: List[dict]):
+    def double_check(self, outputs: list[dict]):
         """[NotImplemented]二次确认
         当检测存在异常状况时返回 False，正常返回 True
         """
         raise NotImplementedError
 
 
-_strategies: Dict[str, Type[DoubleCheckStrategy]] = {}
+_strategies: dict[str, type[DoubleCheckStrategy]] = {}
 
 
-def register_double_check_strategy(strategy: Type[DoubleCheckStrategy]):
+def register_double_check_strategy(strategy: type[DoubleCheckStrategy]):
     """注册二次确认策略"""
     if strategy.name in _strategies:
         logger.debug("DoubleCheckStrategy<%s> already registered", strategy.name)
@@ -171,7 +171,7 @@ def load_all_strategies():
         register_double_check_strategy(s)
 
 
-def pick_double_check_strategy(item: "Item") -> Optional[DoubleCheckStrategy]:
+def pick_double_check_strategy(item: "Item") -> DoubleCheckStrategy | None:
     """拣选二次确认策略"""
     # TODO: 当前仅返回第一个匹配成功的策略，后续不满足的场景按需调整
     for _, strategy_cls in _strategies.items():
@@ -184,7 +184,7 @@ def pick_double_check_strategy(item: "Item") -> Optional[DoubleCheckStrategy]:
 
 
 class DoubleCheckMixin:
-    def double_check(self: "Item", outputs: List[dict]):
+    def double_check(self: "Item", outputs: list[dict]):
         """二次确认"""
         load_all_strategies()
         strategy = pick_double_check_strategy(item=self)

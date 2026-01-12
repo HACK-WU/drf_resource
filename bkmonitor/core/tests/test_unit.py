@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 from core.unit import load_unit
 
 
-class TestI18n(object):
+class TestI18n:
     def test_unit_convert(self):
         unit = load_unit("s")
         assert unit.convert(1, target_suffix="h", current_suffix="d") == 24

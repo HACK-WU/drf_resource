@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,7 @@ specific language governing permissions and limitations under the License.
 
 from collections import namedtuple
 
-import mock
+from unittest import mock
 
 from alarm_backends.service.detect import DataPoint
 from bkmonitor.data_source import BkMonitorTimeSeriesDataSource
@@ -20,7 +19,7 @@ from bkmonitor.data_source.unify_query.query import UnifyQuery
 Strategy = namedtuple("Strategy", ["id", "scenario"])
 
 
-class Item(object):
+class Item:
     def __init__(self, id, strategy, unit, data_sources, metric_ids, query_configs=None, query=None, name="avg(测试指标)"):
         self.id = id
         self.strategy = strategy

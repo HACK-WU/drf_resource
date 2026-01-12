@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import json
 
-import mock
+from unittest import mock
 from django.core.cache import caches
 from django.test import TestCase
 
@@ -483,7 +482,7 @@ class TestTopoManager(TestCMDBBaseTestCase):
         keys = list(TopoManager.keys())
         expected_keys = set()
         for node in TOPO_TREE.convert_to_flat_nodes():
-            expected_keys.add("{}|{}".format(node.bk_obj_id, node.bk_inst_id))
+            expected_keys.add(f"{node.bk_obj_id}|{node.bk_inst_id}")
         self.assertSetEqual(set(keys), set(expected_keys))
 
     def test_get(self):

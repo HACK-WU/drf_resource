@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 import time
-from typing import List
 
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch.helpers import BulkIndexError
@@ -117,7 +115,7 @@ class ActionInstanceDocument(BaseDocument):
         try:
             ts = cls.parse_timestamp_by_id(id)
         except Exception:
-            raise ValueError("invalid action_id: {}".format(id))
+            raise ValueError(f"invalid action_id: {id}")
 
         hits = cls.search(start_time=ts, end_time=ts).filter("term", id=id).execute().hits
         if not hits:
@@ -125,7 +123,7 @@ class ActionInstanceDocument(BaseDocument):
         return cls(**hits[0].to_dict())
 
     @classmethod
-    def mget(cls, ids, fields=None) -> List["ActionInstanceDocument"]:
+    def mget(cls, ids, fields=None) -> list["ActionInstanceDocument"]:
         """
         获取多条处理记录
         """
@@ -154,7 +152,7 @@ class ActionInstanceDocument(BaseDocument):
     @classmethod
     def mget_by_alert(
         cls, alert_ids, fields=None, exclude=None, include=None, ordering=None
-    ) -> List["ActionInstanceDocument"]:
+    ) -> list["ActionInstanceDocument"]:
         search = cls.compile_search(alert_ids, end_time=int(time.time())).filter("terms", alert_id=alert_ids)
         if exclude:
             for key, value in exclude.items():

@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 from ..base import ComponentAPI
 
 
-class CollectionsBkPaas(object):
+class CollectionsBkPaas:
     """Collections of BK_PAAS APIS"""
 
     def __init__(self, client):
@@ -12,5 +11,5 @@ class CollectionsBkPaas(object):
             client=self.client,
             method='GET',
             path='/api/c/compapi{bk_api_ver}/bk_paas/get_app_info/',
-            description=u'获取应用信息',
+            description='获取应用信息',
         )

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -49,7 +48,7 @@ def get_unify_query_url(space_uid: str):
         for key, value in match_keys.items():
             match_values = routing_rule.get(key)
             if match_values:
-                if isinstance(match_values, (int, str)):
+                if isinstance(match_values, int | str):
                     # 匹配条件是数字或者字符串，转换成列表
                     match_values = [str(match_values)]
                 elif not isinstance(match_values, list):
@@ -303,7 +302,7 @@ class GetKubernetesRelationResource(UnifyQueryAPIResource):
         source_info_list = serializers.ListField(child=serializers.DictField(), required=True)
 
     def validate_request_data(self, request_data):
-        request_data = super(GetKubernetesRelationResource, self).validate_request_data(request_data)
+        request_data = super().validate_request_data(request_data)
         query_list = []
         for source_info in request_data.pop("source_info_list", []):
             data_timestamp = source_info.pop("data_timestamp", int(time.time()))

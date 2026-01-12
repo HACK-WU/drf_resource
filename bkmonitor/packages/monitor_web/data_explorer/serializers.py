@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import collections
-from typing import Dict
 
 from django.utils.translation import gettext as _
 from rest_framework import serializers
@@ -233,7 +231,7 @@ class BulkUpdateFavoriteSerializer(BaseFavoriteGroupListSerializer):
             raise ValidationError(_("收藏组({})不存在").format(",".join([str(group_id) for group_id in not_exists_group_id])))
 
     @classmethod
-    def check_duplicate_name(cls, attrs: Dict):
+    def check_duplicate_name(cls, attrs: dict):
         """
         重名检查
         """

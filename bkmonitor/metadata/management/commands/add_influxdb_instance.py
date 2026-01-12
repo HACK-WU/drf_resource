@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import json
-from typing import List
 
 from django.core.management.base import BaseCommand
 
@@ -54,7 +52,7 @@ class Command(BaseCommand):
         parser.add_argument("--influxdb_hosts", type=json.loads, help="influxdb 实例集群的主机信息，注意为json格式化")
         parser.add_argument("--is_readable", type=bool, default=True, help="是否可读")
 
-    def refine_hosts(self, hosts_path: str, hosts: List) -> List:
+    def refine_hosts(self, hosts_path: str, hosts: list) -> list:
         """获取主机信息"""
         if hosts_path:
             with open(hosts_path) as f:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -18,7 +17,7 @@ import arrow
 from bkmonitor.utils import time_tools
 
 
-class TimeMatch(object):
+class TimeMatch:
     """
     时间屏蔽/订阅基类
     """
@@ -77,11 +76,11 @@ class TimeMatch(object):
 
         today_str = current_time.strftime("%Y-%m-%d")
         if start_time <= end_time or end_time > now_time:
-            end_time = time_tools.str2datetime(end_time.strftime("{} %H:%M:%S".format(today_str)))
+            end_time = time_tools.str2datetime(end_time.strftime(f"{today_str} %H:%M:%S"))
         elif start_time <= now_time:
             # 需要跨天计算
             tomorrow_str = (current_time + timedelta(days=1)).strftime("%Y-%m-%d")
-            end_time = time_tools.str2datetime(end_time.strftime("{} %H:%M:%S".format(tomorrow_str)))
+            end_time = time_tools.str2datetime(end_time.strftime(f"{tomorrow_str} %H:%M:%S"))
         return end_time.timestamp() - current_time.timestamp
 
     @staticmethod
@@ -112,7 +111,7 @@ class TimeMatchByDay(TimeMatch):
     """
 
     def __init__(self, cycle, begin_datetime=None, end_datetime=None):
-        super(TimeMatchByDay, self).__init__(cycle, begin_datetime, end_datetime)
+        super().__init__(cycle, begin_datetime, end_datetime)
         self.week_list = self.cycle.get("week_list")
 
     def is_match(self, data_time):
@@ -143,7 +142,7 @@ class TimeMatchByWeek(TimeMatch):
     """
 
     def __init__(self, cycle, begin_datetime=None, end_datetime=None):
-        super(TimeMatchByWeek, self).__init__(cycle, begin_datetime, end_datetime)
+        super().__init__(cycle, begin_datetime, end_datetime)
         self.week_list = self.cycle.get("week_list")
 
     def is_match(self, data_time):
@@ -167,7 +166,7 @@ class TimeMatchByMonth(TimeMatch):
     """
 
     def __init__(self, cycle, begin_datetime=None, end_datetime=None):
-        super(TimeMatchByMonth, self).__init__(cycle, begin_datetime, end_datetime)
+        super().__init__(cycle, begin_datetime, end_datetime)
         self.day_list = self.cycle.get("day_list")
 
     def is_match(self, data_time):

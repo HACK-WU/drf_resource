@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云PaaS平台社区版 (BlueKing PaaS Community
 Edition) available.
@@ -29,7 +28,7 @@ class EmptyEndEvent(Element):
 class ExecutableEndEvent(Element):
     def __init__(self, type, **kwargs):
         self._type = type
-        super(ExecutableEndEvent, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def type(self):
         return self._type

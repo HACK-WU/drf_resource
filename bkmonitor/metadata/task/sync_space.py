@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ import json
 import logging
 import time
 from datetime import datetime
-from typing import Dict, List, Optional, Set
 
 from django.conf import settings
 from django.db.models import Q
@@ -577,10 +575,10 @@ def refresh_bkci_space_name():
 
 
 def push_and_publish_space_router(
-    space_type: Optional[str] = None,
-    space_id: Optional[str] = None,
-    space_id_list: Optional[List[str]] = None,
-    is_publish: Optional[bool] = True,
+    space_type: str | None = None,
+    space_id: str | None = None,
+    space_id_list: list[str] | None = None,
+    is_publish: bool | None = True,
 ):
     """推送数据和通知"""
     from metadata.models.space.constants import SPACE_TO_RESULT_TABLE_CHANNEL
@@ -635,8 +633,8 @@ def push_and_publish_space_router_task():
 def delete_and_create_paas_space_data_id(
     space_type: str,
     space_id: str,
-    need_delete_data_ids: Set,
-    need_add_data_ids: Set,
+    need_delete_data_ids: set,
+    need_add_data_ids: set,
 ):
     if need_delete_data_ids:
         models.SpaceDataSource.objects.filter(
@@ -654,7 +652,7 @@ def delete_and_create_paas_space_data_id(
     models.SpaceDataSource.objects.bulk_create(bulk_create_records, batch_size=BULK_CREATE_BATCH_SIZE)
 
 
-def authorize_paas_space_cluster_data_source(space_cluster: Dict):
+def authorize_paas_space_cluster_data_source(space_cluster: dict):
     """重新针对使用的集群内置指标数据源授权
 
     NOTE: 仅针对集群的进行授权处理
@@ -730,7 +728,7 @@ def authorize_paas_space_cluster_data_source(space_cluster: Dict):
             )
 
 
-def create_and_update_paas_space_resource(space_cluster_namespaces: Dict):
+def create_and_update_paas_space_resource(space_cluster_namespaces: dict):
     """创建或更新空间绑定的资源"""
     space_type = SpaceTypes.BKSAAS.value
     # 针对资源的集群进行处理

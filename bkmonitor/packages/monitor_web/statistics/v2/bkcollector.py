@@ -9,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 from collections import defaultdict
-from typing import List, Optional, Tuple, Union
 
 import arrow
 from django.utils.functional import cached_property
@@ -27,7 +26,7 @@ class BkCollectorCollector(BaseCollector):
 
     DEFAULT_QUERY_PERIOD = 600
 
-    def _query(self, table: str, group_by: Optional[List[str]] = None) -> dict:
+    def _query(self, table: str, group_by: list[str] | None = None) -> dict:
         group_by = group_by or ["bk_biz_id", "bk_cloud_id", "bk_host_innerip"]
 
         alias = "a"
@@ -93,7 +92,7 @@ class BkCollectorCollector(BaseCollector):
 
         return data_id_name_map
 
-    def get_data_names(self, data_id: Union[str, int]) -> Tuple[str, str]:
+    def get_data_names(self, data_id: str | int) -> tuple[str, str]:
         return self.custom_report_data_id_map.get(int(data_id), (str(data_id), str(data_id)))
 
     @register(labelnames=("bk_biz_id", "bk_biz_name", "bk_cloud_id", "bk_host_innerip"))

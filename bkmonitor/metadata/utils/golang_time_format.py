@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -38,13 +37,13 @@ def trans_time_format(date_foramt):
 
     final_result = ""
     if final_hours:
-        final_result = "{}h".format(final_hours)
+        final_result = f"{final_hours}h"
 
     # 如果hour已经有内容，或者min不为空，都需要增加min的内容
     if final_result or min:
-        final_result = "{}{}m".format(final_result, min)
+        final_result = f"{final_result}{min}m"
 
     # sec是无论如何都需要添加的
-    final_result = "{}{}s".format(final_result, sec)
+    final_result = f"{final_result}{sec}s"
 
     return final_result

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ import calendar
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import List
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -197,7 +195,7 @@ def to_document(action_instance: ActionInstance, current_time, alerts=None):
 
     converge_info = getattr(action_instance, "converge_info", {})
     action_info = dict(
-        id="{}{}".format(create_timestamp, action_instance.id),
+        id=f"{create_timestamp}{action_instance.id}",
         raw_id=action_instance.id,
         create_time=create_timestamp,
         update_time=int(action_instance.update_time.timestamp()),
@@ -248,7 +246,7 @@ def to_document(action_instance: ActionInstance, current_time, alerts=None):
     return ActionInstanceDocument(**action_info)
 
 
-def get_target_info_from_ctx(action_instance: ActionInstance, alerts: List[AlertDocument]):
+def get_target_info_from_ctx(action_instance: ActionInstance, alerts: list[AlertDocument]):
     """获取目标信息"""
     if action_instance.outputs.get("target_info"):
         return action_instance.outputs["target_info"]

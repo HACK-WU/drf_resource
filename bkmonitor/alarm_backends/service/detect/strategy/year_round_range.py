@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +15,6 @@ specific language governing permissions and limitations under the License.
 
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from six.moves import range
 
 from alarm_backends.constants import CONST_ONE_DAY
 from alarm_backends.service.detect.strategy import ExprDetectAlgorithms
@@ -33,9 +31,9 @@ class YearRoundRange(AdvancedYearRound):
         # 任意一天满足即可, i从0开始, 表达式history_points也从0开始，索引[0]表示第一天
         for i in range(0, self.validated_config["days"]):
             yield ExprDetectAlgorithms(
-                "abs(unit_convert_min(value, unit)) {comp} "
-                "(abs(unit_convert_min(history_points[{day}].value, unit)) "
-                "* ratio + unit_convert_min(shock, unit, algorithm_unit))".format(day=i, comp=comp),
+                f"abs(unit_convert_min(value, unit)) {comp} "
+                f"(abs(unit_convert_min(history_points[{i}].value, unit)) "
+                "* ratio + unit_convert_min(shock, unit, algorithm_unit))",
                 # 这里用字符串的format渲染django template，因此变量双花括号变成四个花括号
                 _(
                     "{} {{{{method_desc}}}} {}天前的同一时刻绝对值"

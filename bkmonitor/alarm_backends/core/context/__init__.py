@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -42,7 +41,7 @@ from drf_resource.utils.common import count_md5
 logger = logging.getLogger("fta_action.run")
 
 
-class ActionContext(object):
+class ActionContext:
     """
     处理套餐上下文
     """
@@ -103,8 +102,8 @@ class ActionContext(object):
     def __init__(
         self,
         action,
-        related_actions: List[ActionInstance] = None,
-        alerts: List[AlertDocument] = None,
+        related_actions: list[ActionInstance] = None,
+        alerts: list[AlertDocument] = None,
         use_alert_snap=False,
         notice_way=None,
         dynamic_kwargs=None,
@@ -285,7 +284,7 @@ class ActionContext(object):
         return self.ALERT_LEVEL_COLOR.get(self.alert_level, "#000000")
 
     @cached_property
-    def alerts(self) -> List[AlertDocument]:
+    def alerts(self) -> list[AlertDocument]:
         if self.use_alert_snap and self.related_alerts:
             # 如果强制使用alert缓存并且存在缓存，直接返回
             return self.related_alerts
@@ -530,7 +529,7 @@ class ActionContext(object):
                 action_id = self.action.id if self.action else "NULL"
                 alert_id = self.alert.id if self.alert else "NULL"
                 logger.debug(
-                    "action({})|alert({}) create context field({}) error, {}".format(action_id, alert_id, field, e)
+                    f"action({action_id})|alert({alert_id}) create context field({field}) error, {e}"
                 )
         # logger.info("get context dictionary finished for action(%s)", self.action.id if self.action else "None")
         return result
@@ -559,7 +558,7 @@ class ActionContext(object):
                     "id": alert.id,
                     "name": strategy.get("name", "-"),
                     "target": alert.event_document.target,
-                    "dimension": ",".join(["{}={}".format(d.display_key, d.display_value) for d in alert.dimensions])
+                    "dimension": ",".join([f"{d.display_key}={d.display_value}" for d in alert.dimensions])
                     or "-",
                     "current_value": current_value,
                 }
@@ -567,6 +566,6 @@ class ActionContext(object):
         return infos
 
 
-class BaseContextObject(object):
+class BaseContextObject:
     def __init__(self, parent):
         self.parent = parent

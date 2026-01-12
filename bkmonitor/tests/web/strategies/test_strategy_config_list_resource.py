@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -28,16 +27,16 @@ from .data import (
 )
 
 
-class RequestInstance(object):
+class RequestInstance:
     user = "admin"
 
 
-class BizInstance(object):
+class BizInstance:
     id = 2
 
 
 @pytest.mark.usefixtures("mock_cache")
-class TestStrategyConfigListResource(object):
+class TestStrategyConfigListResource:
     def test_get_strategy_config_list(self, mocker):
         def get_cache_msg(*args):
             return_value_map = {

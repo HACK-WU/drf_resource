@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,7 +19,7 @@ from drf_resource.utils.common import count_md5
 logger = logging.getLogger("access.qos")
 
 
-class QoSMixin(object):
+class QoSMixin:
     @classmethod
     def hash_alarm_by_match_info(cls, event_record, strategy_id, item_id):
         return count_md5(

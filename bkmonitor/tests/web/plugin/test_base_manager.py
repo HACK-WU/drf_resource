@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -98,7 +97,7 @@ def new_version(plugin_obj, config_version=None, info_version=None):
     return clear_version
 
 
-class TestBaseManager(object):
+class TestBaseManager:
     CREATE_DATA = CREATE_DATA
     UPDATE_DATA = UPDATE_DATA
     PLUGIN_DATA = PLUGIN_DATA

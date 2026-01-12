@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 import re
 from copy import deepcopy
@@ -115,8 +114,8 @@ class FtaTreeDecode:
         组装标准运维插件
         """
         relate_solution = real_solutions[self.fta_flow[current_node_id]]
-        fta_id_code = "id|%s" % relate_solution.id
-        fta_type_code = "solution_type|%s" % relate_solution.solution_type
+        fta_id_code = f"id|{relate_solution.id}"
+        fta_type_code = f"solution_type|{relate_solution.solution_type}"
 
         if fta_id_code in FTA_COMPONENTS_DICT:
             # 先按照id来获取
@@ -131,7 +130,7 @@ class FtaTreeDecode:
                 self.tree_constants.update(fta_bak_ip_constants(relate_solution))
         else:
             # 其他的非快捷类型的，按照config配置参数来获取
-            fta_config_code = "config|%s" % self.config_decode(relate_solution.config)
+            fta_config_code = f"config|{self.config_decode(relate_solution.config)}"
             fta_component = FTA_COMPONENTS_DICT.get(fta_config_code)
         if not fta_component:
             raise Exception(_("错误，不存在的组件！！{} {}").format(relate_solution.id, relate_solution.title))
@@ -216,8 +215,8 @@ class FtaTreeDecode:
         if left_node is None:
             # 没有成功的时候，成功直接表示结束
             left_node = self.end_node
-        result_key = "${_result_%s}" % parent_node_id
-        conditions = {0: "%s == True" % result_key, 1: "%s == False" % result_key}
+        result_key = f"${{_result_{parent_node_id}}}"
+        conditions = {0: f"{result_key} == True", 1: f"{result_key} == False"}
         result_var = {result_key: activity_result_constant(parent_node.id, result_key)}
         gateway = ExclusiveGateway(conditions=conditions, name="")
         parent_node.error_ignorable = True

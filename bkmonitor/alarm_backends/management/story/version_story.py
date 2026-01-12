@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -64,7 +63,7 @@ class BackendVersion(VersionCheckStep):
             with open(os.path.join(settings.BASE_DIR, "VERSION")) as vfd:
                 version = vfd.read().strip()
         except Exception as e:
-            self.story.warning("get version info error: {}".format(e))
+            self.story.warning(f"get version info error: {e}")
         finally:
             settings.BACKEND_VERSION = version
             return version

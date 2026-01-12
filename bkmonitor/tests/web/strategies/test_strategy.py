@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -131,7 +130,7 @@ action_notice_map_instance = ActionNoticeMapping()
 action_notice_map_instance.id = 1
 
 
-class TestStrategy(object):
+class TestStrategy:
     def test_create(self, mocker):
         create_strategy_dict = copy.deepcopy(STRATEGY_DICT)
         mocker.patch.object(Strategy.objects, "create", return_value=strategy_instance)

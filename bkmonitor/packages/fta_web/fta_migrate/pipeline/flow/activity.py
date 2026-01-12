@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云PaaS平台社区版 (BlueKing PaaS Community
 Edition) available.
@@ -30,7 +29,7 @@ class ServiceActivity(Element):
     ):
         self.component = FancyDict({"code": component_code, "inputs": FancyDict({})})
         self.failure_handler = (
-            "{module}.{name}".format(module=failure_handler.__module__, name=failure_handler.__name__)
+            f"{failure_handler.__module__}.{failure_handler.__name__}"
             if failure_handler
             else None
         )
@@ -38,7 +37,7 @@ class ServiceActivity(Element):
         self.timeout = timeout
         self.skippable = skippable
         self.retryable = retryable
-        super(ServiceActivity, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def type(self):
         return PE.ServiceActivity
@@ -69,7 +68,7 @@ class SubProcess(Element):
         self.constants = kwargs.pop("constants", {})
         self.global_outputs = FancyDict(global_outputs or {})
         self.template_id = template_id
-        super(SubProcess, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def type(self):
         return PE.SubProcess

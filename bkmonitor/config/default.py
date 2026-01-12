@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云PaaS平台社区版 (BlueKing PaaS Community
 Edition) available.
@@ -150,8 +149,8 @@ FORCE_SCRIPT_NAME = SITE_URL
 STATICFILES_DIRS = []
 STATIC_VERSION = "1.0"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATIC_URL = "%sstatic/" % SITE_URL
-REMOTE_STATIC_URL = "%sremote/" % STATIC_URL
+STATIC_URL = f"{SITE_URL}static/"
+REMOTE_STATIC_URL = f"{STATIC_URL}remote/"
 
 # 文件资源配置
 MEDIA_ROOT = os.path.join(BASE_DIR, "USERRES")
@@ -177,8 +176,8 @@ BK_PAAS_INNER_HOST = (
 )
 BK_COMPONENT_API_URL = os.getenv("BK_COMPONENT_API_URL") or BK_PAAS_INNER_HOST
 BK_COMPONENT_API_URL_FRONTEND = os.getenv("BK_COMPONENT_API_URL") or BK_PAAS_HOST
-BK_LOGIN_URL = os.getenv("BKPAAS_LOGIN_URL", "%s/login" % BK_PAAS_HOST).rstrip("/")
-BK_LOGIN_INNER_URL = os.getenv("BK_LOGIN_INNER_URL", "%s/login" % BK_PAAS_INNER_HOST).rstrip("/")
+BK_LOGIN_URL = os.getenv("BKPAAS_LOGIN_URL", f"{BK_PAAS_HOST}/login").rstrip("/")
+BK_LOGIN_INNER_URL = os.getenv("BK_LOGIN_INNER_URL", f"{BK_PAAS_INNER_HOST}/login").rstrip("/")
 ESB_SDK_NAME = "blueking.component"
 
 # 内外差异化配置
@@ -789,7 +788,7 @@ KAFKA_PORT = int(os.environ.get("BK_MONITOR_KAFKA_PORT", 9092))
 # alert 模块告警专属
 ALERT_KAFKA_HOST = [os.environ.get("BK_MONITOR_ALERT_KAFKA_HOST", KAFKA_HOST[0])]
 ALERT_KAFKA_PORT = int(os.environ.get("BK_MONITOR_ALERT_KAFKA_PORT", KAFKA_PORT))
-KAFKA_CONSUMER_GROUP = "{}-bkmonitorv3-alert-{}".format(PLATFORM.lower(), ENVIRONMENT.lower())
+KAFKA_CONSUMER_GROUP = f"{PLATFORM.lower()}-bkmonitorv3-alert-{ENVIRONMENT.lower()}"
 KAFKA_CONSUMER_GROUP = os.environ.get("BK_MONITOR_KAFKA_CONSUMER_GROUP", KAFKA_CONSUMER_GROUP)
 COMMON_KAFKA_CLUSTER_INDEX = 0
 # for stage
@@ -1122,13 +1121,13 @@ JOB_URL = os.getenv("BK_JOB_SITE_URL") or os.getenv("BK_JOB_HOST", JOB_URL)
 BK_CC_URL = BK_PAAS_HOST.replace("paas", "cmdb")
 BK_CC_URL = os.getenv("BK_CC_SITE_URL") or os.getenv("BK_CC_HOST", BK_CC_URL)
 
-BK_ITSM_HOST = os.getenv("BK_ITSM_HOST", "{}/o/bk_itsm/".format(BK_PAAS_HOST))
-BK_SOPS_HOST = os.getenv("BK_SOPS_URL", "{}/o/bk_sops/".format(BK_PAAS_HOST))
+BK_ITSM_HOST = os.getenv("BK_ITSM_HOST", f"{BK_PAAS_HOST}/o/bk_itsm/")
+BK_SOPS_HOST = os.getenv("BK_SOPS_URL", f"{BK_PAAS_HOST}/o/bk_sops/")
 # todo  新增BK_CI_URL 需要在bin/environ.sh 模板中定义
-BK_BCS_HOST = os.getenv("BK_BCS_URL", "{}/o/bk_bcs_app/".format(BK_PAAS_HOST))
+BK_BCS_HOST = os.getenv("BK_BCS_URL", f"{BK_PAAS_HOST}/o/bk_bcs_app/")
 BK_CI_URL = os.getenv("BK_CI_URL") or os.getenv("BKAPP_BK_CI_URL", "")
 BK_MONITOR_HOST = os.getenv("BK_MONITOR_HOST", "{}/o/bk_monitorv3/".format(BK_PAAS_HOST.rstrip("/")))
-ACTION_DETAIL_URL = "%s?bizId={bk_biz_id}/#/event-center/action-detail/{action_id}" % BK_MONITOR_HOST
+ACTION_DETAIL_URL = f"{BK_MONITOR_HOST}?bizId={{bk_biz_id}}/#/event-center/action-detail/{{action_id}}"
 EVENT_CENTER_URL = urljoin(
     BK_MONITOR_HOST, "?bizId={bk_biz_id}#/event-center?queryString=action_id%20%3A%20{collect_id}"
 )
@@ -1141,7 +1140,7 @@ BK_IAM_SYSTEM_NAME = _("监控平台")
 BK_IAM_INNER_HOST = os.getenv("BK_IAM_HOST", os.getenv("BK_IAM_V3_INNER_HOST") or "http://bkiam.service.consul:5001")
 
 BK_IAM_MIGRATION_APP_NAME = "bkmonitor"
-BK_IAM_RESOURCE_API_HOST = os.getenv("BKAPP_IAM_RESOURCE_API_HOST", "{}{}".format(BK_PAAS_INNER_HOST, SITE_URL))
+BK_IAM_RESOURCE_API_HOST = os.getenv("BKAPP_IAM_RESOURCE_API_HOST", f"{BK_PAAS_INNER_HOST}{SITE_URL}")
 
 # 是否跳过 iam migrate
 BK_IAM_SKIP = os.getenv("BK_IAM_SKIP", "false").lower() == "true"
@@ -1341,7 +1340,7 @@ ENABLE_INFLUXDB_STORAGE = True
 
 # bk-notice-sdk requirment
 if not os.getenv("BK_API_URL_TMPL"):
-    os.environ["BK_API_URL_TMPL"] = "%s/api/{api_name}" % BK_COMPONENT_API_URL
+    os.environ["BK_API_URL_TMPL"] = f"{BK_COMPONENT_API_URL}/api/{{api_name}}"
 
 # 内网collector域名
 INNER_COLLOCTOR_HOST = ""

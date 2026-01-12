@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making BK-LOG 蓝鲸日志平台 available.
 Copyright (C) 2021 THL A29 Limited, a Tencent company.  All rights reserved.
@@ -40,7 +39,7 @@ def get_env_or_raise(*keys, default=None):
         return default
 
     raise RuntimeError(
-        'Environment variable "{}" not found, you must set this variable to run this application.'.format(keys)
+        f'Environment variable "{keys}" not found, you must set this variable to run this application.'
     )
 
 
@@ -73,6 +72,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # read VERSION file
 try:
-    VERSION = open(os.path.join(BASE_DIR, "VERSION"), "r", encoding="utf-8").read().strip()
+    VERSION = open(os.path.join(BASE_DIR, "VERSION"), encoding="utf-8").read().strip()
 except:  # noqa
     VERSION = "Unknown version"

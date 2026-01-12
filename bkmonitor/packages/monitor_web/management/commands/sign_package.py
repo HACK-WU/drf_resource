@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -33,7 +32,7 @@ class Command(BaseCommand):
     """
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument("src_path", type=str, help="the source package path")
         parser.add_argument("--dest", dest="dest_path", default=".", help="package dest path")
         parser.add_argument("--protocols", dest="protocols", default="strict,default", help="make an official package?")
@@ -57,7 +56,7 @@ class Command(BaseCommand):
         print("1/4 unzip package")
         with open(src_path, "rb") as tar_obj:
             with tarfile.open(fileobj=tar_obj, mode="r:gz") as tar:
-                print("Package unzip in tmp path: {}".format(tmp_dir))
+                print(f"Package unzip in tmp path: {tmp_dir}")
                 tar.extractall(tmp_dir)
                 filename_list = tar.getnames()
 
@@ -79,7 +78,7 @@ class Command(BaseCommand):
         try:
             with open(meta_yaml_path) as f:
                 meta_content = f.read()
-        except IOError:
+        except OSError:
             raise PluginParseError({"msg": _("meta.yaml不存在，无法解析")})
 
         meta_dict = yaml.load(meta_content, Loader=yaml.FullLoader)
@@ -92,7 +91,7 @@ class Command(BaseCommand):
         else:
             raise PluginParseError({"msg": _("无法解析插件类型")})
 
-        print("Parse success. Plugin ID: {}, Plugin Type: {}".format(plugin_id, plugin_type))
+        print(f"Parse success. Plugin ID: {plugin_id}, Plugin Type: {plugin_type}")
 
         print("3/4 sign package")
         # 3. 根据插件包构造 db 条目，并执行签名
@@ -104,14 +103,12 @@ class Command(BaseCommand):
 
         # 4. 重新打包
         print(
-            "4/4 finish sign and make package: {}({}), version: {}.{}".format(
-                plugin_id, plugin_type, tmp_version.config_version, tmp_version.info_version
-            )
+            f"4/4 finish sign and make package: {plugin_id}({plugin_type}), version: {tmp_version.config_version}.{tmp_version.info_version}"
         )
         import_manager.make_package()
         package_path = os.path.join(import_manager.tmp_path, plugin_id + ".tgz")
-        dest = os.path.join(dest_path, "%s-official.tgz" % tmp_version)
+        dest = os.path.join(dest_path, f"{tmp_version}-official.tgz")
         shutil.copyfile(package_path, dest)
-        print("Package is saved in {}".format(dest))
+        print(f"Package is saved in {dest}")
         shutil.rmtree(import_manager.tmp_path)
         print("done!")

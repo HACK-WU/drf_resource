@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,9 +8,8 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 from collections import defaultdict
-from typing import Dict, List
 
-import mock
+from unittest import mock
 import pytest
 from django.conf import settings
 from monitor_web.constants import AGENT_STATUS
@@ -100,7 +98,7 @@ class TestParseTopoTarget:
             ],
         ],
     )
-    def test_host_topo_target(self, get_host_by_topo_node, dimensions, target: List[Dict], expected):
+    def test_host_topo_target(self, get_host_by_topo_node, dimensions, target: list[dict], expected):
         """
         测试主机拓扑目标解析
         """
@@ -140,7 +138,7 @@ class TestParseTopoTarget:
             ],
         ],
     )
-    def test_host_template_target(self, get_host_by_template, dimensions, target: List[Dict], expected):
+    def test_host_template_target(self, get_host_by_template, dimensions, target: list[dict], expected):
         """
         测试主机服务模板目标解析
         """
@@ -167,7 +165,7 @@ class TestParseTopoTarget:
             ],
         ],
     )
-    def test_service_topo_target(self, get_service_instance_by_topo_node, dimensions, target: List[Dict], expected):
+    def test_service_topo_target(self, get_service_instance_by_topo_node, dimensions, target: list[dict], expected):
         """
         测试服务拓扑目标解析
         """
@@ -189,14 +187,14 @@ class TestParseTopoTarget:
             ],
         ],
     )
-    def test_service_template_target(self, get_service_instance_by_template, dimensions, target: List[Dict], expected):
+    def test_service_template_target(self, get_service_instance_by_template, dimensions, target: list[dict], expected):
         """
         测试服务模板目标解析
         """
         self._test_template(get_service_instance_by_template, dimensions, target, expected)
 
     @staticmethod
-    def _test_template(func, dimensions, target: List[Dict], expected):
+    def _test_template(func, dimensions, target: list[dict], expected):
         template_ids = []
         bk_obj_id = None
         for node in target:
@@ -208,7 +206,7 @@ class TestParseTopoTarget:
         assert func.call_args[1] == {"bk_biz_id": 2, "bk_obj_id": bk_obj_id, "template_ids": template_ids}
 
     @staticmethod
-    def _test_topo(func, dimensions, target: List[Dict], expected):
+    def _test_topo(func, dimensions, target: list[dict], expected):
         topo_nodes = defaultdict(list)
         for node in target:
             topo_nodes[node["bk_obj_id"]].append(node["bk_inst_id"])

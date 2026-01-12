@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import abc
 from collections import namedtuple
 from enum import Enum
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from django.utils.translation import gettext_lazy as _
 
@@ -27,7 +26,7 @@ class EnhanceEnum(Enum):
 
     @classmethod
     @abc.abstractmethod
-    def _get_member__alias_map(cls) -> Dict[Enum, str]:
+    def _get_member__alias_map(cls) -> dict[Enum, str]:
         """
         获取枚举成员与释义的映射关系
         :return:
@@ -35,7 +34,7 @@ class EnhanceEnum(Enum):
         raise NotImplementedError
 
     @classmethod
-    def list_member_values(cls) -> List[Any]:
+    def list_member_values(cls) -> list[Any]:
         """
         获取所有的枚举成员值
         :return:
@@ -46,7 +45,7 @@ class EnhanceEnum(Enum):
         return member_values
 
     @classmethod
-    def get_member_value__alias_map(cls) -> Dict[Any, str]:
+    def get_member_value__alias_map(cls) -> dict[Any, str]:
         """
         获取枚举成员值与释义的映射关系，缓存计算结果
         :return:
@@ -62,7 +61,7 @@ class EnhanceEnum(Enum):
         return member_value__alias_map
 
     @classmethod
-    def list_choices(cls) -> List[Tuple[Any, Any]]:
+    def list_choices(cls) -> list[tuple[Any, Any]]:
         """
         获取可选项列表，一般用于序列化器、model的choices选项
         :return:
@@ -125,7 +124,7 @@ class CommonEnum(EnhanceEnum):
     FETCH_HOST_COUNT_FIELDS = ["bk_host_id"]
 
     @classmethod
-    def _get_member__alias_map(cls) -> Dict[Enum, str]:
+    def _get_member__alias_map(cls) -> dict[Enum, str]:
         return {
             cls.SEP: _("字段分隔符"),
             cls.PAGE_RETURN_ALL_FLAG: _("全量返回标志"),
@@ -145,7 +144,7 @@ class ScopeType(EnhanceEnum):
     SPACE = "space"
 
     @classmethod
-    def _get_member__alias_map(cls) -> Dict[Enum, str]:
+    def _get_member__alias_map(cls) -> dict[Enum, str]:
         return {cls.BIZ: _("业务"), cls.SPACE: _("空间")}
 
 
@@ -156,7 +155,7 @@ class InstanceType(EnhanceEnum):
     SERVICE_INSTANCE = "service_instance"
 
     @classmethod
-    def _get_member__alias_map(cls) -> Dict[Enum, str]:
+    def _get_member__alias_map(cls) -> dict[Enum, str]:
         return {cls.HOST: _("主机"), cls.SERVICE_INSTANCE: _("服务实例")}
 
 
@@ -169,7 +168,7 @@ class ObjectType(EnhanceEnum):
     HOST = "host"
 
     @classmethod
-    def _get_member__alias_map(cls) -> Dict[Enum, str]:
+    def _get_member__alias_map(cls) -> dict[Enum, str]:
         return {cls.BIZ: _("业务"), cls.SET: _("集群"), cls.MODULE: _("模块"), cls.HOST: _("主机")}
 
 
@@ -180,7 +179,7 @@ class AgentStatusType(EnhanceEnum):
     NO_ALIVE = 0
 
     @classmethod
-    def _get_member__alias_map(cls) -> Dict[Enum, str]:
+    def _get_member__alias_map(cls) -> dict[Enum, str]:
         return {cls.ALIVE: _("存活"), cls.NO_ALIVE: _("未存活")}
 
 
@@ -198,7 +197,7 @@ class GSEV2AgentStatusType(EnhanceEnum):
     UNINSTALLED = 7
 
     @classmethod
-    def _get_member__alias_map(cls) -> Dict[Enum, str]:
+    def _get_member__alias_map(cls) -> dict[Enum, str]:
         return {
             cls.UNKNOWN: _("未知"),
             cls.INIT: _("初始安装"),
@@ -219,7 +218,7 @@ class TemplateType(EnhanceEnum):
     SET_TEMPLATE = "SET_TEMPLATE"
 
     @classmethod
-    def _get_member__alias_map(cls) -> Dict[Enum, str]:
+    def _get_member__alias_map(cls) -> dict[Enum, str]:
         return {cls.SERVICE_TEMPLATE: _("服务模版"), cls.SET_TEMPLATE: _("集群模版")}
 
 
@@ -233,7 +232,7 @@ class TimeEnum(EnhanceEnum):
     WEEK = DAY * 7
 
     @classmethod
-    def _get_member__alias_map(cls) -> Dict[Enum, str]:
+    def _get_member__alias_map(cls) -> dict[Enum, str]:
         return {
             cls.SECOND: _("秒"),
             cls.MINUTE: _("分钟"),

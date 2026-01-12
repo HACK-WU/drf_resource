@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +23,7 @@ from monitor_web.alert_events.constant import EventStatus
 from monitor_web.commons.cc.utils import CmdbUtil
 
 
-class EventFilterManager(object):
+class EventFilterManager:
     def __init__(self, time_range, event_queryset=None):
         """
         Event:
@@ -93,7 +92,7 @@ class EventFilterManager(object):
             )
 
 
-class BaseFilter(object):
+class BaseFilter:
     field_mapping = {}
 
     def __init__(self, queryset, manager):
@@ -105,7 +104,7 @@ class BaseFilter(object):
     @staticmethod
     def handle_kwargs(key, value):
         if isinstance(value, list):
-            kwargs = {"{}__in".format(key): value}
+            kwargs = {f"{key}__in": value}
         else:
             kwargs = {key: value}
 
@@ -140,7 +139,7 @@ class EventFilter(BaseFilter):
     field_mapping = {}
 
     def __init__(self, queryset, manager):
-        super(EventFilter, self).__init__(queryset, manager)
+        super().__init__(queryset, manager)
         self.specified_filter = {
             "event_status": self.event_status_filter,
             "ip": self.ip_filter,
@@ -193,7 +192,7 @@ class EventFilter(BaseFilter):
 
 class StrategyFilter(BaseFilter):
     def __init__(self, queryset, manager):
-        super(StrategyFilter, self).__init__(queryset, manager)
+        super().__init__(queryset, manager)
         self.sub_queryset = StrategyModel.objects.filter()
         self.specified_filter = {
             "data_source": self.data_source_filter,
@@ -284,7 +283,7 @@ class AlertFilter(BaseFilter):
     }
 
     def __init__(self, queryset, manager):
-        super(AlertFilter, self).__init__(queryset, manager)
+        super().__init__(queryset, manager)
         self.sub_queryset = Alert.objects.filter()
 
     @property
@@ -294,7 +293,7 @@ class AlertFilter(BaseFilter):
 
 class EventActionFilter(BaseFilter):
     def __init__(self, queryset, manager):
-        super(EventActionFilter, self).__init__(queryset, manager)
+        super().__init__(queryset, manager)
         self.specified_filter = {"alert_status": self.alert_status_filter}
 
     def alert_status_filter(self, kwargs):
@@ -304,7 +303,7 @@ class EventActionFilter(BaseFilter):
 
 class AnomalyFilter(BaseFilter):
     def __init__(self, queryset, manager):
-        super(AnomalyFilter, self).__init__(queryset, manager)
+        super().__init__(queryset, manager)
         self.sub_queryset = AnomalyRecord.objects.filter()
         self.specified_filter = {"content": self.content_filter}
 
@@ -334,7 +333,7 @@ class AnomalyFilter(BaseFilter):
 
 class QueryFilter(BaseFilter):
     def __init__(self, queryset, manager):
-        super(QueryFilter, self).__init__(queryset, manager)
+        super().__init__(queryset, manager)
         self.specified_filter = {"query": self.query_filter}
         self.sub_queryset = {}
 

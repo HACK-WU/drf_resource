@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,7 +21,7 @@ def writeheader(filename, header, skip=None):
     header should be a list of strings
     skip should be a regex
     """
-    f = open(filename, "r")
+    f = open(filename)
     inpt = f.readlines()
     f.close()
     output = []
@@ -55,9 +54,9 @@ def writeheader(filename, header, skip=None):
         f = open(filename, "w")
         f.writelines(output)
         f.close()
-        print("added header to %s" % filename)
-    except IOError as err:
-        print("something went wrong trying to add header to {}: {}".format(filename, err))
+        print(f"added header to {filename}")
+    except OSError as err:
+        print(f"something went wrong trying to add header to {filename}: {err}")
 
 
 def addheader(directory, header, skipreg, filenamereg, dirregex):
@@ -89,8 +88,8 @@ def main(arguments=sys.argv):
     # argument parsing
     if len(arguments) < 3:
         sys.stderr.write(
-            "Usage: %s headerfile directory [filenameregex [dirregex [skip regex]]]\n"
-            "Hint: '.*' is a catch all regex\nHint:'^((?!regexp).)*$' negates a regex\n" % sys.argv[0]
+            f"Usage: {sys.argv[0]} headerfile directory [filenameregex [dirregex [skip regex]]]\n"
+            "Hint: '.*' is a catch all regex\nHint:'^((?!regexp).)*$' negates a regex\n"
         )
         sys.exit(1)
 

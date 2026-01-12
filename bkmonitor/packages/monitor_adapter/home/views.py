@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -263,13 +262,13 @@ def dispatch_external_proxy(request):
         return view_func(fake_request, **kwargs)
 
     except Resolver404:
-        logger.warning("dispatch_plugin_query: resolve view func 404 for: {}".format(url))
+        logger.warning(f"dispatch_plugin_query: resolve view func 404 for: {url}")
         return JsonResponse(
-            {"result": False, "message": "dispatch_plugin_query: resolve view func 404 for: {}".format(url)}, status=404
+            {"result": False, "message": f"dispatch_plugin_query: resolve view func 404 for: {url}"}, status=404
         )
 
     except Exception as e:
-        logger.exception("dispatch_plugin_query: exception for {}".format(e))
+        logger.exception(f"dispatch_plugin_query: exception for {e}")
         raise e
 
 

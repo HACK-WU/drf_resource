@@ -8,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 from dataclasses import dataclass
-from typing import Optional
 
 import ujson as json
 
@@ -28,7 +27,7 @@ from apm_web.profile.profileconverter import ProfileConverter
 class DorisProfileConverter(ProfileConverter):
     """Convert data in doris(pprof json) to Profile object"""
 
-    def convert(self, raw: dict) -> Optional[Profile]:
+    def convert(self, raw: dict) -> Profile | None:
         """parse single raw json data to Profile object"""
         samples_info = raw["list"]
         if not samples_info:

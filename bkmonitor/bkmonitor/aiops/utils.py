@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,7 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 from dataclasses import asdict, dataclass, field, fields
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django.conf import settings
 
@@ -109,7 +108,7 @@ class MetricRecommend(BaseAnomalyConfig):
 
 
 class ReadOnlyAiSetting:
-    def __init__(self, bk_biz_id: int, config: Optional[Dict[str, Dict[str, Any]]] = None):
+    def __init__(self, bk_biz_id: int, config: dict[str, dict[str, Any]] | None = None):
         self.bk_biz_id = bk_biz_id
         config = config or self.default_config
 
@@ -142,7 +141,7 @@ class ReadOnlyAiSetting:
         if scene in MultivariateAnomalyDetection.get_scene_list():
             return scene_config.is_enabled and scene_config.intelligent_detect.get("status") == AccessStatus.SUCCESS
         else:
-            err_msg = "ai setting(bk_biz_id:{}) unknow scene({})".format(self.bk_biz_id, scene)
+            err_msg = f"ai setting(bk_biz_id:{self.bk_biz_id}) unknow scene({scene})"
             logger.error(err_msg)
             raise AiSettingException(err_msg)
 

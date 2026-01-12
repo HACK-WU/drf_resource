@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 import json
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List
 
 import arrow
 from django.utils.translation import gettext as _
@@ -55,9 +53,9 @@ class LogQueryResource(ApiAuthResource):
         @classmethod
         def to_str(cls, value):
             if isinstance(value, list):
-                return [cls.to_str(v) for v in value if v or not isinstance(v, (dict, list))]
+                return [cls.to_str(v) for v in value if v or not isinstance(v, dict | list)]
             elif isinstance(value, dict):
-                return {k: cls.to_str(v) for k, v in value.items() if v or not isinstance(v, (dict, list))}
+                return {k: cls.to_str(v) for k, v in value.items() if v or not isinstance(v, dict | list)}
             else:
                 return str(value)
 
@@ -66,7 +64,7 @@ class LogQueryResource(ApiAuthResource):
             return attrs
 
     @staticmethod
-    def table_format(data: List[Dict], total: int, data_format: str = ""):
+    def table_format(data: list[dict], total: int, data_format: str = ""):
         """
         生成grafana table格式
         """
@@ -101,7 +99,7 @@ class LogQueryResource(ApiAuthResource):
             ]
 
     @staticmethod
-    def get_time(record: Dict, time_field: str) -> int:
+    def get_time(record: dict, time_field: str) -> int:
         time_value = record.pop(time_field)
 
         # 带毫秒的时间戳处理

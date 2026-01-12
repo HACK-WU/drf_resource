@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -31,7 +30,7 @@ from constants.action import (
 logger = logging.getLogger("fta_action.converge")
 
 
-class DimensionHandler(object):
+class DimensionHandler:
     def __init__(
         self,
         dimension,
@@ -128,7 +127,7 @@ class DimensionHandler(object):
         for key, values in self.converged_condition.items():
             if values is None:
                 values = ""
-            if isinstance(values, (list, set)):
+            if isinstance(values, list | set):
                 values = "_".join([str(value) for value in values])
             else:
                 values = str(values)
@@ -184,7 +183,7 @@ class DimensionCalculator:
             if values is None or not str(values):
                 continue
             # 如果值为空的话，忽略掉这个维度
-            if not isinstance(values, (list, set)):
+            if not isinstance(values, list | set):
                 values = [str(values)]
             for value in values:
                 key = FTA_CONVERGE_DIMENSION_KEY.get_key(
@@ -197,7 +196,7 @@ class DimensionCalculator:
                     arrow.utcnow().replace(minutes=-self.DimensionExpireMinutes).timestamp,
                 )
                 # 保存的score
-                kwargs = {"{}_{}".format(self.instance_type, str(self.related_instance.id)): score}
+                kwargs = {f"{self.instance_type}_{str(self.related_instance.id)}": score}
                 pipeline.zadd(key, kwargs)
                 pipeline.expire(key, FTA_CONVERGE_DIMENSION_KEY.ttl)
         pipeline.execute()
@@ -216,7 +215,7 @@ class DimensionCalculator:
             if values is None:
                 return
             # 如果值为空的话，忽略掉这个维度
-            if isinstance(values, (list, set)):
+            if isinstance(values, list | set):
                 values = "_".join([str(value) for value in values])
             label_info[dimension] = values
 
@@ -229,7 +228,7 @@ class DimensionCalculator:
             arrow.utcnow().replace(minutes=-self.DimensionExpireMinutes).timestamp,
         )
         # 保存的score
-        kwargs = {"{}_{}".format(self.instance_type, str(self.related_instance.id)): score}
+        kwargs = {f"{self.instance_type}_{str(self.related_instance.id)}": score}
         pipeline.zadd(sub_converge_key, kwargs)
         pipeline.expire(sub_converge_key, FTA_SUB_CONVERGE_DIMENSION_KEY.ttl)
         pipeline.execute()

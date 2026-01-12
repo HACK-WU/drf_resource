@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -17,7 +16,7 @@ import pytz
 from mock import MagicMock, call, patch  # noqa
 
 
-class MockAnomalyRecord(object):
+class MockAnomalyRecord:
     def __init__(self, **kwargs):
         self.anomaly_id = kwargs.get("anomaly_id", 1)
         self.source_time = kwargs.get("source_time", datetime.datetime.now(pytz.utc))
@@ -26,7 +25,7 @@ class MockAnomalyRecord(object):
         self.origin_alarm = kwargs.get("origin_alarm", {})
 
 
-class MockEventModel(object):
+class MockEventModel:
     def __init__(self, **kwargs):
         self.id = kwargs.get("id", 1)
         self.create_time = kwargs.get("create_time", datetime.datetime.now(pytz.utc))
@@ -48,13 +47,13 @@ class MockEventModel(object):
         self.anomaly_message = "anomaly_message1"
 
 
-class MockEventAction(object):
+class MockEventAction:
     def __init__(self, **kwargs):
         self.status = kwargs.get("status", "SUCCESS")
         self.extend_info = kwargs.get("extend_info", {})
 
 
-class MockQuerySet(object):
+class MockQuerySet:
     def __init__(self, get_result=None, get_raise=None, filter_result=None, aggregate_result=None, exist_return=True):
         self.get = MagicMock(return_value=get_result) if get_result else MagicMock(side_effect=get_raise)
         self.filter = MagicMock(return_value=filter_result)

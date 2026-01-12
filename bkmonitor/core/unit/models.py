@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,12 +10,10 @@ specific language governing permissions and limitations under the License.
 
 
 import functools
-from typing import Optional, Tuple, Union
-
-from six.moves import range
 
 
-class UnitCategory(object):
+
+class UnitCategory:
     """
     指标分类
     """
@@ -25,7 +22,7 @@ class UnitCategory(object):
         self.name = name
 
 
-class UnitMeta(object):
+class UnitMeta:
     """
     单位元信息
     """
@@ -40,10 +37,10 @@ class UnitMeta(object):
         return getattr(self.fn, item)
 
     def __repr__(self):
-        return "{}||{}".format(self.category, self.gid)
+        return f"{self.category}||{self.gid}"
 
 
-class ScaledUnits(object):
+class ScaledUnits:
     """
     动态单位
     """
@@ -100,11 +97,11 @@ class ScaledUnits(object):
 
     def auto_convert(
         self,
-        value: Optional[Union[int, float]],
-        suffix: Optional[str] = None,
+        value: int | float | None,
+        suffix: str | None = None,
         decimal: int = 6,
-        target_range: Optional[Tuple[int, int]] = None,
-    ) -> Tuple[Optional[Union[int, float]], str]:
+        target_range: tuple[int, int] | None = None,
+    ) -> tuple[int | float | None, str]:
         """
         动态单位转换
         :param value: 数值
@@ -153,11 +150,11 @@ class ScaledUnits(object):
 
     def convert(
         self,
-        value: Optional[Union[int, float]],
+        value: int | float | None,
         target_suffix: str,
         current_suffix: str = None,
-        decimal: Optional[int] = None,
-    ) -> Optional[Union[int, float]]:
+        decimal: int | None = None,
+    ) -> int | float | None:
         """
         转换为指定单位
         :param value: 数值
@@ -196,7 +193,7 @@ class ScaledUnits(object):
 
         return value
 
-    def convert_to_max(self, value: Union[int, float], suffix: str = None, decimal: int = 6):
+    def convert_to_max(self, value: int | float, suffix: str = None, decimal: int = 6):
         """
         转换为最大值
         """
@@ -215,14 +212,14 @@ class Percent(ScaledUnits):
 
     def auto_convert(
         self,
-        value: Union[int, float],
-        suffix: Optional[str] = None,
+        value: int | float,
+        suffix: str | None = None,
         decimal: int = 6,
-        target_range: Optional[Tuple[int, int]] = None,
-    ) -> Tuple[Union[int, float], str]:
+        target_range: tuple[int, int] | None = None,
+    ) -> tuple[int | float, str]:
         if target_range is None:
             target_range = (float("inf"), float("inf"))
-        return super(Percent, self).auto_convert(value, suffix, decimal, target_range)
+        return super().auto_convert(value, suffix, decimal, target_range)
 
 
 class BinarySIPrefix(ScaledUnits):
@@ -230,7 +227,7 @@ class BinarySIPrefix(ScaledUnits):
     suffix_list = ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi"]
 
     def __init__(self, suffix=None, suffix_idx=0):
-        super(BinarySIPrefix, self).__init__(suffix_idx=suffix_idx, suffix=suffix)
+        super().__init__(suffix_idx=suffix_idx, suffix=suffix)
 
 
 class DecimalSIPrefix(ScaledUnits):
@@ -238,7 +235,7 @@ class DecimalSIPrefix(ScaledUnits):
     suffix_list = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"]
 
     def __init__(self, suffix=None, suffix_idx=0):
-        super(DecimalSIPrefix, self).__init__(suffix_idx=suffix_idx, suffix=suffix)
+        super().__init__(suffix_idx=suffix_idx, suffix=suffix)
 
 
 class DecimalSIPrefixPlus(ScaledUnits):
@@ -246,7 +243,7 @@ class DecimalSIPrefixPlus(ScaledUnits):
     suffix_list = ["f", "p", "n", "µ", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"]
 
     def __init__(self, suffix=None, suffix_idx=0):
-        super(DecimalSIPrefixPlus, self).__init__(suffix_idx=suffix_idx, suffix=suffix)
+        super().__init__(suffix_idx=suffix_idx, suffix=suffix)
         self.suffix_idx = self.suffix_idx + 5
 
 
@@ -255,7 +252,7 @@ class SimpleCountUnit(ScaledUnits):
     suffix_list = ["", "K", "M", "B", "T"]
 
     def __init__(self, suffix=None, suffix_idx=0):
-        super(SimpleCountUnit, self).__init__(suffix_idx=suffix_idx, suffix=suffix)
+        super().__init__(suffix_idx=suffix_idx, suffix=suffix)
 
 
 class TimeUnit(ScaledUnits):

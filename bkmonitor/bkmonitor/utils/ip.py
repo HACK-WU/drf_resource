@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,10 +10,10 @@ specific language governing permissions and limitations under the License.
 
 import ipaddress
 from functools import partial
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
-def is_ip(ip: str, _version: Optional[int] = None) -> bool:
+def is_ip(ip: str, _version: int | None = None) -> bool:
     """
     判断是否为合法 IP
     :param ip:
@@ -59,7 +58,7 @@ def compressed_ip(ip: str) -> str:
     return ip
 
 
-def ipv6s_formatter(ips: List[str]) -> List[str]:
+def ipv6s_formatter(ips: list[str]) -> list[str]:
     """
     将 IPv6 列表转为标准格式
     :param ips:
@@ -68,7 +67,7 @@ def ipv6s_formatter(ips: List[str]) -> List[str]:
     return [exploded_ip(ip) for ip in ips]
 
 
-def ipv6_formatter(data: Dict[str, Any], ipv6_field_names: List[str]):
+def ipv6_formatter(data: dict[str, Any], ipv6_field_names: list[str]):
     """
     将 data 中 ipv6_field_names 转为 IPv6 标准格式
     :param data: 可能包含 v6 的字典数据
@@ -76,7 +75,7 @@ def ipv6_formatter(data: Dict[str, Any], ipv6_field_names: List[str]):
     :return:
     """
     for ipv6_field_name in ipv6_field_names:
-        ipv6_val: Optional[str] = data.get(ipv6_field_name)
+        ipv6_val: str | None = data.get(ipv6_field_name)
         data[ipv6_field_name] = exploded_ip(ipv6_val)
 
 

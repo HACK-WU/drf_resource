@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
-from typing import Dict, List, Optional, Union
 
 import kafka
 import requests
@@ -31,13 +29,13 @@ logger = logging.getLogger("metadata")
 class ResultTableAndDataSource:
     def __init__(
         self,
-        table_id: Optional[str] = None,
-        bk_data_id: Optional[int] = None,
-        bcs_cluster_id: Optional[str] = None,
-        vm_table_id: Optional[str] = None,
-        metric_name: Optional[str] = None,
-        data_label: Optional[str] = None,
-        with_gse_router: Optional[bool] = False,
+        table_id: str | None = None,
+        bk_data_id: int | None = None,
+        bcs_cluster_id: str | None = None,
+        vm_table_id: str | None = None,
+        metric_name: str | None = None,
+        data_label: str | None = None,
+        with_gse_router: bool | None = False,
     ):
         self.bk_data_id = bk_data_id
         self.table_id = table_id
@@ -78,7 +76,7 @@ class ResultTableAndDataSource:
             data.append(_detail)
         return data
 
-    def get_basic_detail(self, data_id: int) -> Dict:
+    def get_basic_detail(self, data_id: int) -> dict:
         detail = {}
         # 如果传递的数据源，则查询数据源信息
         if data_id:
@@ -88,7 +86,7 @@ class ResultTableAndDataSource:
                 detail.update({"gse_router": self.query_gse_router(data_id)})
         return detail
 
-    def query_gse_router(self, bk_data_id: int) -> Dict:
+    def query_gse_router(self, bk_data_id: int) -> dict:
         """查询GSE路由信息"""
         params = {
             "condition": {"plat_name": config.DEFAULT_GSE_API_PLAT_NAME, "channel_id": bk_data_id},
@@ -113,7 +111,7 @@ class ResultTableAndDataSource:
             )
         return data
 
-    def get_data_source(self, bk_data_id: int) -> Dict:
+    def get_data_source(self, bk_data_id: int) -> dict:
         """获取数据源信息
 
         :param bk_data_id: 数据源ID
@@ -148,7 +146,7 @@ class ResultTableAndDataSource:
             "created_from": ds.created_from,
         }
 
-    def get_table_id(self, table_id: str) -> Dict:
+    def get_table_id(self, table_id: str) -> dict:
         """获取结果表信息"""
         try:
             rt = models.ResultTable.objects.get(table_id=table_id)
@@ -162,7 +160,7 @@ class ResultTableAndDataSource:
             }
         }
 
-    def get_table_id_data_id(self) -> Dict:
+    def get_table_id_data_id(self) -> dict:
         """
         获取数据源ID和结果表ID
 
@@ -208,7 +206,7 @@ class ResultTableAndDataSource:
 
             return tid_ds
 
-    def get_biz_info(self, table_id: str, data_source: Dict) -> Dict:
+    def get_biz_info(self, table_id: str, data_source: dict) -> dict:
         try:
             rt = models.ResultTable.objects.get(table_id=table_id)
         except Exception:
@@ -233,7 +231,7 @@ class ResultTableAndDataSource:
             bk_biz_name = ""
         return {"bk_biz_info": {"bk_biz_id": bk_biz_id, "bk_biz_name": bk_biz_name}}
 
-    def get_clusters(self, bk_data_id: int) -> Dict:
+    def get_clusters(self, bk_data_id: int) -> dict:
         try:
             ds = models.DataSource.objects.get(bk_data_id=bk_data_id)
         except Exception:
@@ -265,7 +263,7 @@ class ResultTableAndDataSource:
         )
         return cluster_info
 
-    def get_storage_cluster(self, table_id: str) -> Dict:
+    def get_storage_cluster(self, table_id: str) -> dict:
         """获取存储相关信息"""
         storage_dict = {}
         for storage_type, storage_cls in models.ResultTable.REAL_STORAGE_DICT.items():
@@ -301,7 +299,7 @@ class ResultTableAndDataSource:
 
         return storage_dict
 
-    def get_influxdb_instance_cluster(self, table_id: str) -> Dict:
+    def get_influxdb_instance_cluster(self, table_id: str) -> dict:
         """获取结果表对应的influxdb实例集群信息"""
         influxdb_storage = models.InfluxDBStorage.objects.filter(table_id=table_id)
         if not influxdb_storage:
@@ -332,7 +330,7 @@ class ResultTableAndDataSource:
 
 class StorageCluster:
     @classmethod
-    def get_cluster_type(self) -> List:
+    def get_cluster_type(self) -> list:
         """获取集群类型"""
         return list(models.ClusterInfo.objects.values_list("cluster_type", flat=True).distinct())
 
@@ -344,7 +342,7 @@ class StorageCluster:
         }
 
     @classmethod
-    def get_cluster_id_cluster_name(cls, cluster_id: Optional[int] = None, cluster_type: Optional[str] = None) -> Dict:
+    def get_cluster_id_cluster_name(cls, cluster_id: int | None = None, cluster_type: str | None = None) -> dict:
         """获取集群 id 和集群名称"""
         qs = models.ClusterInfo.objects.all()
         if not (cluster_id or cluster_type):
@@ -375,14 +373,14 @@ class ClusterHealthCheck:
     @classmethod
     def check(
         cls,
-        cluster_id: Union[str, int, None] = None,
-        cluster_type: Optional[str] = "",
-        domain: Optional[str] = "",
-        port: Optional[int] = 0,
-        schema: Optional[str] = "",
-        is_ssl_verify: Optional[bool] = False,
-        username: Optional[str] = "",
-        password: Optional[str] = "",
+        cluster_id: str | int | None = None,
+        cluster_type: str | None = "",
+        domain: str | None = "",
+        port: int | None = 0,
+        schema: str | None = "",
+        is_ssl_verify: bool | None = False,
+        username: str | None = "",
+        password: str | None = "",
     ) -> bool:
         if cluster_type == "transfer":
             return cls.check_transfer_cluster(cluster_id)
@@ -428,7 +426,7 @@ class ClusterHealthCheck:
             return False
 
     @classmethod
-    def get_cluster(cls, cluster_id: int) -> Optional[models.ClusterInfo]:
+    def get_cluster(cls, cluster_id: int) -> models.ClusterInfo | None:
         """获取集群信息"""
         try:
             return models.ClusterInfo.objects.get(cluster_id=cluster_id)
@@ -439,9 +437,9 @@ class ClusterHealthCheck:
     @classmethod
     def check_kafka_cluster(
         cls,
-        kafka_cluster: Optional[int] = None,
-        cluster_obj: Optional[models.ClusterInfo] = None,
-        kafka_host: Optional[str] = "",
+        kafka_cluster: int | None = None,
+        cluster_obj: models.ClusterInfo | None = None,
+        kafka_host: str | None = "",
     ) -> bool:
         """检测 kafka 集群"""
         # 查询集群域名和端口
@@ -477,9 +475,9 @@ class ClusterHealthCheck:
     @classmethod
     def check_influxdb_cluster(
         cls,
-        influxdb_cluster: Optional[int] = None,
-        cluster_obj: Optional[models.ClusterInfo] = None,
-        host: Optional[str] = "",
+        influxdb_cluster: int | None = None,
+        cluster_obj: models.ClusterInfo | None = None,
+        host: str | None = "",
     ) -> bool:
         """检测 influxdb 集群"""
         # 查询集群域名和端口
@@ -508,14 +506,14 @@ class ClusterHealthCheck:
     @classmethod
     def check_es_cluster(
         cls,
-        es_cluster: Optional[int] = None,
-        cluster_obj: Optional[models.ClusterInfo] = None,
-        domain: Optional[str] = "",
-        port: Optional[int] = None,
-        is_ssl_verify: Optional[bool] = False,
-        username: Optional[str] = "",
-        password: Optional[str] = "",
-        schema: Optional[str] = "",
+        es_cluster: int | None = None,
+        cluster_obj: models.ClusterInfo | None = None,
+        domain: str | None = "",
+        port: int | None = None,
+        is_ssl_verify: bool | None = False,
+        username: str | None = "",
+        password: str | None = "",
+        schema: str | None = "",
     ) -> bool:
         """检测 es 集群"""
         # 查询集群域名和端口
@@ -554,16 +552,16 @@ class ClusterHealthCheck:
     @classmethod
     def check_vm_cluster(
         cls,
-        vm_cluster: Optional[int] = None,
-        cluster_obj: Optional[models.ClusterInfo] = None,
-        host: Optional[str] = "",
+        vm_cluster: int | None = None,
+        cluster_obj: models.ClusterInfo | None = None,
+        host: str | None = "",
     ) -> bool:
         return True
 
 
 class StorageClusterDetail:
     @classmethod
-    def get_detail(cls, cluster_id: Union[str, int]) -> List:
+    def get_detail(cls, cluster_id: str | int) -> list:
         type_func_map = {
             models.ClusterInfo.TYPE_KAFKA: cls.get_kafka_detail,
             models.ClusterInfo.TYPE_INFLUXDB: cls.get_influxdb_proxy_detail,
@@ -577,7 +575,7 @@ class StorageClusterDetail:
         return func(cluster_obj=obj)
 
     @classmethod
-    def get_cluster(cls, cluster_id: int) -> Optional[models.ClusterInfo]:
+    def get_cluster(cls, cluster_id: int) -> models.ClusterInfo | None:
         """获取集群信息"""
         try:
             return models.ClusterInfo.objects.get(cluster_id=cluster_id)
@@ -587,8 +585,8 @@ class StorageClusterDetail:
 
     @classmethod
     def get_kafka_detail(
-        cls, cluster_id: Optional[int] = None, cluster_obj: Optional[models.ClusterInfo] = None
-    ) -> List:
+        cls, cluster_id: int | None = None, cluster_obj: models.ClusterInfo | None = None
+    ) -> list:
         # 查询集群域名和端口
         if not cluster_obj:
             cluster_obj = cls.get_cluster(cluster_id)
@@ -631,8 +629,8 @@ class StorageClusterDetail:
 
     @classmethod
     def get_influxdb_proxy_detail(
-        cls, cluster_id: Optional[int] = None, cluster_obj: Optional[models.ClusterInfo] = None
-    ) -> List:
+        cls, cluster_id: int | None = None, cluster_obj: models.ClusterInfo | None = None
+    ) -> list:
         # 查询集群域名和端口
         if not cluster_obj:
             cluster_obj = cls.get_cluster(cluster_id)
@@ -649,7 +647,7 @@ class StorageClusterDetail:
         ]
 
     @classmethod
-    def get_es_detail(cls, cluster_id: Optional[int] = None, cluster_obj: Optional[models.ClusterInfo] = None) -> List:
+    def get_es_detail(cls, cluster_id: int | None = None, cluster_obj: models.ClusterInfo | None = None) -> list:
         # 查询集群域名和端口
         if not cluster_obj:
             cluster_obj = cls.get_cluster(cluster_id)
@@ -666,7 +664,7 @@ class StorageClusterDetail:
         ]
 
     @classmethod
-    def get_vm_details(cls, cluster_id: Optional[int] = None, cluster_obj: Optional[models.ClusterInfo] = None) -> List:
+    def get_vm_details(cls, cluster_id: int | None = None, cluster_obj: models.ClusterInfo | None = None) -> list:
         # 查询集群域名和端口
         if not cluster_obj:
             cluster_obj = cls.get_cluster(cluster_id)

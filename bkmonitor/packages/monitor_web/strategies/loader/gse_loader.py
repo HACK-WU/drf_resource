@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-from typing import List, Optional
 
 from bkmonitor.models import StrategyModel
 from constants.action import ActionSignal
@@ -50,7 +48,7 @@ class GseDefaultAlarmStrategyLoader(DefaultAlarmStrategyLoaderBase):
     def check_before_set_cache(self) -> bool:
         return True
 
-    def get_notice_group(self, config_type: Optional[str] = None) -> List:
+    def get_notice_group(self, config_type: str | None = None) -> list:
         """根据配置类型获得通知组ID ."""
         if config_type == "business":
             # 获得主备负责人通知组
@@ -71,7 +69,7 @@ class GseDefaultAlarmStrategyLoader(DefaultAlarmStrategyLoaderBase):
                 notice_group_id = self.notice_group_cache["others"]
         return [notice_group_id]
 
-    def load_strategies(self, strategies: List) -> List:
+    def load_strategies(self, strategies: list) -> list:
         """
         执行进程托管类策略的内置操作
         5种事件，2种创建类型：

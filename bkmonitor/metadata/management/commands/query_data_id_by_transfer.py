@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,7 +21,7 @@ from metadata.service.data_source import (
 
 class Command(BaseCommand):
     def create_parser(self, *args, **kwargs):
-        parser = super(Command, self).create_parser(*args, **kwargs)
+        parser = super().create_parser(*args, **kwargs)
         parser.formatter_class = RawTextHelpFormatter
         return parser
 

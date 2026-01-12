@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,7 +14,6 @@ import json
 import arrow
 import pytest
 from django.test import TestCase
-from six.moves import range
 
 from alarm_backends.core.alert import Alert, Event
 from alarm_backends.core.alert.adapter import MonitorEventAdapter
@@ -54,7 +52,7 @@ def _set_recovery_with_event_id(event_id, timedelta=1000):
     )
     for i in range(9):
         ts = check_time - 60 * i
-        CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|0".format(ts): ts})
+        CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|0": ts})
 
 
 class TestRecoverStatusChecker(TestCase):
@@ -124,9 +122,9 @@ class TestRecoverStatusChecker(TestCase):
         for i in range(20):
             ts = check_time - 60 * i
             if i < 3:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
             else:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|0".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|0": ts})
 
         alert = self.get_alert()
         checker = RecoverStatusChecker([alert])
@@ -152,9 +150,9 @@ class TestRecoverStatusChecker(TestCase):
         for i in range(20):
             ts = check_time - 60 * i
             if i > 3:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
             else:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|0".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|0": ts})
 
         alert = self.get_alert()
         checker = RecoverStatusChecker([alert])
@@ -182,9 +180,9 @@ class TestRecoverStatusChecker(TestCase):
         for i in range(20):
             ts = check_time - 60 * i
             if i % 2 == 0:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
             else:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|0".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|0": ts})
 
         alert = self.get_alert()
         checker = RecoverStatusChecker([alert])
@@ -209,7 +207,7 @@ class TestRecoverStatusChecker(TestCase):
         )
         for i in range(20):
             ts = check_time - 60 * i
-            CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+            CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
 
         alert = self.get_alert()
         alert.update_extra_info("is_recovering", True)
@@ -242,9 +240,9 @@ class TestRecoverStatusChecker(TestCase):
         for i in range(20):
             ts = check_time - 60 * i
             if i < 1:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
             else:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|0".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|0": ts})
 
         alert = self.get_alert()
         checker = RecoverStatusChecker([alert])
@@ -293,9 +291,9 @@ class TestRecoverStatusChecker(TestCase):
                 ts = check_time - 60
                 if i > 1:
                     # 配置一个过期的数据
-                    CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+                    CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
                 else:
-                    CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|0".format(ts): ts})
+                    CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|0": ts})
                 check_time = ts
         alert = self.get_alert(multi_strategy)
         checker = RecoverStatusChecker([alert])
@@ -330,9 +328,9 @@ class TestRecoverStatusChecker(TestCase):
         for i in range(20):
             ts = check_time - 60 * i
             if i % 5 == 0:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
             else:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|0".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|0": ts})
 
         alert = self.get_alert()
         checker = RecoverStatusChecker([alert])
@@ -371,9 +369,9 @@ class TestRecoverStatusChecker(TestCase):
         for i in range(20):
             ts = check_time - 60 * i
             if i < 3:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
             else:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|0".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|0": ts})
 
         alert = self.get_alert()
         checker = RecoverStatusChecker([alert])
@@ -400,9 +398,9 @@ class TestRecoverStatusChecker(TestCase):
         for i in range(8):
             ts = check_time - 60 * i
             if i < 3:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
             else:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|0".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|0": ts})
 
         alert = self.get_alert()
         checker = RecoverStatusChecker([alert])
@@ -460,7 +458,7 @@ class TestRecoverStatusChecker(TestCase):
         for i in range(20):
             ts = check_time - 60 * i
             if i < 3:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
 
         alert = self.get_alert(strategy)
         checker = RecoverStatusChecker([alert])
@@ -490,7 +488,7 @@ class TestRecoverStatusChecker(TestCase):
         for i in range(20):
             ts = check_time - 60 * i
             if i < 3:
-                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+                CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
 
         alert = self.get_alert(strategy)
         checker = RecoverStatusChecker([alert])
@@ -519,7 +517,7 @@ class TestRecoverStatusChecker(TestCase):
         )
         for i in range(20):
             ts = check_time - 300 * i
-            CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+            CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
 
         alert = self.get_alert(strategy=strategy)
         checker = RecoverStatusChecker([alert])
@@ -549,7 +547,7 @@ class TestRecoverStatusChecker(TestCase):
         )
         for i in range(20):
             ts = check_time - 300 * i
-            CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+            CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
 
         alert = self.get_alert(strategy=strategy)
         checker = RecoverStatusChecker([alert])
@@ -579,7 +577,7 @@ class TestRecoverStatusChecker(TestCase):
         )
         for i in range(20):
             ts = check_time - 300 * i
-            CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {"{}|ANOMALY".format(ts): ts})
+            CHECK_RESULT_CACHE_KEY.client.zadd(cache_key, {f"{ts}|ANOMALY": ts})
 
         alert = self.get_alert(strategy=strategy)
         checker = RecoverStatusChecker([alert])

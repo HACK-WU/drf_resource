@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,7 @@ specific language governing permissions and limitations under the License.
 """
 import time
 from abc import ABC
-from typing import Callable, Dict, Iterable, List, Optional
+from collections.abc import Callable, Iterable
 
 from django.utils.translation import gettext as _
 from elasticsearch_dsl import AttrDict, Q, Search
@@ -42,7 +41,7 @@ class QueryField:
         agg_field: str = None,
         searchable: bool = True,
         is_char: bool = False,
-        alias_func: Optional[Callable[[SearchField], None]] = None,
+        alias_func: Callable[[SearchField], None] | None = None,
     ):
         """
         :param field: 展示的字段英文名
@@ -87,7 +86,7 @@ class BaseQueryTransformer(BaseTreeTransformer):
     """
 
     # 可供查询的ES字段配置
-    query_fields: List[QueryField] = []
+    query_fields: list[QueryField] = []
 
     # 需要转换的嵌套KV字段，key 为匹配前缀，value 为搜索字段
     # 例如 "tags.": "event.tags"
@@ -164,7 +163,7 @@ class BaseQueryTransformer(BaseTreeTransformer):
         return str(query_tree)
 
     @classmethod
-    def get_field_info(cls, field: str) -> Optional[QueryField]:
+    def get_field_info(cls, field: str) -> QueryField | None:
         """查询 QueryField"""
         for field_info in cls.query_fields:
             if field_info.searchable and field in [field_info.field, str(field_info.display), _(field_info.display)]:
@@ -213,9 +212,9 @@ class BaseQueryHandler:
         self,
         start_time: int = None,
         end_time: int = None,
-        ordering: List[str] = None,
+        ordering: list[str] = None,
         query_string: str = "",
-        conditions: List = None,
+        conditions: list = None,
         page: int = 1,
         page_size: int = 10,
         **kwargs,
@@ -246,7 +245,7 @@ class BaseQueryHandler:
 
         yield from search_object.params(preserve_order=True).scan()
 
-    def export(self) -> List[dict]:
+    def export(self) -> list[dict]:
         """
         将数据导出，用于生成 csv 文件
         :return:
@@ -312,7 +311,7 @@ class BaseQueryHandler:
                 search_object = search_object.query(query_dsl)
         return search_object
 
-    def add_conditions(self, search_object: Search, conditions: List = None):
+    def add_conditions(self, search_object: Search, conditions: list = None):
         """
         处理 filter 条件
         """
@@ -463,7 +462,7 @@ class BaseQueryHandler:
 
         return new_search_object
 
-    def top_n(self, fields: List, size=10, translators: Dict[str, AbstractTranslator] = None, char_add_quotes=True):
+    def top_n(self, fields: list, size=10, translators: dict[str, AbstractTranslator] = None, char_add_quotes=True):
         """
         字段值 TOP N 统计
         :param fields: 需要统计的字段，"+abc" 为升序排列，"-abc" 为降序排列，默认降序排列
@@ -589,11 +588,11 @@ class BaseQueryHandler:
 class BaseBizQueryHandler(BaseQueryHandler, ABC):
     def __init__(
         self,
-        bk_biz_ids: List[int] = None,
+        bk_biz_ids: list[int] = None,
         username: str = "",
         **kwargs,
     ):
-        super(BaseBizQueryHandler, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.bk_biz_ids = bk_biz_ids
         self.authorized_bizs = self.bk_biz_ids
         self.unauthorized_bizs = []
@@ -625,9 +624,7 @@ class QueryBuilder(ElasticsearchQueryBuilder):
     """
 
     def _yield_nested_children(self, parent, children):
-        for child in children:
-            # 同级语句同时出现 AND 与 OR 时，忽略默认的报错
-            yield child
+        yield from children
 
 
 class AlertDimensionFormatter:

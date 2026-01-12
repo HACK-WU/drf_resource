@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -14,12 +13,11 @@ import os
 import re
 import time
 
-from six.moves import range
 
 logger = logging.getLogger("self_monitor")
 
 
-class TimeAndSizeRotateFile(object):
+class TimeAndSizeRotateFile:
     """
     Handler for rotate file, rotating the log file at midnight
     or reached a certain size.

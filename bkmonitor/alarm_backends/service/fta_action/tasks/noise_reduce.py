@@ -108,7 +108,7 @@ class NoiseReduceRecordProcessor:
         # 记录信息
         self.redis_client.zadd(self.abnormal_record_key, {dimension_value_hash: current_timestamp})
         self.redis_client.zadd(
-            self.alert_record_key, {"{}--{}".format(self.alert.id, self.generate_uuid): current_timestamp}
+            self.alert_record_key, {f"{self.alert.id}--{self.generate_uuid}": current_timestamp}
         )
 
         # 插入日志

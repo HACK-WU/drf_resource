@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -39,7 +38,5 @@ def main():
         }
         influxdb_host.update_default_rp(refresh_dbset)
         logger.info(
-            "influxdb->[{}:{}] update default_rp->[{}] success.".format(
-                influxdb_host.domain_name, influxdb_host.port, settings.TS_DATA_SAVED_DAYS
-            )
+            f"influxdb->[{influxdb_host.domain_name}:{influxdb_host.port}] update default_rp->[{settings.TS_DATA_SAVED_DAYS}] success."
         )

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -44,7 +43,7 @@ def add_datasource_record(apps, schema_editor):
     # 获取这个数据源对应的配置记录model，并创建一个新的配置记录
     mq_config = models["KafkaTopicInfo"].objects.create(
         bk_data_id=data_object.bk_data_id,
-        topic="{}{}0".format(config.KAFKA_TOPIC_PREFIX, data_object.bk_data_id),
+        topic=f"{config.KAFKA_TOPIC_PREFIX}{data_object.bk_data_id}0",
         partition=1,
     )
     data_object.mq_config_id = mq_config.id

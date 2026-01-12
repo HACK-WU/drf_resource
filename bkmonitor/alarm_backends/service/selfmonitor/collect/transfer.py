@@ -12,7 +12,7 @@ import logging
 import selectors
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import ClassVar, List, Tuple, Type
+from typing import ClassVar
 
 import arrow
 import requests
@@ -74,7 +74,7 @@ class TransferMetricHelper:
 
     consul_client: BKConsul = field(default_factory=BKConsul)
     # transfer 运营指标变形器列表，由运营侧指定其关注内容
-    deformers: List[Type["Deformer"]] = field(default_factory=lambda: DEFAULT_DEFORMERS)
+    deformers: list[type["Deformer"]] = field(default_factory=lambda: DEFAULT_DEFORMERS)
     metrics: list = field(default_factory=list)
 
     TARGET_HOST_TERM: ClassVar[str] = "service_host"
@@ -85,7 +85,7 @@ class TransferMetricHelper:
     def __post_init__(self):
         self.deformers_map = {x.KEY: x for x in self.deformers}
 
-    def ingest_keys(self, _prefix: str, keys: List[str]) -> List[Tuple[str, str]]:
+    def ingest_keys(self, _prefix: str, keys: list[str]) -> list[tuple[str, str]]:
         """消化原始 keys 提供 session 级的 transfer 实例数据"""
         targets = defaultdict(dict)
         for key in keys:
@@ -119,7 +119,7 @@ class TransferMetricHelper:
         """
         return [(x[self.TARGET_HOST_TERM], x[self.TARGET_PORT_TERM]) for x in targets.values()]
 
-    def fetch_target_url(self, key_pair: Tuple[str, str]) -> str:
+    def fetch_target_url(self, key_pair: tuple[str, str]) -> str:
         """通过 consul key 组装成采集目标 URL"""
         value_pair = []
         # key_pair: (xxx/service_host, xxxx/service_port)
@@ -178,7 +178,7 @@ class TransferMetricHelper:
             if result:
                 self.metrics.extend(self._transfer(timestamp, result.values()))
 
-    def _transfer(self, timestamp: int, samples_list: List[Sample]) -> List[dict]:
+    def _transfer(self, timestamp: int, samples_list: list[Sample]) -> list[dict]:
         """将 Prometheus Sample 转换成目标数据格式"""
         data = []
         for samples in samples_list:

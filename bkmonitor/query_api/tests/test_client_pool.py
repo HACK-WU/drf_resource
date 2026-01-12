@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,7 @@ specific language governing permissions and limitations under the License.
 from query_api.drivers.influxdb import pool as influxdb_pool
 
 
-class TestInfluxDBClientPool(object):
+class TestInfluxDBClientPool:
     def test_poll_size(self):
 
         connect_args_list = [{"host": "127.0.0.1", "port": i} for i in range(8086, 8100)]

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -39,7 +38,7 @@ class ActionProcessor(BaseActionProcessor):
     """
 
     def __init__(self, action_id, alerts=None):
-        super(ActionProcessor, self).__init__(action_id, alerts=alerts)
+        super().__init__(action_id, alerts=alerts)
         self.execute_config = self.action_config["execute_config"]
         self.backend_config = self.action.action_plugin.get("backend_config", {})
         self.function_config = {item["function"]: item for item in self.backend_config}

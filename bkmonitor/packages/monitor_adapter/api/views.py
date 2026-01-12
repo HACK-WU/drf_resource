@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,7 +19,7 @@ def version_info(request):
     version_file = os.path.join(settings.BASE_DIR, 'VERSION')
     version = ""
     if os.path.exists(version_file) and os.path.isfile(version_file):
-        with open(version_file, 'r') as f:
+        with open(version_file) as f:
             version = f.read()
 
     return HttpResponse(version.strip(), content_type='text/plain')

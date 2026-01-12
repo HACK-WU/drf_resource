@@ -9,7 +9,7 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 from copy import copy
-from typing import Any, Dict
+from typing import Any
 
 from django.conf import settings
 from django.core.paginator import Paginator
@@ -64,7 +64,7 @@ class CollectConfigListResource(Resource):
     """
 
     def __init__(self):
-        super(CollectConfigListResource, self).__init__()
+        super().__init__()
         self.realtime_data = {}  # 采集配置实时数据结果
         self.service_type_data = {}  # 服务分类数据
         self.plugin_release_version = {}  # 插件最新版本，用于检查采集配置是否需要升级
@@ -528,7 +528,7 @@ class RenameCollectConfigResource(Resource):
         id = serializers.IntegerField(label="采集配置ID")
         name = serializers.CharField(label="名称")
 
-    def perform_request(self, params: Dict):
+    def perform_request(self, params: dict):
         CollectConfigMeta.objects.filter(id=params["id"], bk_biz_id=params["bk_biz_id"]).update(name=params["name"])
         return "success"
 
@@ -543,7 +543,7 @@ class ToggleCollectConfigStatusResource(Resource):
         id = serializers.IntegerField(required=True, label="采集配置ID")
         action = serializers.ChoiceField(required=True, choices=["enable", "disable"], label="启停配置")
 
-    def perform_request(self, params: Dict):
+    def perform_request(self, params: dict):
         config_id = params["id"]
         action = params["action"]
 
@@ -677,7 +677,7 @@ class RetryTargetNodesResource(Resource):
         id = serializers.IntegerField(required=True, label="采集配置ID")
         instance_id = serializers.CharField(required=True, label="需要重试的实例id")
 
-    def perform_request(self, params: Dict[str, Any]):
+    def perform_request(self, params: dict[str, Any]):
         try:
             collect_config = CollectConfigMeta.objects.select_related("deployment_config").get(
                 id=params["id"], bk_biz_id=params["bk_biz_id"]
@@ -702,7 +702,7 @@ class RevokeTargetNodesResource(Resource):
         id = serializers.IntegerField(label="采集配置ID")
         instance_ids = serializers.ListField(label="需要终止的实例ID")
 
-    def perform_request(self, params: Dict[str, Any]):
+    def perform_request(self, params: dict[str, Any]):
         try:
             collect_config = CollectConfigMeta.objects.select_related("deployment_config").get(
                 id=params["id"], bk_biz_id=params["bk_biz_id"]
@@ -732,7 +732,7 @@ class RunCollectConfigResource(Resource):
         bk_biz_id = serializers.IntegerField(label="业务ID")
         id = serializers.IntegerField(label="采集配置ID")
 
-    def perform_request(self, params: Dict[str, Any]):
+    def perform_request(self, params: dict[str, Any]):
         try:
             collect_config = CollectConfigMeta.objects.select_related("deployment_config").get(
                 id=params["id"], bk_biz_id=params["bk_biz_id"]
@@ -756,7 +756,7 @@ class BatchRevokeTargetNodesResource(Resource):
         bk_biz_id = serializers.IntegerField(label="业务ID")
         id = serializers.IntegerField(label="采集配置ID")
 
-    def perform_request(self, params: Dict[str, Any]):
+    def perform_request(self, params: dict[str, Any]):
         try:
             collect_config = CollectConfigMeta.objects.select_related("deployment_config").get(
                 id=params["id"], bk_biz_id=params["bk_biz_id"]
@@ -782,7 +782,7 @@ class GetCollectLogDetailResource(Resource):
         instance_id = serializers.CharField(label="主机/实例id")
         task_id = serializers.IntegerField(label="任务id")
 
-    def perform_request(self, params: Dict[str, Any]):
+    def perform_request(self, params: dict[str, Any]):
         try:
             config = CollectConfigMeta.objects.select_related("deployment_config").get(
                 id=params["id"], bk_biz_id=params["bk_biz_id"]
@@ -803,7 +803,7 @@ class BatchRetryConfigResource(Resource):
         bk_biz_id = serializers.IntegerField(label="业务ID")
         id = serializers.IntegerField(label="采集配置ID")
 
-    def perform_request(self, params: Dict[str, Any]):
+    def perform_request(self, params: dict[str, Any]):
         try:
             config = CollectConfigMeta.objects.select_related("deployment_config").get(
                 id=params["id"], bk_biz_id=params["bk_biz_id"]
@@ -942,7 +942,7 @@ class SaveCollectConfigResource(Resource):
                 for rule in rules:
                     rule_name = rule["name"]
                     if rule_name in name_set:
-                        raise CollectConfigParamsError(msg="Duplicate keyword rule name({})".format(rule_name))
+                        raise CollectConfigParamsError(msg=f"Duplicate keyword rule name({rule_name})")
                     name_set.add(rule_name)
 
             # 克隆时 插件 bk-pull 密码不能为bool
@@ -1028,7 +1028,7 @@ class SaveCollectConfigResource(Resource):
             # mode 为 "plugin" 时，如果密码不改变，不会传入，获取到 None
             # mode 为 "collector" 时，如果密码不改变，传入值为 bool 类型（由详情接口返回的）
             # 这两种情况要替换为实际值（默认值兜底）
-            if isinstance(received_password, (type(None), bool)):
+            if isinstance(received_password, type(None) | bool):
                 default_password = param["default"]
                 actual_password = deployment_params[param_mode].get(param_name, default_password)
                 data["params"][param_mode][param_name] = actual_password
@@ -1071,7 +1071,7 @@ class SaveCollectConfigResource(Resource):
             if not settings.TENCENT_CLOUD_METRIC_PLUGIN_CONFIG:
                 raise ValueError("TENCENT_CLOUD_METRIC_PLUGIN_CONFIG is not set, please contact administrator")
 
-            plugin_config: Dict[str, Any] = settings.TENCENT_CLOUD_METRIC_PLUGIN_CONFIG
+            plugin_config: dict[str, Any] = settings.TENCENT_CLOUD_METRIC_PLUGIN_CONFIG
             plugin_params = {
                 "plugin_id": plugin_id,
                 "bk_biz_id": data['bk_biz_id'],

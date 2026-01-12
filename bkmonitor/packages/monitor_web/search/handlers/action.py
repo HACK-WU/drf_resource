@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import time
-from typing import List
 
 from django.utils.translation import gettext as _
 
@@ -17,7 +15,7 @@ class ActionSearchHandler(BaseSearchHandler):
     SCENE = "action"
     QUERY_DAYS = 7
 
-    def search(self, query: str, limit: int = 10) -> List[SearchResultItem]:
+    def search(self, query: str, limit: int = 10) -> list[SearchResultItem]:
         end_time = int(time.time())
         start_time = end_time - self.QUERY_DAYS * 24 * 60 * 60
 

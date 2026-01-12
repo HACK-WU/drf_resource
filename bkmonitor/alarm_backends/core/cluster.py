@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import time
-from typing import List
 
 from django.conf import settings
 
@@ -43,14 +41,14 @@ def get_cluster() -> Cluster:
     return _cluster
 
 
-def filter_bk_biz_ids(bk_biz_ids: List[int]) -> List[int]:
+def filter_bk_biz_ids(bk_biz_ids: list[int]) -> list[int]:
     """
     过滤出集群需要处理的业务ID
     """
     return get_cluster().filter(TargetType.biz, bk_biz_ids)
 
 
-def get_cluster_bk_biz_ids() -> List[int]:
+def get_cluster_bk_biz_ids() -> list[int]:
     """
     获取集群需要处理的业务ID
     """

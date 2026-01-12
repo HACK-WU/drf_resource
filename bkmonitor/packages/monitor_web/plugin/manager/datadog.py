@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -48,7 +47,7 @@ class DataDogPluginManager(PluginManager):
 
     def make_package(self, **kwargs):
         kwargs.update(dict(add_dirs=self.fetch_lib_dirs()))
-        return super(DataDogPluginManager, self).make_package(**kwargs)
+        return super().make_package(**kwargs)
 
     def _get_debug_config_context(self, config_version, info_version, param, target_nodes):
         collector_data = param["collector"]
@@ -72,9 +71,7 @@ class DataDogPluginManager(PluginManager):
 
         collector_params[
             "command"
-        ] = "{{{{ step_data.{}.control_info.setup_path }}}}/{{{{ step_data.{}.control_info.start_cmd }}}}".format(
-            self.plugin.plugin_id, self.plugin.plugin_id
-        )
+        ] = f"{{{{ step_data.{self.plugin.plugin_id}.control_info.setup_path }}}}/{{{{ step_data.{self.plugin.plugin_id}.control_info.start_cmd }}}}"
 
         deploy_steps = [
             {
@@ -112,7 +109,7 @@ class DataDogPluginManager(PluginManager):
             if not os.path.exists(lib_path):
                 raise PluginParseError({"msg": _("缺少 lib 文件夹")})
 
-            lib_tar_name = "{}-lib-{}".format(self.plugin.plugin_id, sys_name)
+            lib_tar_name = f"{self.plugin.plugin_id}-lib-{sys_name}"
 
             file_manager = PluginFileManager.save_dir(dir_path=lib_path, dir_name=lib_tar_name)
             collector_json[sys_name] = {
@@ -163,7 +160,7 @@ class DataDogPluginFileManager(PluginFileManager):
         lib_path = os.path.join(plugin_os_path, os.listdir(plugin_os_path)[0], "lib")
         if not os.path.exists(lib_path):
             raise PluginParseError({"msg": _("缺少 lib 文件夹")})
-        lib_tar_name = "{}-lib-{}".format(check_name, os_type)
+        lib_tar_name = f"{check_name}-lib-{os_type}"
         file_manager = cls.save_dir(dir_path=lib_path, dir_name=lib_tar_name, plugin_id=plugin_id)
         ret = {
             "file_id": file_manager.file_obj.id,
@@ -201,7 +198,7 @@ class DataDogPluginFileManager(PluginFileManager):
             conf_yaml_path = os.path.join(plugin_base, os.listdir(plugin_base)[0], "etc", "conf.yaml.example")
             if not os.path.exists(conf_yaml_path):
                 raise PluginParseError({"msg": _("缺少 conf.yaml.example 配置模板文件")})
-        with open(conf_yaml_path, "r", encoding="utf-8") as fp:
+        with open(conf_yaml_path, encoding="utf-8") as fp:
             conf_content = fp.read()
         return conf_content
 
@@ -210,7 +207,7 @@ class DataDogPluginFileManager(PluginFileManager):
         meta_yaml_path = os.path.join(plugin_base, os.listdir(plugin_base)[0], "info", "meta.yaml")
         if not os.path.exists(meta_yaml_path):
             raise PluginParseError({"msg": _("缺少 meta.yaml 配置模板文件")})
-        with open(meta_yaml_path, "r", encoding="utf-8") as fp:
+        with open(meta_yaml_path, encoding="utf-8") as fp:
             datadog_check_name = ""
             for line in fp.readlines():
                 if "datadog_check_name" in line:

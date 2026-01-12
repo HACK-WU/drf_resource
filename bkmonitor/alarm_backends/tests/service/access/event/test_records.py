@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -40,7 +39,7 @@ def mock_arrow(mocker):
 
 
 @pytest.mark.usefixtures("mock_arrow")
-class TestGseEventRecords(object):
+class TestGseEventRecords:
     def test_agent(self, mocker):
         get_strategy_by_id = mocker.patch.object(StrategyCacheManager, "get_strategy_by_id")
         get_strategy_by_id.return_value = copy.deepcopy(AGENT_LOSE_STRATEGY)
@@ -188,7 +187,7 @@ class TestGseEventRecords(object):
 
 
 @pytest.mark.usefixtures("mock_arrow")
-class TestCustomEventRecords(object):
+class TestCustomEventRecords:
     def test_custom_str(self, mocker):
         get_strategy_by_id = mocker.patch.object(StrategyCacheManager, "get_strategy_by_id")
         get_strategy_by_id.return_value = copy.deepcopy(CUSTOM_STR_STRATEGY)
@@ -218,7 +217,7 @@ class TestCustomEventRecords(object):
 
 
 @pytest.mark.usefixtures("mock_arrow")
-class TestGseProcessEventRecords(object):
+class TestGseProcessEventRecords:
     def test_custom_str(self, mocker):
         get_strategy_by_id = mocker.patch.object(StrategyCacheManager, "get_strategy_by_id")
         get_strategy_by_id.return_value = copy.deepcopy(PROCESS_EVENT_STRATEGY)

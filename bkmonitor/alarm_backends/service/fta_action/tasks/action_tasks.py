@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -60,7 +59,7 @@ def run_action(action_type, action_info):
     :return:
     """
     # import action's call function
-    module_name = "alarm_backends.service.fta_action.%s.processor" % action_type or action_info.get("module")
+    module_name = f"alarm_backends.service.fta_action.{action_type}.processor" or action_info.get("module")
     # logger.info("$%s Action start, call back module name %s", action_info["id"], action_type)
     logger.info(f"[run_action_worker] action({action_info['id']}) {action_type} begin import {module_name}")
     try:
@@ -234,7 +233,7 @@ def sync_action_instances_every_10_secs(last_sync_time=None):
         logger.info("[get service lock fail] sync_action_instances_every_10_secs. will process later")
         return
     except BaseException as e:  # NOCC:broad-except(设计如此:)
-        logger.exception("[process error] sync_action_instances_every_10_secs, reason：{msg}".format(msg=str(e)))
+        logger.exception(f"[process error] sync_action_instances_every_10_secs, reason：{str(e)}")
         return
 
 
@@ -369,7 +368,7 @@ def check_timeout_actions():
         logger.info("[get service lock fail] check timeout action. will process later")
         return
     except BaseException as e:  # NOCC:broad-except(设计如此:)
-        logger.exception("[process error] check timeout action, reason：{msg}".format(msg=str(e)))
+        logger.exception(f"[process error] check timeout action, reason：{str(e)}")
         return
 
 
@@ -389,7 +388,7 @@ def execute_demo_actions():
         logger.info("[get service lock fail] run demo action. will process later")
         return
     except BaseException as e:  # NOCC:broad-except(设计如此:)
-        logger.exception("[process error] run demo action, reason：{msg}".format(msg=str(e)))  # NOCC:broad-except(设计如此:)
+        logger.exception(f"[process error] run demo action, reason：{str(e)}")  # NOCC:broad-except(设计如此:)
         return
 
 

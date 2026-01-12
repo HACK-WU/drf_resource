@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -26,7 +25,7 @@ def get_env_list(env_prefix):
     index = 0
     result = []
     while True:
-        current_name = "{}{}".format(env_prefix, index)
+        current_name = f"{env_prefix}{index}"
         current_value = os.getenv(current_name)
 
         # 此轮已经不能再获取新的变量了，可以返回
@@ -37,5 +36,5 @@ def get_env_list(env_prefix):
         result.append(current_value)
         index += 1
 
-    logger.info("env->[{}] got total env count->[{}]".format(env_prefix, index))
+    logger.info(f"env->[{env_prefix}] got total env count->[{index}]")
     return result

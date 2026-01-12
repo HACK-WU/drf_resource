@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -35,7 +34,7 @@ def object_md5(info):
     else:
         info_str = str(info)
 
-    logger.debug("info->[{}] is strinfy to->[{}]".format(info, info_str))
+    logger.debug(f"info->[{info}] is strinfy to->[{info_str}]")
 
     m = hashlib.md5()
     if isinstance(info_str, str):
@@ -85,14 +84,14 @@ def _trans_dict_to_str(d):
     for key in key_list:
         # 如果是字典，继续递归
         if isinstance(d[key], dict):
-            result_list.append("{}={}".format(key, _trans_dict_to_str(d[key])))
+            result_list.append(f"{key}={_trans_dict_to_str(d[key])}")
 
         # 否则，遍历所有的内容，看看是否有字典
         elif isinstance(d[key], list):
-            result_list.append("{}={}".format(key, _trans_list_to_str(d[key])))
+            result_list.append(f"{key}={_trans_list_to_str(d[key])}")
 
         # 如果是整形或者字符串
         else:
-            result_list.append("{}={}".format(key, d[key]))
+            result_list.append(f"{key}={d[key]}")
 
     return "&".join(result_list)

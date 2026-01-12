@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -49,7 +48,7 @@ def patch_redis_tools(mocker):
 def patch_consul_tool(mocker):
     kv_store = {}
 
-    class MockConsul(object):
+    class MockConsul:
         def put(self, key, value):
             kv_store[key] = json.dumps(value)
 

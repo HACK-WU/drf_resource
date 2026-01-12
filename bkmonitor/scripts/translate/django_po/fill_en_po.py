@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -23,7 +22,7 @@ def safe_encode(s):
         return s
 
 
-class ScanPoFile(object):
+class ScanPoFile:
     def __init__(self):
         self.translator = GooleTrans(
             service_urls=[
@@ -40,10 +39,10 @@ class ScanPoFile(object):
             random_int = random.random()
             time.sleep(random_int)
             t = self.translator.translate(ready_to_tran, dest="en")
-            print("翻译成功:{}-->{}".format(ready_to_tran, t.text))
+            print(f"翻译成功:{ready_to_tran}-->{t.text}")
             return t.text
         except Exception as e:
-            print("翻译失败, 原因:{}, 当前语句：{}".format(e, ready_to_tran))
+            print(f"翻译失败, 原因:{e}, 当前语句：{ready_to_tran}")
             return "翻译失败"
 
     def scan(self, po_file):

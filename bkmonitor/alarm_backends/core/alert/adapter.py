@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 import copy
 import json
 import time as time_mod
-from typing import Dict, List
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -33,7 +31,7 @@ class MonitorEventAdapter:
     SPECIAL_ALERT_TAG_KEY_WHITELIST = [DoubleCheckStrategy.DOUBLE_CHECK_CONTEXT_KEY]
 
     @classmethod
-    def push_to_kafka(cls, events: List[Dict]):
+    def push_to_kafka(cls, events: list[dict]):
         """
         将事件推送到 Kafka，提供给故障自愈进行消费
         :param events: 从 Adapter 解析出来的事件对象
@@ -155,7 +153,7 @@ class MonitorEventAdapter:
         return event
 
     @classmethod
-    def extract_target(cls, strategy: Dict, dimensions: Dict, dimension_fields: List[str] = None):
+    def extract_target(cls, strategy: dict, dimensions: dict, dimension_fields: list[str] = None):
         """
         解析事件的 target，将对应的维度pop出去
         返回 target_type, target, data_dimensions

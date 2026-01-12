@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -17,10 +16,10 @@ pwd = os.path.dirname(__file__)
 
 
 def update_plugin_data(apps, schema_editor):
-    with open(os.path.join(pwd, "prometheus_plugins.json"), "r") as fd:
+    with open(os.path.join(pwd, "prometheus_plugins.json")) as fd:
         prometheus_plugins = json.loads(fd.read())
 
-    with open(os.path.join(pwd, "built_in_plugins.json"), "r") as fd:
+    with open(os.path.join(pwd, "built_in_plugins.json")) as fd:
         built_in_plugins = json.loads(fd.read())
 
     data = prometheus_plugins + built_in_plugins
@@ -35,7 +34,7 @@ def update_plugin_data(apps, schema_editor):
     for config in data:
         config["meta"]["is_internal"] = True
         plugin_meta, _ = CollectorPluginMeta.objects.update_or_create(
-            plugin_id="bkplugin_%s" % config["meta"].pop("plugin_id"),
+            plugin_id="bkplugin_{}".format(config["meta"].pop("plugin_id")),
             defaults=dict(config["meta"], **operator_info),
         )
         plugin_info, _ = CollectorPluginInfo.objects.update_or_create(defaults=operator_info, **config["info"])

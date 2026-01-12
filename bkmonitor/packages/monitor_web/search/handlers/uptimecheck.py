@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from typing import List
 
 from django.utils.translation import gettext as _
 
@@ -15,7 +13,7 @@ from monitor_web.search.handlers.base import (
 class UptimecheckSearchHandler(BaseSearchHandler):
     SCENE = "uptimecheck"
 
-    def search_node(self, query: str, limit: int = 10) -> List[SearchResultItem]:
+    def search_node(self, query: str, limit: int = 10) -> list[SearchResultItem]:
         nodes = UptimeCheckNode.objects.filter(name__icontains=query).values("id", "bk_biz_id", "name")
 
         if self.scope == SearchScope.BIZ:
@@ -46,7 +44,7 @@ class UptimecheckSearchHandler(BaseSearchHandler):
         )
         return search_results
 
-    def search_task(self, query: str, limit: int = 10) -> List[SearchResultItem]:
+    def search_task(self, query: str, limit: int = 10) -> list[SearchResultItem]:
         tasks = UptimeCheckTask.objects.filter(name__icontains=query).values("id", "bk_biz_id", "name")
 
         if self.scope == SearchScope.BIZ:
@@ -77,7 +75,7 @@ class UptimecheckSearchHandler(BaseSearchHandler):
         )
         return search_results
 
-    def search(self, query: str, limit: int = 10) -> List[SearchResultItem]:
+    def search(self, query: str, limit: int = 10) -> list[SearchResultItem]:
         search_results = self.search_task(query, limit) + self.search_node(query, limit)
         self.add_permission_for_results(results=search_results, action=ActionEnum.VIEW_SYNTHETIC)
         return search_results

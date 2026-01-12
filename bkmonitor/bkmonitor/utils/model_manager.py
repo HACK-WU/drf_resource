@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +15,6 @@ from django.db import connections, models
 from django.db.models import signals
 from django.db.models.sql import InsertQuery
 from django.db.utils import OperationalError
-from six.moves import range
 
 from bkmonitor.utils.user import get_global_user
 
@@ -27,10 +25,10 @@ def close_all_django_db_connections():
             conn.close_if_unusable_or_obsolete()
 
 
-class AutoConnManagerMixin(object):
+class AutoConnManagerMixin:
     def __init__(self, *args, **kwargs):
         self.time = time.time()
-        super(AutoConnManagerMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get_queryset(self):
         if settings.DATABASE_CONNECTION_AUTO_CLEAN_INTERVAL:
@@ -39,10 +37,10 @@ class AutoConnManagerMixin(object):
                 close_all_django_db_connections()
                 self.time = time.time()
 
-        return super(AutoConnManagerMixin, self).get_queryset()
+        return super().get_queryset()
 
 
-class IgnoreBlurInsertMixin(object):
+class IgnoreBlurInsertMixin:
     @classmethod
     def _compiler_as_sql_hacker(cls, compiler):
         def as_sql(*args, **kwargs):
@@ -94,7 +92,7 @@ class Model(models.Model):
 
 class RecordModelManager(ModelManager):
     def get_queryset(self):
-        return super(RecordModelManager, self).get_queryset().filter(is_deleted=False)
+        return super().get_queryset().filter(is_deleted=False)
 
     def create(self, *args, **kwargs):
         kwargs.update({"create_user": get_global_user() or "unknown"})
@@ -146,11 +144,11 @@ class AbstractRecordModel(models.Model):
         self.update_user = username
         if self.pk is None:
             self.create_user = username
-        return super(AbstractRecordModel, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def delete(self, hard=False, *args, **kwargs):
         if hard:
-            return super(AbstractRecordModel, self).delete(*args, **kwargs)
+            return super().delete(*args, **kwargs)
 
         signals.pre_delete.send(sender=self.__class__, instance=self)
         username = get_global_user() or "unknown"

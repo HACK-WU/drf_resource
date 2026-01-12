@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -106,7 +105,7 @@ class CreateEventPluginResource(BaseEventPluginResource):
             plugin_id=request_data["plugin_id"], version=request_data.get("version")
         ).exists():
             raise PluginIDExistError({"plugin_id": request_data["plugin_id"], "version": request_data["version"]})
-        return super(CreateEventPluginResource, self).validate_request_data(request_data)
+        return super().validate_request_data(request_data)
 
     def perform_request(self, validated_data):
         serializer = get_serializer(validated_data["plugin_type"], data=validated_data)
@@ -133,7 +132,7 @@ class UpdateEventPluginResource(BaseEventPluginResource):
         :param request_data:
         :return:
         """
-        plugin_info = super(UpdateEventPluginResource, self).validate_request_data(request_data)
+        plugin_info = super().validate_request_data(request_data)
         request_data.update(plugin_info)
         return request_data
 
@@ -390,7 +389,7 @@ class ListEventPluginResource(BaseEventPluginResource):
 
 class EventPluginInstanceBaseResource(Resource):
     def __init__(self, context=None):
-        super(EventPluginInstanceBaseResource, self).__init__(context)
+        super().__init__(context)
         self.event_plugin = None
 
     def validate_poller_data(self, validated_data):
@@ -440,7 +439,7 @@ class CreateEventPluginInstanceResource(EventPluginInstanceBaseResource):
         clean_configs = CleanConfigSerializer(many=True, required=False)
 
     def validate_request_data(self, request_data):
-        validated_data = super(CreateEventPluginInstanceResource, self).validate_request_data(request_data)
+        validated_data = super().validate_request_data(request_data)
         try:
             self.event_plugin = EventPlugin.objects.get(
                 plugin_id=validated_data["plugin_id"],
@@ -477,11 +476,11 @@ class UpdateEventPluginInstanceResource(EventPluginInstanceBaseResource):
         normalization_config = NormalizationConfig(many=True, label="字段清洗规则", required=False)
 
     def __init__(self, context=None):
-        super(UpdateEventPluginInstanceResource, self).__init__(context)
+        super().__init__(context)
         self.instance = None
 
     def validate_request_data(self, request_data):
-        validated_data = super(UpdateEventPluginInstanceResource, self).validate_request_data(request_data)
+        validated_data = super().validate_request_data(request_data)
         try:
             self.instance = EventPluginInstance.objects.get(
                 id=validated_data["id"], bk_biz_id=validated_data["bk_biz_id"]

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -60,7 +59,7 @@ class UptimeCheckTaskAdmin(admin.ModelAdmin):
     list_filter = ("bk_biz_id", "protocol", "is_deleted", "update_user", "update_time")
 
     def get_nodes(self, obj):
-        return "\n".join(["{}-{}".format(str(p.id), p.name) for p in obj.nodes.all()])
+        return "\n".join([f"{str(p.id)}-{p.name}" for p in obj.nodes.all()])
 
 
 class UptimeCheckGroupAdmin(admin.ModelAdmin):
@@ -68,7 +67,7 @@ class UptimeCheckGroupAdmin(admin.ModelAdmin):
     list_filter = ("bk_biz_id", "is_deleted", "update_user", "update_time")
 
     def get_nodes(self, obj):
-        return "\n".join(["{}-{}".format(str(task.id), task.name) for task in obj.tasks.all()])
+        return "\n".join([f"{str(task.id)}-{task.name}" for task in obj.tasks.all()])
 
 
 admin.site.register(models.UserConfig, UserConfigAdmin)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -18,7 +17,7 @@ Category = namedtuple("Category", ["id", "name", "children"])
 Metric = namedtuple("Metric", ["id", "name", "unit", "unsupported_resource"])
 
 
-def get_metrics(scenario) -> List:
+def get_metrics(scenario) -> list:
     """
     获取指标
     """

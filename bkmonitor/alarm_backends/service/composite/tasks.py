@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 
 from alarm_backends.core.alert import Alert

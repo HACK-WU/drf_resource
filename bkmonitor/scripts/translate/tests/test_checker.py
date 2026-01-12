@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -31,7 +30,7 @@ from django.utils.translation import gettext as _, gettext_lazy as _lazy
 
 class TranslateFinderTest(unittest.TestCase):
     def test_import_finder(self):
-        with open("test_data.txt", "r") as f:
+        with open("test_data.txt") as f:
             node = ast.parse(f.read())
 
         for n in ast.walk(node):

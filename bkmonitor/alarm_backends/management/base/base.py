@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -42,7 +41,7 @@ class BaseCommand(DjangoBaseCommand, protocol.AbstractLifecycleMixin, protocol.A
     __UPTIME__ = time.time()
 
     def add_arguments(self, parser):
-        super(BaseCommand, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument(
             "--min-interval",
             type=int,
@@ -92,7 +91,7 @@ class BaseCommand(DjangoBaseCommand, protocol.AbstractLifecycleMixin, protocol.A
 
             pdb.set_trace()
 
-        super(BaseCommand, self).execute(*args, **options)
+        super().execute(*args, **options)
 
     def handle(self, *args, **options):
         signal.signal(signal.SIGTERM, self._onsignal)
@@ -100,7 +99,7 @@ class BaseCommand(DjangoBaseCommand, protocol.AbstractLifecycleMixin, protocol.A
 
         for option, value in six.iteritems(options):
             if option not in ("no_color", "pythonpath", "settings", "traceback", "verbosity") and value is not None:
-                attr = "_{}_".format(option.upper())
+                attr = f"_{option.upper()}_"
                 setattr(self, attr, options[option])
 
         #
@@ -150,7 +149,7 @@ class BaseCommand(DjangoBaseCommand, protocol.AbstractLifecycleMixin, protocol.A
 
 class ConsulDispatchCommand(dispatch.DefaultDispatchMixin, service_discovery.ConsulServiceDiscoveryMixin, BaseCommand):
     def add_arguments(self, parser):
-        super(ConsulDispatchCommand, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument(
             "--path-prefix",
         )
@@ -163,11 +162,9 @@ class ConsulDispatchCommand(dispatch.DefaultDispatchMixin, service_discovery.Con
     __COMMAND_NAME__ = None
 
     def __init__(self, *args, **kwargs):
-        super(ConsulDispatchCommand, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        self._PATH_PREFIX_ = "{}_{}_{}_{}/{}".format(
-            settings.APP_CODE, settings.PLATFORM, settings.ENVIRONMENT, get_cluster().name, self.__COMMAND_NAME__
-        )
+        self._PATH_PREFIX_ = f"{settings.APP_CODE}_{settings.PLATFORM}_{settings.ENVIRONMENT}_{get_cluster().name}/{self.__COMMAND_NAME__}"
 
     def dispatch(self):
         self.register()
@@ -187,7 +184,7 @@ class ConsulDispatchCommand(dispatch.DefaultDispatchMixin, service_discovery.Con
                 path = "/".join([self._PATH_PREFIX_, host_addr, instance])
                 info = self.get_registration_info(path)
                 if info:
-                    result.append(("{}/{}".format(host_addr, instance), info))
+                    result.append((f"{host_addr}/{instance}", info))
 
         return result
 

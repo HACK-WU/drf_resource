@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -33,7 +32,7 @@ class BcsClusterManagerBaseResource(BcsApiGatewayBaseResource):
 
     def get_request_url(self, validated_request_data):
         return (
-            super(BcsClusterManagerBaseResource, self)
+            super()
             .get_request_url(validated_request_data)
             .format(**validated_request_data)
         )
@@ -68,7 +67,7 @@ class FetchClustersResource(BcsClusterManagerBaseResource):
         return cluster_id_mapping_biz_id
 
     def perform_request(self, params):
-        clusters = super(FetchClustersResource, self).perform_request(params)
+        clusters = super().perform_request(params)
         cluster_id_mapping_biz_id = self.get_cluster_id_mapping_biz_id()
         for cluster in clusters:
             # 标记需要同步的业务集群列表
@@ -89,7 +88,7 @@ class GetProjectClustersResource(BcsClusterManagerBaseResource):
         exclude_shared_cluster = serializers.BooleanField(required=False, label="是否过滤掉共享集群", default=False)
 
     def perform_request(self, validated_request_data):
-        clusters = super(GetProjectClustersResource, self).perform_request(
+        clusters = super().perform_request(
             {"projectID": validated_request_data["project_id"]}
         )
         # 过滤掉共享集群
@@ -127,7 +126,7 @@ class GetProjectK8sNonSharedClustersResource(BcsClusterManagerBaseResource):
         project_id = serializers.CharField(required=False, label="项目 ID", default="")
 
     def perform_request(self, validated_request_data):
-        clusters = super(GetProjectK8sNonSharedClustersResource, self).perform_request(
+        clusters = super().perform_request(
             {"projectID": validated_request_data["project_id"]}
         )
         # 过滤掉共享集群

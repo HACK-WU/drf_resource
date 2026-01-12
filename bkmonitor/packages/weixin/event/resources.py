@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -33,7 +32,7 @@ from fta_web.alert.resources import (
 logger = logging.getLogger(__name__)
 
 
-class EventTargetMixin(object):
+class EventTargetMixin:
     @classmethod
     def get_target_display(cls, alert, topo_links=None):
         """
@@ -274,7 +273,7 @@ class GetEventGraphView(AlertPermissionResource):
 
         compare_series_name = ""
         if time_compare:
-            query_params["function"].update({"time_compare": ["{}h".format(time_compare)]})
+            query_params["function"].update({"time_compare": [f"{time_compare}h"]})
             compare_series_name = hms_string(timedelta(hours=time_compare).total_seconds())
         result = resource.alert.alert_graph_query(**query_params)
 
@@ -299,7 +298,7 @@ class GetEventGraphView(AlertPermissionResource):
                         continue
                     # 记录该点的时间
                     current_time = point[1]
-                    current = "{:g}".format(point[0])
+                    current = f"{point[0]:g}"
                     break
                 else:
                     current_time = 0
@@ -307,14 +306,14 @@ class GetEventGraphView(AlertPermissionResource):
                 # 查找对应时间的点
                 for point in datapoints:
                     if point[1] == current_time and point[0] is not None:
-                        current = "{:g}".format(point[0])
+                        current = f"{point[0]:g}"
 
             series["statistics"] = {
-                "min": "{:g}".format(min(points)) if points else "",
-                "max": "{:g}".format(max(points)) if points else "",
-                "avg": "{:g}".format(sum(points) / len(points)) if points else "",
+                "min": f"{min(points):g}" if points else "",
+                "max": f"{max(points):g}" if points else "",
+                "avg": f"{sum(points) / len(points):g}" if points else "",
                 "current": current,
-                "total": "{:g}".format(sum(points)),
+                "total": f"{sum(points):g}",
             }
 
         return result["series"]
@@ -341,7 +340,7 @@ class GetEventList(AlertPermissionResource, EventTargetMixin):
         for alert in alerts:
             event = alert.event_document
 
-            key = "{}|{}".format(alert.strategy_id, alert.severity)
+            key = f"{alert.strategy_id}|{alert.severity}"
             # 如果不存在分组则初始化
             if key not in result:
                 result[key] = {

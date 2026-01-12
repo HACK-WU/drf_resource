@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -137,7 +136,7 @@ class GrafanaSwitchOrgView(SwitchOrgView):
             if not self.is_allowed_external_request(request):
                 return HttpResponseForbidden(f"外部用户{request.external_user}无该仪表盘访问或操作权限")
 
-        return super(GrafanaSwitchOrgView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
 
 class GrafanaProxyView(ProxyView):
@@ -164,7 +163,7 @@ class GrafanaProxyView(ProxyView):
             user = auth.authenticate(username=authorizer)
             setattr(request, "user", user)
 
-        response = super(GrafanaProxyView, self).dispatch(request, *args, **kwargs)
+        response = super().dispatch(request, *args, **kwargs)
 
         # 这里对 Home 仪表盘进行 patch，替换为指定的面板
         if request.method == "GET" and request.path.rstrip("/").endswith("/api/dashboards/home"):
@@ -174,7 +173,7 @@ class GrafanaProxyView(ProxyView):
                 patched_content = json.dumps(origin_content)
                 return HttpResponse(patched_content, status=response.status_code)
             except Exception as e:
-                logger.exception("[patch home panels] error: {}".format(e))
+                logger.exception(f"[patch home panels] error: {e}")
                 # 异常则不替换了
                 return response
 
@@ -185,7 +184,7 @@ class GrafanaProxyView(ProxyView):
         return response
 
     def get_request_headers(self, request):
-        headers = super(GrafanaProxyView, self).get_request_headers(request)
+        headers = super().get_request_headers(request)
         # 单仪表盘权限适配
         for exempt_api in self.exempt_apis:
             if exempt_api.match(request.path):
@@ -194,7 +193,7 @@ class GrafanaProxyView(ProxyView):
         return headers
 
     def update_response(self, response, content):
-        content = super(GrafanaProxyView, self).update_response(response, content)
+        content = super().update_response(response, content)
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         return content.replace(
@@ -207,7 +206,7 @@ class ApiProxyView(GrafanaProxyView):
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
-        response = super(ApiProxyView, self).dispatch(request, *args, **kwargs)
+        response = super().dispatch(request, *args, **kwargs)
 
         # 过滤外部用户仪表盘
         if "api/search" in request.path:

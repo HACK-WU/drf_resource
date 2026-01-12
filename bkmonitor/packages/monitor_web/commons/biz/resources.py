@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 import json
 import logging
 import re
-from typing import List
 
 from django.conf import settings
 from django.core.cache import caches
@@ -126,21 +124,21 @@ class ListSpacesResource(Resource):
         show_detail = serializers.BooleanField(required=False, default=False, allow_null=True)
 
     @classmethod
-    def get_space_by_user(cls, username, use_cache=True) -> List[dict]:
+    def get_space_by_user(cls, username, use_cache=True) -> list[dict]:
         perm_client = Permission(username)
         return perm_client.filter_space_list_by_action(ActionEnum.VIEW_BUSINESS, use_cache)
 
-    def perform_request(self, validated_request_data) -> List[dict]:
+    def perform_request(self, validated_request_data) -> list[dict]:
         username = get_request_username()
 
         if validated_request_data["show_all"]:
             # 针对特定用户名屏蔽空间信息
             if settings.BLOCK_SPACE_RULE and re.search(settings.BLOCK_SPACE_RULE, username):
-                spaces: List[dict] = self.get_space_by_user(username)
+                spaces: list[dict] = self.get_space_by_user(username)
             else:
-                spaces: List[dict] = SpaceApi.list_spaces_dict()
+                spaces: list[dict] = SpaceApi.list_spaces_dict()
         else:
-            spaces: List[dict] = self.get_space_by_user(username)
+            spaces: list[dict] = self.get_space_by_user(username)
 
         if validated_request_data["show_detail"]:
             list(map(self.enrich_space_func, spaces))
@@ -388,7 +386,7 @@ class SpaceIntroduceResource(CacheResource):
                 },
             }
 
-        tag_intro_key = "introduce:{}:{}".format(tag, bk_biz_id)
+        tag_intro_key = f"introduce:{tag}:{bk_biz_id}"
         func = {
             "performance": performance,
             "uptime-check": uptime_check,
@@ -415,7 +413,7 @@ class SpaceIntroduceResource(CacheResource):
             try:
                 return self.get_introduce(tag, bk_biz_id)
             except BKAPIError as e:
-                logger.exception("get biz({}) introduce error: {}".format(bk_biz_id, e))
+                logger.exception(f"get biz({bk_biz_id}) introduce error: {e}")
                 return {}
         else:
             tags = ['performance', 'uptime-check', 'apm-home', 'k8s', 'custom-scenes', 'collect-config']

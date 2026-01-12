@@ -1,7 +1,7 @@
 [tool.black]
 line-length = 120
 include = '\.pyi?$'
-skip-string-normalization = 'true'
+skip-string-normalization = true
 exclude = '''
 /(
     \.git
@@ -36,3 +36,18 @@ max-complexity = 25
 format = "pylint"
 exclude = "*config*,*migrations*,*.pyc,.git,__pycache__.tox,docs,old,build,dist,*.egg-info,.cache,.eggs"
 
+[tool.pytest.ini_options]
+# 测试 drf_resource 模块，完全独立不依赖 bkmonitor
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+testpaths = ["tests/api_explorer"]
+pythonpath = "."
+console_output_style = "progress"
+addopts = "-v --strict-markers --tb=short -p no:django -p no:dotenv"
+markers = [
+    "slow: 标记为慢速测试",
+    "unit: 单元测试",
+    "integration: 集成测试",
+    "api: API 测试",
+]

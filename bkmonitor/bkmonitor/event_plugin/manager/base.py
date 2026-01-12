@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 
 import abc
-from typing import Type
 
 from bkmonitor.event_plugin.accessor import EventPluginInstAccessor
 from bkmonitor.event_plugin.constant import CollectType
@@ -32,7 +30,7 @@ class BaseEventPluginManager(metaclass=abc.ABCMeta):
         self.accessor = EventPluginInstAccessor(plugin_inst)
 
     @classmethod
-    def get_serializer_class(cls) -> Type[EventPluginBaseSerializer]:
+    def get_serializer_class(cls) -> type[EventPluginBaseSerializer]:
         raise NotImplementedError
 
     def get_datasource_option(self) -> dict:

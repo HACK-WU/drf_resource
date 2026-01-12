@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -19,7 +18,7 @@ from alarm_backends.service.access.data.records import DataRecord
 from .config import FORMAT_RAW_DATA, STANDARD_DATA, STRATEGY_CONFIG_V3
 
 
-class TestRecords(object):
+class TestRecords:
     def test_record(self, mocker):
         get_strategy_by_id = mocker.patch.object(StrategyCacheManager, "get_strategy_by_id")
         get_strategy_by_id.return_value = copy.deepcopy(STRATEGY_CONFIG_V3)

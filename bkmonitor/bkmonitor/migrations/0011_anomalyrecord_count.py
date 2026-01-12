@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -31,14 +30,14 @@ def pre_check(apps, *args, **kwargs):
         global_config = apps.get_model("bkmonitor", "GlobalConfig")
         reserved_days = global_config.objects.get(key="TS_DATA_SAVED_DAYS").value
         raise MigrateError(
-            "\n[ERROR]异常记录数过多,当前数量为{}，您可以按以下流程完成操作:\n"
-            "1、减小全局配置中'监控采集数据保存天数'的值来减少存储量,当前值为{};\n"
+            f"\n[ERROR]异常记录数过多,当前数量为{count}，您可以按以下流程完成操作:\n"
+            f"1、减小全局配置中'监控采集数据保存天数'的值来减少存储量,当前值为{reserved_days};\n"
             "2、清理异常记录至200万以下，操作方法：\n"
             "登录后台执行:\n"
             "workon bkmonitorv3-monitor\n"
             "./bin/manage.sh run_clean\n"
             "3、停止后台进程后部署SaaS;\n"
-            "4、部署后台".format(count, reserved_days)
+            "4、部署后台"
         )
     if count > NEED_STOP_RECORD_COUNT:
         try:

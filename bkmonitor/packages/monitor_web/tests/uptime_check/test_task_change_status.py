@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import pytest
 from django.utils.translation import gettext as _
-from mock import Mock
+from unittest.mock import Mock
 
 from drf_resource.exceptions import CustomException
 from monitor_web.models.uptime_check import UptimeCheckTask
@@ -39,7 +38,7 @@ def mock_change_status_flow():
 
 
 @pytest.mark.django_db
-class TestTaskChangeStatus(object):
+class TestTaskChangeStatus:
     def test_change_status(self, mocker):
         task = mock_change_status_flow()
         strategy_func = mock_strategy_func(mocker)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -74,7 +73,7 @@ def add_gse_custom_report_aggregation_datasource(apps, *args, **kwargs):
         {"name": "disable_metric_cutter", "value": "true", "value_type": "string"},  # 上报influxdb的时候不打散metric field
         {
             "name": "metrics_report_path",
-            "value": "{}/influxdb_metrics/{}/time_series_metric".format(config.CONSUL_PATH, data_id),
+            "value": f"{config.CONSUL_PATH}/influxdb_metrics/{data_id}/time_series_metric",
             "value_type": "string",
         },
     ]

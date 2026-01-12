@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -38,7 +37,7 @@ class HostAnomalyDetection(BasicAlgorithmsCollection):
         )
 
     def get_context(self, data_point):
-        context = super(HostAnomalyDetection, self).get_context(data_point)
+        context = super().get_context(data_point)
         anomaly_sort = parse_anomaly(data_point.values["anomaly_sort"], self.config)
         extra_info = data_point.values["extra_info"]
         context.update({"anomaly_sort": anomaly_sort, "extra_info": extra_info})

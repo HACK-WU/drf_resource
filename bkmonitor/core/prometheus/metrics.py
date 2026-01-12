@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -38,7 +37,7 @@ DEPLOYMENT = DeploymentNotSet
 
 def refresh_deployment():
     try:
-        with open('/etc/hostname', 'r') as f:
+        with open('/etc/hostname') as f:
             hostname = f.read().strip()
         if hostname.count("-") < 2:
             return ""

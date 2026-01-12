@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -35,7 +34,7 @@ from bk_audit.log.models import AuditContext, AuditInstance
 from bkmonitor.iam import ActionEnum
 
 
-class BaseMonitorInstance(object):
+class BaseMonitorInstance:
 
     action = None
     resource_id = ""
@@ -50,7 +49,7 @@ class BaseMonitorInstance(object):
 
     @property
     def resource_type(self):
-        class ResourceType(object):
+        class ResourceType:
             id = ""
 
         _resource_type = ResourceType()

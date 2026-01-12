@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,7 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 from collections import OrderedDict, defaultdict
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING
 
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext as _
@@ -28,19 +27,19 @@ if TYPE_CHECKING:
     from alarm_backends.service.detect.strategy import BasicAlgorithmsCollection  # noqa
 
 
-def load_detector_cls(_type) -> Type["BasicAlgorithmsCollection"]:
+def load_detector_cls(_type) -> type["BasicAlgorithmsCollection"]:
     algorithms_target = camel_to_underscore(_type)
     package_name = "alarm_backends.service.detect"
-    cls_target = "{}.strategy.{}.{}".format(package_name, algorithms_target, _type)
+    cls_target = f"{package_name}.strategy.{algorithms_target}.{_type}"
     try:
         cls = import_string(cls_target)
     except ImportError:
-        logger.error("detector load error: {}".format(cls_target))
+        logger.error(f"detector load error: {cls_target}")
         cls = None
     return cls
 
 
-class DetectMixin(object):
+class DetectMixin:
     def detect(self, data_points):
         if not data_points:
             return []
@@ -120,9 +119,7 @@ class DetectMixin(object):
                     if ap:
                         ap.anomaly_message = prefix + ap.anomaly_message + suffix
                         logger.info(
-                            "[detect] strategy({}) item({}) level[{}] 发现异常点: {}".format(
-                                ap.data_point.item.strategy.id, ap.data_point.item.id, level, ap.__dict__
-                            )
+                            f"[detect] strategy({ap.data_point.item.strategy.id}) item({ap.data_point.item.id}) level[{level}] 发现异常点: {ap.__dict__}"
                         )
                         anomaly_records.append(ap)
 
@@ -168,9 +165,9 @@ class DetectMixin(object):
                 redis_pipeline = check_result.CHECK_RESULT
 
             if d.record_id in anomaly_record_ids:
-                name = "{}|{}".format(timestamp, ANOMALY_LABEL)
+                name = f"{timestamp}|{ANOMALY_LABEL}"
             else:
-                name = "{}|{}".format(timestamp, str(d.value))
+                name = f"{timestamp}|{str(d.value)}"
 
             try:
                 # 1. 缓存数据(检测结果缓存) type:SortedSet
@@ -183,7 +180,7 @@ class DetectMixin(object):
                     last_checkpoints[dimensions_md5] = timestamp
 
             except Exception as e:
-                msg = "set check result cache error:%s" % e
+                msg = f"set check result cache error:{e}"
                 logger.exception(msg)
 
         if redis_pipeline:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ import base64
 import datetime
 import logging
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -36,7 +34,7 @@ from drf_resource.exceptions import CustomException
 logger = logging.getLogger("bkmonitor.cron_report")
 
 
-def split_graph_id(graph_id: str) -> Tuple[str, str, str]:
+def split_graph_id(graph_id: str) -> tuple[str, str, str]:
     """
     分割图表ID
     分为三段，由减号分隔
@@ -54,7 +52,7 @@ def split_graph_id(graph_id: str) -> Tuple[str, str, str]:
     return result.group(1, 4, 5)
 
 
-def chunk_list(items: List, chunk_size: int):
+def chunk_list(items: list, chunk_size: int):
     """
     对数组进行指定长度的分页
     :param items: 带分页数组
@@ -191,7 +189,7 @@ class ReportHandler:
         }
         self.item_id = item_id
 
-    def fetch_receivers(self, item_receivers: Optional[List[Dict]] = None) -> List[str]:
+    def fetch_receivers(self, item_receivers: list[dict] | None = None) -> list[str]:
         """
         获取所有需要接收邮件的人
         :return: 接收邮件的名单
@@ -403,7 +401,7 @@ class ReportHandler:
         ]
 
         # 记录图表标题的中间变量
-        panel_names: Dict[Tuple[int, str], Dict[str, str]] = {}
+        panel_names: dict[tuple[int, str], dict[str, str]] = {}
 
         for content in contents:
             graphs = []
@@ -551,7 +549,7 @@ class ReportHandler:
                         logger.error("[mail_report] send.wxwork_group content failed, {}".format(response["errmsg"]))
                         failed.append(response["errmsg"])
                 except Exception as error:
-                    logger.error("[mail_report] send.wxwork_group content failed, {}".format(error))
+                    logger.error(f"[mail_report] send.wxwork_group content failed, {error}")
 
                 for graph in content["origin_graphs"]:
                     try:
@@ -562,7 +560,7 @@ class ReportHandler:
                         else:
                             success_count += 1
                     except Exception as error:
-                        logger.error("[mail_report] send.wxwork_group image failed, {}".format(error))
+                        logger.error(f"[mail_report] send.wxwork_group image failed, {error}")
 
             logger.info(
                 f"[mail_report] send_wxbot finished: {render_args['mail_title']},"

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 
 import logging
-from typing import Dict, List, Optional
 
 from django.db import models
 from django.db.models import Q
@@ -23,7 +21,7 @@ logger = logging.getLogger("metadata")
 
 class DataPipelineManager(models.Manager):
     def filter_data(
-        self, name: Optional[str] = None, chinese_name: Optional[str] = None, is_enable: Optional[str] = "all"
+        self, name: str | None = None, chinese_name: str | None = None, is_enable: str | None = "all"
     ) -> QuerySet:
         """根据条件过滤数据"""
         filter_params = {}
@@ -48,14 +46,14 @@ class DataPipelineManager(models.Manager):
         kafka_cluster_id: int,
         transfer_cluster_id: str,
         username: str,
-        chinese_name: Optional[str] = "",
-        label: Optional[str] = "",
-        influxdb_storage_cluster_id: Optional[int] = None,
-        kafka_storage_cluster_id: Optional[int] = None,
-        es_storage_cluster_id: Optional[int] = None,
-        vm_storage_cluster_id: Optional[int] = None,
-        is_enable: Optional[bool] = True,
-        description: Optional[str] = "",
+        chinese_name: str | None = "",
+        label: str | None = "",
+        influxdb_storage_cluster_id: int | None = None,
+        kafka_storage_cluster_id: int | None = None,
+        es_storage_cluster_id: int | None = None,
+        vm_storage_cluster_id: int | None = None,
+        is_enable: bool | None = True,
+        description: str | None = "",
     ) -> str:
         """
         创建记录
@@ -114,7 +112,7 @@ class DataPipelineManager(models.Manager):
         )
         return name
 
-    def get_name_by_cluster_ids(self, cluster_id_list: List) -> Dict:
+    def get_name_by_cluster_ids(self, cluster_id_list: list) -> dict:
         """通过集群 ID 获取链路名称"""
         # 过滤数据
         qs_data = self.filter(
@@ -156,7 +154,7 @@ class DataPipelineManager(models.Manager):
 
 class DataPipelineEtlConfigManager(models.Manager):
     def filter_data(
-        self, data_pipeline_name_list: Optional[List[str]] = None, etl_config: Optional[str] = None
+        self, data_pipeline_name_list: list[str] | None = None, etl_config: str | None = None
     ) -> QuerySet:
         """根据条件过滤数据"""
         filter_params = {}
@@ -169,7 +167,7 @@ class DataPipelineEtlConfigManager(models.Manager):
         return self.filter(**filter_params)
 
     def create_record(
-        self, data_pipeline_name: str, etl_configs: List[str], username: str, is_default: Optional[bool] = False
+        self, data_pipeline_name: str, etl_configs: list[str], username: str, is_default: bool | None = False
     ):
         """创建链路的使用场景记录
         :param data_pipeline_name: 链路名称
@@ -189,7 +187,7 @@ class DataPipelineEtlConfigManager(models.Manager):
         self.bulk_create(data)
 
     def update_record(
-        self, data_pipeline_name: str, etl_configs: List[str], username: str, is_default: Optional[bool] = False
+        self, data_pipeline_name: str, etl_configs: list[str], username: str, is_default: bool | None = False
     ):
         """更新记录
         :param data_pipeline_name: 链路名称
@@ -204,9 +202,9 @@ class DataPipelineEtlConfigManager(models.Manager):
 class DataPipelineSpaceManager(models.Manager):
     def filter_data(
         self,
-        data_pipeline_name_list: Optional[List[str]] = None,
-        space_type: Optional[str] = None,
-        space_id: Optional[str] = None,
+        data_pipeline_name_list: list[str] | None = None,
+        space_type: str | None = None,
+        space_id: str | None = None,
     ) -> QuerySet:
         """根据条件过滤数据"""
         filter_params = {}
@@ -221,7 +219,7 @@ class DataPipelineSpaceManager(models.Manager):
         return self.filter(**filter_params)
 
     def create_record(
-        self, data_pipeline_name: str, spaces: List[Dict], username: str, is_default: Optional[bool] = False
+        self, data_pipeline_name: str, spaces: list[dict], username: str, is_default: bool | None = False
     ):
         """创建记录
         :param data_pipeline_name: 链路名称
@@ -242,7 +240,7 @@ class DataPipelineSpaceManager(models.Manager):
         self.bulk_create(data)
 
     def update_record(
-        self, data_pipeline_name: str, spaces: List[str], username: str, is_default: Optional[bool] = False
+        self, data_pipeline_name: str, spaces: list[str], username: str, is_default: bool | None = False
     ):
         """更新记录
         :param data_pipeline_name: 链路名称
@@ -261,9 +259,9 @@ class DataPipelineDataSourceManager(models.Manager):
     def filter_data_source(
         self,
         data_pipeline_name: str,
-        page: Optional[int] = constants.MIN_PAGE_NUM,
-        page_size: Optional[int] = constants.DEFAULT_PAGE_SIZE,
-    ) -> List:
+        page: int | None = constants.MIN_PAGE_NUM,
+        page_size: int | None = constants.DEFAULT_PAGE_SIZE,
+    ) -> list:
         from metadata.models import DataSource, SpaceDataSource
 
         """过滤数据源信息"""

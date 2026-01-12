@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 
 from collections import OrderedDict
-from typing import Dict, List, Optional
 
 from django.db.transaction import atomic
 from rest_framework import serializers
@@ -39,7 +37,7 @@ class ParamsSerializer(serializers.Serializer):
 
 
 class BaseEsRouter(Resource):
-    def create_or_update_options(self, table_id: str, options: List[Dict]):
+    def create_or_update_options(self, table_id: str, options: list[dict]):
         """创建或者更新结果表 option"""
         # 查询结果表下的option
         exist_objs = {obj.name: obj for obj in models.ResultTableOption.objects.filter(table_id=table_id)}
@@ -215,7 +213,7 @@ class CreateOrUpdateEsRouter(Resource):
         else:
             UpdateEsRouter().request(validated_request_data)
 
-    def get_table_id(self, table_id: str) -> Optional[models.ResultTable]:
+    def get_table_id(self, table_id: str) -> models.ResultTable | None:
         """检测结果表是否存在"""
         try:
             return models.ResultTable.objects.get(table_id=table_id)

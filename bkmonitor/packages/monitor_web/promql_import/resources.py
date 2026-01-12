@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import html
 import json
 import logging
 import os
 import re
 from collections import defaultdict
-from typing import Tuple
 
 import yaml
 from django.conf import settings
@@ -42,7 +40,7 @@ class ImportBaseResource(Resource):
         return ConvertGrafanaPromqlDashboardResource.convert_metric_id(promql, [])
 
     @classmethod
-    def convert_metric_field(cls, promql: str, params: dict) -> Tuple[str, str]:
+    def convert_metric_field(cls, promql: str, params: dict) -> tuple[str, str]:
         scenario = "kubernetes"
 
         try:
@@ -103,8 +101,8 @@ class ImportGrafanaDashboard(ImportBaseResource):
 
     @classmethod
     def read(cls, name):
-        file_path = os.path.join(settings.BASE_DIR, "{}.json".format(name))
-        with open(file_path, "r") as f:
+        file_path = os.path.join(settings.BASE_DIR, f"{name}.json")
+        with open(file_path) as f:
             return json.loads(f.read())
 
     @classmethod
@@ -232,7 +230,7 @@ class ImportGrafanaDashboard(ImportBaseResource):
                         }
                     )
             except Exception as e:
-                logger.exception("创建仪表盘请求异常: %s" % e)
+                logger.exception(f"创建仪表盘请求异常: {e}")
                 file_dict[name].append(
                     {"status": "fail", "message": _("创建仪表盘请求异常:{}").format(e), "json": grafana_config}
                 )
@@ -318,7 +316,7 @@ class ImportAlertRule(ImportBaseResource):
                 user_group_serializer.is_valid(True)
                 user_group_serializer.save()
             except ValidationError as e:
-                logger.exception("创建告警组失败: %s" % e)
+                logger.exception(f"创建告警组失败: {e}")
                 # 暂不做处理，勾选默认运维组
                 return [UserGroup.objects.get(bk_biz_id=bk_biz_id, name=_("运维")).id]
             notice_group_ids.append(UserGroup.objects.get(bk_biz_id=bk_biz_id, name=group_name).id)
@@ -429,7 +427,7 @@ class ImportAlertRule(ImportBaseResource):
                 try:
                     resource.strategies.save_strategy_v2(**strategy_config)
                 except Exception as e:
-                    logger.exception("创建策略失败: %s" % e)
+                    logger.exception(f"创建策略失败: {e}")
                     file_dict[f.name].append(
                         {
                             "status": "fail",

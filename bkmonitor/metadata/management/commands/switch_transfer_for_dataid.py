@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -48,7 +47,7 @@ class Command(BaseCommand):
             queryset = queryset.filter(bk_data_id__in=filter_data_id_list)
 
         self.stdout.write(
-            self.style.SUCCESS("[switch_transfer_for_dataid] START. Total count: {}".format(queryset.count()))
+            self.style.SUCCESS(f"[switch_transfer_for_dataid] START. Total count: {queryset.count()}")
         )
 
         for datasource in queryset:
@@ -63,9 +62,7 @@ class Command(BaseCommand):
             datasource.refresh_consul_config()
 
             self.stdout.write(
-                "data_id({}) transfer config changed: [{}] -> [{}]".format(
-                    datasource.bk_data_id, old_transfer_id, datasource.transfer_cluster_id
-                )
+                f"data_id({datasource.bk_data_id}) transfer config changed: [{old_transfer_id}] -> [{datasource.transfer_cluster_id}]"
             )
 
         self.stdout.write(self.style.SUCCESS("[switch_transfer_for_dataid] DONE!"))

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 import time
-from typing import Dict, List
 
 from elasticsearch.helpers import BulkIndexError
 from elasticsearch_dsl import Q
@@ -151,7 +149,7 @@ def check_blocked_alert_finished(alert_keys):
     )
 
 
-def send_check_task(alerts: List[Dict], run_immediately=True):
+def send_check_task(alerts: list[dict], run_immediately=True):
     """
     生成告警检测任务
     :param alerts: 告警对象列表
@@ -191,7 +189,7 @@ def send_check_task(alerts: List[Dict], run_immediately=True):
 
 
 @app.task(ignore_result=True, queue="celery_alert_manager")
-def handle_alerts(alert_keys: List[AlertKey]):
+def handle_alerts(alert_keys: list[AlertKey]):
     """
     处理告警（异步任务）
     """
@@ -221,7 +219,7 @@ def handle_alerts(alert_keys: List[AlertKey]):
     metrics.report_all()
 
 
-def fetch_agg_interval(strategy_ids: List[int]):
+def fetch_agg_interval(strategy_ids: list[int]):
     """
     根据策略ID获取每个策略的聚合周期
     """
@@ -248,7 +246,7 @@ def fetch_agg_interval(strategy_ids: List[int]):
     return agg_interval_by_strategy
 
 
-def cal_alerts_check_interval(alerts: List[Dict]):
+def cal_alerts_check_interval(alerts: list[dict]):
     """
     计算告警的检查周期
     监控周期<30s，每15s检查一次

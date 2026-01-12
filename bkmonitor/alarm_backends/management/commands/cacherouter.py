@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -18,7 +17,7 @@ from bkmonitor.models import CacheNode, CacheRouter
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument("--strategy_id", type=int)
         parser.add_argument("--remove_node_id", type=int)
         parser.add_argument(
@@ -42,7 +41,7 @@ class Command(BaseCommand):
         if strategy_id:
             current_node_id = get_node_by_strategy_id(strategy_id=strategy_id).id
         for node in CacheNode.objects.filter(is_enable=True, cluster_name=get_cluster().name):
-            print(f"- ({node.id}){node}{' <- {}'.format(strategy_id) if current_node_id == node.id else ''}")
+            print(f"- ({node.id}){node}{f' <- {strategy_id}' if current_node_id == node.id else ''}")
 
     def remove_node(self, node_id):
         check = input(f"[!] check again: remove node id: {node_id}  [y]/[N]:\t")

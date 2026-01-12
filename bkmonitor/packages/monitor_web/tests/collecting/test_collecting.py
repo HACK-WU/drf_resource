@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +12,7 @@ specific language governing permissions and limitations under the License.
 import json
 import os
 
-import mock
+from unittest import mock
 from django.test import TestCase
 
 from config import celery_app
@@ -29,7 +28,7 @@ from monitor_web.models.custom_report import CustomEventGroup, CustomEventItem
 from monitor_web.models.plugin import CollectorPluginMeta
 
 
-class Base(object):
+class Base:
     pass
 
 
@@ -87,8 +86,8 @@ class TestCollectingViewSet(TestCase):
 
         mock_api.side_effect = mock_request
         file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_file", "test.json")
-        with open(file_path, "r") as fp:
+        with open(file_path) as fp:
             post_data = json.load(fp)
         local.current_request = request
         content = resource.collecting.save_collect_config.request(post_data)
-        self.assert_(content["deployment_id"], DeploymentConfigVersion.objects.last().pk)
+        self.assertTrue(content["deployment_id"], DeploymentConfigVersion.objects.last().pk)

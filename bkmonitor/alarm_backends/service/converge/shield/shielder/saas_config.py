@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -132,7 +131,7 @@ class AlertShieldConfigShielder(BaseShielder):
 
         # 如果没有匹配到任何屏蔽配置，记录日志
         if not self.shield_objs:
-            detail = "%s 条屏蔽配置全部未匹配" % len(self.configs)
+            detail = f"{len(self.configs)} 条屏蔽配置全部未匹配"
             if len(self.configs) == 0:
                 detail = "无生效屏蔽配置"
             if not from_cache:

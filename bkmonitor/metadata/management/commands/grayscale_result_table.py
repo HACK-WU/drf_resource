@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -93,7 +92,7 @@ class Command(BaseCommand):
         try:
             cluster_id = self.init_argus_cluster(cluster_name, receive_addr)
         except Exception as err:
-            raise CommandError("init argus cluster failed, %s" % err)
+            raise CommandError(f"init argus cluster failed, {err}")
 
         self.stdout.write("grayscale result_table start")
 
@@ -102,14 +101,14 @@ class Command(BaseCommand):
             table_id=table_id, storage_cluster_id=cluster_id, defaults={"tenant_id": tenant_id}
         )
         if created:
-            self.stdout.write("create argus datasource %s done" % obj)
+            self.stdout.write(f"create argus datasource {obj} done")
         else:
-            self.stdout.write("update argus datasource %s done" % obj)
+            self.stdout.write(f"update argus datasource {obj} done")
 
         # 最小化原则, 只更新 consul 配置
         try:
             models.DataSourceResultTable.refresh_consul_config_by_table_id(table_id)
         except Exception as err:
-            raise CommandError("grayscale result_table failed, %s" % err)
+            raise CommandError(f"grayscale result_table failed, {err}")
 
         self.stdout.write("grayscale result_table success")

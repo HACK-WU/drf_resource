@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -39,7 +38,7 @@ def change_custom_report_aggregation_datasource(apps, *args, **kwargs):
     models["DataSource"].objects.filter(bk_data_id=data_id).update(
         data_name=data_name,
         source_label=source_label,
-        data_description="init data_source for %s" % data_name,
+        data_description=f"init data_source for {data_name}",
     )
     # 修改table_id
     table_id_models = [

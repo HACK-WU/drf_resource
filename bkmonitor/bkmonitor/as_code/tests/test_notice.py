@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -23,10 +22,10 @@ DATA_PATH = "bkmonitor/as_code/tests/data/"
 
 
 def test_notice_parse():
-    with open(f"{DATA_PATH}notice/snippets/base.yaml", "r") as f:
+    with open(f"{DATA_PATH}notice/snippets/base.yaml") as f:
         snippet = yaml.safe_load(f.read())
 
-    with open(f"{DATA_PATH}notice/ops.yaml", "r") as f:
+    with open(f"{DATA_PATH}notice/ops.yaml") as f:
         code_config = yaml.safe_load(f.read())
         result, message, code_config = SnippetRenderer.render(code_config, {"base.yaml": snippet})
 
@@ -35,7 +34,7 @@ def test_notice_parse():
     config = p.parse(code_config)
     assert config
 
-    with open(f"{DATA_PATH}notice/ops_duty.yaml", "r") as f:
+    with open(f"{DATA_PATH}notice/ops_duty.yaml") as f:
         code_config = yaml.safe_load(f.read())
         result, message, code_config = SnippetRenderer.render(code_config, {"base.yaml": snippet})
     duty_rules = {"test rules": 1}
@@ -48,7 +47,7 @@ def test_notice_parse():
     print("config", config)
     assert config["duty_rules"] == [1]
 
-    with open(f"{DATA_PATH}notice/duty.yaml", "r") as f:
+    with open(f"{DATA_PATH}notice/duty.yaml") as f:
         code_config = yaml.safe_load(f.read())
         result, message, code_config = SnippetRenderer.render(code_config, {"base.yaml": snippet})
 
@@ -61,10 +60,10 @@ def test_notice_parse():
 
 
 def test_invalid_version_notice_parse():
-    with open(f"{DATA_PATH}notice/snippets/base.yaml", "r") as f:
+    with open(f"{DATA_PATH}notice/snippets/base.yaml") as f:
         snippet = yaml.safe_load(f.read())
 
-    with open(f"{DATA_PATH}notice/ops_invalid_version.yaml", "r") as f:
+    with open(f"{DATA_PATH}notice/ops_invalid_version.yaml") as f:
         code_config = yaml.safe_load(f.read())
         result, message, code_config = SnippetRenderer.render(code_config, {"base.yaml": snippet})
 
@@ -78,10 +77,10 @@ def test_invalid_version_notice_parse():
 
 
 def test_valid_version_notice_parse():
-    with open(f"{DATA_PATH}notice/snippets/base.yaml", "r") as f:
+    with open(f"{DATA_PATH}notice/snippets/base.yaml") as f:
         snippet = yaml.safe_load(f.read())
 
-    with open(f"{DATA_PATH}notice/ops_valid_version.yaml", "r") as f:
+    with open(f"{DATA_PATH}notice/ops_valid_version.yaml") as f:
         code_config = yaml.safe_load(f.read())
         result, message, code_config = SnippetRenderer.render(code_config, {"base.yaml": snippet})
 

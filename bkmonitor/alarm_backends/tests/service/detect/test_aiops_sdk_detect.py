@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import copy
 from unittest import TestCase
 
-import mock
+from unittest import mock
 import pytest
 
 from alarm_backends.service.detect import DataPoint

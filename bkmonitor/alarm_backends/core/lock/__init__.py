@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -18,7 +17,7 @@ from alarm_backends.core.storage.redis import Cache
 from bkmonitor.utils.common_utils import uniqid4
 
 
-class BaseLock(object):
+class BaseLock:
     def __init__(self, name, ttl=None):
         self.name = name
         # 默认60秒过期
@@ -42,7 +41,7 @@ class RedisLock(BaseLock):
     __token = None
 
     def __init__(self, name, ttl=None):
-        super(RedisLock, self).__init__(name, ttl)
+        super().__init__(name, ttl)
         self.client = Cache("service")
 
     def acquire(self, _wait=0.001):
@@ -66,12 +65,12 @@ class RedisLock(BaseLock):
         return self.client.delete(self.name)
 
 
-class MultiRedisLock(object):
+class MultiRedisLock:
     """
     Redis 批量锁
     """
 
-    def __init__(self, keys: List[str], ttl: int = None):
+    def __init__(self, keys: list[str], ttl: int = None):
         self.keys = keys
         self.ttl = ttl or CONST_MINUTES
         self.client = Cache("service")

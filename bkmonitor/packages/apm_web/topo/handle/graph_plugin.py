@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 import functools
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Type, Union
 
 from django.utils.translation import gettext_lazy as _
 from elasticsearch_dsl import A, Q
@@ -41,6 +39,7 @@ from drf_resource import api
 from core.unit import load_unit
 from fta_web.alert.handlers.alert import AlertQueryHandler
 from monitor_web.models.scene_view import SceneViewModel
+import builtins
 
 
 @dataclass
@@ -61,11 +60,11 @@ class Plugin:
 class PrePlugin(Plugin):
     """前置插件 (通常用来获取指标数据)"""
 
-    metric: Type[MetricHandler] = None
+    metric: type[MetricHandler] = None
     _runtime: dict = field(default_factory=dict)
     is_common: bool = False
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         raise NotImplementedError
 
     @property
@@ -106,7 +105,7 @@ class PostPlugin(Plugin):
 
 
 class ValuesPluginMixin:
-    def get_increase_values_mapping(self, **kwargs) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def get_increase_values_mapping(self, **kwargs) -> dict[tuple[str | tuple], dict]:
         params = {
             "application": self._runtime["application"],
             "start_time": self._runtime["start_time"],
@@ -125,7 +124,7 @@ class ValuesPluginMixin:
                 res[(i,)][self.id] += v[m.metric_id]
         return dict(res)
 
-    def get_instance_values_mapping(self, **kwargs) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def get_instance_values_mapping(self, **kwargs) -> dict[tuple[str | tuple], dict]:
         params = {
             "application": self._runtime["application"],
             "start_time": self._runtime["start_time"],
@@ -182,7 +181,7 @@ class ValuesPluginMixin:
 
 
 class SimpleMetricInstanceValuesMixin(PrePlugin, ValuesPluginMixin):
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping()
 
 
@@ -197,7 +196,7 @@ class DurationUnitMixin:
 class PluginProvider:
     @dataclass
     class Container:
-        _plugins: List = field(default_factory=list)
+        _plugins: list = field(default_factory=list)
 
         def __iter__(self):
             pure_res = []
@@ -267,7 +266,7 @@ class EdgeRequestCount(PrePlugin, ValuesPluginMixin):
 
     id: str = TopoEdgeDataType.REQUEST_COUNT.value
     type: GraphPluginType = GraphPluginType.EDGE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowCount,
         group_by=[
             "from_apm_service_name",
@@ -275,7 +274,7 @@ class EdgeRequestCount(PrePlugin, ValuesPluginMixin):
         ],
     )
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping()
 
 
@@ -284,12 +283,12 @@ class EdgeRequestCount(PrePlugin, ValuesPluginMixin):
 class EdgeAvgDuration(DurationUnitMixin, ValuesPluginMixin, PrePlugin):
     id: str = TopoEdgeDataType.DURATION_AVG.value
     type: GraphPluginType = GraphPluginType.EDGE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowAvgDuration,
         group_by=["from_apm_service_name", "to_apm_service_name"],
     )
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping()
 
 
@@ -298,13 +297,13 @@ class EdgeAvgDuration(DurationUnitMixin, ValuesPluginMixin, PrePlugin):
 class EdgeDurationP50(DurationUnitMixin, ValuesPluginMixin, PrePlugin):
     id: str = TopoEdgeDataType.DURATION_P50.value
     type: GraphPluginType = GraphPluginType.EDGE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationBucket,
         group_by=["from_apm_service_name", "to_apm_service_name"],
         functions=[{"id": "histogram_quantile", "params": [{"id": "scalar", "value": "0.50"}]}],
     )
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping()
 
     @classmethod
@@ -317,13 +316,13 @@ class EdgeDurationP50(DurationUnitMixin, ValuesPluginMixin, PrePlugin):
 class EdgeDurationP95(DurationUnitMixin, ValuesPluginMixin, PrePlugin):
     id: str = TopoEdgeDataType.DURATION_P95.value
     type: GraphPluginType = GraphPluginType.EDGE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationBucket,
         group_by=["from_apm_service_name", "to_apm_service_name"],
         functions=[{"id": "histogram_quantile", "params": [{"id": "scalar", "value": "0.95"}]}],
     )
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping()
 
     @classmethod
@@ -336,13 +335,13 @@ class EdgeDurationP95(DurationUnitMixin, ValuesPluginMixin, PrePlugin):
 class EdgeDurationP99(DurationUnitMixin, ValuesPluginMixin, PrePlugin):
     id: str = TopoEdgeDataType.DURATION_P99.value
     type: GraphPluginType = GraphPluginType.EDGE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationBucket,
         group_by=["from_apm_service_name", "to_apm_service_name"],
         functions=[{"id": "histogram_quantile", "params": [{"id": "scalar", "value": "0.99"}]}],
     )
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping()
 
     @classmethod
@@ -357,9 +356,9 @@ class EdgeErrorCount(PrePlugin, ValuesPluginMixin):
 
     id: str = TopoEdgeDataType.ERROR_COUNT.value
     type: GraphPluginType = GraphPluginType.EDGE
-    metric: Type[MetricHandler] = ServiceFlowCount
+    metric: builtins.type[MetricHandler] = ServiceFlowCount
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping(
             group_by=["from_apm_service_name", "to_apm_service_name"],
             where=[
@@ -376,14 +375,14 @@ class EdgeErrorRate(PrePlugin, ValuesPluginMixin):
 
     id: str = TopoEdgeDataType.ERROR_RATE.value
     type: GraphPluginType = GraphPluginType.EDGE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowErrorRateCaller, group_by=["from_apm_service_name", "to_apm_service_name"]
     )
 
     def __post_init__(self):
         self.converter = load_unit("percent")
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_calculate_values_mapping()
 
     def _to_value(self, value):
@@ -405,13 +404,13 @@ class NodeRequestCount(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.REQUEST_COUNT.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowCount,
         group_by=["from_apm_service_name", "to_apm_service_name"],
     )
     is_common: bool = True
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_increase_values_mapping()
 
 
@@ -422,12 +421,12 @@ class NodeRequestCountCaller(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.REQUEST_COUNT_CALLER.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowCount,
         group_by=["from_apm_service_name"],
     )
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_increase_values_mapping()
 
 
@@ -438,9 +437,9 @@ class NodeRequestCountCallee(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.REQUEST_COUNT_CALLEE.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(ServiceFlowCount, group_by=["to_apm_service_name"])
+    metric: builtins.type[MetricHandler] = functools.partial(ServiceFlowCount, group_by=["to_apm_service_name"])
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_increase_values_mapping()
 
 
@@ -451,7 +450,7 @@ class NodeAvgDurationCaller(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.AVG_DURATION_CALLER.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(ServiceFlowAvgDuration, group_by=["from_apm_service_name"])
+    metric: builtins.type[MetricHandler] = functools.partial(ServiceFlowAvgDuration, group_by=["from_apm_service_name"])
 
 
 @PluginProvider.pre_plugin
@@ -461,7 +460,7 @@ class NodeAvgDurationCallee(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.AVG_DURATION_CALLEE.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(ServiceFlowAvgDuration, group_by=["to_apm_service_name"])
+    metric: builtins.type[MetricHandler] = functools.partial(ServiceFlowAvgDuration, group_by=["to_apm_service_name"])
 
 
 @PluginProvider.pre_plugin  # noqa
@@ -471,7 +470,7 @@ class NodeDurationMaxCaller(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.DURATION_MAX_CALLER.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationMax,
         group_by=["from_apm_service_name"],
     )
@@ -484,7 +483,7 @@ class NodeDurationMaxCallee(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.DURATION_MAX_CALLEE.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationMax,
         group_by=["to_apm_service_name"],
     )
@@ -497,7 +496,7 @@ class NodeDurationMinCaller(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.DURATION_MIN_CALLER.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationMin,
         group_by=["from_apm_service_name"],
     )
@@ -510,12 +509,12 @@ class NodeDurationMinCallee(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.DURATION_MIN_CALLEE.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationMin,
         group_by=["to_apm_service_name"],
     )
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping()
 
 
@@ -526,7 +525,7 @@ class NodeDurationP50Caller(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.DURATION_P50_CALLER.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationBucket,
         group_by=["from_apm_service_name"],
         functions=[{"id": "histogram_quantile", "params": [{"id": "scalar", "value": "0.5"}]}],
@@ -544,7 +543,7 @@ class NodeDurationP50Callee(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.DURATION_P50_CALLEE.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationBucket,
         group_by=["to_apm_service_name"],
         functions=[{"id": "histogram_quantile", "params": [{"id": "scalar", "value": "0.5"}]}],
@@ -562,7 +561,7 @@ class NodeDurationP95Caller(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.DURATION_P95_CALLER.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationBucket,
         group_by=["from_apm_service_name"],
         functions=[{"id": "histogram_quantile", "params": [{"id": "scalar", "value": "0.95"}]}],
@@ -580,7 +579,7 @@ class NodeDurationP95Callee(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.DURATION_P95_CALLEE.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationBucket,
         group_by=["to_apm_service_name"],
         functions=[{"id": "histogram_quantile", "params": [{"id": "scalar", "value": "0.95"}]}],
@@ -598,7 +597,7 @@ class NodeDurationP99Caller(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.DURATION_P99_CALLER.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationBucket,
         group_by=["from_apm_service_name"],
         functions=[{"id": "histogram_quantile", "params": [{"id": "scalar", "value": "0.99"}]}],
@@ -616,7 +615,7 @@ class NodeDurationP99Callee(DurationUnitMixin, SimpleMetricInstanceValuesMixin):
 
     id: str = BarChartDataType.DURATION_P99_CALLEE.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = functools.partial(
+    metric: builtins.type[MetricHandler] = functools.partial(
         ServiceFlowDurationBucket,
         group_by=["to_apm_service_name"],
         functions=[{"id": "histogram_quantile", "params": [{"id": "scalar", "value": "0.99"}]}],
@@ -634,9 +633,9 @@ class NodeErrorRateCaller(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.ErrorRateCaller.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = ServiceFlowCount
+    metric: builtins.type[MetricHandler] = ServiceFlowCount
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         total_mapping = self.get_instance_values_mapping(group_by=["from_apm_service_name"])
         caller_error_mapping = self.get_instance_values_mapping(
             group_by=["from_apm_service_name"], where=[{"key": "from_span_error", "method": "eq", "value": ["true"]}]
@@ -658,9 +657,9 @@ class NodeErrorRateCallee(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.ErrorRateCallee.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = ServiceFlowCount
+    metric: builtins.type[MetricHandler] = ServiceFlowCount
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         total_mapping = self.get_instance_values_mapping(group_by=["to_apm_service_name"])
         callee_error_mapping = self.get_instance_values_mapping(
             group_by=["to_apm_service_name"], where=[{"key": "to_span_error", "method": "eq", "value": ["true"]}]
@@ -682,9 +681,9 @@ class NodeErrorRateFull(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.ErrorRate.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = ServiceFlowCount
+    metric: builtins.type[MetricHandler] = ServiceFlowCount
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         total_mapping = self.get_increase_values_mapping(group_by=["from_apm_service_name", "to_apm_service_name"])
         error_mapping = self.get_total_error_count_mapping()
 
@@ -724,9 +723,9 @@ class NodeErrorCountCaller(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.ERROR_COUNT_CALLER.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = ServiceFlowCount
+    metric: builtins.type[MetricHandler] = ServiceFlowCount
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping(
             group_by=["from_apm_service_name"], where=[{"key": "from_span_error", "method": "eq", "value": ["true"]}]
         )
@@ -739,9 +738,9 @@ class NodeErrorCountCallee(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.ERROR_COUNT_CALLEE.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = ServiceFlowCount
+    metric: builtins.type[MetricHandler] = ServiceFlowCount
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping(
             group_by=["to_apm_service_name"], where=[{"key": "to_span_error", "method": "eq", "value": ["true"]}]
         )
@@ -852,9 +851,9 @@ class NodeErrorCountCallerMultiple(ErrorCountStatusCodeMixin):
 
     id: str = BarChartDataType.ERROR_COUNT_CALLER.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = ServiceFlowCount
+    metric: builtins.type[MetricHandler] = ServiceFlowCount
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self._install("caller")
 
 
@@ -868,9 +867,9 @@ class NodeErrorCountCalleeMultiple(ErrorCountStatusCodeMixin):
 
     id: str = BarChartDataType.ERROR_COUNT_CALLEE.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = ServiceFlowCount
+    metric: builtins.type[MetricHandler] = ServiceFlowCount
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self._install("callee")
 
 
@@ -881,9 +880,9 @@ class NodeInstanceCount(PrePlugin):
 
     id: str = BarChartDataType.INSTANCE_COUNT.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = ServiceFlowCount
+    metric: builtins.type[MetricHandler] = ServiceFlowCount
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         instances = api.apm_api.query_instance(
             **{
                 "bk_biz_id": self._runtime["application"].bk_biz_id,
@@ -907,7 +906,7 @@ class NodeAlert(PrePlugin):
 
     id: str = BarChartDataType.Alert.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = None
+    metric: builtins.type[MetricHandler] = None
 
     _ALERT_MAX_SIZE = 1000
 
@@ -936,7 +935,7 @@ class NodeAlert(PrePlugin):
                 flow_metrics.append(f"{i}_{j}")
         self.flow_metrics = flow_metrics
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         """
         查询节点告警
         告警来源:
@@ -1076,9 +1075,9 @@ class NodeApdex(PrePlugin):
 
     id: str = BarChartDataType.Apdex.value
     type: GraphPluginType = GraphPluginType.NODE
-    metric: Type[MetricHandler] = ApdexInstance
+    metric: builtins.type[MetricHandler] = ApdexInstance
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         res = defaultdict(lambda: defaultdict(str))
 
         # Step1: 计算服务节点的 Apdex
@@ -1139,13 +1138,13 @@ class EndpointRequestCountCaller(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.REQUEST_COUNT_CALLER.value
     type: GraphPluginType = GraphPluginType.ENDPOINT
-    metric: Type[MetricHandler] = functools.partial(ServiceFlowCount, group_by=["from_span_name"])
+    metric: builtins.type[MetricHandler] = functools.partial(ServiceFlowCount, group_by=["from_span_name"])
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_increase_values_mapping()
 
     def add_endpoint_query(self, params, endpoint_name):
-        params = super(EndpointRequestCountCaller, self).add_endpoint_query(params, endpoint_name)
+        params = super().add_endpoint_query(params, endpoint_name)
 
         params.setdefault("where", []).extend(
             [
@@ -1163,13 +1162,13 @@ class EndpointRequestCountCallee(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.REQUEST_COUNT_CALLEE.value
     type: GraphPluginType = GraphPluginType.ENDPOINT
-    metric: Type[MetricHandler] = functools.partial(ServiceFlowCount, group_by=["to_span_name"])
+    metric: builtins.type[MetricHandler] = functools.partial(ServiceFlowCount, group_by=["to_span_name"])
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_increase_values_mapping()
 
     def add_endpoint_query(self, params, endpoint_name):
-        params = super(EndpointRequestCountCallee, self).add_endpoint_query(params, endpoint_name)
+        params = super().add_endpoint_query(params, endpoint_name)
         params.setdefault("where", []).extend(
             [
                 {"key": "to_apm_service_name", "method": "eq", "value": [self._runtime["service_name"]]},
@@ -1186,10 +1185,10 @@ class EndpointAvgDurationCaller(DurationUnitMixin, SimpleMetricInstanceValuesMix
 
     id: str = BarChartDataType.AVG_DURATION_CALLER.value
     type: GraphPluginType = GraphPluginType.ENDPOINT
-    metric: Type[MetricHandler] = functools.partial(ServiceFlowAvgDuration, group_by=["from_span_name"])
+    metric: builtins.type[MetricHandler] = functools.partial(ServiceFlowAvgDuration, group_by=["from_span_name"])
 
     def add_endpoint_query(self, params, endpoint_name):
-        params = super(EndpointAvgDurationCaller, self).add_endpoint_query(params, endpoint_name)
+        params = super().add_endpoint_query(params, endpoint_name)
         params.setdefault("where", []).extend(
             [
                 {"key": "from_apm_service_name", "method": "eq", "value": [self._runtime["service_name"]]},
@@ -1206,10 +1205,10 @@ class EndpointAvgDurationCallee(DurationUnitMixin, SimpleMetricInstanceValuesMix
 
     id: str = BarChartDataType.AVG_DURATION_CALLEE.value
     type: GraphPluginType = GraphPluginType.ENDPOINT
-    metric: Type[MetricHandler] = functools.partial(ServiceFlowAvgDuration, group_by=["to_span_name"])
+    metric: builtins.type[MetricHandler] = functools.partial(ServiceFlowAvgDuration, group_by=["to_span_name"])
 
     def add_endpoint_query(self, params, endpoint_name):
-        params = super(EndpointAvgDurationCallee, self).add_endpoint_query(params, endpoint_name)
+        params = super().add_endpoint_query(params, endpoint_name)
         params.setdefault("where", []).extend(
             [
                 {"key": "to_apm_service_name", "method": "eq", "value": [self._runtime["service_name"]]},
@@ -1226,15 +1225,15 @@ class EndpointErrorCountCaller(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.ERROR_COUNT_CALLER.value
     type: GraphPluginType = GraphPluginType.ENDPOINT
-    metric: Type[MetricHandler] = ServiceFlowCount
+    metric: builtins.type[MetricHandler] = ServiceFlowCount
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping(
             group_by=["from_span_name"], where=[{"key": "from_span_error", "method": "eq", "value": ["true"]}]
         )
 
     def add_endpoint_query(self, params, endpoint_name):
-        params = super(EndpointErrorCountCaller, self).add_endpoint_query(params, endpoint_name)
+        params = super().add_endpoint_query(params, endpoint_name)
         params.setdefault("where", []).extend(
             [
                 {"key": "from_apm_service_name", "method": "eq", "value": [self._runtime["service_name"]]},
@@ -1251,15 +1250,15 @@ class EndpointErrorCountCallee(PrePlugin, ValuesPluginMixin):
 
     id: str = BarChartDataType.ERROR_COUNT_CALLEE.value
     type: GraphPluginType = GraphPluginType.ENDPOINT
-    metric: Type[MetricHandler] = ServiceFlowCount
+    metric: builtins.type[MetricHandler] = ServiceFlowCount
 
-    def install(self) -> Dict[Tuple[Union[str, Tuple]], Dict]:
+    def install(self) -> dict[tuple[str | tuple], dict]:
         return self.get_instance_values_mapping(
             group_by=["to_span_name"], where=[{"key": "to_span_error", "method": "eq", "value": ["true"]}]
         )
 
     def add_endpoint_query(self, params, endpoint_name):
-        params = super(EndpointErrorCountCallee, self).add_endpoint_query(params, endpoint_name)
+        params = super().add_endpoint_query(params, endpoint_name)
         params.setdefault("where", []).extend(
             [
                 {"key": "to_apm_service_name", "method": "eq", "value": [self._runtime["service_name"]]},
@@ -1829,7 +1828,7 @@ class TableViewConverter(ViewConverter):
         ]
 
     def __init__(self, *args, **kwargs):
-        super(TableViewConverter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.time_convert = load_unit("µs")
         self.percent_convert = load_unit("percent")
         self.views = SceneViewModel.objects.filter(bk_biz_id=self.bk_biz_id, scene_id="apm_service")

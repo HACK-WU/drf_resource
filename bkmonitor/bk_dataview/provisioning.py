@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,10 +11,8 @@ import glob
 import json
 import logging
 import os.path
-import typing
 from collections import defaultdict
 from dataclasses import dataclass, fields
-from typing import Dict, List, Union
 
 import yaml
 from django.conf import settings
@@ -41,8 +38,8 @@ class Datasource:
     access: str = "direct"
     isDefault: bool = False
     withCredentials: bool = True
-    database: Union[None, str] = None
-    jsonData: Union[None, Dict] = None
+    database: None | str = None
+    jsonData: None | dict = None
     version: int = 0
 
 
@@ -51,7 +48,7 @@ class Dashboard:
     """面板标准格式"""
 
     org_id: int
-    dashboard: Dict
+    dashboard: dict
     folderId: int
     inputs: list
     title: str = ""
@@ -62,7 +59,7 @@ class Dashboard:
 
 
 class BaseProvisioning:
-    def datasources(self, request, org_name: str, org_id: int) -> List[Datasource]:
+    def datasources(self, request, org_name: str, org_id: int) -> list[Datasource]:
         raise NotImplementedError(".datasources() must be overridden.")
 
     def datasource_callback(
@@ -70,13 +67,13 @@ class BaseProvisioning:
     ):
         pass
 
-    def dashboards(self, request, org_name: str, org_id: int) -> List[Dashboard]:
+    def dashboards(self, request, org_name: str, org_id: int) -> list[Dashboard]:
         raise NotImplementedError(".dashboards() must be overridden.")
 
     @classmethod
     def _generate_default_dashboards(
         cls, datasources, org_id, json_name, template, folder_id
-    ) -> typing.List[Dashboard]:
+    ) -> list[Dashboard]:
         raise NotImplementedError("._generate_default_dashboards() must be overridden.")
 
 
@@ -110,7 +107,7 @@ class SimpleProvisioning(BaseProvisioning):
                 _FILE_CACHE[f"{name}.{suffix}"].append(ds)
         return _FILE_CACHE[f"{name}.{suffix}"]
 
-    def datasources(self, request, org_name: str, org_id: int) -> List[Datasource]:
+    def datasources(self, request, org_name: str, org_id: int) -> list[Datasource]:
         """不注入数据源"""
         with os_env(ORG_NAME=org_name, ORG_ID=org_id):
             for suffix in self.file_suffix:
@@ -118,7 +115,7 @@ class SimpleProvisioning(BaseProvisioning):
                     for ds in conf["datasources"]:
                         yield Datasource(**ds)
 
-    def dashboards(self, request, org_name: str, org_id: int) -> List[Dashboard]:
+    def dashboards(self, request, org_name: str, org_id: int) -> list[Dashboard]:
         """固定目录下的json文件, 自动注入"""
         with os_env(ORG_NAME=org_name, ORG_ID=org_id):
             for suffix in self.file_suffix:
@@ -152,13 +149,13 @@ class SimpleProvisioning(BaseProvisioning):
             ds_list = []
             for ds in provisioning.datasources(None, org_name, org_id):
                 if not isinstance(ds, Datasource):
-                    raise ValueError("{} is not instance {}".format(type(ds), Datasource))
+                    raise ValueError(f"{type(ds)} is not instance {Datasource}")
                 ds_list.append(ds)
             sync_data_sources(org_id, ds_list)
             datasources = api.grafana.get_all_data_source(org_id=org_id)["data"]
 
         if not datasources:
-            logger.error("组织({})创建默认仪表盘({})失败: 未找到数据源".format(org_id, json_name))
+            logger.error(f"组织({org_id})创建默认仪表盘({json_name})失败: 未找到数据源")
             return False
 
         path = os.path.join(settings.BASE_DIR, f"packages/monitor_web/grafana/dashboards/{json_name}")
@@ -193,11 +190,11 @@ class SimpleProvisioning(BaseProvisioning):
 
             return True
         except Exception as err:  # noqa
-            logger.exception("组织({})创建默认仪表盘{}失败: {}".format(org_id, json_name, err))
+            logger.exception(f"组织({org_id})创建默认仪表盘{json_name}失败: {err}")
             return False
 
 
-def sync_data_sources(org_id: int, data_sources: List[Datasource]):
+def sync_data_sources(org_id: int, data_sources: list[Datasource]):
     """
     创建/更新数据源
     """
@@ -253,7 +250,7 @@ def _camel_to_snake(s):
 _ORG_DASHBOARD_CACHE = defaultdict(set)
 
 
-def sync_dashboards(org_id: int, dashboards: List[Dashboard]):
+def sync_dashboards(org_id: int, dashboards: list[Dashboard]):
     """同步仪表盘"""
 
     if org_id not in _ORG_DASHBOARD_CACHE:

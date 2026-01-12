@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +23,7 @@ def business(mocker):
     mocker.patch("alarm_backends.core.cache.cmdb.BusinessManager.get", return_value=_business)
 
 
-class TestI18n(object):
+class TestI18n:
     def test_set_biz(self, business):
         i18n.set_biz(None)
         assert i18n.get_locale() == "zh_Hans"

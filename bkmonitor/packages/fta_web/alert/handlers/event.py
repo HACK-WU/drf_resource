@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +7,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from typing import Dict, List
 
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy as _lazy
@@ -73,7 +71,7 @@ class EventQueryHandler(BaseQueryHandler):
     query_transformer = EventQueryTransformer
 
     def __init__(self, dedupe_md5: str = "", **kwargs):
-        super(EventQueryHandler, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.dedupe_md5 = dedupe_md5
 
         if not self.ordering:
@@ -149,9 +147,9 @@ class EventQueryHandler(BaseQueryHandler):
         }
         return result_data
 
-    def top_n(self, fields: List, size=10, translators: Dict[str, AbstractTranslator] = None, char_add_quotes=True):
+    def top_n(self, fields: list, size=10, translators: dict[str, AbstractTranslator] = None, char_add_quotes=True):
         translators = {
             "strategy_id": StrategyTranslator(),
             "category": CategoryTranslator(),
         }
-        return super(EventQueryHandler, self).top_n(fields, size, translators, char_add_quotes)
+        return super().top_n(fields, size, translators, char_add_quotes)

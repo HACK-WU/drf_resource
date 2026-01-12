@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -73,9 +72,7 @@ class NodataHandler(base.BaseHandler):
             published.append(strategy_id)
 
         logger.info(
-            "[nodata] no_data_check published {}/{} strategy_ids: {}".format(
-                len(published), len(strategy_ids), published
-            )
+            f"[nodata] no_data_check published {len(published)}/{len(strategy_ids)} strategy_ids: {published}"
         )
 
         # 先缓1s，过了EXECUTE_TIME_SECOND时间窗口先
@@ -85,7 +82,7 @@ class NodataHandler(base.BaseHandler):
         client.delete(service_key)
         # 等下一波（EXECUTE_TIME_SECOND）
         wait_for = (EXECUTE_TIME_SECOND + 60 - arrow.now().second) % 60
-        logger.info("[nodata] wait {}s for next leader competition".format(wait_for))
+        logger.info(f"[nodata] wait {wait_for}s for next leader competition")
         if wait_for > 1:
             time.sleep(wait_for)
 

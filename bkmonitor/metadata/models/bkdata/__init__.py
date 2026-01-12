@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 from .result_table import BkBaseResultTable  # noqa
 

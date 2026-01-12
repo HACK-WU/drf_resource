@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +12,7 @@ import json
 import logging
 import re
 from collections import defaultdict
-from typing import Callable, Dict, Generator, Iterable, List, Set, Tuple
+from collections.abc import Callable, Generator, Iterable
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -95,7 +94,7 @@ class GetGraphQueryConfig(Resource):
             # 是否展示单指标
             display = serializers.BooleanField(label="是否单独展示", default=True)
 
-            def validate_where(self, where: List[Dict]):
+            def validate_where(self, where: list[dict]):
                 validated_where = []
                 for condition in where:
                     if condition.get("value") is not None:
@@ -129,7 +128,7 @@ class GetGraphQueryConfig(Resource):
         end_time = serializers.IntegerField(required=True, label="结束时间")
         compare_config = serializers.DictField(required=True, label="对比配置")
 
-        def validate_target(self, target: List):
+        def validate_target(self, target: list):
             """
             监控目标兼容两种目标格式
             """
@@ -142,7 +141,7 @@ class GetGraphQueryConfig(Resource):
             return target
 
     @staticmethod
-    def create_where_with_dimensions(where: list, dimensions: dict) -> List[Dict]:
+    def create_where_with_dimensions(where: list, dimensions: dict) -> list[dict]:
         """
         在where条件中插入维度条件
         """
@@ -203,7 +202,7 @@ class GetGraphQueryConfig(Resource):
         return new_where
 
     @staticmethod
-    def to_unify_query(query_config: Dict) -> Dict:
+    def to_unify_query(query_config: dict) -> dict:
         """
         查询配置转换
         """
@@ -243,7 +242,7 @@ class GetGraphQueryConfig(Resource):
         }
 
     @staticmethod
-    def get_dimension_fields(config: Dict) -> List[str]:
+    def get_dimension_fields(config: dict) -> list[str]:
         """
         获取查询配置维度
         """
@@ -263,8 +262,8 @@ class GetGraphQueryConfig(Resource):
 
     @classmethod
     def create_unify_query_config(
-        cls, bk_biz_id: int, query_configs: List[Dict], expressions: Dict[str, str], functions: Dict[str, List]
-    ) -> List[Dict]:
+        cls, bk_biz_id: int, query_configs: list[dict], expressions: dict[str, str], functions: dict[str, list]
+    ) -> list[dict]:
         """
         解析表达式，生产unify-query配置
         """
@@ -397,7 +396,7 @@ class GetGraphQueryConfig(Resource):
         return condition_dimensions_set
 
     @classmethod
-    def get_dimensions_set(cls, params, unify_query_config: Dict) -> Tuple[Set[Tuple[Tuple]], List[Tuple[Tuple]]]:
+    def get_dimensions_set(cls, params, unify_query_config: dict) -> tuple[set[tuple[tuple]], list[tuple[tuple]]]:
         """
         查询维度组合
         """
@@ -440,7 +439,7 @@ class GetGraphQueryConfig(Resource):
         )
 
         # 取出所有的维度组合
-        dimensions_set: Set[Tuple] = set()
+        dimensions_set: set[tuple] = set()
         for point in points:
             dimensions = tuple((field, point[field]) for field in dimension_fields if field in point)
             if len(dimensions) < len(dimension_fields):
@@ -460,7 +459,7 @@ class GetGraphQueryConfig(Resource):
                     )
                 )
 
-        instance_dimensions_set: Set[Tuple] = set()
+        instance_dimensions_set: set[tuple] = set()
         for target_instance in target_instances:
             dimensions_list = [{}]
             for key, value in target_instance.items():
@@ -480,7 +479,7 @@ class GetGraphQueryConfig(Resource):
         return dimensions_set, sorted(list(instance_dimensions_set | condition_dimensions_set))
 
     @classmethod
-    def get_dimensions_translate_mapping(cls, bk_biz_id: int, dimension_set: Iterable[Tuple[Tuple]]) -> Dict:
+    def get_dimensions_translate_mapping(cls, bk_biz_id: int, dimension_set: Iterable[tuple[tuple]]) -> dict:
         """
         维度翻译映射
         """
@@ -518,7 +517,7 @@ class GetGraphQueryConfig(Resource):
         return dimension_mapping
 
     @classmethod
-    def no_compare(cls, params: Dict, unify_query_configs: List[Dict]) -> List[Dict]:
+    def no_compare(cls, params: dict, unify_query_configs: list[dict]) -> list[dict]:
         """
         不对比
         - 每个指标的每个维度一张图
@@ -530,7 +529,7 @@ class GetGraphQueryConfig(Resource):
         """
 
         index = 1
-        panels: List[dict] = (
+        panels: list[dict] = (
             []
             if params["compare_config"].get("split", True)
             else [{"id": 1, "type": "graph", "title": _("总览"), "subTitle": "", "targets": []}]
@@ -550,8 +549,8 @@ class GetGraphQueryConfig(Resource):
                     )
 
                     for dimension_tuple in dimensions_set:
-                        new_unify_query_config: Dict = json.loads(json.dumps(unify_query_config))
-                        dimensions: Dict = {field: value for field, value in dimension_tuple}
+                        new_unify_query_config: dict = json.loads(json.dumps(unify_query_config))
+                        dimensions: dict = {field: value for field, value in dimension_tuple}
 
                         # 按维度增加过滤条件
                         for query_config in new_unify_query_config["query_configs"]:
@@ -608,7 +607,7 @@ class GetGraphQueryConfig(Resource):
                         index += 1
             else:
                 # 如果进行视图合并，只需要将查询配置全部放到targets下即可
-                new_unify_query_config: Dict = json.loads(json.dumps(unify_query_config))
+                new_unify_query_config: dict = json.loads(json.dumps(unify_query_config))
                 new_unify_query_config["slimit"] = TS_MAX_SLIMIT
                 new_unify_query_config["target"] = params["target"]
                 if len(new_unify_query_config["query_configs"]) > 1:
@@ -632,7 +631,7 @@ class GetGraphQueryConfig(Resource):
         return panels
 
     @classmethod
-    def metric_compare(cls, params: Dict, unify_query_configs: List[Dict]) -> List[Dict]:
+    def metric_compare(cls, params: dict, unify_query_configs: list[dict]) -> list[dict]:
         """
         指标对比
         - 将相同维度不同指标放在一张图上
@@ -647,7 +646,7 @@ class GetGraphQueryConfig(Resource):
                 dimensions_translate_mapping = cls.get_dimensions_translate_mapping(params["bk_biz_id"], dimensions_set)
 
                 for dimensions in dimensions_set:
-                    new_unify_query_config: Dict = json.loads(json.dumps(unify_query_config))
+                    new_unify_query_config: dict = json.loads(json.dumps(unify_query_config))
 
                     # 按维度增加过滤条件
                     for query_config in new_unify_query_config["query_configs"]:
@@ -692,7 +691,7 @@ class GetGraphQueryConfig(Resource):
         return panels
 
     @classmethod
-    def target_compare(cls, params: Dict, unify_query_configs: List[Dict]) -> List[Dict]:
+    def target_compare(cls, params: dict, unify_query_configs: list[dict]) -> list[dict]:
         """
         目标对比(维度对比)
         - 每个指标一张图
@@ -702,7 +701,7 @@ class GetGraphQueryConfig(Resource):
         panels = []
         for index, unify_query_config in enumerate(unify_query_configs):
             # 查询维度
-            dimension_fields: Set[str] = set()
+            dimension_fields: set[str] = set()
             for query_config in unify_query_config["query_configs"]:
                 dimension_fields.update(query_config["group_by"])
 
@@ -712,7 +711,7 @@ class GetGraphQueryConfig(Resource):
             else:
                 alias = "result"
 
-            new_unify_query_config: Dict = json.loads(json.dumps(unify_query_config))
+            new_unify_query_config: dict = json.loads(json.dumps(unify_query_config))
             new_unify_query_config["slimit"] = TS_MAX_SLIMIT
             new_unify_query_config["target"] = params["target"]
 
@@ -737,7 +736,7 @@ class GetGraphQueryConfig(Resource):
         return panels
 
     @classmethod
-    def time_compare(cls, params: Dict, unify_query_configs: List[Dict]) -> List[Dict]:
+    def time_compare(cls, params: dict, unify_query_configs: list[dict]) -> list[dict]:
         """
         时间对比
         - 查询多段时间数据
@@ -758,7 +757,7 @@ class GetGraphQueryConfig(Resource):
                 unify_query_config = target["data"]
 
                 # 查询维度
-                dimension_fields: Set[str] = set()
+                dimension_fields: set[str] = set()
                 for query_config in unify_query_config["query_configs"]:
                     dimension_fields.update(query_config["group_by"])
 
@@ -802,7 +801,7 @@ class GetGraphQueryConfig(Resource):
             functions=params["functions"],
         )
 
-        compare_func: Dict[str, Callable[[Dict, List], List]] = defaultdict(
+        compare_func: dict[str, Callable[[dict, list], list]] = defaultdict(
             lambda: self.no_compare,
             {"time": self.time_compare, "metric": self.metric_compare, "target": self.target_compare},
         )
@@ -850,7 +849,7 @@ class GetPromqlQueryConfig(Resource):
         start_time = serializers.IntegerField(required=True, label="开始时间")
         end_time = serializers.IntegerField(required=True, label="结束时间")
 
-    def create_unify_query_config(self, params: Dict):
+    def create_unify_query_config(self, params: dict):
         """
         生成unify-query查询参数
         """
@@ -884,7 +883,7 @@ class GetPromqlQueryConfig(Resource):
 
         return unify_query_configs
 
-    def no_compare(self, params: Dict, unify_query_configs: List[Dict]) -> List[Dict]:
+    def no_compare(self, params: dict, unify_query_configs: list[dict]) -> list[dict]:
         """
         不对比
         """
@@ -1095,7 +1094,7 @@ class SaveToDashboard(Resource):
 
     @classmethod
     def add_target(
-        cls, panel: TimeSeriesPanel, functions: list, query_configs: List[Dict], alias: str, expression: str
+        cls, panel: TimeSeriesPanel, functions: list, query_configs: list[dict], alias: str, expression: str
     ):
         """
         添加target配置

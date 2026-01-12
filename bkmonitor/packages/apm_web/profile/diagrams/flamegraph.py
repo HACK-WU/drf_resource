@@ -9,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 from apm_web.profile.diagrams.base import FunctionNode
 from apm_web.profile.diagrams.diff import DiffNode, ProfileDiffer
@@ -18,7 +17,7 @@ from apm_web.profile.diagrams.tree_converter import TreeConverter
 logger = logging.getLogger("apm")
 
 
-def diff_node_to_element(diff_node: Optional[DiffNode]) -> dict:
+def diff_node_to_element(diff_node: DiffNode | None) -> dict:
     return {
         **diff_node.default.to_dict(),
         "diff_info": diff_node.diff_info,

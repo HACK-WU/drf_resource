@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,16 +8,15 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import hashlib
-from typing import Dict, List, Tuple
 
 from django.utils.translation import gettext as _
 
 
-def sort_panels(panels: List[Dict], order: List[Dict], hide_metric=True) -> Tuple[List[Dict], List[Dict]]:
+def sort_panels(panels: list[dict], order: list[dict], hide_metric=True) -> tuple[list[dict], list[dict]]:
     """
     对图表进行分组排序
     """
-    panels: Dict[str, Dict] = {panel["id"]: panel for panel in panels}
+    panels: dict[str, dict] = {panel["id"]: panel for panel in panels}
 
     ordered_panels = []
     exists_panel_ids = set()
@@ -64,7 +62,7 @@ def sort_panels(panels: List[Dict], order: List[Dict], hide_metric=True) -> Tupl
     return ordered_panels, order
 
 
-def get_variable_filter_dict(variables: List):
+def get_variable_filter_dict(variables: list):
     """
     根据变量配置生成过滤条件配置
     """

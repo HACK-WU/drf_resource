@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -81,7 +80,7 @@ def truncate(message):
                 msg = message  # Defer encoding till later
     if len(msg) < TRUNCATED_LENGTH:
         return msg
-    return "%s ...[truncated]" % msg[:TRUNCATED_LENGTH]
+    return f"{msg[:TRUNCATED_LENGTH]} ...[truncated]"
 
 
 # ===============================================================================
@@ -159,10 +158,10 @@ class logger_traceback:
             # 打印堆栈信息
             traceback_msg = ""
             for filename, lineno, function, text in traceback.extract_tb(info[2]):
-                msg = "{} line: {} in {}".format(filename, lineno, function)
-                traceback_msg = "{}{}\n{}\n".format(traceback_msg, msg, text)
+                msg = f"{filename} line: {lineno} in {function}"
+                traceback_msg = f"{traceback_msg}{msg}\n{text}\n"
             if traceback_msg:
-                message = "{}\n{}".format(message, traceback_msg)
+                message = f"{message}\n{traceback_msg}"
             sys.exc_clear()
             return message
         except Exception:

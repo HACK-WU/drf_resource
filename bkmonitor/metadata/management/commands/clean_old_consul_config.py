@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -34,8 +33,6 @@ class Command(BaseCommand):
             # 然后把配置刷到新版consul路径
             datasource.refresh_consul_config()
             self.stdout.write(
-                "bk_data_id->[{}] clean old consul config ({}), and refresh new config ({})".format(
-                    datasource.bk_data_id, consul_config_path, datasource.consul_config_path
-                )
+                f"bk_data_id->[{datasource.bk_data_id}] clean old consul config ({consul_config_path}), and refresh new config ({datasource.consul_config_path})"
             )
         self.stdout.write("[clean_old_consul_config] DONE!")

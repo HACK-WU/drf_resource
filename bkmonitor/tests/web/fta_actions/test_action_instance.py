@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -75,9 +74,9 @@ class TestBatchCreateResource(TestCase):
             **{
                 "event_id": int(time.time()),
                 "plugin_id": "fta-test",
-                "alert_name": "test context-{}".format(event_time),
+                "alert_name": f"test context-{event_time}",
                 "time": int(time.time()),
-                "tags": [{"key": "device", "value": "cpu{}".format(event_time)}],
+                "tags": [{"key": "device", "value": f"cpu{event_time}"}],
                 "target": "127.0.0.1|0",
                 "ip": "127.0.0.1",
                 "bk_cloud_id": 0,
@@ -185,7 +184,7 @@ class TestBatchCreateResource(TestCase):
         backend_mock.start()
         template_detail_mock.start()
         response_data = GetActionParamsResource().request(**request_data)
-        print("action params %s" % response_data)
+        print(f"action params {response_data}")
         self.assertEqual(len(response_data), 1)
         self.assertTrue("params" in response_data[0])
         backend_mock.stop()
@@ -257,11 +256,11 @@ class TestBatchCreateResource(TestCase):
             template_detail = item["execute_config"]["template_detail"]
             notice_way = item["execute_config"]["context_inputs"]["notice_way"]
             print(notice_way, template_detail["title"], template_detail["message"])
-            self.assertEqual(template_detail["title"], "蓝鲸监控 | pppp给您分派了告警【告警名称(%s)】" % self.alerts[0].id)
+            self.assertEqual(template_detail["title"], f"蓝鲸监控 | pppp给您分派了告警【告警名称({self.alerts[0].id})】")
 
     def test_assign_template_with_multi_alerts(self):
         request_data = {
-            "alert_ids": [self.alert_id, "%stest" % self.alert_id],
+            "alert_ids": [self.alert_id, f"{self.alert_id}test"],
             "operator": "pppp",
             "appointees": ["admin", "yunweixiaoge"],
             "notice_ways": ["sms", "mail", "weixin", "voice"],
@@ -387,7 +386,7 @@ class TestBatchCreateResource(TestCase):
             )
             actions.append(ai.id)
 
-            action_ids.append("{}{}".format(int(ai.create_time.timestamp()), ai.id))
+            action_ids.append(f"{int(ai.create_time.timestamp())}{ai.id}")
 
         # sync_actions_sharding_task(actions)
         time.sleep(3)

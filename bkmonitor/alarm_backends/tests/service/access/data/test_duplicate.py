@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -23,12 +22,12 @@ from .config import STANDARD_DATA
 pytestmark = pytest.mark.django_db
 
 
-class MockRecord(object):
+class MockRecord:
     def __init__(self, attrs):
         self.__dict__.update(attrs)
 
 
-class TestDuplicate(object):
+class TestDuplicate:
     def setup_method(self, method):
         redis = fakeredis.FakeRedis(decode_responses=True)
         redis.flushall()

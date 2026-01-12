@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -26,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class BcsApiGatewayBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
     def get_headers(self):
-        headers = super(BcsApiGatewayBaseResource, self).get_headers()
+        headers = super().get_headers()
         headers["Authorization"] = f"Bearer {settings.BCS_API_GATEWAY_TOKEN}"
         return headers
 

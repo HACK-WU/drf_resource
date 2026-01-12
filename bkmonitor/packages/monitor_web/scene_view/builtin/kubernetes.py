@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import copy
 import json
-from typing import Dict, List, Optional, Set
 
 from django.core.exceptions import EmptyResultSet
 from django.utils.translation import gettext as _
@@ -70,7 +68,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         cls.load_builtin_views()
 
         builtin_view_ids = {v.split("-")[-1] for v in cls.builtin_views if v.startswith("kubernetes-")}
-        existed_view_ids: Set[str] = {v.id for v in existed_view}
+        existed_view_ids: set[str] = {v.id for v in existed_view}
         create_view_ids = builtin_view_ids - existed_view_ids
 
         new_views = []
@@ -104,7 +102,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         cls.create_default_kubernetes_order(bk_biz_id, scene_id, view_type)
 
     @classmethod
-    def get_metric_prefixes(cls, view: SceneViewModel) -> List:
+    def get_metric_prefixes(cls, view: SceneViewModel) -> list:
         """获得在指标缓存中需要检索的指标前缀 ."""
         metric_prefixes = []
         if view.id in ["container", "pod", "workload"]:
@@ -116,7 +114,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return metric_prefixes
 
     @classmethod
-    def get_available_metric_list(cls, view: SceneViewModel, metric_prefixes: str, default_detail_config: List) -> List:
+    def get_available_metric_list(cls, view: SceneViewModel, metric_prefixes: str, default_detail_config: list) -> list:
         """获得可用的所有指标列表 ."""
         # 根据指标前缀在指标缓存表中查询匹配的指标
         metric_list = cls.get_metrics_list(view, metric_prefixes)
@@ -131,7 +129,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return metric_list
 
     @classmethod
-    def get_order(cls, view: SceneViewModel, default_detail_config: List):
+    def get_order(cls, view: SceneViewModel, default_detail_config: list):
         view_id = cls.get_view_id(view)
         if view_id in ["kubernetes-service_monitor", "kubernetes-pod_monitor", "kubernetes-event"]:
             return []
@@ -209,7 +207,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return False
 
     @classmethod
-    def get_order_groups(cls, view: SceneViewModel, id_prefix: str) -> List:
+    def get_order_groups(cls, view: SceneViewModel, id_prefix: str) -> list:
         """获得面板分组配置 ."""
         # 获得面板分组ID
         order_groups_map = {}
@@ -324,7 +322,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
             )
 
     @classmethod
-    def get_view_config(cls, view: SceneViewModel, params: Dict = None, *args, **kwargs) -> Dict:
+    def get_view_config(cls, view: SceneViewModel, params: dict = None, *args, **kwargs) -> dict:
         cls.load_builtin_views()
         view_id = cls.get_view_id(view)
         view_config = json.loads(json.dumps(cls.builtin_views[view_id]))
@@ -365,15 +363,15 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return view_config
 
     @classmethod
-    def get_cluster_view_config(cls, view: SceneViewModel, view_config: Dict):
+    def get_cluster_view_config(cls, view: SceneViewModel, view_config: dict):
         return view_config
 
     @classmethod
-    def get_event_view_config(cls, view: SceneViewModel, view_config: Dict):
+    def get_event_view_config(cls, view: SceneViewModel, view_config: dict):
         return view_config
 
     @classmethod
-    def get_pod_view_config(cls, view: SceneViewModel, view_config: Dict):
+    def get_pod_view_config(cls, view: SceneViewModel, view_config: dict):
         view_config["panels"] = []
         default_detail_config = DEFAULT_POD_DETAIL
         default_where = [
@@ -407,7 +405,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return view_config
 
     @classmethod
-    def get_container_view_config(cls, view: SceneViewModel, view_config: Dict):
+    def get_container_view_config(cls, view: SceneViewModel, view_config: dict):
         view_config["panels"] = []
         default_detail_config = DEFAULT_CONTAINER_DETAIL
         default_where = [
@@ -447,7 +445,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return view_config
 
     @classmethod
-    def get_workload_view_config(cls, view: SceneViewModel, view_config: Dict):
+    def get_workload_view_config(cls, view: SceneViewModel, view_config: dict):
         view_config["panels"] = []
         default_detail_config = DEFAULT_WORKLOAD_DETAIL
         default_where = [
@@ -492,7 +490,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return overview_panels
 
     @classmethod
-    def get_service_view_config(cls, view: SceneViewModel, view_config: Dict):
+    def get_service_view_config(cls, view: SceneViewModel, view_config: dict):
         view_config["panels"] = []
         default_detail_config = DEFAULT_SERVICE_DETAIL
         default_where = [
@@ -515,7 +513,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return view_config
 
     @classmethod
-    def build_panel_group(cls, view: SceneViewModel, default_detail_config: List) -> Dict:
+    def build_panel_group(cls, view: SceneViewModel, default_detail_config: list) -> dict:
         """构造视图中的面板顺序配置 ."""
         # 获得数据库中的面板顺序
         id_prefix = DEFAULT_PANEL_GROUP_ID_PREFIX.format(view_id=view.id)
@@ -621,7 +619,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return new_order_groups_map
 
     @classmethod
-    def build_order(cls, view: SceneViewModel, default_detail_config: List, order_groups_map: Dict) -> List:
+    def build_order(cls, view: SceneViewModel, default_detail_config: list, order_groups_map: dict) -> list:
         order_groups_map = copy.deepcopy(order_groups_map)
         id_prefix = DEFAULT_PANEL_GROUP_ID_PREFIX.format(view_id=view.id)
         order = []
@@ -666,7 +664,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return order
 
     @classmethod
-    def build_panels(cls, order: List, panel_group_map: Dict, default_where: List) -> List:
+    def build_panels(cls, order: list, panel_group_map: dict, default_where: list) -> list:
         """给面板配置添加unify query参数 ."""
         group_list = []
         for group in order:
@@ -804,7 +802,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return group_list
 
     @classmethod
-    def get_node_view_config(cls, view: SceneViewModel, view_config: Dict):
+    def get_node_view_config(cls, view: SceneViewModel, view_config: dict):
         # 获得所有的面板
         default_detail_config = DEFAULT_NODE_PANELS
         panel_group_map = cls.build_panel_group(view, default_detail_config)
@@ -851,8 +849,8 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
 
     @classmethod
     def build_overview_panels(
-        cls, view: SceneViewModel, panels: List, where: List, panel_group_map: Dict = None
-    ) -> List:
+        cls, view: SceneViewModel, panels: list, where: list, panel_group_map: dict = None
+    ) -> list:
         """复制面板并用部分属性值替换 ."""
         bk_biz_id = view.bk_biz_id
         try:
@@ -912,7 +910,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return overview_panels
 
     @classmethod
-    def get_service_monitor_view_config(cls, view: SceneViewModel, view_config: Dict):
+    def get_service_monitor_view_config(cls, view: SceneViewModel, view_config: dict):
         default_detail_config = []
         view_config["order"] = cls.get_order(view, default_detail_config)
         view_config["panels"] = []
@@ -946,7 +944,7 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
         return view_config
 
     @classmethod
-    def get_pod_monitor_view_config(cls, view: SceneViewModel, view_config: Dict):
+    def get_pod_monitor_view_config(cls, view: SceneViewModel, view_config: dict):
         default_detail_config = []
         view_config["order"] = cls.get_order(view, default_detail_config)
         view_config["panels"] = []
@@ -981,8 +979,8 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
 
     @classmethod
     def get_panel_default_param(
-        cls, view_config: Dict, default_detail_config_map: Dict, group_id: str, panel_id: str
-    ) -> Dict:
+        cls, view_config: dict, default_detail_config_map: dict, group_id: str, panel_id: str
+    ) -> dict:
         """获得面板的默认参数配置 ."""
         # 获得默认面板参数配置
         default_panel = default_detail_config_map.get(group_id, {}).get(panel_id)
@@ -1087,8 +1085,8 @@ class KubernetesBuiltinProcessor(BuiltinProcessor):
 
     @classmethod
     def create_or_update_view(
-        cls, bk_biz_id: int, scene_id: str, view_type: str, view_id: str, view_config: Dict
-    ) -> Optional[SceneViewModel]:
+        cls, bk_biz_id: int, scene_id: str, view_type: str, view_id: str, view_config: dict
+    ) -> SceneViewModel | None:
         view = SceneViewModel.objects.get(bk_biz_id=bk_biz_id, scene_id=scene_id, type=view_type, id=view_id)
         if "order" in view_config:
             order = view_config["order"]

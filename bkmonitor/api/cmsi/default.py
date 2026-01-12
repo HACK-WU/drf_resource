@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +12,6 @@ import abc
 import base64
 import json
 from copy import deepcopy
-from typing import Dict, List, Union
 
 import six
 from django.conf import settings
@@ -25,7 +23,7 @@ from core.errors.api import BKAPIError
 
 
 class CMSIBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
-    base_url = "%s/api/c/compapi/v2/cmsi/" % settings.BK_COMPONENT_API_URL
+    base_url = f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/cmsi/"
     module_name = "cmsi"
 
 
@@ -49,7 +47,7 @@ class CheckCMSIResource(CMSIBaseResource):
         }
     """
 
-    def perform_request(self, validated_request_data: Dict[str, Union[List[str], any]]):
+    def perform_request(self, validated_request_data: dict[str, list[str] | any]):
         """
         发送请求
         """
@@ -60,22 +58,22 @@ class CheckCMSIResource(CMSIBaseResource):
         return self.send_request(validated_request_data, receivers)
 
     @classmethod
-    def get_receivers(cls, validated_request_data: Dict) -> List[str]:
+    def get_receivers(cls, validated_request_data: dict) -> list[str]:
         """
         获取接收用户列表
         优先 receiver__username， 再 receiver
         """
         if validated_request_data.get("receiver__username"):
-            receivers: List[str] = validated_request_data["receiver__username"].split(",")
+            receivers: list[str] = validated_request_data["receiver__username"].split(",")
         elif isinstance(validated_request_data["receiver"], list):
-            receivers: List = validated_request_data["receiver"]
+            receivers: list = validated_request_data["receiver"]
             validated_request_data["receiver"] = ",".join(receivers)
         else:
-            receivers: List = validated_request_data["receiver"].split(",")
+            receivers: list = validated_request_data["receiver"].split(",")
 
         return receivers
 
-    def send_request(self, validated_request_data: Dict, receivers: List[str]):  # send_failed_users
+    def send_request(self, validated_request_data: dict, receivers: list[str]):  # send_failed_users
         """
         发送请求
         """
@@ -120,7 +118,7 @@ class CheckCMSIResource(CMSIBaseResource):
             return response_data
 
     @classmethod
-    def get_external_receiver_info(cls, receivers_username: List[str]) -> Dict[str, Dict[str, str]]:
+    def get_external_receiver_info(cls, receivers_username: list[str]) -> dict[str, dict[str, str]]:
         """
         通过用户名获取用户信息(邮箱和电话号)
         param
@@ -357,7 +355,7 @@ class SendMail(CheckCMSIResource):
 
             return attrs
 
-    def perform_request(self, validated_request_data: Dict[str, Union[List[str], any]]):
+    def perform_request(self, validated_request_data: dict[str, list[str] | any]):
         """
         发送请求
 
@@ -375,8 +373,8 @@ class SendMail(CheckCMSIResource):
             return super().perform_request(validated_request_data)
 
         # 区分内外部用户
-        internal_users: List[str] = []
-        external_users: List[str] = []
+        internal_users: list[str] = []
+        external_users: list[str] = []
 
         for username in validated_request_data.get("receiver__username").split(","):
             # 通过是否以 "@tai" 结尾判断是否是内外部用户
@@ -424,7 +422,7 @@ class SendMail(CheckCMSIResource):
 
         return response or default_response_data
 
-    def get_receivers_with_external_users(self, external_users: List[str]) -> List[str]:
+    def get_receivers_with_external_users(self, external_users: list[str]) -> list[str]:
         """
         获取接收者
 
@@ -453,7 +451,7 @@ class SendMail(CheckCMSIResource):
         # 获取最终的 receivers
         return [receivers_info[username]["email"] for username in exist_usernames]
 
-    def rich_message_detail_with_usernames(self, usernames: List[str], message_detail):
+    def rich_message_detail_with_usernames(self, usernames: list[str], message_detail):
         """
         丰富异常用户的消息详情
         """

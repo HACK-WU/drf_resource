@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云PaaS平台社区版 (BlueKing PaaS Community
 Edition) available.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 """
 
 
-class PipelineElement(object):
+class PipelineElement:
     ServiceActivity = "ServiceActivity"
     SubProcess = "SubProcess"
     ExclusiveGateway = "ExclusiveGateway"

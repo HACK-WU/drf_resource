@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -95,7 +94,7 @@ class LogPluginManager(BuiltInPluginManager):
         return self._create_version(data, event_list)
 
     def _create_version(self, data, event_list):
-        version, need_debug = super(LogPluginManager, self).create_version(data)
+        version, need_debug = super().create_version(data)
         plugin = CollectorPluginMeta.objects.get(plugin_id=version.plugin.plugin_id)
         plugin_manager = self.__class__(plugin, self.operator)
         plugin_manager.release_collector_plugin(version)
@@ -110,7 +109,7 @@ class LogPluginManager(BuiltInPluginManager):
         return self._update_version(data, event_list)
 
     def _update_version(self, data, event_list):
-        version, need_debug = super(LogPluginManager, self).update_version(data)
+        version, need_debug = super().update_version(data)
         self.release_collector_plugin(version)
         self.modify_result_table(version, event_list)
         return version, need_debug

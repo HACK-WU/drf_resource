@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -71,16 +70,16 @@ class GseCustomStrEventRecord(EventRecord):
     TITLE = _("自定义字符型")
 
     def __init__(self, raw_data, strategies):
-        super(GseCustomStrEventRecord, self).__init__(raw_data=raw_data)
+        super().__init__(raw_data=raw_data)
 
         self.strategies = strategies
 
     def check(self):
         if len(self.raw_data["_value_"]) >= 1:
-            logger.debug("custom event value: %s" % self.raw_data)
+            logger.debug(f"custom event value: {self.raw_data}")
             return True
         else:
-            logger.warning("custom event value check fail: %s" % self.raw_data)
+            logger.warning(f"custom event value check fail: {self.raw_data}")
             return False
 
     def get_plat_info(self, alarm):
@@ -97,7 +96,7 @@ class GseCustomStrEventRecord(EventRecord):
             host_obj = HostManager.get(ip, bk_cloud_id, using_mem=True)
         except Exception as e:
             logger.exception(
-                "{}, get host error, bk_cloud_id({}), " "ip({}), except({})".format(self.NAME, bk_cloud_id, ip, e)
+                f"{self.NAME}, get host error, bk_cloud_id({bk_cloud_id}), " f"ip({ip}), except({e})"
             )
             return []
 
@@ -124,7 +123,7 @@ class GseCustomStrEventRecord(EventRecord):
             if host_obj.topo_link:
                 dimensions["bk_topo_node"] = sorted({node.id for node in chain(*list(host_obj.topo_link.values()))})
         except Exception as e:
-            logger.exception("{} full error {}, {}".format(self.__class__.__name__, alarm, e))
+            logger.exception(f"{self.__class__.__name__} full error {alarm}, {e}")
             return []
 
         new_record_list = []
@@ -169,7 +168,7 @@ class GseCustomStrEventRecord(EventRecord):
         return self.event_time
 
     def clean_record_id(self):
-        return "{md5_dimension}.{timestamp}".format(md5_dimension=self.md5_dimension, timestamp=self.event_time)
+        return f"{self.md5_dimension}.{self.event_time}"
 
     def clean_dimensions(self):
         dimensions = self.raw_data["dimensions"].copy()
@@ -191,13 +190,7 @@ class GseCustomStrEventRecord(EventRecord):
         """
         {md5_dimension}.{timestamp}.{strategy_id}.{item_id}.{level}"
         """
-        return "{md5_dimension}.{timestamp}.{strategy_id}.{item_id}.{level}".format(
-            md5_dimension=self.md5_dimension,
-            timestamp=self.event_time,
-            strategy_id=self._strategy_id,
-            item_id=self._item_id,
-            level=self.level,
-        )
+        return f"{self.md5_dimension}.{self.event_time}.{self._strategy_id}.{self._item_id}.{self.level}"
 
     def clean_anomaly_message(self):
         return self.raw_data["_title_"]

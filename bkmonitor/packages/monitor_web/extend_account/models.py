@@ -7,7 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from typing import Any, Dict
+from typing import Any
 
 from django.db import models
 
@@ -25,7 +25,7 @@ class UserAccessRecordManager(models.Manager):
         else:
             return VisitSource.PC
 
-    def update_or_create_by_space(self, username: str, source: str, space_info: Dict[str, Any]) -> "UserAccessRecord":
+    def update_or_create_by_space(self, username: str, source: str, space_info: dict[str, Any]) -> "UserAccessRecord":
         """通过 request 尝试创建"""
         extra_info, _ = self.update_or_create(
             username=username,

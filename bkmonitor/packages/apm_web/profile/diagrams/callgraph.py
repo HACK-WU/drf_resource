@@ -13,7 +13,7 @@ import re
 from collections import deque
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Any, List
+from typing import Any
 
 from graphviz import Digraph
 
@@ -62,7 +62,7 @@ def multiline_printable_name(name, file_path=''):
     return f"{name}\\n{file_path}\\n" if file_path else f"{name}\\n"
 
 
-def build_edge_relation(node_list: List[FunctionNode]) -> list:
+def build_edge_relation(node_list: list[FunctionNode]) -> list:
     edges = {}
     visited_nodes = set()
 
@@ -138,7 +138,7 @@ def dot_color(score: float, is_back_ground: bool = False) -> str:
         g = value * (1 - saturation * score)
 
     b = value * (1 - saturation)
-    return "#{:02x}{:02x}{:02x}".format(int(r * 255.0), int(g * 255.0), int(b * 255.0))
+    return f"#{int(r * 255.0):02x}{int(g * 255.0):02x}{int(b * 255.0):02x}"
 
 
 def generate_svg_data(tree: FunctionTree, data: dict, unit: str):

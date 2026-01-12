@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -30,7 +29,7 @@ class Command(BaseCommand):
     _PLATFORM_ = "enterprise"
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument(
             "--environment",
             choices=["development", "testing", "production"],
@@ -43,7 +42,7 @@ class Command(BaseCommand):
         )
 
     def __init__(self, *args, **kwargs):
-        super(Command, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._ENVIRONMENT_ = settings.ENVIRONMENT
         self._PLATFORM_ = settings.PLATFORM
@@ -51,7 +50,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for option, value in six.iteritems(options):
             if option not in ("no_color", "pythonpath", "settings", "traceback", "verbosity") and value is not None:
-                attr = "_{}_".format(option.upper())
+                attr = f"_{option.upper()}_"
                 setattr(self, attr, options[option])
 
         context = {

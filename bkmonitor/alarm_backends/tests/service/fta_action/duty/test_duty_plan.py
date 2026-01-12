@@ -1,6 +1,6 @@
 import datetime
 
-import mock
+from unittest import mock
 import pytest
 
 from alarm_backends.service.fta_action.tasks import (

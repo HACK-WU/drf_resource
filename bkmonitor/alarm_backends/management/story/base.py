@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 from alarm_backends.management.story.color import ConsoleColor
 
 
-class StoryCollection(object):
+class StoryCollection:
 
     stories = []
 
@@ -44,7 +43,7 @@ class StoryCollection(object):
             p.resolve()
 
     def pre_run(self):
-        print("Valid check item: {}".format(len(self.stories)))
+        print(f"Valid check item: {len(self.stories)}")
 
     @classmethod
     def mark(cls):
@@ -76,7 +75,7 @@ def register_step(story_cls):
             story = s
             break
     else:
-        raise OSError("can't find story: {}".format(story_cls))
+        raise OSError(f"can't find story: {story_cls}")
 
     def register(cls):
         step = cls(story)
@@ -88,7 +87,7 @@ def register_step(story_cls):
     return register
 
 
-class StepController(object):
+class StepController:
     def can_be_loaded(self):
         return self._check()
 
@@ -96,7 +95,7 @@ class StepController(object):
         return True
 
 
-class Problem(object):
+class Problem:
     def __init__(self, p_name, story, **context):
         self.name = p_name
         self.story = story
@@ -118,18 +117,18 @@ class Problem(object):
         return self.name
 
 
-class BaseStory(object):
+class BaseStory:
     name = ""
     problems = []
     steps = []
 
     def check(self):
         for i, step in enumerate(self.steps):
-            print("  [step]{}. {}...".format(i + 1, step))
+            print(f"  [step]{i + 1}. {step}...")
             try:
                 p = step.check()
             except Exception as err:
-                p = StepCheckError("请关注！自监控执行健康检查异常: {}".format(err), self)
+                p = StepCheckError(f"请关注！自监控执行健康检查异常: {err}", self)
             if p:
                 if isinstance(p, list):
                     self.problems.extend(p)
@@ -161,7 +160,7 @@ class BaseStory(object):
         return self.__class__.name
 
 
-class CheckStep(object):
+class CheckStep:
     name = ""
     controller = StepController()
 

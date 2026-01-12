@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ import json
 import logging
 import time
 from collections import defaultdict
-from typing import Dict, List, Union
 
 from django.utils.translation import gettext as _
 
@@ -75,7 +73,7 @@ class UpgradeRuleMatch:
 class AssignRuleMatch:
     """分派规则适配"""
 
-    def __init__(self, assign_rule: Dict, assign_rule_snap=None, alert: AlertDocument = None):
+    def __init__(self, assign_rule: dict, assign_rule_snap=None, alert: AlertDocument = None):
         """
         初始化分派规则适配对象
 
@@ -298,11 +296,11 @@ class AlertAssignMatchManager:
     def __init__(
         self,
         alert: AlertDocument,
-        notice_users: List = None,
-        group_rules: List[Dict] = None,
-        assign_mode: List[str] = None,
+        notice_users: list = None,
+        group_rules: list[dict] = None,
+        assign_mode: list[str] = None,
         notice_type=None,
-        cmdb_attrs: Dict[str, Union[Host, Set, Module]] = None,
+        cmdb_attrs: dict[str, Host | Set | Module] = None,
     ):
         """
         :param alert: 告警
@@ -332,7 +330,7 @@ class AlertAssignMatchManager:
         # 指定的分派规则, 以优先级从高到低排序
         self.group_rules = group_rules or []
         # 匹配到的规则
-        self.matched_rules: List[AssignRuleMatch] = []
+        self.matched_rules: list[AssignRuleMatch] = []
         # 匹配到的规则对应的告警信息
         self.matched_rule_info = {
             "notice_upgrade_user_groups": [],  # 通知升级负责人
@@ -346,7 +344,7 @@ class AlertAssignMatchManager:
         }
         self.severity_source = ""
 
-    def get_match_cmdb_dimensions(self, cmdb_attrs: Dict[str, Union[Host, Set, Module]]):
+    def get_match_cmdb_dimensions(self, cmdb_attrs: dict[str, Host | Set | Module]):
         """
         获取CMDB相关的维度信息
 
@@ -480,13 +478,13 @@ class AlertAssignMatchManager:
         # 返回主机ID列表，将集合转换为列表
         return list(host_ids)
 
-    def get_matched_rules(self) -> List[AssignRuleMatch]:
+    def get_matched_rules(self) -> list[AssignRuleMatch]:
         """
         适配分派规则, 通过api获取动态分组，适用于SaaS调试预览，后台实现基于缓存重写
         :return: 匹配的规则列表
         """
         # 初始化匹配成功的匹配对象列表
-        matched_rules: List[AssignRuleMatch] = []
+        matched_rules: list[AssignRuleMatch] = []
         # # 检查是否需要按规则分派
         if AssignMode.BY_RULE not in self.assign_mode:
             # 如果不需要分派的，不要进行规则匹配
@@ -619,7 +617,7 @@ class AlertAssignMatchManager:
         执行规则适配
         """
         # 获取匹配的规则列表
-        self.matched_rules: List[AssignRuleMatch] = self.get_matched_rules()
+        self.matched_rules: list[AssignRuleMatch] = self.get_matched_rules()
 
         # 整理匹配到的规则
         if self.matched_rules:

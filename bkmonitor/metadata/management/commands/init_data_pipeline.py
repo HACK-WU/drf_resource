@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-from typing import Dict, List, Tuple
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -83,7 +81,7 @@ class Command(BaseCommand):
 
         self.stdout.write("init datapipeline successfully")
 
-    def _init_pipeline(self, data_id_kafka: Dict, data_id_transfer: Dict, data_id_rt: Dict) -> Dict:
+    def _init_pipeline(self, data_id_kafka: dict, data_id_transfer: dict, data_id_rt: dict) -> dict:
         """初始化管道
         仅初始化完管道数据，然后再分配到数据源 ID
         """
@@ -123,7 +121,7 @@ class Command(BaseCommand):
 
         return data_id_pipeline
 
-    def _init_etl_config_pipeline(self, etl_config_data: Dict, data_id_pipeline_name: Dict):
+    def _init_etl_config_pipeline(self, etl_config_data: dict, data_id_pipeline_name: dict):
         """初始化数据场景和管道的关联关系"""
         event_data_id_list = etl_config_data["event_data_id_list"]
         apm_data_id_list = etl_config_data["apm_data_id_list"]
@@ -162,7 +160,7 @@ class Command(BaseCommand):
         models.DataPipelineEtlConfig.objects.bulk_create(bulk_create_data)
         self.stdout.write("init datapipeline and etl config successfully")
 
-    def _init_data_id_pipeline(self, data_id_pipeline_name: Dict):
+    def _init_data_id_pipeline(self, data_id_pipeline_name: dict):
         """初始化数据源 id 和管道的关系"""
         bulk_create_data = [
             models.DataPipelineDataSource(data_pipeline_name=pipeline_name, bk_data_id=data_id)
@@ -171,7 +169,7 @@ class Command(BaseCommand):
         models.DataPipelineDataSource.objects.bulk_create(bulk_create_data)
         self.stdout.write("init datapipeline and datasource successfully")
 
-    def _init_space_pipeline(self, data_id_pipeline_name: Dict):
+    def _init_space_pipeline(self, data_id_pipeline_name: dict):
         """初始化空间数据和管道的关系"""
         # 获取数据源和空间的关系
         data_id_space_dict = self._get_space_data_id()
@@ -199,7 +197,7 @@ class Command(BaseCommand):
         models.DataPipelineSpace.objects.bulk_create(bulk_create_data)
         self.stdout.write("init datapipeline and space successfully")
 
-    def _refine_etl_config(self, data_id_name: Dict, data_id_etl_config: Dict) -> Dict:
+    def _refine_etl_config(self, data_id_name: dict, data_id_etl_config: dict) -> dict:
         """获取使用场景类型
 
         - 枚举已经使用的 data id，进行分类
@@ -253,7 +251,7 @@ class Command(BaseCommand):
             "metric_data_id_list": metric_data_id_list,
         }
 
-    def _refine_data_id_pipeline(self, data_id_pipeline: Dict) -> Dict:
+    def _refine_data_id_pipeline(self, data_id_pipeline: dict) -> dict:
         """获取数据源 ID 和 pipeline 的关系"""
         qs = models.DataPipeline.objects.all()
         pipeline_name_map = {
@@ -275,7 +273,7 @@ class Command(BaseCommand):
 
         return data_id_pipeline_name
 
-    def _compose_pipeline_data(self, table_ids: List, kafka: str, transfer_cluster: str) -> List:
+    def _compose_pipeline_data(self, table_ids: list, kafka: str, transfer_cluster: str) -> list:
         unique_key = (kafka, transfer_cluster)
         data = []
         if not table_ids:
@@ -296,7 +294,7 @@ class Command(BaseCommand):
             data.append(_unique_key)
         return data
 
-    def _get_rt_influxdb_vm(self) -> Tuple:
+    def _get_rt_influxdb_vm(self) -> tuple:
         """获取 rt 和 influxdb 存储的关系"""
         # 获取 vm 集群 ID
         vm_cluster_ids = models.ClusterInfo.objects.filter(cluster_type=models.ClusterInfo.TYPE_VM).values_list(
@@ -327,7 +325,7 @@ class Command(BaseCommand):
             for qs in models.ESStorage.objects.values("table_id", "storage_cluster_id")
         }
 
-    def _get_data_source(self) -> Tuple:
+    def _get_data_source(self) -> tuple:
         """获取数据源 ID 和 名称及 transfer 集群"""
         qs = models.DataSource.objects.values(
             "bk_data_id", "data_name", "mq_cluster_id", "transfer_cluster_id", "etl_config"
@@ -346,7 +344,7 @@ class Command(BaseCommand):
 
         return data_id_name, data_id_etl_config, data_id_kafka, data_id_transfer
 
-    def _get_data_id_rt(self) -> Dict:
+    def _get_data_id_rt(self) -> dict:
         qs = models.DataSourceResultTable.objects.values("bk_data_id", "table_id")
         # 组装数据
         data = {}
@@ -354,7 +352,7 @@ class Command(BaseCommand):
             data.setdefault(obj["bk_data_id"], []).append(obj["table_id"])
         return data
 
-    def _get_space_data_id(self) -> Dict:
+    def _get_space_data_id(self) -> dict:
         """获取空间范围下的 data id"""
         qs = models.SpaceDataSource.objects.filter(from_authorization=False).values(
             "space_type_id", "space_id", "bk_data_id"
@@ -364,7 +362,7 @@ class Command(BaseCommand):
             data.setdefault(obj["bk_data_id"], []).append((obj["space_type_id"], obj["space_id"]))
         return data
 
-    def _get_space_type_data_id(self) -> Dict:
+    def _get_space_type_data_id(self) -> dict:
         """获取空间类型所属的数据源 ID
 
         NOTE: 包含全空间类型
@@ -423,4 +421,4 @@ class Command(BaseCommand):
             data_pipeline_name=default_name, defaults={"etl_config": ETLConfig.ALL.value}
         )
 
-        self.stdout.write(f"set default pipeline with space and etl config successfully")
+        self.stdout.write("set default pipeline with space and etl config successfully")

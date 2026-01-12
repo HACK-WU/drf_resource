@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -52,16 +51,14 @@ if __name__ == "__main__":
     name = name or "apigw_default"
 
     print(
-        """
+        f"""
         ===========================
-        source:         {},
-        target:         {},
-        format:         {},
-        name:         {},
+        source:         {source},
+        target:         {target},
+        format:         {format},
+        name:         {name},
         ===========================
-    """.format(
-            source, target, format, name
-        )
+    """
     )
 
     if format == "swagger":
@@ -101,7 +98,7 @@ paths:"""
           userVerifiedRequired: false
         disabledStages: []"""
 
-        output = open(os.path.join(target, "{}.{}".format(name, format)), "w")
+        output = open(os.path.join(target, f"{name}.{format}"), "w")
         output.write(template_header)
         with open(source, "rb") as f:
             apis = yaml.load(f, Loader=yaml.FullLoader)
@@ -137,7 +134,7 @@ paths:"""
             for api in apis
         ]
 
-        output = open(os.path.join(target, "{}.{}".format(name, format)), "w")
+        output = open(os.path.join(target, f"{name}.{format}"), "w")
         if format == "json":
             json.dump(data, output, indent=2)
         else:

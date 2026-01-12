@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云PaaS平台社区版 (BlueKing PaaS Community
 Edition) available.
@@ -116,7 +115,7 @@ def __grow(tree, elem):
         try:
             next_elem = elem.outgoing[0]
         except BaseException as error:
-            print("migrate {} error {}".format(elem.name, str(error)))
+            print(f"migrate {elem.name} error {str(error)}")
             raise
         __grow_flow(tree, outgoing, elem, next_elem)
 
@@ -149,7 +148,7 @@ def __grow(tree, elem):
         try:
             next_elem = elem.outgoing[0]
         except BaseException as error:
-            print("migrate {}: {} error {}".format(elem.name, elem.outgoing, str(error)))
+            print(f"migrate {elem.name}: {elem.outgoing} error {str(error)}")
             raise
         __grow_flow(tree, outgoing, elem, next_elem)
 

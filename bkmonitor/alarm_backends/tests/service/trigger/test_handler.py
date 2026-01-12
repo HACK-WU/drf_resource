@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,7 @@ specific language governing permissions and limitations under the License.
 
 
 import pytest
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 from alarm_backends.core.cache.key import ANOMALY_SIGNAL_KEY, SERVICE_LOCK_TRIGGER
 from alarm_backends.core.lock.service_lock import service_lock
@@ -32,7 +31,7 @@ def sleep(mocker):
     return mocker.patch("time.sleep", return_value=None)
 
 
-class TestHandler(object):
+class TestHandler:
     def setup(self):
         ANOMALY_SIGNAL_KEY.client.flushall()
 

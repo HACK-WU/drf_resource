@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -21,7 +20,7 @@ from bkmonitor.utils.cipher import AESCipher
 key_dir = os.path.dirname(__file__)
 
 
-class RSAVerification(object):
+class RSAVerification:
     @classmethod
     def gen_signature(cls, message):
         if isinstance(message, str):
@@ -40,7 +39,7 @@ class RSAVerification(object):
             with open(os.path.join(key_dir, "bk.key")) as f:
                 key = RSA.importKey(f.read())
 
-        except IOError:
+        except OSError:
             pass
 
         except ValueError:
@@ -61,7 +60,7 @@ class RSAVerification(object):
         return verifier.verify(h, signature)
 
 
-class AESVerification(object):
+class AESVerification:
     @classmethod
     def cipher(cls):
         # 需要判断是否有指定密钥，如有，优先级最高
@@ -84,7 +83,7 @@ class AESVerification(object):
             return False
 
 
-class Verification(object):
+class Verification:
     def __new__(cls, protocol):
         if protocol == "default":
             return AESVerification()

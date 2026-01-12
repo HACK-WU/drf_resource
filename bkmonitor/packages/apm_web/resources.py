@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -289,6 +288,6 @@ class ServiceAndComponentCompatibleResource(SidebarPageListResource):
                     "service_name": i["service"],
                 }
             )
-        return super(ServiceAndComponentCompatibleResource, self).get_pagination_data(
+        return super().get_pagination_data(
             origin_data, params, column_type, in_place=True
         )

@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 import json
 import time
-from typing import List
 
 from alarm_backends.core.cache.base import CacheManager
 from calendars.models import CalendarModel
@@ -14,7 +12,7 @@ class CalendarCacheManager(CacheManager):
     CACHE_KEY_TEMPLATE = CacheManager.CACHE_KEY_PREFIX + ".calendar.{calendar_id}"
 
     @classmethod
-    def mget(cls, calendar_ids: List[int]) -> List[List]:
+    def mget(cls, calendar_ids: list[int]) -> list[list]:
         if not calendar_ids:
             return []
         results = cls.cache.mget(
@@ -23,7 +21,7 @@ class CalendarCacheManager(CacheManager):
         return [json.loads(result or "[]") for result in results]
 
     @classmethod
-    def get(cls, calendar_id: int) -> List:
+    def get(cls, calendar_id: int) -> list:
         key = cls.CACHE_KEY_TEMPLATE.format(calendar_id=calendar_id)
         result = cls.cache.get(key)
         if not result:

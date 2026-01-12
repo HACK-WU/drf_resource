@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from typing import List
 
 from django.utils.translation import gettext as _
 from furl import furl
@@ -109,7 +107,7 @@ class K8sSearchHandler(BaseSearchHandler):
             )
         return search_results
 
-    def search(self, query: str, limit: int = 10) -> List[SearchResultItem]:
+    def search(self, query: str, limit: int = 10) -> list[SearchResultItem]:
         search_results = self.search_clusters(query, limit)
 
         obj_types = [

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,7 +21,7 @@ class SetManager(RefreshByBizMixin, CMDBCacheManager):
 
     ObjectClass = Set
     type = "set"
-    CACHE_KEY = "{prefix}.cmdb.set".format(prefix=CMDBCacheManager.CACHE_KEY_PREFIX)
+    CACHE_KEY = f"{CMDBCacheManager.CACHE_KEY_PREFIX}.cmdb.set"
 
     @classmethod
     def key_to_internal_value(cls, bk_set_id):
@@ -41,7 +40,7 @@ class SetManager(RefreshByBizMixin, CMDBCacheManager):
         :param bk_set_id: 集群ID
         :rtype: Set
         """
-        return super(SetManager, cls).get(bk_set_id)
+        return super().get(bk_set_id)
 
     @classmethod
     def refresh_by_biz(cls, bk_biz_id):

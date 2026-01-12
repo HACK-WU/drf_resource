@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -65,7 +64,7 @@ class UptimecheckCacheManager(CacheManager):
             pipeline.set(cls.NODE_CACHE_KEY_TEMPLATE.format(node_id=node["id"]), json.dumps(node), cls.CACHE_TIMEOUT)
 
         pipeline.execute()
-        cls.logger.info("refresh uptimecheck nodes finished, amount: {}".format(len(nodes)))
+        cls.logger.info(f"refresh uptimecheck nodes finished, amount: {len(nodes)}")
 
     @classmethod
     def refresh_tasks(cls):
@@ -86,7 +85,7 @@ class UptimecheckCacheManager(CacheManager):
             json.dumps([f["id"] for f in tasks]),
             cls.CACHE_TIMEOUT,
         )
-        cls.logger.info("refresh uptimecheck task finished, amount: {}".format(count))
+        cls.logger.info(f"refresh uptimecheck task finished, amount: {count}")
 
     @classmethod
     def get_task_id_list(cls):

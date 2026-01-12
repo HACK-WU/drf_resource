@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -18,9 +17,9 @@ from query_api.exceptions import SQLSyntaxError
 logger = logging.getLogger("sql_parse")
 
 
-class SQLStatement(object):
+class SQLStatement:
     def __init__(self, sql):
-        logger.info("<<< %s" % sql)
+        logger.info(f"<<< {sql}")
         self._sql = sql
         tlist_tuple = sqlparse.parse(sql.strip())
         if len(tlist_tuple) > 1:
@@ -70,7 +69,7 @@ class SQLStatement(object):
         if not keyword:
             raise Exception
         while keyword:
-            func_name = "_process_%s" % keyword.normalized.split(" ")[0]
+            func_name = "_process_{}".format(keyword.normalized.split(" ")[0])
             args = [
                 idx,
             ]
@@ -148,7 +147,7 @@ class SQLStatement(object):
         self.slimit_item = slimit_item
 
     def _split_items(self, tlist):
-        func_name = "_split_{cls}".format(cls=type(tlist).__name__)
+        func_name = f"_split_{type(tlist).__name__}"
         func = getattr(self, func_name.lower(), lambda x: x)
         result = func(tlist)
         if not isinstance(result, list):

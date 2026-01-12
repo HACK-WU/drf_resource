@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -112,9 +111,7 @@ class ActionProcessor(BaseActionProcessor):
         except RelatedAlertNotFoundError as error:
             # 当有关联的记录
             logger.warning(
-                "${action_id} run collect action failed , msg is {error}".format(
-                    action_id=self.action.id, error=str(error)
-                )
+                f"${self.action.id} run collect action failed , msg is {str(error)}"
             )
             kwargs["node_execute_times"] = self.action.outputs.get(node_execute_times_key, 0)
             self.set_finished(
@@ -127,9 +124,7 @@ class ActionProcessor(BaseActionProcessor):
             return
         except BaseException as error:
             logger.exception(
-                "${action_id} run collect action failed , msg is {error}".format(
-                    action_id=self.action.id, error=str(error)
-                )
+                f"${self.action.id} run collect action failed , msg is {str(error)}"
             )
             kwargs["node_execute_times"] = self.action.outputs.get(node_execute_times_key, 0)
             self.set_finished(
@@ -179,11 +174,7 @@ class ActionProcessor(BaseActionProcessor):
                 notice_way=collect_info["notice_way"],
                 collect_type=collect_type,
             ),
-            content_template_path="notice/{signal}/{collect_type}/{notice_way}_content.jinja".format(
-                signal=action_signal,
-                notice_way=msg_content_type,
-                collect_type=collect_type,
-            ),
+            content_template_path=f"notice/{action_signal}/{collect_type}/{msg_content_type}_content.jinja",
             context=self.context,
         )
 
@@ -227,7 +218,7 @@ class ActionProcessor(BaseActionProcessor):
         for key, values in self.converged_condition.items():
             if values is None:
                 values = ""
-            if isinstance(values, (list, set)):
+            if isinstance(values, list | set):
                 values = "_".join([str(value) for value in values])
             else:
                 values = str(values)

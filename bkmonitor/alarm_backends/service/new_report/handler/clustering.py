@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -44,7 +43,7 @@ class ClusteringReportHandler(BaseReportHandler):
     AGGS_FIELD_PREFIX = "__dist"
 
     def __init__(self, report: Report):
-        super(ClusteringReportHandler, self).__init__(report)
+        super().__init__(report)
         self.log_prefix = (
             f"[clustering_report] bk_biz_id: {self.report.bk_biz_id}"
             f" index_set_id: {self.report.scenario_config['index_set_id']}"
@@ -251,7 +250,7 @@ class ClusteringReportHandler(BaseReportHandler):
         try:
             result = self.query_patterns(time_config)
             if not result:
-                logger.info("[{}] Query pattern is empty.".format(self.log_prefix))
+                logger.info(f"[{self.log_prefix}] Query pattern is empty.")
         except Exception as e:
             logger.exception(f"{self.log_prefix} query pattern error: {e}")
             raise e
@@ -279,7 +278,7 @@ class ClusteringReportHandler(BaseReportHandler):
             space = SpaceApi.get_space_detail(bk_biz_id=self.report.bk_biz_id)
             space_name = space.space_name
         except Exception as e:  # pylint:disable=broad-except
-            logger.exception("get space info error: {}".format(e))
+            logger.exception(f"get space info error: {e}")
 
         render_params = {
             "bk_biz_id": self.report.bk_biz_id,

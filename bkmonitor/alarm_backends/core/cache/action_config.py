@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import datetime
-from typing import Dict
 
 import pytz
 
@@ -56,14 +54,14 @@ class ActionConfigCacheManager(CacheManager):
         }
 
     @classmethod
-    def get_action_plugin_by_id(cls, plugin_id: int) -> Dict:
+    def get_action_plugin_by_id(cls, plugin_id: int) -> dict:
         """
         从缓存中获取策略详情
         """
         return extended_json.loads(cls.cache.get(cls.PLUGIN_CACHE_KEY.format(cache_id=plugin_id)) or "{}")
 
     @classmethod
-    def get_action_config_by_id(cls, config_id: int) -> Dict:
+    def get_action_config_by_id(cls, config_id: int) -> dict:
         """
         从缓存中获取策略详情
         """

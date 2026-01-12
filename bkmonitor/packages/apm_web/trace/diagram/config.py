@@ -18,13 +18,13 @@ class DiagramConfig:
 @dataclass
 class DiagramConfigController:
 
-    flamegraph: Optional[DiagramConfig] = None
-    sequence: Optional[DiagramConfig] = None
-    topo: Optional[DiagramConfig] = None
-    statistics: Optional[DiagramConfig] = None
+    flamegraph: DiagramConfig | None = None
+    sequence: DiagramConfig | None = None
+    topo: DiagramConfig | None = None
+    statistics: DiagramConfig | None = None
 
     @classmethod
-    def read(cls, forced_config: Optional[dict] = None) -> Optional["DiagramConfigController"]:
+    def read(cls, forced_config: dict | None = None) -> Optional["DiagramConfigController"]:
         raw_config = forced_config or settings.APM_TRACE_DIAGRAM_CONFIG
         if not raw_config:
             return None

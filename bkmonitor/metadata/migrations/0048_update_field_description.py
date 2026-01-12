@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -25,7 +24,7 @@ def update_description(apps, schema_editor):
     for model_name in list(models.keys()):
         models[model_name] = apps.get_model("metadata", model_name)
 
-    with open("./metadata/data/description_append.json", "r", encoding="utf-8") as unit_file:
+    with open("./metadata/data/description_append.json", encoding="utf-8") as unit_file:
         field_list = json.load(unit_file)
 
     # 遍历获取所有的字段
@@ -38,7 +37,7 @@ def update_description(apps, schema_editor):
         try:
             field_object = models["ResultTableField"].objects.get(table_id=table_id, field_name=field_name)
         except models["ResultTableField"].DoesNotExist:
-            print("table->[{}] field->[{}] is missing".format(table_id, field_name))
+            print(f"table->[{table_id}] field->[{field_name}] is missing")
             continue
 
         field_object.description = field_info["item_display"]
@@ -48,7 +47,7 @@ def update_description(apps, schema_editor):
         try:
             table_object = models["ResultTable"].objects.get(table_id=table_id)
         except models["ResultTable"].DoesNotExist:
-            print("table->[%s] is missing" % table_id)
+            print(f"table->[{table_id}] is missing")
             continue
 
         table_object.table_name_zh = field_info["table_name_zh"]

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import json
-from typing import Optional
 
 from celery import shared_task
 from django.conf import settings
@@ -402,13 +400,13 @@ class Application(AbstractRecordModel):
     @classmethod
     def get_application_id_by_app_name(cls, app_name: str):
         request = get_request()
-        biz_id: Optional[int] = request.biz_id
+        biz_id: int | None = request.biz_id
 
         if biz_id is None:
             try:
                 data = json.loads(request.body.decode("utf-8"))
             except (TypeError, json.JSONDecodeError):
-                raise ValueError("application({}) not found".format(app_name))
+                raise ValueError(f"application({app_name}) not found")
 
             # space_uid to biz_id
             if "space_uid" in data:
@@ -417,7 +415,7 @@ class Application(AbstractRecordModel):
         try:
             return cls.objects.get(app_name=app_name, bk_biz_id=biz_id).application_id
         except cls.DoesNotExist:
-            raise ValueError("application({}) not found".format(app_name))
+            raise ValueError(f"application({app_name}) not found")
 
     @classmethod
     def get_application_by_app_id(cls, application_id):
@@ -661,7 +659,7 @@ class Application(AbstractRecordModel):
             )
             Application.authorization_to_maintainers.delay(self.update_user, self.application_id)
         except Exception as e:  # pylint: disable=broad-except
-            logger.warning("application->({}) grant creator action failed, reason: {}".format(self.application_id, e))
+            logger.warning(f"application->({self.application_id}) grant creator action failed, reason: {e}")
 
     @property
     def is_create_finished(self):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import json
 
-from django.db import connection, migrations, models
+from django.db import connection, migrations
 
 
 def query_sql(sql):
@@ -80,7 +79,7 @@ def migrate_log_collector(apps, schema_editor):
         LogCollector.objects.bulk_create(new_configs)
         LogCollectorHost.objects.bulk_create(new_hosts)
 
-    except Exception as e:
+    except Exception:
         pass
 
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 
 
 import json
-import sys
 from time import sleep
 
 from googletrans import Translator as GooleTrans
@@ -19,7 +17,7 @@ from googletrans import Translator as GooleTrans
 from .config import COLLECTED_WORDS_FILE, STANDARD_WORDS_FILE, TRANSLATE_INTERVAL, TRANSLATE_WORDS_FILE
 
 
-class Translator(object):
+class Translator:
     def __init__(self):
         self.translator = GooleTrans(
             service_urls=[
@@ -36,9 +34,9 @@ class Translator(object):
     @staticmethod
     def read(file_path, default):
         try:
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 return json.loads(f.read()) or default
-        except IOError:
+        except OSError:
             return default
 
     @staticmethod
@@ -48,7 +46,7 @@ class Translator(object):
 
     def run(self):
         for word in self.words:
-            print("translating word '{}'".format(word))
+            print(f"translating word '{word}'")
 
             # 标准翻译字典
             if word in self.standard_words:
@@ -62,9 +60,9 @@ class Translator(object):
                     self.write(TRANSLATE_WORDS_FILE, self.translated_words)
                     sleep(TRANSLATE_INTERVAL)
                 except Exception as e:
-                    print("translate error: {}".format(e))
+                    print(f"translate error: {e}")
 
-        print("translate {} words".format(len(self.translated_words) - self.translated_word_count))
+        print(f"translate {len(self.translated_words) - self.translated_word_count} words")
 
     @property
     def no_translate(self):

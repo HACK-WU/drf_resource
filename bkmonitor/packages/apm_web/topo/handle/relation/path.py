@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 import itertools
 from collections import defaultdict
 from dataclasses import asdict, dataclass
-from typing import List, Type
 
 from django.utils.translation import gettext_lazy as _
 
@@ -41,7 +39,7 @@ class Layer:
     def __init__(self, rt):
         self._runtime = rt
 
-    def get_layer(self, *args, **kwargs) -> [Node, List[Relation]]:
+    def get_layer(self, *args, **kwargs) -> [Node, list[Relation]]:
         raise NotImplementedError
 
     @property
@@ -71,9 +69,9 @@ class Layer0(Layer):
 
 
 class ResourceLayer(Layer):
-    source_path: List[str] = None
+    source_path: list[str] = None
 
-    def get_layer(self, nodes: List[Node]) -> List[Relation]:
+    def get_layer(self, nodes: list[Node]) -> list[Relation]:
         query_lists = []
         source_ids = []
         for node in nodes:
@@ -159,7 +157,7 @@ class PathTemplateSidebar:
     # --- runtime attrs
     _sidebar_index: int
     _tree: Node
-    _tree_infos: List[TreeInfo]
+    _tree_infos: list[TreeInfo]
     _tree_info: TreeInfo
     # 此侧边栏是否有节点数据
     have_data: bool = False
@@ -170,7 +168,7 @@ class PathTemplateSidebar:
     bind_source_type: Source = None
     group: SidebarGroup = None
 
-    def combine_nodes(self, nodes: List[Node]):
+    def combine_nodes(self, nodes: list[Node]):
         """
         处理当前侧边栏对应的资源实体的所有节点 返回合并后的节点列表
         正常的节点会合并
@@ -254,7 +252,7 @@ class PathTemplateSidebar:
 
         return r_nodes
 
-    def _group_by_alert(self, group_by_key, node_key, query_string, nodes: List[Node]):
+    def _group_by_alert(self, group_by_key, node_key, query_string, nodes: list[Node]):
         """根据告警状态来聚合节点"""
 
         alerts = self._search_alert(query_string)
@@ -398,13 +396,13 @@ class SystemSidebar(PathTemplateSidebar):
 
 @dataclass
 class PathTemplate:
-    layers: List[Type[Layer]]
-    sidebars: List[Type[PathTemplateSidebar]]
+    layers: list[type[Layer]]
+    sidebars: list[type[PathTemplateSidebar]]
 
     def to_tree_json(self, tree: Node, _):
         return asdict(tree)
 
-    def to_layers_json(self, tree: Node, tree_info, tree_infos: List[TreeInfo]):
+    def to_layers_json(self, tree: Node, tree_info, tree_infos: list[TreeInfo]):
         sidebars = []
 
         # Step1: 先获取 tree 的所有边
@@ -476,7 +474,7 @@ class PathTemplate:
         ]
 
     @classmethod
-    def _group_sidebar(cls, sidebar_instances: List[PathTemplateSidebar]):
+    def _group_sidebar(cls, sidebar_instances: list[PathTemplateSidebar]):
         """对侧边栏进行分组归类"""
 
         group_mapping = defaultdict(dict)

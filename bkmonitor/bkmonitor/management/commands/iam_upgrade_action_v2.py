@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making BK-LOG 蓝鲸日志平台 available.
 Copyright (C) 2021 THL A29 Limited, a Tencent company.  All rights reserved.
@@ -21,7 +20,6 @@ the project delivered to anyone in the future.
 """
 import sys
 import time
-from typing import List
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -75,11 +73,11 @@ ACTIONS_TO_UPGRADE = [
 
 class ApiBatchAuthRequest(OldApiBatchAuthRequest):
     def __init__(self, *args, expired_at=None, **kwargs):
-        super(ApiBatchAuthRequest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.expired_at = expired_at
 
     def to_dict(self):
-        request_dict = super(ApiBatchAuthRequest, self).to_dict()
+        request_dict = super().to_dict()
         if self.expired_at is not None:
             request_dict["expired_at"] = self.expired_at
         return request_dict
@@ -94,7 +92,7 @@ class Command(BaseCommand):
         parser.add_argument("-u", "--username")
 
     def __init__(self, *args, **kwargs):
-        super(Command, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.spaces = {str(space["bk_biz_id"]): space["space_name"] for space in SpaceApi.list_spaces_dict()}
         self.apm_applications = {
@@ -119,12 +117,12 @@ class Command(BaseCommand):
 
         # 并发数
         concurrency = int(concurrency) if concurrency else 50
-        print("upgrade with concurrency: %s" % concurrency)
+        print(f"upgrade with concurrency: {concurrency}")
 
         # 按用户名过滤
         self.username = username
         if username:
-            print("upgrade for user: %s" % username)
+            print(f"upgrade for user: {username}")
 
         self.upgrade_policy(concurrency)
 
@@ -201,7 +199,7 @@ class Command(BaseCommand):
                 try:
                     results.append(future.get())
                 except Exception as e:
-                    print("[grant_resource] grant permission for action: {}, something wrong: {}".format(action.id, e))
+                    print(f"[grant_resource] grant permission for action: {action.id}, something wrong: {e}")
 
             progress += len(resources)
             global_progress += len(resources)
@@ -219,7 +217,7 @@ class Command(BaseCommand):
                 )
             )
 
-            print("[grant_resource] [END] action[%s]" % action.id)
+            print(f"[grant_resource] [END] action[{action.id}]")
 
         print("[upgrade_policy] [END]")
 
@@ -249,7 +247,7 @@ class Command(BaseCommand):
             print("Congratulations! IAM upgrade successfully!!!")
             return True
 
-        print("Sorry, maybe something wrong with IAM upgrade. Following actions not OK: %s" % ", ".join(no_ok_actions))
+        print("Sorry, maybe something wrong with IAM upgrade. Following actions not OK: {}".format(", ".join(no_ok_actions)))
         return False
 
     def query_polices(self, action_id):
@@ -282,7 +280,7 @@ class Command(BaseCommand):
             policies = [policy for policy in policies if policy["subject"]["id"] == self.username]
         return policies
 
-    def expression_to_resource_paths(self, expression, paths: List):
+    def expression_to_resource_paths(self, expression, paths: list):
         """
         将权限表达式转换为资源路径
         """
@@ -398,8 +396,7 @@ class Command(BaseCommand):
                     results.append(self.grant_resource_chunked(resource, chunk))
         except Exception as e:  # pylint: disable=broad-except
             print(
-                "grant permission error for action[%s], subject[%s]: %s"
-                % (resource["actions"][0]["id"], resource["subject"], e)
+                "grant permission error for action[{}], subject[{}]: {}".format(resource["actions"][0]["id"], resource["subject"], e)
             )
         return results
 

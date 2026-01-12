@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 import copy
 import json
 import logging
-import typing
 from dataclasses import asdict, dataclass, field
 
 from apm.constants import ProfileApiType
@@ -39,7 +37,7 @@ class ApiParam:
     type: str = ""
     start: int = ""
     end: int = ""
-    label_filter: typing.Dict = field(default_factory=list)
+    label_filter: dict = field(default_factory=list)
     service_name: str = ""
     limit: ApiParamLimit = None
     order: ApiParamOrder = None

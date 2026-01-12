@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,29 +14,29 @@ from django.apps.registry import Apps
 
 from bkmonitor.utils.common_utils import chunks
 
-ActionConfigInfo = typing.Dict[str, typing.Any]
+ActionConfigInfo = dict[str, typing.Any]
 
 
-def get_action_configs_generator(action_config_model, config_ids: typing.Set[int]):
+def get_action_configs_generator(action_config_model, config_ids: set[int]):
     print(f"[to_be_updated_configs] total -> {len(config_ids)}")
     # 使用生成器分批查询，避免单次全量拉取导致 OOM
     for chunk_config_ids in chunks(list(config_ids), 500):
-        action_configs: typing.List[ActionConfigInfo] = action_config_model.objects.filter(
+        action_configs: list[ActionConfigInfo] = action_config_model.objects.filter(
             id__in=chunk_config_ids
         ).values("id", "execute_config")
         yield list(action_configs)
 
 
 def fetch_action_configs(
-    apps: Apps, strategy_ids: typing.Optional[typing.Set[int]] = None
-) -> typing.Generator[typing.List[ActionConfigInfo], None, None]:
+    apps: Apps, strategy_ids: set[int] | None = None
+) -> typing.Generator[list[ActionConfigInfo], None, None]:
 
     action_config_model = apps.get_model("bkmonitor", "ActionConfig")
     relation_model = apps.get_model("bkmonitor", "StrategyActionConfigRelation")
-    relations: typing.List[typing.Dict[str, int]] = relation_model.objects.values(
+    relations: list[dict[str, int]] = relation_model.objects.values(
         "strategy_id", "config_id", "relate_type"
     )
-    config_ids: typing.Set[int] = set()
+    config_ids: set[int] = set()
     for relation in relations:
         if relation["relate_type"] == "NOTICE" and (strategy_ids is None or relation["strategy_id"] in strategy_ids):
             config_ids.add(relation["config_id"])
@@ -46,13 +45,13 @@ def fetch_action_configs(
 
 
 def fetch_action_configs_by_bizs(
-    apps: Apps, bk_biz_ids: typing.List[str]
-) -> typing.Generator[typing.List[ActionConfigInfo], None, None]:
+    apps: Apps, bk_biz_ids: list[str]
+) -> typing.Generator[list[ActionConfigInfo], None, None]:
     strategy_model = apps.get_model("bkmonitor", "StrategyModel")
     action_config_model = apps.get_model("bkmonitor", "ActionConfig")
     relation_model = apps.get_model("bkmonitor", "StrategyActionConfigRelation")
 
-    strategy_ids: typing.Set[int] = set(
+    strategy_ids: set[int] = set(
         strategy_model.objects.filter(bk_biz_id__in=bk_biz_ids).values_list("id", flat=True)
     )
 
@@ -60,7 +59,7 @@ def fetch_action_configs_by_bizs(
     if len(strategy_ids) > 500:
         yield from fetch_action_configs(apps, strategy_ids)
     else:
-        config_ids: typing.Set[int] = set(
+        config_ids: set[int] = set(
             relation_model.objects.filter(strategy_id__in=strategy_ids, relate_type="NOTICE").values_list(
                 "config_id", flat=True
             )
@@ -68,15 +67,15 @@ def fetch_action_configs_by_bizs(
         yield from get_action_configs_generator(action_config_model, config_ids)
 
 
-def update_notice_template(apps: Apps, old: str, new: str, bk_biz_ids: typing.Optional[typing.List[str]] = None):
+def update_notice_template(apps: Apps, old: str, new: str, bk_biz_ids: list[str] | None = None):
 
     if bk_biz_ids is None:
-        action_configs_generator: typing.Generator[typing.List[ActionConfigInfo], None, None] = fetch_action_configs(
+        action_configs_generator: typing.Generator[list[ActionConfigInfo], None, None] = fetch_action_configs(
             apps
         )
     else:
         action_configs_generator: typing.Generator[
-            typing.List[ActionConfigInfo], None, None
+            list[ActionConfigInfo], None, None
         ] = fetch_action_configs_by_bizs(apps, bk_biz_ids)
 
     count: int = 0
@@ -85,7 +84,7 @@ def update_notice_template(apps: Apps, old: str, new: str, bk_biz_ids: typing.Op
     relation_model = apps.get_model("bkmonitor", "StrategyActionConfigRelation")
     for index, action_configs in enumerate(action_configs_generator):
         is_change: bool = False
-        to_be_updated_configs: typing.List[typing.Any] = []
+        to_be_updated_configs: list[typing.Any] = []
         for action_config in action_configs:
             try:
                 for template in action_config["execute_config"]["template_detail"]["template"]:
@@ -111,7 +110,7 @@ def update_notice_template(apps: Apps, old: str, new: str, bk_biz_ids: typing.Op
         # 找到关联的 strategy_ids，清理 hash & snippet
         # Q：为什么要清理 hash & snippet
         # A：hash & snippet 为 asCode 模块维护的配置唯一标识和片段，用于导入时校验配置是否相同，此处已做配置修改，需要进行重置
-        strategy_ids: typing.List[int] = list(
+        strategy_ids: list[int] = list(
             relation_model.objects.filter(
                 config_id__in=[to_be_updated_config.pk for to_be_updated_config in to_be_updated_configs],
                 relate_type="NOTICE",

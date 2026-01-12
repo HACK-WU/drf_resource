@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -50,7 +49,7 @@ aix_system_info = SystemInfo(
 )
 
 
-class JobTaskClient(object):
+class JobTaskClient:
     """
     JOB任务执行客户端
     """
@@ -89,7 +88,7 @@ class JobTaskClient(object):
     def render_script(self, directory, name, cxt):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         tpl_path = os.path.join(os.path.dirname(os.path.dirname(current_dir)), 'uptime_check', 'collector')
-        with open(os.path.join(tpl_path, directory, name), "r", encoding="utf-8") as fd:
+        with open(os.path.join(tpl_path, directory, name), encoding="utf-8") as fd:
             script_tpl = fd.read()
         template = Template(script_tpl)
 

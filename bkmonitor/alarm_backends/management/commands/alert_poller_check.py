@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -17,12 +16,12 @@ from alarm_backends.core.cache.key import ALERT_HOST_DATA_ID_KEY
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument("--host", help="list poll tasks for this host, default list all tasks")
 
     def handle(self, *args, **options):
         target_host = options.get("host") or "all"
-        print("list poll tasks for host(%s)" % target_host)
+        print(f"list poll tasks for host({target_host})")
         ip_topics = ALERT_HOST_DATA_ID_KEY.client.hgetall(ALERT_HOST_DATA_ID_KEY.get_key())
         for ip, topics in ip_topics.items():
             data_topic_info = []

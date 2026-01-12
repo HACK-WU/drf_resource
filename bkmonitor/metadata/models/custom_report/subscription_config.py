@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -178,9 +177,9 @@ class CustomReportSubscription(models.Model):
         # 1. 从数据库查询到bk_biz_id到自定义上报配置的数据
         result = (
             query_set.extra(
-                select={"token": "{}.token".format(data_source_table_name)},
+                select={"token": f"{data_source_table_name}.token"},
                 tables=[data_source_table_name],
-                where=["{}.bk_data_id={}.bk_data_id".format(group_table_name, data_source_table_name)],
+                where=[f"{group_table_name}.bk_data_id={data_source_table_name}.bk_data_id"],
             )
             .values("bk_biz_id", "bk_data_id", "token", "max_rate")
             .distinct()
@@ -359,7 +358,7 @@ class CustomReportSubscription(models.Model):
         for biz_id, items in biz_id_to_data_id_config.items():
             if biz_id not in all_biz_ids and biz_id > 0:
                 # 如果cmdb不存在这个业务，那么需要跳过这个业务的下发
-                logger.info("biz_id({}) does not exists in cmdb".format(biz_id))
+                logger.info(f"biz_id({biz_id}) does not exists in cmdb")
                 continue
 
             if not is_all_biz_refresh and bk_biz_id != biz_id:
@@ -369,7 +368,7 @@ class CustomReportSubscription(models.Model):
             # 2. 从节点管理查询到biz_id下的Proxy机器
             bk_host_ids = biz_id_to_proxy[biz_id]
             if not bk_host_ids:
-                logger.warning("Update custom report config to biz_id({}) error, No proxy found".format(biz_id))
+                logger.warning(f"Update custom report config to biz_id({biz_id}) error, No proxy found")
                 continue
 
             # 3. 通过节点管理下发配置
@@ -412,16 +411,16 @@ class CustomReportSubscription(models.Model):
                 if old_subscription_params_md5 != new_subscription_params_md5:
                     logger.info("subscription task config has changed, update it.")
                     result = api.node_man.update_subscription(subscription_params)
-                    logger.info("update subscription successful, result:{}".format(result))
+                    logger.info(f"update subscription successful, result:{result}")
                     qs.update(config=subscription_params)
                 return sub_config_obj.subscription_id
             except Exception as e:  # noqa
-                logger.exception("update subscription error:{}, params:{}".format(e, subscription_params))
+                logger.exception(f"update subscription error:{e}, params:{subscription_params}")
         else:
             try:
                 logger.info("subscription task not exists, create it.")
                 result = api.node_man.create_subscription(subscription_params)
-                logger.info("create subscription successful, result:{}".format(result))
+                logger.info(f"create subscription successful, result:{result}")
 
                 # 创建订阅成功后，优先存储下来，不然因为其他报错会导致订阅ID丢失
                 subscription_id = result["subscription_id"]
@@ -436,10 +435,10 @@ class CustomReportSubscription(models.Model):
                 result = api.node_man.run_subscription(
                     subscription_id=subscription_id, actions={plugin_name: "INSTALL"}
                 )
-                logger.info("run subscription result:{}".format(result))
+                logger.info(f"run subscription result:{result}")
                 return subscription_id
             except Exception as e:  # noqa
-                logger.exception("create subscription error{}, params:{}".format(e, subscription_params))
+                logger.exception(f"create subscription error{e}, params:{subscription_params}")
 
 
 class LogSubscriptionConfig(models.Model):
@@ -575,18 +574,18 @@ class LogSubscriptionConfig(models.Model):
                 if old_subscription_params_md5 != new_subscription_params_md5:
                     logger.info("custom log config subscription task config has changed, update it.")
                     result = api.node_man.update_subscription(subscription_params)
-                    logger.info("update custom log config subscription successful, result:{}".format(result))
+                    logger.info(f"update custom log config subscription successful, result:{result}")
                     log_subscription.update(config=subscription_params)
                 return sub_config_obj.subscription_id
             except Exception as e:
                 logger.exception(
-                    "update custom log config subscription error:{}, params:{}".format(e, subscription_params)
+                    f"update custom log config subscription error:{e}, params:{subscription_params}"
                 )
         else:
             try:
                 logger.info("custom log config subscription task not exists, create it.")
                 result = api.node_man.create_subscription(subscription_params)
-                logger.info("create custom log config subscription successful, result:{}".format(result))
+                logger.info(f"create custom log config subscription successful, result:{result}")
 
                 # 创建订阅成功后，优先存储下来，不然因为其他报错会导致订阅ID丢失
                 subscription_id = result["subscription_id"]
@@ -600,8 +599,8 @@ class LogSubscriptionConfig(models.Model):
                 result = api.node_man.run_subscription(
                     subscription_id=subscription_id, actions={cls.PLUGIN_NAME: "INSTALL"}
                 )
-                logger.info("run custom log config subscription result:{}".format(result))
+                logger.info(f"run custom log config subscription result:{result}")
             except Exception as e:
                 logger.exception(
-                    "create custom log config subscription error{}, params:{}".format(e, subscription_params)
+                    f"create custom log config subscription error{e}, params:{subscription_params}"
                 )

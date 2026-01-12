@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -23,7 +22,7 @@ from core.prometheus import metrics
 logger = logging.getLogger("trigger")
 
 
-class TriggerProcessor(object):
+class TriggerProcessor:
     # 单次处理量(默认为全量处理)
     MAX_PROCESS_COUNT = 0
 
@@ -62,23 +61,19 @@ class TriggerProcessor(object):
             ANOMALY_LIST_KEY.client.ltrim(self.anomaly_list_key, 0, -len(self.anomaly_points) - 1)
             if len(self.anomaly_points) == self.MAX_PROCESS_COUNT:
                 # 拉取到的数量若等于最大数量，说明还没拉取完，下次需要再次拉取处理
-                signal_key = "{strategy_id}.{item_id}".format(strategy_id=self.strategy_id, item_id=self.item_id)
+                signal_key = f"{self.strategy_id}.{self.item_id}"
                 ANOMALY_SIGNAL_KEY.client.delay("rpush", ANOMALY_SIGNAL_KEY.get_key(), signal_key, delay=1)
                 logger.info(
-                    "[pull anomaly record] strategy({}), item({}) pull {} record."
-                    "queue has data, process next time".format(self.strategy_id, self.item_id, len(self.anomaly_points))
+                    f"[pull anomaly record] strategy({self.strategy_id}), item({self.item_id}) pull {len(self.anomaly_points)} record."
+                    "queue has data, process next time"
                 )
             else:
                 logger.info(
-                    "[pull anomaly record] strategy({}), item({}) pull {} record".format(
-                        self.strategy_id, self.item_id, len(self.anomaly_points)
-                    )
+                    f"[pull anomaly record] strategy({self.strategy_id}), item({self.item_id}) pull {len(self.anomaly_points)} record"
                 )
         else:
             logger.warning(
-                "[pull anomaly record] strategy({}), item({}) pull {} record".format(
-                    self.strategy_id, self.item_id, len(self.anomaly_points)
-                )
+                f"[pull anomaly record] strategy({self.strategy_id}), item({self.item_id}) pull {len(self.anomaly_points)} record"
             )
 
     def push_event_to_kafka(self, event_records):
@@ -128,10 +123,8 @@ class TriggerProcessor(object):
         if self.event_records:
             self.push_event_to_kafka(self.event_records)
             logger.info(
-                "[process result collect] strategy({}), item({}) finish."
-                "push {} AnomalyRecord, {} Event".format(
-                    self.strategy_id, self.item_id, len(self.anomaly_records), len(self.event_records)
-                )
+                f"[process result collect] strategy({self.strategy_id}), item({self.item_id}) finish."
+                f"push {len(self.anomaly_records)} AnomalyRecord, {len(self.event_records)} Event"
             )
             metrics.TRIGGER_PROCESS_PUSH_DATA_COUNT.labels(strategy_id=metrics.TOTAL_TAG).inc(len(self.event_records))
 
@@ -150,9 +143,7 @@ class TriggerProcessor(object):
                 try:
                     self.process_point(point)
                 except Exception as e:
-                    error_message = "[process error] strategy({}), item({}) reason: {} \norigin data: {}".format(
-                        self.strategy_id, self.item_id, e, point
-                    )
+                    error_message = f"[process error] strategy({self.strategy_id}), item({self.item_id}) reason: {e} \norigin data: {point}"
                     logger.exception(error_message)
 
         self.push()

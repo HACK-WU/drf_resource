@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,7 @@ specific language governing permissions and limitations under the License.
 import copy
 import functools
 from dataclasses import dataclass, field
-from typing import Callable, List, Type
+from collections.abc import Callable
 
 from django.utils.translation import gettext_lazy as _
 
@@ -93,10 +92,10 @@ def get_duration_columns(dimension="default"):
 
 @dataclass
 class Template:
-    table_group_by: List[str]
-    metric: [Type[MetricHandler], functools.partial]
-    columns: List[dict]
-    ignore_keys: List[str] = field(default_factory=list)
+    table_group_by: list[str]
+    metric: [type[MetricHandler], functools.partial]
+    columns: list[dict]
+    ignore_keys: list[str] = field(default_factory=list)
     link_service_field_index: int = 0
     other_service_field_index: int = 1
     unit: Callable = None
@@ -333,7 +332,7 @@ class ServiceMetricStatistics(BaseQuery):
         return res
 
     def __init__(self, *args, **kwargs):
-        super(ServiceMetricStatistics, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.graph = GraphQuery(*args, **kwargs).create_graph()
         self.views = SceneViewModel.objects.filter(bk_biz_id=self.bk_biz_id, scene_id="apm_service")
 

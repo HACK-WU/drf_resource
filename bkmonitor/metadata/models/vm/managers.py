@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-from typing import Optional
 
 from django.db import models
 from django.db.transaction import atomic
@@ -25,8 +23,8 @@ class SpaceVMInfoManager(models.Manager):
         self,
         space_type: str,
         space_id: str,
-        vm_cluster_id: Optional[int] = None,
-        vm_retention_time: Optional[str] = VM_RETENTION_TIME,
+        vm_cluster_id: int | None = None,
+        vm_retention_time: str | None = VM_RETENTION_TIME,
     ) -> models.Model:
         """创建记录
 

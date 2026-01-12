@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ import hashlib
 import json
 import logging
 import re
-from typing import Dict, Optional
 
 from django.conf import settings
 from jinja2 import Template
@@ -117,7 +115,7 @@ def parse_and_get_rt_biz_id(table_id: str) -> int:
         return settings.DEFAULT_BKDATA_BIZ_ID
 
 
-def compose_config(tpl: str, render_params: Dict, err_msg_prefix: Optional[str] = "compose config") -> Dict:
+def compose_config(tpl: str, render_params: dict, err_msg_prefix: str | None = "compose config") -> dict:
     """渲染配置模板"""
     content = Template(tpl).render(**render_params)
     try:

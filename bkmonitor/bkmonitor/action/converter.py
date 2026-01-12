@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import copy
 from collections import defaultdict
-from typing import List
 
 from django.conf import settings
 from django.db import transaction
@@ -197,7 +195,7 @@ class ActionConverter:
             return migrate_result
 
     def get_or_create_notice_action(
-        self, strategy: dict, action: models.Action, all_notice_groups: List[models.NoticeGroup]
+        self, strategy: dict, action: models.Action, all_notice_groups: list[models.NoticeGroup]
     ):
         alarm_interval = int(action.config["alarm_interval"])
         action_config = {
@@ -257,7 +255,7 @@ class ActionConverter:
         strategy: dict,
         notice_group: models.NoticeGroup,
         action: models.Action,
-        all_notice_groups: List[models.NoticeGroup],
+        all_notice_groups: list[models.NoticeGroup],
     ):
         action_config = {
             "plugin_id": 2,
@@ -291,7 +289,7 @@ class ActionConverter:
         if notice_group.id in self.new_action_cache:
             action_obj = self.new_action_cache[notice_group.id]
         else:
-            action_config["name"] = "[webhook] {}({})".format(notice_group.name, notice_group.id)
+            action_config["name"] = f"[webhook] {notice_group.name}({notice_group.id})"
             action_config["desc"] = _("迁移的回调套餐, 原策略: {}({}), 原通知组: {}({})").format(
                 strategy_name, strategy_id, notice_group.name, notice_group.id
             )

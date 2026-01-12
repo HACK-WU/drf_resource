@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ import json
 import time
 from collections import namedtuple
 
-import mock
+from unittest import mock
 import pytest
 
 from alarm_backends.service.access import AccessRealTimeDataProcess
@@ -35,7 +34,7 @@ def mock_kafka_consumer(mocker):
 
 class FakeKafkaConsumer(mock.MagicMock):
     def __init__(self, *args, **kwargs):
-        super(FakeKafkaConsumer, self).__init__()
+        super().__init__()
         self.topics = set()
         self.subscribe_call_count = 0
         self.subscription_call_count = 0
@@ -49,7 +48,7 @@ class FakeKafkaConsumer(mock.MagicMock):
         self.topics = set(topics)
 
 
-class TestAccessDataProcess(object):
+class TestAccessDataProcess:
     def test_leader(self, mock_time):
         service = mock.MagicMock()
         p = AccessRealTimeDataProcess(service)

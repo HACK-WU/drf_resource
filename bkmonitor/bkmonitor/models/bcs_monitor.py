@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import abc
 import itertools
-from typing import Dict
 
 from django.db import models
 from django.utils import timezone
@@ -154,7 +152,7 @@ class BCSMonitor(BCSBase):
         return columns
 
     @classmethod
-    def load_list_from_api(cls, params: Dict):
+    def load_list_from_api(cls, params: dict):
         api_resources = cls.fetch_k8s_monitor_list_by_cluster(params)
 
         monitors = []

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
-from typing import Dict, List, Optional, Union
 
 from metadata import models
 from metadata.models.space import constants
@@ -45,7 +43,7 @@ def get_biz_data_id():
 
 
 def get_real_biz_id(
-    data_name: str, is_in_ts_group: bool, is_in_event_group: bool, space_uid: Optional[str] = None
+    data_name: str, is_in_ts_group: bool, is_in_event_group: bool, space_uid: str | None = None
 ) -> int:
     # 平台业务ID，赋值为 0
     platform_biz_id = 0
@@ -68,7 +66,7 @@ def get_real_biz_id(
     return real_biz_id
 
 
-def get_real_zero_biz_data_id() -> Union[Dict, List]:
+def get_real_zero_biz_data_id() -> dict | list:
     """获取数据源归属的业务
     1. 查询数据源对应的rt，如果bk_biz_id为0，则为所属业务
     2. 如果为0，则需要查询 tsgroup 或者 eventgroup, 并且设置为平台级ID

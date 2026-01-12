@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,14 +11,14 @@ specific language governing permissions and limitations under the License.
 from django.utils.translation import gettext_lazy as _lazy
 
 
-class LabelType(object):
+class LabelType:
     DataSourceLabel = "source_label"  # 数据源标签
     DataTypeLabel = "type_label "  # 数据类型标签
     ResultTableLabel = "result_table_label"  # 结果表分类标签
 
 
 # 数据来源标签，例如：计算平台(bk_data)，监控采集器(bk_monitor_collector)
-class DataSourceLabel(object):
+class DataSourceLabel:
     BK_MONITOR_COLLECTOR = "bk_monitor"
     BK_DATA = "bk_data"
     CUSTOM = "custom"
@@ -31,7 +30,7 @@ class DataSourceLabel(object):
 
 
 # 数据类型标签，例如：时序数据(time_series)，事件数据(event)，日志数据(log)
-class DataTypeLabel(object):
+class DataTypeLabel:
     TIME_SERIES = "time_series"
     EVENT = "event"
     LOG = "log"
@@ -135,7 +134,7 @@ DATA_CATEGORY = [
 
 
 # 主机标签
-class HostResultTableLabel(object):
+class HostResultTableLabel:
     os = "os"
     host_process = "host_process"
     host_device = "host_device"
@@ -146,31 +145,31 @@ class KubernetesResultTableLabel:
 
 
 # 应用标签
-class ApplicationsResultTableLabel(object):
+class ApplicationsResultTableLabel:
     application_check = "application_check"
     uptimecheck = "uptimecheck"
     apm = "apm"
 
 
 # 服务标签
-class ServicesResultTableLabel(object):
+class ServicesResultTableLabel:
     component = "component"
     service_module = "service_module"
     service_process = "service_process"
 
 
 # 数据中心标签
-class DataCenterResultTableLabel(object):
+class DataCenterResultTableLabel:
     hardware_device = "hardware_device"
 
 
 # 其他标签
-class OthersResultTableLabel(object):
+class OthersResultTableLabel:
     other_rt = "other_rt"
 
 
 # 标签
-class ResultTableLabelObj(object):
+class ResultTableLabelObj:
     HostObject = HostResultTableLabel
     KubernetesObject = KubernetesResultTableLabel
     ServicesObj = ServicesResultTableLabel

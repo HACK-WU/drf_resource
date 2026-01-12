@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 
 import json
-from typing import Dict, Optional
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -99,7 +97,7 @@ class Command(BaseCommand):
         # 否则，取第一个作为 service name
         return splitted_data[1]
 
-    def _bulk_create_proxy_storage(self, proxy_cluster_list: QuerySet, proxy_storage_map: Dict) -> bool:
+    def _bulk_create_proxy_storage(self, proxy_cluster_list: QuerySet, proxy_storage_map: dict) -> bool:
         record_list = []
         for pc in proxy_cluster_list:
             cluster_id = pc["cluster_id"]
@@ -149,7 +147,7 @@ class Command(BaseCommand):
                 continue
             router.update(influxdb_proxy_storage_id=id)
 
-    def _update_router_by_table_id(self, table_id_list: Optional[str] = None):
+    def _update_router_by_table_id(self, table_id_list: str | None = None):
         """通过结果表更新路由"""
         if not table_id_list:
             return
@@ -164,9 +162,7 @@ class Command(BaseCommand):
             influxdb_proxy_storage_id = proxy_storage_map.get(key)
             if not influxdb_proxy_storage_id:
                 self.stdout.write(
-                    "table_id: {}, storage_cluster_id: {}, cluster_id: {} not found".format(
-                        obj.table_id, obj.storage_cluster_id, obj.proxy_cluster_name
-                    )
+                    f"table_id: {obj.table_id}, storage_cluster_id: {obj.storage_cluster_id}, cluster_id: {obj.proxy_cluster_name} not found"
                 )
                 continue
             obj.influxdb_proxy_storage_id = influxdb_proxy_storage_id

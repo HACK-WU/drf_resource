@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -525,7 +524,7 @@ class GetTimeZoneResource(Resource):
     def perform_request(self, validated_request_data):
         return sorted(
             [
-                {"name": "{}({})".format(name, time_zone), "time_zone": time_zone}
+                {"name": f"{name}({time_zone})", "time_zone": time_zone}
                 for name, time_zone in TIME_ZONE_DICT.items()
             ],
             key=lambda time_zone: lazy_pinyin(time_zone["name"]),

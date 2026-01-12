@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,7 @@ specific language governing permissions and limitations under the License.
 """
 import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from opentelemetry import trace
 
@@ -40,10 +39,10 @@ class DatabaseConnection(BaseDatabaseConnection):
         self.ops = DatabaseOperations(self)
 
     def execute(self, rt_id, params):
-        extra: Dict[str, Any] = {"use_full_index_names": params.pop("use_full_index_names", False)}
+        extra: dict[str, Any] = {"use_full_index_names": params.pop("use_full_index_names", False)}
 
         query_body: str = json.dumps(params)
-        logger.info("ES QUERY: rt_id is {}, query body is {}".format(rt_id, query_body))
+        logger.info(f"ES QUERY: rt_id is {rt_id}, query body is {query_body}")
         with tracer.start_as_current_span("es_query") as span:
             span.set_attribute("bk.system", "es_query")
             span.set_attribute("bk.es_query.statement", query_body)

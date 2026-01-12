@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-from typing import Optional
 
 import six
 from django.conf import settings
@@ -75,7 +73,7 @@ def _get_or_create_user_group(bk_biz_id, group_name, receivers):
         return None
 
 
-def get_or_create_plugin_manager_group(bk_biz_id: int) -> Optional[int]:
+def get_or_create_plugin_manager_group(bk_biz_id: int) -> int | None:
     """
     获取或创建插件管理员组
     :param bk_biz_id: 业务ID
@@ -91,7 +89,7 @@ def get_or_create_plugin_manager_group(bk_biz_id: int) -> Optional[int]:
     return _get_or_create_user_group(bk_biz_id, _("【蓝鲸】官方插件管理员"), receivers)
 
 
-def get_or_create_gse_manager_group(bk_biz_id: int) -> Optional[int]:
+def get_or_create_gse_manager_group(bk_biz_id: int) -> int | None:
     """
     获取GSE 管理员通知组
     """
@@ -102,7 +100,7 @@ def get_or_create_gse_manager_group(bk_biz_id: int) -> Optional[int]:
     return _get_or_create_user_group(bk_biz_id, _("【蓝鲸】GSE管理员"), receivers)
 
 
-def get_or_create_ops_notice_group(bk_biz_id: int) -> Optional[int]:
+def get_or_create_ops_notice_group(bk_biz_id: int) -> int | None:
     """
     获取或创建运维通知组
     :param bk_biz_id: 业务ID

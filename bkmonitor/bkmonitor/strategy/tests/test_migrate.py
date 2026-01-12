@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import random
 import typing
 from copy import deepcopy
@@ -15,10 +14,10 @@ from constants import alert as alert_constants
 pytestmark = pytest.mark.django_db
 
 
-BIZ_SCOPE: typing.List[int] = list(range(1, 10))
+BIZ_SCOPE: list[int] = list(range(1, 10))
 
 
-def assert_template(action_configs: typing.List[ActionConfig], expect: str):
+def assert_template(action_configs: list[ActionConfig], expect: str):
     for action_config in action_configs:
         assert action_config.hash == ""
         assert action_config.snippet == ""
@@ -28,12 +27,12 @@ def assert_template(action_configs: typing.List[ActionConfig], expect: str):
 
 @pytest.fixture
 def strategy_factory():
-    def _inner(_config: typing.Dict, _count: int):
+    def _inner(_config: dict, _count: int):
 
         for template in _config["notice"]["config"]["template"]:
             template["message_tmpl"] = alert_constants.OLD_DEFAULT_TEMPLATE
 
-        strategy_ids: typing.List[int] = []
+        strategy_ids: list[int] = []
         for idx in range(_count):
             strategy = Strategy(
                 **{**_config, "name": f"{_config['name']}_{idx}", "bk_biz_id": random.choice(BIZ_SCOPE)}
@@ -41,15 +40,15 @@ def strategy_factory():
             strategy.save()
             strategy_ids.append(strategy.to_dict()["id"])
 
-        config_id__strategy_id: typing.Dict[int, int] = {}
-        strategy_relate_infos: typing.List[typing.Dict[str, typing.Any]] = []
+        config_id__strategy_id: dict[int, int] = {}
+        strategy_relate_infos: list[dict[str, typing.Any]] = []
         for relation in StrategyActionConfigRelation.objects.filter(strategy_id__in=strategy_ids).values(
             "strategy_id", "config_id"
         ):
             config_id__strategy_id[relation["config_id"]] = relation["strategy_id"]
 
-        config_ids: typing.List[int] = []
-        action_configs: typing.List[ActionConfig] = ActionConfig.objects.filter(id__in=config_id__strategy_id.keys())
+        config_ids: list[int] = []
+        action_configs: list[ActionConfig] = ActionConfig.objects.filter(id__in=config_id__strategy_id.keys())
         for action_config in action_configs:
             config_ids.append(action_config.id)
             strategy_relate_infos.append(
@@ -184,14 +183,14 @@ class TestMigrate:
         clean_model,
         strategy_factory,
         count: int,
-        bk_biz_ids: typing.Optional[typing.List[int]],
+        bk_biz_ids: list[int] | None,
         rollback: bool,
         use_cmd: bool,
     ):
 
-        strategy_relate_infos: typing.List[typing.Dict[str, typing.Any]] = strategy_factory(self.Config, count)
+        strategy_relate_infos: list[dict[str, typing.Any]] = strategy_factory(self.Config, count)
 
-        update_count: typing.Optional[int] = None
+        update_count: int | None = None
         if use_cmd:
             call_command("update_notice_template", bk_biz_ids=bk_biz_ids)
         else:
@@ -203,8 +202,8 @@ class TestMigrate:
             )
 
         query_kwargs = {"bk_biz_id__in": bk_biz_ids or BIZ_SCOPE}
-        strategy_ids: typing.Set[int] = set(StrategyModel.objects.filter(**query_kwargs).values_list("id", flat=True))
-        config_ids: typing.List[int] = [
+        strategy_ids: set[int] = set(StrategyModel.objects.filter(**query_kwargs).values_list("id", flat=True))
+        config_ids: list[int] = [
             strategy_relate_info["config_id"]
             for strategy_relate_info in strategy_relate_infos
             if strategy_relate_info["strategy_id"] in strategy_ids
@@ -217,7 +216,7 @@ class TestMigrate:
         assert StrategyModel.objects.filter(**{**query_kwargs, "hash": "", "snippet": ""}).count() == len(strategy_ids)
 
         if rollback:
-            rollback_count: typing.Optional[int] = None
+            rollback_count: int | None = None
             if use_cmd:
                 call_command("update_notice_template", bk_biz_ids=bk_biz_ids, rollback=True)
             else:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import json
 import logging
-from typing import Dict, Optional
 
 from monitor_web.models.scene_view import SceneViewModel, SceneViewOrderModel
 from monitor_web.scene_view.builtin import BuiltinProcessor, NormalProcessorMixin
@@ -24,7 +22,7 @@ class AlertBuiltinProcessor(NormalProcessorMixin, BuiltinProcessor):
     """告警中心视图配置"""
 
     SCENE_ID = "alert"
-    builtin_views: Dict = None
+    builtin_views: dict = None
 
     filenames = [
         # ⬇️ 告警中心视图
@@ -44,8 +42,8 @@ class AlertBuiltinProcessor(NormalProcessorMixin, BuiltinProcessor):
 
     @classmethod
     def create_or_update_view(
-        cls, bk_biz_id: int, scene_id: str, view_type: str, view_id: str, view_config: Dict
-    ) -> Optional[SceneViewModel]:
+        cls, bk_biz_id: int, scene_id: str, view_type: str, view_id: str, view_config: dict
+    ) -> SceneViewModel | None:
         view = SceneViewModel.objects.get(bk_biz_id=bk_biz_id, scene_id=scene_id, type=view_type, id=view_id)
         if "order" in view_config:
             view.order = view_config["order"]
@@ -53,7 +51,7 @@ class AlertBuiltinProcessor(NormalProcessorMixin, BuiltinProcessor):
         return view
 
     @classmethod
-    def get_view_config(cls, view: SceneViewModel, params: Dict = None, *args, **kwargs) -> Dict:
+    def get_view_config(cls, view: SceneViewModel, params: dict = None, *args, **kwargs) -> dict:
         cls.load_builtin_views()
 
         bk_biz_id = view.bk_biz_id
@@ -109,7 +107,7 @@ class AlertBuiltinProcessor(NormalProcessorMixin, BuiltinProcessor):
             return None
 
         except Exception:  # noqa
-            logger.warning(f"[Alert] ")
+            logger.warning("[Alert] ")
             return None
 
     @classmethod

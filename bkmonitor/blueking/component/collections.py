@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Collections for component client"""
 from .apis.bk_login import CollectionsBkLogin
 from .apis.bk_paas import CollectionsBkPaas

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
-from typing import Dict, List, Optional
 
 from django.db import transaction
 from django.db.models import Q
@@ -100,7 +98,7 @@ def get_bcs_dataids(bk_biz_ids: list = None, cluster_ids: list = None, mode: str
     NOTE: 升级空间后，bk_biz_id, 可能为负数，需要转换到空间属性
     """
 
-    def _filter_cluster(bk_biz_ids: List, clusters: QuerySet) -> QuerySet:
+    def _filter_cluster(bk_biz_ids: list, clusters: QuerySet) -> QuerySet:
         # 获取 bcs 空间信息
         bcs_spaces = get_bcs_space_by_biz(bk_biz_ids)
         # 过滤需要的参数
@@ -197,7 +195,7 @@ def get_bcs_dataids(bk_biz_ids: list = None, cluster_ids: list = None, mode: str
     return data_ids, data_id_cluster_map
 
 
-def get_bcs_space_by_biz(bk_biz_ids: Optional[List] = None) -> List[Dict]:
+def get_bcs_space_by_biz(bk_biz_ids: list | None = None) -> list[dict]:
     """通过业务获取到 BCS 空间信息"""
     # 如果传递的业务 ID 为空，则直接返回
     if not bk_biz_ids:

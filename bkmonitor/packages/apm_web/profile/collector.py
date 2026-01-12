@@ -14,7 +14,6 @@ import logging
 import os
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Tuple
 
 import requests
 from requests import RequestException
@@ -26,7 +25,7 @@ from drf_resource import api
 logger = logging.getLogger("root")
 
 
-def encode_multipart_form_data(data) -> Tuple[bytes, bytes]:
+def encode_multipart_form_data(data) -> tuple[bytes, bytes]:
     boundary = binascii.hexlify(os.urandom(16))
 
     # The body that is generated is very sensitive and must perfectly match what the server expects.

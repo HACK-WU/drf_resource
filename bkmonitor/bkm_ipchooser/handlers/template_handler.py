@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from bkm_ipchooser import constants, types
 from bkm_ipchooser.api import BkApi
@@ -22,11 +21,11 @@ class Template:
         self.bk_biz_id = [scope["bk_biz_id"] for scope in self.scope_list][0]
         self.meta = BaseHandler.get_meta_data(self.bk_biz_id)
 
-    def list_templates(self, template_id_list: List[int] = None) -> List[types.Template]:
+    def list_templates(self, template_id_list: list[int] = None) -> list[types.Template]:
         templates = self.query_cc_templates(template_id_list)
         return self.format_templates(templates)
 
-    def format_templates(self, templates: List[Dict]) -> List[types.Template]:
+    def format_templates(self, templates: list[dict]) -> list[types.Template]:
         """格式化CC API接口获取到的模板列表"""
         raise NotImplementedError
 
@@ -37,7 +36,7 @@ class Template:
     def query_template_hosts(self, start: int, page_size: int):
         raise NotImplementedError
 
-    def fill_host_count(self, templates: List[types.Template]):
+    def fill_host_count(self, templates: list[types.Template]):
         """填充模板下主机数量"""
         params_list = [
             {
@@ -53,7 +52,7 @@ class Template:
         for template in templates:
             template["count"] = template_host_map.get(template["id"], 0)
 
-    def list_template_nodes(self, start: int, page_size: int) -> Dict[str, Any]:
+    def list_template_nodes(self, start: int, page_size: int) -> dict[str, Any]:
         """获取节点列表"""
         result = {"start": 0, "page_size": 500, "total": 0, "data": []}
         nodes = self.query_template_nodes(start=start, page_size=page_size)
@@ -66,7 +65,7 @@ class Template:
         result["data"] = nodes
         return result
 
-    def agent_statistics(self, template_id_list: List[int], only_host_count: bool = False) -> List[Dict]:
+    def agent_statistics(self, template_id_list: list[int], only_host_count: bool = False) -> list[dict]:
         """统计模板下主机的agent状态"""
         templates = self.list_templates(template_id_list=template_id_list)
         params_list = [{"template": template, "only_host_count": only_host_count} for template in templates]
@@ -75,19 +74,19 @@ class Template:
         )
         return template_agent_result
 
-    def template_agent_statistics(self, template: Dict, only_host_count: bool = False) -> List[Dict]:
+    def template_agent_statistics(self, template: dict, only_host_count: bool = False) -> list[dict]:
         """统计模板下主机的agent状态"""
         raise NotImplementedError
 
-    def service_instance_counts(self, template_id_list: List[int]) -> List[Dict]:
+    def service_instance_counts(self, template_id_list: list[int]) -> list[dict]:
         """统计模板下服务实例数量"""
         raise NotImplementedError
 
-    def service_instance_count(self, template: Dict) -> Dict:
+    def service_instance_count(self, template: dict) -> dict:
         """统计模板下服务实例数量"""
         raise NotImplementedError
 
-    def list_template_hosts(self, start: int, page_size: int) -> Dict[str, Any]:
+    def list_template_hosts(self, start: int, page_size: int) -> dict[str, Any]:
         """获取主机列表, 带分页"""
         result = {"start": start, "page_size": page_size, "count": 0, "data": []}
         hosts = self.query_template_hosts(start=start, page_size=page_size)
@@ -100,11 +99,11 @@ class Template:
 
         return result
 
-    def query_cc_templates(self, template_id_list: List[int] = None) -> List[Dict]:
+    def query_cc_templates(self, template_id_list: list[int] = None) -> list[dict]:
         """子类实现查询CC API接口获取模板列表"""
         raise NotImplementedError
 
-    def fetch_template_node_total(self, template_id: int) -> Dict:
+    def fetch_template_node_total(self, template_id: int) -> dict:
         """
         子类实现获取模板下所有节点
         param: template_id: 模板ID
@@ -113,8 +112,8 @@ class Template:
         raise NotImplementedError
 
     def fetch_template_host_total(
-        self, template_id: int, fields: List[str] = constants.CommonEnum.SIMPLE_HOST_FIELDS.value
-    ) -> Dict:
+        self, template_id: int, fields: list[str] = constants.CommonEnum.SIMPLE_HOST_FIELDS.value
+    ) -> dict:
         """
         子类实现获取模板下所有主机
         param: template_id: 模板ID
@@ -122,11 +121,11 @@ class Template:
         """
         raise NotImplementedError
 
-    def format_template_node(self, node: Dict) -> types.TemplateNode:
+    def format_template_node(self, node: dict) -> types.TemplateNode:
         """子类实现模板节点格式化"""
         raise NotImplementedError
 
-    def fill_node_path(self, node_list: List[Dict]):
+    def fill_node_path(self, node_list: list[dict]):
         """获取节点路径"""
         result = []
         if not node_list:
@@ -173,14 +172,14 @@ class SetTemplate(Template):
             scope_list=scope_list, template_id=template_id, template_type=constants.TemplateType.SET_TEMPLATE.value
         )
 
-    def query_cc_templates(self, template_id_list: List[int] = None):
+    def query_cc_templates(self, template_id_list: list[int] = None):
         """调用CC接口获取集群模板"""
         params = {"bk_biz_id": self.bk_biz_id}
         if template_id_list:
             params["set_template_ids"] = template_id_list
         return BkApi.list_set_template(params)
 
-    def format_templates(self, templates: List[Dict]) -> List[types.Template]:
+    def format_templates(self, templates: list[dict]) -> list[types.Template]:
         """格式化CC API接口获取到的模板列表"""
         BaseHandler.sort_by_name(templates)
         return [
@@ -194,7 +193,7 @@ class SetTemplate(Template):
             for template in templates
         ]
 
-    def query_template_nodes(self, start: int, page_size: int) -> List[types.TemplateNode]:
+    def query_template_nodes(self, start: int, page_size: int) -> list[types.TemplateNode]:
         params = {
             "bk_biz_id": self.bk_biz_id,
             "fields": constants.CommonEnum.DEFAULT_SET_FIELDS.value,
@@ -228,7 +227,7 @@ class SetTemplate(Template):
 
         return result
 
-    def query_template_hosts(self, start: int, page_size: int) -> List[types.FormatHostInfo]:
+    def query_template_hosts(self, start: int, page_size: int) -> list[types.FormatHostInfo]:
         params = {
             "bk_biz_id": self.bk_biz_id,
             "bk_set_template_ids": [self.template_id],
@@ -241,8 +240,8 @@ class SetTemplate(Template):
         return BkApi.find_host_by_set_template(params)
 
     def fetch_template_host_total(
-        self, template_id: int, fields: List[str] = constants.CommonEnum.SIMPLE_HOST_FIELDS.value
-    ) -> Dict:
+        self, template_id: int, fields: list[str] = constants.CommonEnum.SIMPLE_HOST_FIELDS.value
+    ) -> dict:
         result = {
             "id": template_id,
             "data": [],
@@ -260,7 +259,7 @@ class SetTemplate(Template):
         result["data"] = host_list
         return result
 
-    def template_agent_statistics(self, template: Dict, only_host_count: bool = False) -> Dict[str, Any]:
+    def template_agent_statistics(self, template: dict, only_host_count: bool = False) -> dict[str, Any]:
         """统计模板下主机的agent状态"""
         result = {"set_template": {"id": template["id"], "name": template["name"], "meta": self.meta}}
 
@@ -278,7 +277,7 @@ class SetTemplate(Template):
 
         return result
 
-    def service_instance_counts(self, template_id_list: List[int]) -> List[Dict]:
+    def service_instance_counts(self, template_id_list: list[int]) -> list[dict]:
         """统计模板下服务实例数量"""
         templates = self.list_templates(template_id_list=template_id_list)
         params_list = [{"template": template} for template in templates]
@@ -287,7 +286,7 @@ class SetTemplate(Template):
         )
         return template_service_instance_result
 
-    def service_instance_count(self, template: Dict) -> Dict:
+    def service_instance_count(self, template: dict) -> dict:
         # 统计模板下服务实例数量
         result = {"set_template": {"id": template["id"], "name": template["name"], "meta": self.meta}}
         service_instance_result = BkApi.list_service_instance_by_set_template(
@@ -309,7 +308,7 @@ class SetTemplate(Template):
 
         return result
 
-    def fetch_template_node_total(self, template_id: int) -> Dict:
+    def fetch_template_node_total(self, template_id: int) -> dict:
         """
         获取模板下所有节点
         param: template_id: 模板ID
@@ -328,7 +327,7 @@ class SetTemplate(Template):
         result["data"] = node_list
         return result
 
-    def format_template_node(self, node: Dict) -> types.TemplateNode:
+    def format_template_node(self, node: dict) -> types.TemplateNode:
         """格式化节点"""
         return dict(
             instance_id=node.get("bk_set_id"),
@@ -349,14 +348,14 @@ class ServiceTemplate(Template):
             scope_list=scope_list, template_id=template_id, template_type=constants.TemplateType.SERVICE_TEMPLATE.value
         )
 
-    def query_cc_templates(self, template_id_list: List[int] = None):
+    def query_cc_templates(self, template_id_list: list[int] = None):
         """调用CC接口获取服务模板"""
         params = {"bk_biz_id": self.bk_biz_id}
         if template_id_list:
             params["service_template_ids"] = template_id_list
         return BkApi.list_service_template(params)
 
-    def format_templates(self, templates: List[Dict]) -> List[types.Template]:
+    def format_templates(self, templates: list[dict]) -> list[types.Template]:
         """格式化CC API接口获取到的模板列表"""
         service_category_list = BkApi.list_service_category({"bk_biz_id": self.bk_biz_id})
         service_category_map = {}
@@ -377,7 +376,7 @@ class ServiceTemplate(Template):
             for template in templates
         ]
 
-    def query_template_nodes(self, start: int, page_size: int) -> List[types.TemplateNode]:
+    def query_template_nodes(self, start: int, page_size: int) -> list[types.TemplateNode]:
         params = {
             "bk_biz_id": self.bk_biz_id,
             "fields": constants.CommonEnum.DEFAULT_MODULE_FIELDS.value,
@@ -405,7 +404,7 @@ class ServiceTemplate(Template):
             node["count"] = instance_counts[node["bk_module_id"]]
         return result
 
-    def query_template_hosts(self, start: int, page_size: int) -> List[types.FormatHostInfo]:
+    def query_template_hosts(self, start: int, page_size: int) -> list[types.FormatHostInfo]:
         params = {
             "bk_biz_id": self.bk_biz_id,
             "bk_service_template_ids": [self.template_id],
@@ -417,7 +416,7 @@ class ServiceTemplate(Template):
         }
         return BkApi.find_host_by_service_template(params)
 
-    def template_agent_statistics(self, template: Dict, only_host_count: bool = False) -> Dict[str, Any]:
+    def template_agent_statistics(self, template: dict, only_host_count: bool = False) -> dict[str, Any]:
         """统计模板下主机的agent状态"""
         result = {"service_template": {"id": template["id"], "name": template["name"], "meta": self.meta}}
 
@@ -435,7 +434,7 @@ class ServiceTemplate(Template):
 
         return result
 
-    def service_instance_counts(self, template_id_list: List[int]) -> List[Dict]:
+    def service_instance_counts(self, template_id_list: list[int]) -> list[dict]:
         """统计模板下服务实例数量"""
         templates = self.list_templates(template_id_list=template_id_list)
 
@@ -481,7 +480,7 @@ class ServiceTemplate(Template):
             )
         return result
 
-    def fetch_template_node_total(self, template_id: int) -> Dict:
+    def fetch_template_node_total(self, template_id: int) -> dict:
         """
         获取模板下所有节点
         param: template_id: 模板ID
@@ -502,8 +501,8 @@ class ServiceTemplate(Template):
         return result
 
     def fetch_template_host_total(
-        self, template_id: int, fields: List[str] = constants.CommonEnum.SIMPLE_HOST_FIELDS.value
-    ) -> Dict:
+        self, template_id: int, fields: list[str] = constants.CommonEnum.SIMPLE_HOST_FIELDS.value
+    ) -> dict:
         result = {
             "id": template_id,
             "data": [],
@@ -521,7 +520,7 @@ class ServiceTemplate(Template):
         result["data"] = host_list
         return result
 
-    def format_template_node(self, node: Dict) -> types.TemplateNode:
+    def format_template_node(self, node: dict) -> types.TemplateNode:
         """格式化节点"""
         return dict(
             instance_id=node.get("bk_module_id"),
@@ -542,24 +541,24 @@ class TemplateHandler:
         self.template_type = template_type
         self.template_id = template_id
 
-    def get_instance(self) -> Union[ServiceTemplate, SetTemplate]:
+    def get_instance(self) -> ServiceTemplate | SetTemplate:
         """获取模板处理实例"""
         return {
             constants.TemplateType.SET_TEMPLATE.value: SetTemplate,
             constants.TemplateType.SERVICE_TEMPLATE.value: ServiceTemplate,
         }.get(self.template_type)(scope_list=self.scope_list, template_id=self.template_id)
 
-    def list_templates(self, template_id_list: List[int] = None) -> List[types.Template]:
+    def list_templates(self, template_id_list: list[int] = None) -> list[types.Template]:
         return self.get_instance().list_templates(template_id_list=template_id_list)
 
-    def list_nodes(self, start: int, page_size: int) -> Dict[str, Any]:
+    def list_nodes(self, start: int, page_size: int) -> dict[str, Any]:
         return self.get_instance().list_template_nodes(start=start, page_size=page_size)
 
-    def list_hosts(self, start: int, page_size: int) -> Dict[str, Any]:
+    def list_hosts(self, start: int, page_size: int) -> dict[str, Any]:
         return self.get_instance().list_template_hosts(start=start, page_size=page_size)
 
-    def agent_statistics(self, template_id_list: List[int] = None, only_host_count: bool = False) -> List[Dict]:
+    def agent_statistics(self, template_id_list: list[int] = None, only_host_count: bool = False) -> list[dict]:
         return self.get_instance().agent_statistics(template_id_list=template_id_list, only_host_count=only_host_count)
 
-    def service_instance_counts(self, template_id_list: List[int] = None) -> List[Dict]:
+    def service_instance_counts(self, template_id_list: list[int] = None) -> list[dict]:
         return self.get_instance().service_instance_counts(template_id_list=template_id_list)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 
 
 import logging
-from typing import List
 
 import arrow
 
@@ -33,7 +31,7 @@ class ExpireFilter(base.Filter):
         # 丢弃超过max(半个小时 或者 10个周期延迟)的告警
         expire_seconds = max([record.items[0].query_configs[0]["agg_interval"] * 10, 30 * constants.CONST_MINUTES])
         if arrow.utcnow().timestamp - arrow.get(utctime).timestamp > expire_seconds:
-            logger.info("Discard the data(%s) because it takes more than 30 minutes" % record.raw_data)
+            logger.info(f"Discard the data({record.raw_data}) because it takes more than 30 minutes")
             return True
         else:
             return False
@@ -55,7 +53,7 @@ class RangeFilter(base.Filter):
         """
 
         dimensions = record.dimensions
-        items: List[Item] = record.items
+        items: list[Item] = record.items
         for item in items:
             item_id = item.id
             if not record.is_retains[item_id]:
@@ -66,9 +64,7 @@ class RangeFilter(base.Filter):
             is_filtered = not is_match
             if is_filtered:
                 logger.debug(
-                    "Discard the alarm ({}) because it not match strategy({}) item({}) agg_condition".format(
-                        record.raw_data, item.strategy.id, item_id
-                    )
+                    f"Discard the alarm ({record.raw_data}) because it not match strategy({item.strategy.id}) item({item_id}) agg_condition"
                 )
 
             record.is_retains[item_id] = not is_filtered

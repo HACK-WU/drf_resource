@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -23,7 +22,7 @@ CONST_MAX_LEN_CHECK_RESULT = 30  # 检测结果缓存，默认只保留30条数�
 ANOMALY_LABEL = "ANOMALY"  # 异常标识
 
 
-class Result(object):
+class Result:
     _pipeline = None
 
     def __init__(
@@ -55,7 +54,7 @@ class Result(object):
 
 class CheckResult(Result):
     def __init__(self, *args, **kwargs):
-        super(CheckResult, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def pipeline(cls):

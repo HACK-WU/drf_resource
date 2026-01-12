@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -28,7 +27,7 @@ class StreamSourceNode(SourceNode):
 
     def __init__(self, source_rt_id):
         self.source_rt_id = source_rt_id
-        super(StreamSourceNode, self).__init__()
+        super().__init__()
 
     def __eq__(self, other):
         if isinstance(other, dict):
@@ -43,7 +42,7 @@ class StreamSourceNode(SourceNode):
 
     @property
     def name(self):
-        return "{}({})".format(self.get_node_type(), self.source_rt_id)
+        return f"{self.get_node_type()}({self.source_rt_id})"
 
     @property
     def output_table_name(self):

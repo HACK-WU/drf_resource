@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ specific language governing permissions and limitations under the License.
 import json
 import logging
 import uuid
-from typing import Dict, List
 
 from django.db.models import Q
 from django.db.models.base import ModelBase
@@ -50,7 +48,7 @@ def add_datasource(models, data_id, data_name, etl_config, source_label, type_la
         creator=user,
         mq_cluster_id=kafka_cluster.cluster_id,
         is_custom_source=is_custom_source,
-        data_description="init data_source for %s" % data_name,
+        data_description=f"init data_source for {data_name}",
         # 由于mq_config和data_source两者相互指向对方，所以只能先提供占位符，先创建data_source
         mq_config_id=0,
         last_modify_user=user,
@@ -59,7 +57,7 @@ def add_datasource(models, data_id, data_name, etl_config, source_label, type_la
     # 获取这个数据源对应的配置记录model，并创建一个新的配置记录
     mq_config = models["KafkaTopicInfo"].objects.create(
         bk_data_id=data_object.bk_data_id,
-        topic="{}{}0".format(config.KAFKA_TOPIC_PREFIX, data_object.bk_data_id),
+        topic=f"{config.KAFKA_TOPIC_PREFIX}{data_object.bk_data_id}0",
         partition=1,
     )
     data_object.mq_config_id = mq_config.id
@@ -182,7 +180,7 @@ def add_resulttablefieldoption(items):
         )
 
 
-def filter_apm_log_table_ids(data_source_model: ModelBase, ds_rt_model: ModelBase) -> Dict[str, List]:
+def filter_apm_log_table_ids(data_source_model: ModelBase, ds_rt_model: ModelBase) -> dict[str, list]:
     """过滤 apm 和 log 对应的结果表"""
     data_ids = data_source_model.objects.filter(etl_config="bk_flat_batch").values_list("bk_data_id", flat=True)
     qs = ds_rt_model.objects.filter(bk_data_id__in=data_ids)
@@ -201,8 +199,8 @@ def filter_apm_log_table_ids(data_source_model: ModelBase, ds_rt_model: ModelBas
 
 
 def filter_table_id_es_versions(
-    es_storage_model: ModelBase, cluster_info_model: ModelBase, table_id_list: List
-) -> Dict[str, str]:
+    es_storage_model: ModelBase, cluster_info_model: ModelBase, table_id_list: list
+) -> dict[str, str]:
     """根据结果表过滤使用的 ES 的版本"""
     qs = es_storage_model.objects.filter(table_id__in=table_id_list)
     table_id_storage_id_map = {obj.table_id: obj.storage_cluster_id for obj in qs}
@@ -223,7 +221,7 @@ def filter_table_id_es_versions(
 
 def get_log_field_options(
     rt_field_model: ModelBase, rt_field_option_model: ModelBase, table_id: str, es_version: str, creator: str
-) -> List:
+) -> list:
     """获取日志字段选项配置"""
     field_options = [
         {

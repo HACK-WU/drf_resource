@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -26,21 +25,19 @@ class Command(ServiceCommand, ConsulServiceDiscoveryMixin):
     __COMMAND_NAME__ = __name__.split(".")[-1]
 
     def __init__(self, *args, **kwargs):
-        super(Command, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         ConsulServiceDiscoveryMixin.__init__(self, *args, **kwargs)
-        self._PATH_PREFIX_ = "{}_{}_{}_{}/{}".format(
-            settings.APP_CODE, settings.PLATFORM, settings.ENVIRONMENT, get_cluster().name, self.__COMMAND_NAME__
-        )
+        self._PATH_PREFIX_ = f"{settings.APP_CODE}_{settings.PLATFORM}_{settings.ENVIRONMENT}_{get_cluster().name}/{self.__COMMAND_NAME__}"
 
     def on_start(self, *args, **kwargs):
-        self._PATH_PREFIX_ = "{}-{}".format(self._PATH_PREFIX_, self._SERVICE_TYPE_)
+        self._PATH_PREFIX_ = f"{self._PATH_PREFIX_}-{self._SERVICE_TYPE_}"
         try:
             signals.request_started.send(sender=self.__class__, environ=kwargs)
             handler_cls = load_handler_cls(self._SERVICE_TYPE_, self._HANDLER_TYPE_)
         except Exception:  # noqa
             logger.exception(
-                "Error loading Handler, service_type({}),"
-                " handler_type({})".format(self._SERVICE_TYPE_, self._HANDLER_TYPE_)
+                f"Error loading Handler, service_type({self._SERVICE_TYPE_}),"
+                f" handler_type({self._HANDLER_TYPE_})"
             )
             raise
         else:
@@ -53,8 +50,8 @@ class Command(ServiceCommand, ConsulServiceDiscoveryMixin):
                 if always_raise:
                     raise exc
                 logger.exception(
-                    "Error executing Handler, service_type({}), "
-                    "handler_type({})".format(self._SERVICE_TYPE_, self._HANDLER_TYPE_)
+                    f"Error executing Handler, service_type({self._SERVICE_TYPE_}), "
+                    f"handler_type({self._HANDLER_TYPE_})"
                 )
             finally:
                 signals.request_finished.send(sender=self.__class__)

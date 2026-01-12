@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云PaaS平台社区版 (BlueKing PaaS Community
 Edition) available.
@@ -15,7 +14,7 @@ from fta_web.fta_migrate.pipeline.collections import FancyDict
 from fta_web.fta_migrate.pipeline.constants import PE
 
 
-class Data(object):
+class Data:
     def __init__(self, inputs=None, outputs=None):
         self.inputs = FancyDict(inputs or {})
         self.outputs = outputs or []
@@ -29,7 +28,7 @@ class Data(object):
         return base
 
 
-class Params(object):
+class Params:
     def __init__(self, params=None):
         self.params = FancyDict(params or {})
 
@@ -42,7 +41,7 @@ class Params(object):
         return base
 
 
-class Var(object):
+class Var:
     PLAIN = PE.plain
     SPLICE = PE.splice
     LAZY = PE.lazy
@@ -62,10 +61,10 @@ class Var(object):
 
 class DataInput(Var):
     def __init__(self, *args, **kwargs):
-        super(DataInput, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def to_dict(self):
-        base = super(DataInput, self).to_dict()
+        base = super().to_dict()
         base["is_param"] = True
         return base
 
@@ -75,10 +74,10 @@ class NodeOutput(Var):
         self.source_act = source_act
         self.source_key = source_key
         kwargs["value"] = None
-        super(NodeOutput, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def to_dict(self):
-        base = super(NodeOutput, self).to_dict()
+        base = super().to_dict()
         base["source_act"] = self.source_act
         base["source_key"] = self.source_key
         return base
@@ -88,9 +87,9 @@ class RewritableNodeOutput(Var):
     def __init__(self, source_act, *args, **kwargs):
         self.source_act = source_act
         kwargs["value"] = None
-        super(RewritableNodeOutput, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def to_dict(self):
-        base = super(RewritableNodeOutput, self).to_dict()
+        base = super().to_dict()
         base["source_act"] = self.source_act
         return base

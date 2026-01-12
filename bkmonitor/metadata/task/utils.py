@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,14 +8,13 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import threading
-from typing import List, Optional
 
 # 默认的批量大小
 DEFAULT_BULK_SIZE = 50
 
 
 def bulk_handle(
-    handler, data: List, bulk_size: Optional[int] = DEFAULT_BULK_SIZE, is_wait_finish: Optional[bool] = True
+    handler, data: list, bulk_size: int | None = DEFAULT_BULK_SIZE, is_wait_finish: bool | None = True
 ):
     """批量操作"""
     # 获取长度，用以进行分组

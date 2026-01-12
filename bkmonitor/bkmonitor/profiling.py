@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ import binascii
 import gzip
 import json
 import os
-import typing
 import urllib.parse
 
 import six
@@ -244,7 +242,7 @@ def convert_stack_exception_event(
     frames: HashableStackTraceType,
     nframes: int,
     exc_type_name: str,
-    events: typing.List[stack_event.StackExceptionSampleEvent],
+    events: list[stack_event.StackExceptionSampleEvent],
 ) -> None:
     location_key = (
         self._to_locations(frames, nframes),
@@ -334,7 +332,7 @@ class PyroscopePprofHTTPExporter(PprofExporter):
         return profile, libs
 
     @staticmethod
-    def _encode_multipart_formdata(data) -> typing.Tuple[bytes, bytes]:
+    def _encode_multipart_formdata(data) -> tuple[bytes, bytes]:
         boundary = binascii.hexlify(os.urandom(16))
 
         # The body that is generated is very sensitive and must perfectly match what the server expects.
@@ -390,7 +388,7 @@ def _build_default_exporters(self):  # noqa
     return [PyroscopePprofHTTPExporter(endpoint, endpoint_path)]
 
 
-def _get_endpoint_info_from_env() -> typing.Tuple[str, str]:
+def _get_endpoint_info_from_env() -> tuple[str, str]:
     """Get endpoint url and path from environment variables"""
     endpoint = os.getenv("BKAPP_CONTINUOUS_PROFILING_ENDPOINT", "http://localhost:4040")
     endpoint_path = os.getenv("BKAPP_CONTINUOUS_PROFILING_PATH", "/pyroscope/ingest")

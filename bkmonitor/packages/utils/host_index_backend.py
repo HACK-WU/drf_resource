@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -81,7 +80,7 @@ class SnapshotHostIndexBackend(HostIndexBackendBase):
             hostindex = SnapshotHostIndex.objects.get(item=item, category=category, result_table_id=snap_table_id)
             data = TSDBData.get_data_with_cache(
                 table_name=result_table_id,
-                select_field="MEAN({}) as {}".format(hostindex.item, hostindex.item),
+                select_field=f"MEAN({hostindex.item}) as {hostindex.item}",
                 filter_dict=filter_dict,
                 group_by_field=["ip", "bk_cloud_id", "minute1", hostindex.dimension_field],
                 order_by_field="time asc",

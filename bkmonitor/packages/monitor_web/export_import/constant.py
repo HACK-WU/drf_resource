@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +12,7 @@ specific language governing permissions and limitations under the License.
 # 配置类型
 
 
-class ConfigType(object):
+class ConfigType:
     COLLECT = "collect"
     STRATEGY = "strategy"
     PLUGIN = "plugin"
@@ -21,21 +20,21 @@ class ConfigType(object):
 
 
 # 导入详情状态类型
-class ImportDetailStatus(object):
+class ImportDetailStatus:
     IMPORTING = "importing"
     SUCCESS = "success"
     FAILED = "failed"
 
 
 # 导入历史状态
-class ImportHistoryStatus(object):
+class ImportHistoryStatus:
     UPLOAD = "upload"
     IMPORTED = "imported"
     IMPORTING = "importing"
 
 
 # 配置类型对应的文件夹名称
-class ConfigDirectoryName(object):
+class ConfigDirectoryName:
     plugin = "plugin_directory"
     collect = "collect_config_directory"
     strategy = "strategy_config_directory"

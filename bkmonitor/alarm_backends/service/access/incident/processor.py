@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ import copy
 import json
 import logging
 import time
-from typing import Dict
 
 from pika.adapters.blocking_connection import BlockingChannel
 from pika.spec import Basic
@@ -43,7 +41,7 @@ class BaseAccessIncidentProcess(BaseAccessProcess):
 
 class AccessIncidentProcess(BaseAccessIncidentProcess):
     def __init__(self, broker_url: str, queue_name: str) -> None:
-        super(AccessIncidentProcess, self).__init__()
+        super().__init__()
 
         self.broker_url = broker_url
         self.queue_name = queue_name
@@ -51,14 +49,14 @@ class AccessIncidentProcess(BaseAccessIncidentProcess):
         self.client.ping()
 
     def process(self) -> None:
-        def callback(ch: BlockingChannel, method: Basic.Deliver, properties: Dict, body: str):
+        def callback(ch: BlockingChannel, method: Basic.Deliver, properties: dict, body: str):
             sync_info = json.loads(body)
             self.handle_sync_info(sync_info)
             ch.basic_ack(method.delivery_tag)
 
         self.client.start_consuming(self.queue_name, callback=callback)
 
-    def handle_sync_info(self, sync_info: Dict) -> None:
+    def handle_sync_info(self, sync_info: dict) -> None:
         """处理rabbitmq中的内容.
 
         :param sync_info: 同步内容
@@ -68,7 +66,7 @@ class AccessIncidentProcess(BaseAccessIncidentProcess):
         elif sync_info["sync_type"] == IncidentSyncType.UPDATE.value:
             self.update_incident(sync_info)
 
-    def create_incident(self, sync_info: Dict) -> None:
+    def create_incident(self, sync_info: dict) -> None:
         """根据同步信息，从AIOPS接口获取故障详情，并创建到监控的ES中.
 
         :param sync_info: 同步内容
@@ -132,7 +130,7 @@ class AccessIncidentProcess(BaseAccessIncidentProcess):
             logger.error(f"[CREATE]Record incident operations error: {e}", exc_info=True)
             return
 
-    def update_incident(self, sync_info: Dict) -> None:
+    def update_incident(self, sync_info: dict) -> None:
         """根据同步信息，从AIOPS接口获取故障详情，并更新到监控的ES中.
 
         :param sync_info: 同步内容

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -31,7 +30,7 @@ def init_uploaded_file_data(apps, schema_editor):
             cursor.execute("select * from collector_user_file")
             data = __dictfetchall(cursor)
     except Exception as e:
-        logger.exception("迁移 dataapi 文件上传数据发生异常：%s" % e)
+        logger.exception(f"迁移 dataapi 文件上传数据发生异常：{e}")
         return
     UploadedFile = apps.get_model("monitor", "UploadedFile")
     for item in data:

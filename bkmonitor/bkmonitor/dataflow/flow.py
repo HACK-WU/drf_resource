@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,12 +21,12 @@ from core.errors.bkmonitor.dataflow import DataFlowNotExists, DataFlowStartFaile
 logger = logging.getLogger("bkmonitor.dataflow")
 
 
-class DataFlow(object):
+class DataFlow:
     """
     对应计算平台的dataflow
     """
 
-    class Status(object):
+    class Status:
         NoStart = "no-start"
         Running = "running"
         Starting = "starting"
@@ -155,11 +154,11 @@ class DataFlow(object):
                     cluster_group=settings.BK_DATA_FLOW_CLUSTER_GROUP,
                 )
             logger.info(
-                "start/restart dataflow({}({})) success, result:({})".format(self.flow_name, self.flow_id, result)
+                f"start/restart dataflow({self.flow_name}({self.flow_id})) success, result:({result})"
             )
             return result
         except Exception as e:  # noqa
-            logger.exception("start/restart dataflow({}({})) failed".format(self.flow_name, self.flow_id))
+            logger.exception(f"start/restart dataflow({self.flow_name}({self.flow_id})) failed")
             raise DataFlowStartFailed(flow_id=self.flow_id, flow_name=self.flow_name, err=e)
 
     def start(self, consuming_mode=None):
@@ -172,7 +171,7 @@ class DataFlow(object):
         elif flow_status == self.Status.Running:
             # 该flow的状态正常启动，需要去判断是否更新如果节点有更新则重启
             if not self.is_modified:
-                logger.info("dataflow({}({})) has not changed.".format(self.flow_name, self.flow_id))
+                logger.info(f"dataflow({self.flow_name}({self.flow_id})) has not changed.")
                 return {}
             return self.start_or_restart_flow(False, consuming_mode)
         else:
@@ -201,7 +200,7 @@ class DataFlow(object):
         self.sql_changed = node.need_restart_from_tail()
 
     def delete(self):
-        logger.info("delete dataflow({}({})) start".format(self.flow_name, self.flow_id))
+        logger.info(f"delete dataflow({self.flow_name}({self.flow_id})) start")
 
         flow_info = api.bkdata.get_data_flow(flow_id=self.flow_id)
 
@@ -222,7 +221,7 @@ class DataFlow(object):
             flow_info = api.bkdata.get_data_flow(flow_id=self.flow_id)
             max_retries -= 1
 
-        logger.info("dataflow({}({})) stop success, begin to delete".format(self.flow_name, self.flow_id))
+        logger.info(f"dataflow({self.flow_name}({self.flow_id})) stop success, begin to delete")
 
         api.bkdata.delete_data_flow(flow_id=self.flow_id)
 
@@ -230,16 +229,14 @@ class DataFlow(object):
         """
         重建flow
         """
-        logger.info("rebuild dataflow({}({}))".format(self.flow_name, self.flow_id))
+        logger.info(f"rebuild dataflow({self.flow_name}({self.flow_id}))")
 
         # 删除flow
         self.delete()
-        logger.info("delete old dataflow({}({})) success".format(self.flow_name, self.flow_id))
+        logger.info(f"delete old dataflow({self.flow_name}({self.flow_id})) success")
 
         flow = self.create_flow(flow_name=self.flow_name)
         logger.info(
-            "rebuild dataflow({}({})) success, new dataflow({}({}))".format(
-                self.flow_name, self.flow_id, flow.flow_name, flow.flow_id
-            )
+            f"rebuild dataflow({self.flow_name}({self.flow_id})) success, new dataflow({flow.flow_name}({flow.flow_id}))"
         )
         return flow

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云 - Resource SDK (BlueKing - Resource SDK) available.

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -33,7 +32,7 @@ class FilterUnknownTimeTask(BaseTask):
         2. 根据表信息，创建出对应的flow，以及node节点
         3. 最后启动任务
         """
-        super(FilterUnknownTimeTask, self).__init__()
+        super().__init__()
 
         self.rt_id = rt_id
 

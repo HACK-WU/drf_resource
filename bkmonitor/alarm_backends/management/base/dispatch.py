@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +15,7 @@ from alarm_backends.management.hashring import HashRing
 
 class DefaultDispatchMixin(AbstractDispatchMixin):
     def dispatch_all_hosts(self, hosts):
-        if isinstance(hosts, (list, tuple)):
+        if isinstance(hosts, list | tuple):
             hosts = {host: 1 for host in hosts}
 
         targets = self.query_host_targets()
@@ -37,7 +36,7 @@ class DefaultDispatchMixin(AbstractDispatchMixin):
 
     def dispatch_for_instance(self, hosts, instances, target_instance=None):
         if target_instance is None:
-            target_instance = "{}/{}".format(self.host_addr, self.pid)
+            target_instance = f"{self.host_addr}/{self.pid}"
 
         _, host_targets = self.dispatch_for_host(hosts)
         instance_targets = []

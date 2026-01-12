@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 import logging
 import time
 from collections import defaultdict
-from typing import List
 
 from alarm_backends.core.cache.assign import AssignCacheManager
 from alarm_backends.core.context import ActionContext
@@ -53,11 +51,11 @@ class BackendAssignMatchManager(AlertAssignMatchManager):
                 "sets": action_context.target.sets,
                 "modules": action_context.target.modules,
             }
-        super(BackendAssignMatchManager, self).__init__(
+        super().__init__(
             alert, notice_users, group_rules, assign_mode, notice_type, cmdb_attrs
         )
 
-    def get_matched_rules(self) -> List[AssignRuleMatch]:
+    def get_matched_rules(self) -> list[AssignRuleMatch]:
         """
         适配分派规则, 后台通过缓存获取
         :return: 返回匹配的分派规则列表
@@ -101,7 +99,7 @@ class AlertAssigneeManager:
     def __init__(
             self,
             alert: AlertDocument,
-            notice_user_groups: List = None,
+            notice_user_groups: list = None,
             assign_mode: AssignMode = None,
             upgrade_config=None,
             notice_type: ActionNoticeType = None,
@@ -141,7 +139,7 @@ class AlertAssigneeManager:
             self.origin_notice_users_object: AlertAssignee = self.get_origin_notice_users_object(
                 notice_user_groups or [])  # 否则使用原始的通知人员对象
 
-        self.matched_group: List[AssignRuleMatch] = None  # 匹配的告警组ID
+        self.matched_group: list[AssignRuleMatch] = None  # 匹配的告警组ID
         self.is_matched = False  # 初始化匹配状态为未匹配
         # 获取告警分派管理对象，如果是默认通知，则返回None。否则会更新matched_group的值
         self.match_manager: BackendAssignMatchManager = self.get_match_manager()

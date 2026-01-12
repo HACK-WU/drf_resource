@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -41,7 +40,7 @@ from core.prometheus import metrics
 logger = logging.getLogger("access.data")
 
 
-class TokenBucket(object):
+class TokenBucket:
     def __init__(self, strategy_group_key, interval=60):
         self.strategy_group_key = strategy_group_key
         self.client = STRATEGY_TOKEN_BUCKET_KEY.client

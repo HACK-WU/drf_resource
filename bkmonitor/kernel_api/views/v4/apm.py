@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 from apm_web.meta.views import ApplicationViewSet
 

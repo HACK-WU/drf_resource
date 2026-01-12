@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -177,7 +176,7 @@ class TestActionConfigValidate(TestCase):
         ac = ActionConfig.objects.create(name="测试重名", bk_biz_id=2, plugin_id=2, converge_config={}, execute_config={})
 
         c = Client()
-        response = c.delete(path="/fta/action/config/%s/" % ac.id, data={"bk_biz_id": 2})
+        response = c.delete(path=f"/fta/action/config/{ac.id}/", data={"bk_biz_id": 2})
         print(response.data)
         self.assertEqual(response.status_code, 200)
 
@@ -187,5 +186,5 @@ class TestActionConfigValidate(TestCase):
         StrategyActionConfigRelation.objects.create(config_id=ac.id, strategy_id=1, user_groups=[1, 2])
 
         c = Client()
-        response = c.delete(path="/fta/action/config/%s/" % ac.id)
+        response = c.delete(path=f"/fta/action/config/{ac.id}/")
         self.assertEqual(response.status_code, 400)

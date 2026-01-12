@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -41,7 +40,7 @@ class DetectContext(dict):
         return self.__getitem__(item)
 
 
-class Algorithms(object):
+class Algorithms:
     """
     检测算法基类，定义一个算法对象。
     """
@@ -113,7 +112,7 @@ class Algorithms(object):
             try:
                 anomaly_point.anomaly_message = self._format_message(data_point)
             except Exception as e:
-                logger.error("format anomaly message error: {}".format(e))
+                logger.error(f"format anomaly message error: {e}")
                 anomaly_point.anomaly_message = ""
             return [anomaly_point]
 
@@ -141,9 +140,7 @@ class Algorithms(object):
             if check_result:
                 ap = self.gen_anomaly_point(data_point, check_result, level)
                 logger.info(
-                    "[detect] strategy({}) item({}) level[{}] 发现异常点: {}".format(
-                        ap.data_point.item.strategy.id, ap.data_point.item.id, level, ap.__dict__
-                    )
+                    f"[detect] strategy({ap.data_point.item.strategy.id}) item({ap.data_point.item.id}) level[{level}] 发现异常点: {ap.__dict__}"
                 )
                 anomaly_points.append(ap)
 
@@ -199,12 +196,7 @@ class Algorithms(object):
         "{dimensions_md5}.{timestamp}.{strategy_id}.{item_id}.{level}"
         其中dimensions_md5 和 timestamp 是data_point的record_id
         """
-        return "{record_id}.{strategy_id}.{item_id}.{level}".format(
-            record_id=data_point.record_id,
-            strategy_id=data_point.item.strategy.id,
-            item_id=data_point.item.id,
-            level=level,
-        )
+        return f"{data_point.record_id}.{data_point.item.strategy.id}.{data_point.item.id}.{level}"
 
 
 class ExprDetectAlgorithms(Algorithms):
@@ -285,14 +277,14 @@ class BasicAlgorithmsCollection(Algorithms):
         return anomaly
 
     def get_context(self, data_point):
-        context = super(BasicAlgorithmsCollection, self).get_context(data_point)
+        context = super().get_context(data_point)
         context.update(
             {"algorithm_unit": self.unit, "unit_auto_convert": unit_auto_convert, "unit_convert_min": unit_convert_min}
         )
         return context
 
 
-class HistoryPointFetcher(object):
+class HistoryPointFetcher:
     def set_default(self, value: int):
         self._default = value
 
@@ -466,12 +458,12 @@ class RangeRatioAlgorithmsCollection(BasicAlgorithmsCollection, HistoryPointFetc
         return next(g)
 
 
-class SDKPreDetectMixin(object):
+class SDKPreDetectMixin:
     GROUP_PREDICT_FUNC = None
     PREDICT_FUNC = None
     WITH_HISTORY_ANOMALY = False
 
-    def generate_dimensions(self, data_point: DataPoint) -> Dict:
+    def generate_dimensions(self, data_point: DataPoint) -> dict:
         """生成维度字典.
 
         :param data_point: 数据点
@@ -484,7 +476,7 @@ class SDKPreDetectMixin(object):
         dimensions["strategy_id"] = int(data_point.item.strategy.id)
         return dimensions
 
-    def pre_detect(self, data_points: List[DataPoint]) -> None:
+    def pre_detect(self, data_points: list[DataPoint]) -> None:
         """生成按照dimension划分的预测输入数据，调用SDK API进行批量分组预测.
 
         :param data_points: 待预测的数据

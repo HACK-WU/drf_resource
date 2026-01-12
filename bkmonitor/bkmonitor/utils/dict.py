@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 
 import collections.abc
-from typing import Dict
 
 
 def nested_update(d, u, overwrite=False):
@@ -26,7 +24,7 @@ def nested_update(d, u, overwrite=False):
     return d
 
 
-def nested_diff(d: Dict, s: Dict) -> Dict:
+def nested_diff(d: dict, s: dict) -> dict:
     """
     字典差异提取
     """

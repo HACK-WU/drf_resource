@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from typing import Any, Dict
+from typing import Any
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -27,10 +26,10 @@ class ContextViewSet(GenericViewSet):
 
     @action(methods=["GET"], detail=False)
     def enhanced(self, request):
-        params: Dict[str, Any] = request.query_params.copy()
+        params: dict[str, Any] = request.query_params.copy()
         params["bk_biz_id"] = get_default_biz_id(request)
         # resource 感知不到 response，此处复用 resource.request，并在 response 设置 cookie
-        get_context_result: Dict[str, Any] = resource.commons.enhanced_get_context.request(params)
+        get_context_result: dict[str, Any] = resource.commons.enhanced_get_context.request(params)
         response = Response(get_context_result["context"])
         if get_context_result["context_type"] == ContextType.BASIC.value:
             response.set_cookie("bk_biz_id", str(get_context_result["context"]["BK_BIZ_ID"]))

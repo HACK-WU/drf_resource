@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -47,15 +46,15 @@ def scheduled_register_bk_plugin():
         deployed, plugin_code, plugin_info = parse_bk_plugin_deployed_info(plugin)
         if not deployed:
             failed_plugins.append(plugin_code)
-            logger.info("failed: bk_plugin: [{}] does not deployed".format(plugin_code))
+            logger.info(f"failed: bk_plugin: [{plugin_code}] does not deployed")
         instance, created = ActionPlugin.origin_objects.update_or_create(plugin_key=plugin_code, defaults=plugin_info)
         registered_plugins.append(plugin_code) if created else updated_plugins.append(plugin_code)
         logger.info("success: {} bk_plugin: [{}]".format("register" if created else "update", instance.name))
 
     logger.info(
-        "registered {} bk_plugin: {}, ".format(len(registered_plugins), registered_plugins),
-        "updated {} bk_plugin: {}, ".format(len(updated_plugins), updated_plugins),
-        "failed {} bk_plugin: {}".format(len(failed_plugins), failed_plugins),
+        f"registered {len(registered_plugins)} bk_plugin: {registered_plugins}, ",
+        f"updated {len(updated_plugins)} bk_plugin: {updated_plugins}, ",
+        f"failed {len(failed_plugins)} bk_plugin: {failed_plugins}",
     )
 
 

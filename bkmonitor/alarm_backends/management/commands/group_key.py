@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -17,7 +16,7 @@ from alarm_backends.core.control.strategy import Strategy
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument("--group_key", help="strategy group key")
         parser.add_argument("--strategy_id", help="strategy id")
 
@@ -31,7 +30,7 @@ class Command(BaseCommand):
             print("---------strategy to group_key----------")
             strategy = StrategyCacheManager.get_strategy_by_id(strategy_id)
             if not strategy:
-                print("strategy({}) no config, please confirm that the strategy_id is correct.".format(strategy_id))
+                print(f"strategy({strategy_id}) no config, please confirm that the strategy_id is correct.")
             else:
                 for item in strategy["items"]:
                     if item.get("query_md5"):
@@ -46,7 +45,7 @@ class Command(BaseCommand):
             records = StrategyCacheManager.get_strategy_group_detail(group_key)
             if not records:
                 print(
-                    "strategy_group_key({}) no config, please confirm that the group_key is correct.".format(group_key)
+                    f"strategy_group_key({group_key}) no config, please confirm that the group_key is correct."
                 )
             else:
                 for strategy_id, item_ids in list(records.items()):
@@ -56,4 +55,4 @@ class Command(BaseCommand):
                         continue
                     strategy = Strategy(strategy_id)
                     for item in strategy.items:
-                        print("strategy({}), item({}) strage_group_key({})".format(strategy_id, item.id, group_key))
+                        print(f"strategy({strategy_id}), item({item.id}) strage_group_key({group_key})")

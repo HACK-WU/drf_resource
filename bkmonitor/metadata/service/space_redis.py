@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import json
 import logging
-from typing import Dict, List, Optional
 
 import requests
 
@@ -31,7 +29,7 @@ from metadata.utils.redis_tools import RedisTools
 logger = logging.getLogger("metadata")
 
 
-def get_space_config_from_redis(space_uid: str, table_id: str) -> Dict:
+def get_space_config_from_redis(space_uid: str, table_id: str) -> dict:
     """从 redis 中获取空间配置信息"""
     key = f"{SPACE_REDIS_KEY}:{space_uid}"
     data = RedisTools.hget(key, table_id)
@@ -42,7 +40,7 @@ def get_space_config_from_redis(space_uid: str, table_id: str) -> Dict:
     return json.loads(data.decode("utf-8"))
 
 
-def get_kihan_prom_field_list(domain: str) -> List:
+def get_kihan_prom_field_list(domain: str) -> list:
     # NOTE: 因为是临时接口，访问的域名配置到 apigw，通过header 传递进来
     url = f"{domain}/api/v1/targets/metadata"
     params = {"match_target": "{namespace='pg'}"}
@@ -85,7 +83,7 @@ def push_and_publish_es_aliases(data_label: str):
 
 
 def push_and_publish_es_table_id(
-    table_id: str, index_set: str, source_type: str, cluster_id: int, options: Optional[List] = None
+    table_id: str, index_set: str, source_type: str, cluster_id: int, options: list | None = None
 ):
     """推送并发布es结果表
 

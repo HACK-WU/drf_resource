@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,7 @@ specific language governing permissions and limitations under the License.
 from django.utils.translation import gettext as _
 
 
-class ScopeType(object):
+class ScopeType:
     INSTANCE = "instance"
     IP = "ip"
     NODE = "node"
@@ -28,7 +27,7 @@ SCOPE_TYPE_NAME_MAPPING = {
 }
 
 
-class ShieldStatus(object):
+class ShieldStatus:
     SHIELDED = 1    # 屏蔽中
     EXPIRED = 2     # 已过期
     REMOVED = 3     # 被解除
@@ -41,7 +40,7 @@ SHIELD_STATUS_NAME_MAPPING = {
 }
 
 
-class ShieldCategory(object):
+class ShieldCategory:
     SCOPE = "scope"
     STRATEGY = "strategy"
     EVENT = "event"
@@ -59,14 +58,14 @@ SHIELD_CATEGORY_NAME_MAPPING = {
 }
 
 
-class ShieldCycleType(object):
+class ShieldCycleType:
     ONCE = 1  # 一次
     EVERYDAY = 2  # 每天
     EVERY_WEEK = 3  # 每周
     EVERY_MONTH = 4  # 每月
 
 
-class ShieldType(object):
+class ShieldType:
     SAAS_CONFIG = "saas_config"
     HOST_STATUS = "host_status"
     HOST_TARGET = "host_target"

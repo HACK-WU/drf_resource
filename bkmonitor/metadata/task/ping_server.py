@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -50,7 +49,7 @@ def refresh_ping_server_2_node_man():
         task_name="refresh_ping_server_2_node_man", process_target=None
     ).observe(cost_time)
     metrics.report_all()
-    logger.info("end refresh ping server to node man, cost time: %s" % cost_time)
+    logger.info(f"end refresh ping server to node man, cost time: {cost_time}")
 
 
 def refresh_ping_conf(plugin_name="bkmonitorproxy"):
@@ -132,10 +131,10 @@ def refresh_ping_conf(plugin_name="bkmonitorproxy"):
                             }
                         )
             except Exception:  # noqa
-                logger.exception("从节点管理获取云区域({})下的ProxyIP列表失败".format(bk_cloud_id))
+                logger.exception(f"从节点管理获取云区域({bk_cloud_id})下的ProxyIP列表失败")
                 continue
         if not proxies:
-            logger.error("云区域({})下无可用proxy节点，相关pingserver服务不可用".format(bk_cloud_id))
+            logger.error(f"云区域({bk_cloud_id})下无可用proxy节点，相关pingserver服务不可用")
             continue
         proxies_host_ids = [p["bk_host_id"] for p in proxies]
 
@@ -168,7 +167,5 @@ def refresh_ping_conf(plugin_name="bkmonitorproxy"):
             PingServerSubscriptionConfig.create_subscription(bk_cloud_id, host_info, target_hosts, plugin_name)
         except Exception:  # noqa
             logger.exception(
-                "下发pingserver订阅任务失败，bk_cloud_id({}), proxies_ips({}), plugin({})".format(
-                    bk_cloud_id, proxies_host_ids, plugin_name
-                )
+                f"下发pingserver订阅任务失败，bk_cloud_id({bk_cloud_id}), proxies_ips({proxies_host_ids}), plugin({plugin_name})"
             )

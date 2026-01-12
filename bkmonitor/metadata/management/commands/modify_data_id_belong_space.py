@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -27,7 +26,7 @@ class Command(BaseCommand):
             try:
                 space = Space.objects.get(space_id=space_id, space_type_id=space_type_id)
             except Space.DoesNotExist:
-                self.stdout.write("can not find space {}__{}".format(space_type_id, space_id))
+                self.stdout.write(f"can not find space {space_type_id}__{space_id}")
                 return
             DataSource.objects.filter(bk_data_id__in=data_ids).update(space_uid=space.space_uid)
         else:

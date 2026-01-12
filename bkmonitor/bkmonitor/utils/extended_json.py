@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -52,7 +51,7 @@ class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         type_ = type(obj)
         if type_ in SUPPORTED_TYPES:
-            if issubclass(type_, (datetime, date, time)):
+            if issubclass(type_, datetime | date | time):
                 return {"__type__": type_.__name__, "__value__": obj.strftime(STD_DT_FORMAT)}
             if issubclass(type_, Decimal):
                 return {"__type__": type_.__name__, "__value__": obj.as_tuple()}
@@ -78,7 +77,7 @@ class CustomJSONDecoder(json.JSONDecoder):
     def dict_to_object(self, d):
         type_ = SUPPORTED_TYPES_NAME2CLASS.get(d.get("__type__"))
         if type_ in SUPPORTED_TYPES:
-            if issubclass(type_, (datetime, date, time)):
+            if issubclass(type_, datetime | date | time):
                 dt = arrow.get(d.get("__value__")).replace(tzinfo="local").naive
                 if type_ is datetime:
                     return dt
@@ -104,7 +103,7 @@ class JSONEncoderDT(json.JSONEncoder):
         if isinstance(o, datetime):
             return o.strftime(STD_DT_FORMAT)
         else:
-            return super(JSONEncoderDT, self).default(o)
+            return super().default(o)
 
 
 class JSONDecoderDT(json.JSONDecoder):
@@ -120,7 +119,7 @@ class JSONDecoderDT(json.JSONDecoder):
     def dict_to_object(self, d):
         type_ = SUPPORTED_TYPES_NAME2CLASS.get(d.get("__type__"))
         if type_ in SUPPORTED_TYPES:
-            if issubclass(type_, (datetime, date, time)):
+            if issubclass(type_, datetime | date | time):
                 return d.get("__value__")
         return d
 

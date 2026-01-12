@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-import typing
 
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
@@ -64,7 +62,7 @@ class QueryHostsBaseSer(ScopeSelectorBaseSer, PaginationSer):
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
-        search_cond_map: typing.Dict[str, str] = {
+        search_cond_map: dict[str, str] = {
             "ip": "inner_ip",
             "inner_ipv6": "inner_ipv6",
             "os_type": "os_type",
@@ -75,7 +73,7 @@ class QueryHostsBaseSer(ScopeSelectorBaseSer, PaginationSer):
         }
 
         conditions = []
-        search_condition: typing.Dict[str, str] = attrs.get("search_condition", {})
+        search_condition: dict[str, str] = attrs.get("search_condition", {})
         # k-v 查找上线前临时兼容的模糊查询字段
         if "search_content" in attrs:
             if is_v6(attrs["search_content"]):
@@ -100,9 +98,9 @@ class QueryHostsBaseSer(ScopeSelectorBaseSer, PaginationSer):
             elif key == "alive":
                 # 转为数据库可识别的 Agent 状态
                 if val == constants.AgentStatusType.ALIVE.value:
-                    cond_vals: typing.List[str] = [constants.ProcStateType.RUNNING]
+                    cond_vals: list[str] = [constants.ProcStateType.RUNNING]
                 else:
-                    cond_vals: typing.List[str] = list(
+                    cond_vals: list[str] = list(
                         set(constants.PROC_STATE_TUPLE) - {constants.ProcStateType.RUNNING}
                     )
                 conditions.append({"key": cond_key, "value": cond_vals})

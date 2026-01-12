@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +7,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from typing import List, Tuple
 
 from apm_web.topo.constants import BarChartDataType, RelationResourcePathType
 from apm_web.topo.handle.graph_plugin import PluginProvider
@@ -70,7 +68,7 @@ class RelationEntrance:
             return PathProvider.get_template(self.tree_paths).to_layers_json(tree, self.tree_info, self.trees_info)
         raise ValueError(f"[RelationTopo] 不支持以 {export_type} 格式导出关联树")
 
-    def _find_complex(self, trees: List[Tuple[str, Node]]):
+    def _find_complex(self, trees: list[tuple[str, Node]]):
         """
         从树列表中返回最复杂的那颗
         树的得分：对每层的节点数量进行加权求和 层级越深此层级的节点权重越低

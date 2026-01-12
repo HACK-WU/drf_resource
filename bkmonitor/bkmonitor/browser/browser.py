@@ -4,7 +4,6 @@ import os
 import time
 from functools import lru_cache
 from threading import Lock
-from typing import Optional
 
 from celery import platforms
 from celery.signals import worker_process_init, worker_process_shutdown
@@ -13,7 +12,7 @@ from pyppeteer.browser import Browser
 
 logger = logging.getLogger("bkmonitor")
 
-_browser: Optional[Browser] = None
+_browser: Browser | None = None
 _browser_lock = Lock()
 _browser_connected = False
 _browser_start_time = 0

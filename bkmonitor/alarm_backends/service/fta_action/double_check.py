@@ -9,7 +9,7 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar, Dict, Type
+from typing import TYPE_CHECKING, ClassVar
 
 from alarm_backends.core.control.mixins.double_check import DoubleCheckStrategy
 from constants.action import NoticeWay
@@ -85,7 +85,7 @@ class SuspectedMissingPoints:
 @dataclass
 class DoubleCheckHandler:
     alert: "AlertDocument"
-    double_check_result_handle_map: ClassVar[Dict[str, Type]] = {
+    double_check_result_handle_map: ClassVar[dict[str, type]] = {
         "SUSPECTED_MISSING_POINTS": SuspectedMissingPoints,
     }
 

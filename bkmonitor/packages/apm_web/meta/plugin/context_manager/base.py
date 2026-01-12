@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -31,7 +30,7 @@ class Field:
 
 
 class FieldManager:
-    _FIELDS: typing.Dict[str, Field] = {}
+    _FIELDS: dict[str, Field] = {}
 
     @classmethod
     def register(cls, meta):
@@ -43,8 +42,8 @@ class FieldManager:
         cls._FIELDS[field_obj.key] = field_obj
 
     @classmethod
-    def get_context(cls, scope: str) -> typing.Dict[str, typing.Any]:
-        context: typing.Dict[str, str] = {}
+    def get_context(cls, scope: str) -> dict[str, typing.Any]:
+        context: dict[str, str] = {}
         for field in cls._FIELDS.values():
             if field.scope != scope:
                 continue

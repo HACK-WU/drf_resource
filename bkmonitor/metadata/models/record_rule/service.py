@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 
 import logging
-from typing import Dict, List, Optional
 
 from django.db.transaction import atomic
 
@@ -33,9 +31,9 @@ class RecordRuleService:
         space_type: str,
         space_id: str,
         record_name: str,
-        rule_type: Optional[str] = DEFAULT_RULE_TYPE,
-        rule_config: Optional[dict] = "",
-        count_freq: Optional[int] = 60,
+        rule_type: str | None = DEFAULT_RULE_TYPE,
+        rule_config: dict | None = "",
+        count_freq: int | None = 60,
     ) -> None:
         self.space_type = space_type
         self.space_id = space_id
@@ -65,7 +63,7 @@ class RecordRuleService:
         self._create_vm_storage(table_id, dst_rt)
 
     def _create_record_rule_record(
-        self, table_id: str, bksql: List, rule_metrics: Dict, src_table_ids: List, dst_rt: str, count_freq: int
+        self, table_id: str, bksql: list, rule_metrics: dict, src_table_ids: list, dst_rt: str, count_freq: int
     ):
         """创建预计算记录"""
         vm_info = vm_utils.get_vm_cluster_id_name(space_type=self.space_type, space_id=self.space_id)
@@ -103,7 +101,7 @@ class RecordRuleService:
             bk_biz_id=biz_id,
         )
 
-    def _create_table_id_fields(self, table_id: str, metrics: List):
+    def _create_table_id_fields(self, table_id: str, metrics: list):
         """创建rt的字段"""
         objs = []
         for metric in metrics:
@@ -136,7 +134,7 @@ class BkDataFlow:
         self.space_id = space_id
         self.table_id = table_id
 
-    def start_flow(self, check_status: bool = True, consuming_mode: Optional[str] = ConsumingMode.Tail) -> bool:
+    def start_flow(self, check_status: bool = True, consuming_mode: str | None = ConsumingMode.Tail) -> bool:
         """启动数据流"""
         # 如果flow已经启动，则不需要再次启动
         if (

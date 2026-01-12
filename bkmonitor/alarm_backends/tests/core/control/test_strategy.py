@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import copy
 from datetime import datetime
 
-import mock
+from unittest import mock
 from django.test import TestCase
 
 from alarm_backends.core.control.strategy import Strategy

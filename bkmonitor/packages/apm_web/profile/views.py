@@ -14,7 +14,6 @@ import hashlib
 import itertools
 import json
 import logging
-from typing import Optional, Tuple, Union
 
 from django.http import HttpResponse
 from django.utils import timezone
@@ -175,16 +174,16 @@ class ProfileQueryViewSet(ProfileBaseViewSet):
         start: int,
         end: int,
         result_table_id: str,
-        extra_params: Optional[dict] = None,
+        extra_params: dict | None = None,
         api_type: APIType = APIType.QUERY_SAMPLE_BY_JSON,
-        profile_id: Optional[str] = None,
-        filter_labels: Optional[dict] = None,
+        profile_id: str | None = None,
+        filter_labels: dict | None = None,
         dimension_fields: str = None,
         data_type: str = None,
         sample_type: str = None,
         order: str = None,
-        converter: Optional[ConverterType] = None,
-    ) -> Union[DorisProfileConverter, TreeConverter, dict]:
+        converter: ConverterType | None = None,
+    ) -> DorisProfileConverter | TreeConverter | dict:
         """
         获取 profile 数据
         """
@@ -543,7 +542,7 @@ class ProfileQueryViewSet(ProfileBaseViewSet):
         return tendency_data, compare_tendency_result
 
     @staticmethod
-    def enlarge_duration(start: int, end: int, offset: int) -> Tuple[int, int]:
+    def enlarge_duration(start: int, end: int, offset: int) -> tuple[int, int]:
         # start & end all in microsecond, so we need to convert it to millisecond
         start = int(start / 1000 + offset * 1000)
         end = int(end / 1000 + offset * 1000)

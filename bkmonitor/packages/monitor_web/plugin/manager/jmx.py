@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -54,7 +53,7 @@ class JMXPluginManager(PluginManager):
             plugin_params["port"] = collector_params["port"]
         else:
             plugin_params["port"] = "{{ control_info.listen_port }}"
-            collector_params["port"] = "{{ step_data.%s.control_info.listen_port }}" % self.plugin.plugin_id
+            collector_params["port"] = f"{{{{ step_data.{self.plugin.plugin_id}.control_info.listen_port }}}}"
         plugin_params["host"] = collector_params["host"]
         collector_params["metric_url"] = "{}:{}".format(collector_params["host"], collector_params["port"])
         diff_metrics = plugin_version.config.diff_fields

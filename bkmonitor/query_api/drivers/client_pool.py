@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -26,7 +25,7 @@ except ImportError:  # Platform-specific: No threads available
             pass
 
 
-class BaseClientFactory(object):
+class BaseClientFactory:
     def client_key(self, **request_context):
         raise NotImplementedError
 
@@ -39,7 +38,7 @@ class BaseClientFactory(object):
             client.close()
 
 
-class ClientPoolManage(object):
+class ClientPoolManage:
     def __init__(self, client_factory, max_poll_size=10):
         self.max_poll_size = max_poll_size
         self.client_factory = client_factory

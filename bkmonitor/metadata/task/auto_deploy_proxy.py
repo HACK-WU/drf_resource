@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 import re
-from typing import List
 
 from django.conf import settings
 
@@ -20,13 +18,13 @@ from drf_resource import api
 logger = logging.getLogger("metadata")
 
 
-class ProcStatus(object):
+class ProcStatus:
     NOT_REGISTED = 0
     RUNNING = 1
     TERMINATED = 2
 
 
-class AutoDeployProxy(object):
+class AutoDeployProxy:
     """
     Auto Deploy Proxy(bkmonitorproxy), include first deploy, upgrade
     """
@@ -34,7 +32,7 @@ class AutoDeployProxy(object):
     VERSION_PATTERN = re.compile(r"[vV]?(\d+\.){1,5}\d+$")
 
     @classmethod
-    def deploy_proxy(cls, plugin_name: str, plugin_version: str, bk_cloud_id: int, bk_host_ids: List[int]):
+    def deploy_proxy(cls, plugin_name: str, plugin_version: str, bk_cloud_id: int, bk_host_ids: list[int]):
         logger.info(
             f"update proxy on bk_cloud_id({bk_cloud_id}), get host_ids->[{','.join([str(h) for h in bk_host_ids])}]"
         )
@@ -70,17 +68,15 @@ class AutoDeployProxy(object):
         )
         try:
             result = api.node_man.plugin_operate(**params)
-            message = "update ({}) to version({}) success with result({}), Please see detail in bk_nodeman SaaS".format(
-                plugin_name, plugin_version, result
-            )
+            message = f"update ({plugin_name}) to version({plugin_version}) success with result({result}), Please see detail in bk_nodeman SaaS"
             logger.info(message)
         except Exception as e:  # noqa
-            raise Exception("update ({}) error:{}, params:{}".format(plugin_name, e, params))
+            raise Exception(f"update ({plugin_name}) error:{e}, params:{params}")
 
         logger.info("refresh bk_cloud_id->[%s] proxy success", bk_cloud_id)
 
     @classmethod
-    def get_proxy_hosts_by_cloud(cls, bk_cloud_id: int) -> List[int]:
+    def get_proxy_hosts_by_cloud(cls, bk_cloud_id: int) -> list[int]:
         bk_host_ids = []
         proxies = api.node_man.get_proxies(bk_cloud_id=bk_cloud_id)
         logger.info("bk_cloud_id->[%d] has %d proxies", bk_cloud_id, len(proxies))
@@ -131,7 +127,7 @@ class AutoDeployProxy(object):
             return
 
         plugin_latest_version = cls.find_latest_version(plugin_name=plugin_name)
-        logger.info("find {} version {} from bk_nodeman, start auto deploy.".format(plugin_name, plugin_latest_version))
+        logger.info(f"find {plugin_name} version {plugin_latest_version} from bk_nodeman, start auto deploy.")
 
         # 云区域
         cloud_infos = api.cmdb.search_cloud_area()
@@ -144,14 +140,14 @@ class AutoDeployProxy(object):
                 cls.deploy_with_cloud_id(plugin_name, plugin_latest_version, bk_cloud_id)
             except Exception as e:
                 logger.exception(
-                    "Auto deploy {} error, with bk_cloud_id({}), error({}).".format(plugin_name, bk_cloud_id, e)
+                    f"Auto deploy {plugin_name} error, with bk_cloud_id({bk_cloud_id}), error({e})."
                 )
 
         # 直连区域
         try:
             cls.deploy_direct_area_proxy(plugin_name, plugin_latest_version)
         except Exception as e:
-            logger.exception("Auto deploy {} error, with direct area, error({}).".format(plugin_name, e))
+            logger.exception(f"Auto deploy {plugin_name} error, with direct area, error({e}).")
 
 
 def main():

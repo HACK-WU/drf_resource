@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 
 import json
 import time
-from typing import Dict, List
 
 import requests
 from django.core.management.base import BaseCommand
@@ -53,7 +51,7 @@ class Command(BaseCommand):
         data_id_list = self._query_all_no_data_data_id_list(unify_query_host, platform_biz_id)
         self.stdout.write(json.dumps({"count": len(data_id_list), "result": data_id_list}))
 
-    def _query_belong_data_id(self, space_uid: str) -> List:
+    def _query_belong_data_id(self, space_uid: str) -> list:
         """获取归属空间的数据源ID
 
         - 业务空间类型，需要查询插件相关的data__id
@@ -78,14 +76,14 @@ class Command(BaseCommand):
 
         return list(bk_data_ids)
 
-    def _query_all_no_data_data_id_list(self, unify_query_host: str, bk_biz_id: int) -> List:
+    def _query_all_no_data_data_id_list(self, unify_query_host: str, bk_biz_id: int) -> list:
         """查询所有没有数据流量的数据源ID"""
         promql = "sum by (id) (sum_over_time(bkmonitor:transfer_pipeline_frontend_handled_total[30d]))<=0"
         return self._request_unify_query(
             unify_query_host, promql, {"X-Bk-Scope-Space-Uid": f"{SpaceTypes.BKCC.value}__{bk_biz_id}"}
         )
 
-    def _query_space_no_data_data_id_list(self, unify_query_host: str, bk_biz_id: int, data_id_list: List) -> List:
+    def _query_space_no_data_data_id_list(self, unify_query_host: str, bk_biz_id: int, data_id_list: list) -> list:
         """查询空间没有数据流量的数据源ID"""
         data_id_str = [str(d) for d in data_id_list]
         filter_q = "|".join(data_id_str)
@@ -98,7 +96,7 @@ class Command(BaseCommand):
             unify_query_host, promql, {"X-Bk-Scope-Space-Uid": f"{SpaceTypes.BKCC.value}__{bk_biz_id}"}
         )
 
-    def _request_unify_query(self, host: str, promql: str, headers: Dict) -> List:
+    def _request_unify_query(self, host: str, promql: str, headers: dict) -> list:
         """请求unify-query接口"""
         url = f"{host}/query/ts/promql"
         now_sec = int(time.time())

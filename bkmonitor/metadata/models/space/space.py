@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 import json
 import logging
-from typing import Dict, List, Optional
 
 from django.db import models
 from django.db.models.fields import DateTimeField
@@ -70,7 +68,7 @@ class Space(BaseModel):
         """
         return f"{self.space_type_id}{SPACE_UID_HYPHEN}{self.space_id}"
 
-    def to_dict(self, fields: Optional[List] = None, exclude: Optional[List] = None) -> Dict:
+    def to_dict(self, fields: list | None = None, exclude: list | None = None) -> dict:
         data = {}
         for f in self._meta.concrete_fields + self._meta.many_to_many:
             value = f.value_from_object(self)
@@ -92,7 +90,7 @@ class Space(BaseModel):
         return data
 
     @classmethod
-    def bulk_create_space(cls, space_type_id: str, space_list: List):
+    def bulk_create_space(cls, space_type_id: str, space_list: list):
         """批量创建同类型空间"""
         data = []
         for s in space_list:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,7 +14,6 @@ import math
 from django.conf import settings
 from django.http import HttpResponse
 from PIL import Image, ImageDraw, ImageFont
-from six.moves import range
 
 
 def produce_watermark(text):

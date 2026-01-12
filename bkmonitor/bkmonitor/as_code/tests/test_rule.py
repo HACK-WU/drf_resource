@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-import mock
+from unittest import mock
 import pytest
 import yaml
 
@@ -23,10 +22,10 @@ DATA_PATH = "bkmonitor/as_code/tests/data/"
 
 
 def test_strategy_parse():
-    with open(f"{DATA_PATH}rule/snippets/base.yaml", "r") as f:
+    with open(f"{DATA_PATH}rule/snippets/base.yaml") as f:
         snippet = yaml.safe_load(f.read())
 
-    with open(f"{DATA_PATH}rule/all.yaml", "r") as f:
+    with open(f"{DATA_PATH}rule/all.yaml") as f:
         code_config = yaml.safe_load(f.read())
         result, message, code_config = SnippetRenderer.render(code_config, {"base.yaml": snippet})
 
@@ -36,7 +35,7 @@ def test_strategy_parse():
     config = p.parse(code_config)
     assert config
 
-    with open(f"{DATA_PATH}rule/cpu_simple.yaml", "r") as f:
+    with open(f"{DATA_PATH}rule/cpu_simple.yaml") as f:
         code_config = yaml.safe_load(f.read())
         result, message, code_config = SnippetRenderer.render(code_config, {"base.yaml": snippet})
 
@@ -79,16 +78,16 @@ def test_strategy_import():
     get_dynamic_query.side_effect = lambda *args, **kwargs: {"children": []}
 
     configs = {}
-    with open(f"{DATA_PATH}rule/all.yaml", "r") as f:
+    with open(f"{DATA_PATH}rule/all.yaml") as f:
         configs["all.yaml"] = yaml.safe_load(f.read())
 
-    with open(f"{DATA_PATH}rule/cpu_simple.yaml", "r") as f:
+    with open(f"{DATA_PATH}rule/cpu_simple.yaml") as f:
         configs["cpu_simple.yaml"] = yaml.safe_load(f.read())
 
-    with open(f"{DATA_PATH}rule/cpu_simple_with_snippet.yaml", "r") as f:
+    with open(f"{DATA_PATH}rule/cpu_simple_with_snippet.yaml") as f:
         configs["cpu_simple_with_snippet.yaml"] = yaml.safe_load(f.read())
 
-    with open(f"{DATA_PATH}rule/snippets/base.yaml", "r") as f:
+    with open(f"{DATA_PATH}rule/snippets/base.yaml") as f:
         snippet = yaml.safe_load(f.read())
 
     import_strategy(

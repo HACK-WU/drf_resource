@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -225,7 +224,7 @@ class TraceHandler:
     def build_new_resource(cls, resource: dict) -> dict:
         new_resource = {}
         for k, v in resource.items():
-            if isinstance(v, (list, set)):
+            if isinstance(v, list | set):
                 new_resource[k] = tuple(v)
             elif isinstance(v, dict):
                 new_resource[k] = cls.build_new_resource(v)

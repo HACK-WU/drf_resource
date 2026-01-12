@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -864,7 +863,7 @@ class TraceDataSource(ApmDataSourceConfigBase):
     @classmethod
     def _filter_and_sort_valid_index_names(cls, app_name, index_names):
         date_index_pairs = []
-        pattern = re.compile(r".*_bkapm_trace_{0}_(\d{{8}})_\d+$".format(re.escape(app_name)))
+        pattern = re.compile(rf".*_bkapm_trace_{re.escape(app_name)}_(\d{{}})_\d+$")
 
         for name in index_names:
             match = pattern.search(name)
@@ -1136,7 +1135,7 @@ class TraceDataSource(ApmDataSourceConfigBase):
 
     @classmethod
     def stop(cls, bk_biz_id, app_name):
-        super(TraceDataSource, cls).stop(bk_biz_id, app_name)
+        super().stop(bk_biz_id, app_name)
         # 删除关联的索引集
         ins = cls.objects.filter(bk_biz_id=bk_biz_id, app_name=app_name).first()
         if ins:

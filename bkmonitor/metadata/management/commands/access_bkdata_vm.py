@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 
 import json
-from typing import Dict, List
 
 from django.core.management import BaseCommand, CommandError
 
@@ -147,14 +145,12 @@ class Command(BaseCommand):
         )
         # 如果有失败记录，则输出
         if failed_access_vm_table_id or failed_create_kafka_table_id:
-            msg = "failed access vm table_id: {};failed create kafka table_id:{}".format(
-                failed_access_vm_table_id, failed_create_kafka_table_id
-            )
+            msg = f"failed access vm table_id: {failed_access_vm_table_id};failed create kafka table_id:{failed_create_kafka_table_id}"
             self.stderr.write(msg)
         else:
             self.stdout.write("access bk data successfully!")
 
-    def _valid(self, options: Dict):
+    def _valid(self, options: dict):
         """校验参数"""
         if not options.get("vm_retention_time"):
             raise CommandError("vm_retention_time is null")
@@ -162,7 +158,7 @@ class Command(BaseCommand):
         if options["partition"] < 1:
             raise CommandError("partition input error, it must gte 1, please check and retry")
 
-    def _get_zero_space_table_id(self, input_table_id_list: List) -> Dict:
+    def _get_zero_space_table_id(self, input_table_id_list: list) -> dict:
         """获取 0 空间下的结果表"""
         if not input_table_id_list:
             input_table_id_list = (
@@ -202,7 +198,7 @@ class Command(BaseCommand):
             for table_id, bk_data_id in table_id_data_id.items()
         }
 
-    def _get_space_table_id(self, space_type: str, space_id: str, input_table_id_list: List) -> Dict:
+    def _get_space_table_id(self, space_type: str, space_id: str, input_table_id_list: list) -> dict:
         """获取空间下的结果表"""
         all_data_id_list = (
             models.SpaceDataSource.objects.filter(space_id=space_id, space_type_id=space_type)
@@ -249,14 +245,14 @@ class Command(BaseCommand):
             if table_id in table_id_list
         }
 
-    def _get_data_time_len(self, bk_data_id_list: list) -> Dict:
+    def _get_data_time_len(self, bk_data_id_list: list) -> dict:
         """获取数据源的长度"""
         ret_data = {}
         for ds in models.DataSource.objects.filter(bk_data_id__in=bk_data_id_list).values("bk_data_id", "etl_config"):
             ret_data[ds["bk_data_id"]] = get_timestamp_len(data_id=ds["bk_data_id"], etl_config=ds["etl_config"])
         return ret_data
 
-    def _get_bkbase_name_and_topic(self, table_id_list: List) -> Dict:
+    def _get_bkbase_name_and_topic(self, table_id_list: list) -> dict:
         """获取结果表对应的计算平台名称及需要的topic"""
         name_and_topic = {}
         for table_id in table_id_list:
@@ -267,11 +263,11 @@ class Command(BaseCommand):
             }
         return name_and_topic
 
-    def _filter_exist_table(self, table_id_list: List) -> List:
+    def _filter_exist_table(self, table_id_list: list) -> list:
         """过滤已经存在的记录"""
         return list(models.KafkaStorage.objects.filter(table_id__in=table_id_list).values_list("table_id", flat=True))
 
-    def _filter_accessed_vm_table(self, table_id_list: List) -> List:
+    def _filter_accessed_vm_table(self, table_id_list: list) -> list:
         """过滤已经接入到 vm 的结果表"""
         return list(
             models.AccessVMRecord.objects.filter(result_table_id__in=table_id_list).values_list(
@@ -279,14 +275,14 @@ class Command(BaseCommand):
             )
         )
 
-    def _filter_access_kafka_not_vm(self, kafka_table_id_list: List) -> List:
+    def _filter_access_kafka_not_vm(self, kafka_table_id_list: list) -> list:
         """过滤接入了 kafka 存储，但是没有接 vm 的结果表"""
         access_vm_table_ids = models.AccessVMRecord.objects.filter(result_table_id__in=kafka_table_id_list).values_list(
             "result_table_id", flat=True
         )
         return list(set(kafka_table_id_list) - set(access_vm_table_ids))
 
-    def _create_kafka_storage(self, tale_id_kafka_info: Dict, storage_cluster_id: int, partition: int) -> List:
+    def _create_kafka_storage(self, tale_id_kafka_info: dict, storage_cluster_id: int, partition: int) -> list:
         """接入计算平台"""
         failed_table_id_list = []
         # 没有创建的结果表，需要创建
@@ -322,7 +318,7 @@ class Command(BaseCommand):
         models.DataSource.objects.get(bk_data_id=data_id).refresh_consul_config()
         self.stdout.write("refresh consul config success")
 
-    def _refresh_redis(self, space_type: str, space_id: str, table_id_list: List[str]):
+    def _refresh_redis(self, space_type: str, space_id: str, table_id_list: list[str]):
         """刷新 redis 配置"""
         self.stdout.write("start refresh router redis config")
 

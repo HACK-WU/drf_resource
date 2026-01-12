@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ specific language governing permissions and limitations under the License.
 import json
 import logging
 from collections import OrderedDict
-from typing import List
 
 from django.core.cache import cache
 from django.db.models import Q
@@ -412,7 +410,7 @@ class RefreshMetricForKihan(Resource):
         # 记录超时配置
         cache.set(self.RATE_LIMIT_KEY, 1, self.RATE_LIMIT_TIMEOUT)
 
-    def _check_metric_count(self, metric_list: List):
+    def _check_metric_count(self, metric_list: list):
         # 当指标超过 `1000`, 不允许写入
         if len(metric_list) < self.MAX_METRIC_COUNT:
             return

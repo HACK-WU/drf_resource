@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ import json
 import time
 from collections import namedtuple
 
-import mock
+from unittest import mock
 import pytest
 from django.conf import settings
 
@@ -60,7 +59,7 @@ def clear_index():
 
 class FakeKafkaConsumer(mock.MagicMock):
     def __init__(self, *args, **kwargs):
-        super(FakeKafkaConsumer, self).__init__()
+        super().__init__()
         self.partitions = set()
         self.assign_call_count = 0
         self.assignment_call_count = 0
@@ -74,7 +73,7 @@ class FakeKafkaConsumer(mock.MagicMock):
         self.partitions = set(partitions)
 
 
-class TestAlertPollerHandler(object):
+class TestAlertPollerHandler:
     def test_leader(self):
         service = mock.Mock()
         p = AlertHandler(service)

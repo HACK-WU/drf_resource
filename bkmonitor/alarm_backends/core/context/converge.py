@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import collections
 import logging
-from typing import List
 
 from django.utils.functional import cached_property
 
@@ -104,8 +102,8 @@ class Converge(BaseContextObject):
     @cached_property
     def alert_info(self):
         if self.strategy_id:
-            return "{}_{}_{}_{}".format(self.strategy_id, self.alert_level, self.signal, self.dimensions)
-        return "{}_{}_{}_{}".format(self.alert_name, self.alert_level, self.signal, self.dimensions)
+            return f"{self.strategy_id}_{self.alert_level}_{self.signal}_{self.dimensions}"
+        return f"{self.alert_name}_{self.alert_level}_{self.signal}_{self.dimensions}"
 
     @cached_property
     def signal(self):
@@ -121,7 +119,7 @@ class Converge(BaseContextObject):
         """
         if self.parent.notice_channel not in NoticeChannel.DEFAULT_CHANNELS:
             # 如果不在默认渠道内的话，需要拼接channel
-            return "{}|{}".format(self.parent.notice_channel, self.parent.notice_way)
+            return f"{self.parent.notice_channel}|{self.parent.notice_way}"
         return self.parent.notice_way
 
     @cached_property
@@ -155,7 +153,7 @@ class Converge(BaseContextObject):
         通知信息组合
         :return:
         """
-        return "{}_{}_{}".format(self.alert_info, self.notice_way, self.notice_receiver)
+        return f"{self.alert_info}_{self.notice_way}_{self.notice_receiver}"
 
     @cached_property
     def action_info(self):
@@ -163,7 +161,7 @@ class Converge(BaseContextObject):
 
         :return:
         """
-        return "{}_{}_{}".format(self.strategy_id, self.signal, self.action_id)
+        return f"{self.strategy_id}_{self.signal}_{self.action_id}"
 
     @cached_property
     def process(self):
@@ -207,7 +205,7 @@ class Converge(BaseContextObject):
     def action_status(self):
         return self.parent.action.status
 
-    def get_dict(self, fields: List[str]):
+    def get_dict(self, fields: list[str]):
         """根据需要转成"""
         ctx_dict = {}
         for field in fields:
@@ -216,6 +214,6 @@ class Converge(BaseContextObject):
             except BaseException as error:
                 ctx_dict[field] = None
                 logger.debug(
-                    "action({}) create converge context field({}) error, {}".format(self.parent.action.id, field, error)
+                    f"action({self.parent.action.id}) create converge context field({field}) error, {error}"
                 )
         return ctx_dict

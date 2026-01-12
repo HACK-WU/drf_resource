@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -27,7 +26,7 @@ class HashRing(ConsulDispatchCommand):
 
     def __init__(self, command):
         self.__COMMAND_NAME__ = command
-        super(HashRing, self).__init__()
+        super().__init__()
 
     @classmethod
     def is_leader(cls):
@@ -55,7 +54,7 @@ class HashRing(ConsulDispatchCommand):
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument("--host")
         parser.add_argument("--biz_id", type=int)
         parser.add_argument("--type")
@@ -78,6 +77,6 @@ class Command(BaseCommand):
                 continue
             target_list = [i for i in targets if not biz_id or i == biz_id]
             if target_list:
-                print("host: %s" % target_host)
+                print(f"host: {target_host}")
                 for target in target_list:
-                    print("- %s" % target)
+                    print(f"- {target}")

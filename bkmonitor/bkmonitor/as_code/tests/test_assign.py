@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -31,7 +30,7 @@ def setup():
 
 
 def test_assign_parse():
-    with open(f"{DATA_PATH}assign/normal_assign.yaml", "r") as f:
+    with open(f"{DATA_PATH}assign/normal_assign.yaml") as f:
         code_config = yaml.safe_load(f.read())
     notice_group_ids = {"日常运维": 1}
     action_ids = {"test": 23}
@@ -54,7 +53,7 @@ def test_assign_parse():
 
 
 def test_convert_assign(setup):
-    with open(f"{DATA_PATH}assign/normal_assign.yaml", "r") as f:
+    with open(f"{DATA_PATH}assign/normal_assign.yaml") as f:
         code_config = yaml.safe_load(f.read())
     notice_group_ids = {"日常运维": 1, "开发": 2}
     action_ids = {"test": 23}
@@ -79,7 +78,7 @@ def test_convert_assign(setup):
 
 
 def test_convert_assign_error(setup):
-    with open(f"{DATA_PATH}assign/normal_assign.yaml", "r") as f:
+    with open(f"{DATA_PATH}assign/normal_assign.yaml") as f:
         code_config = yaml.safe_load(f.read())
     notice_group_ids = {"日常运维": 1, "开发": 2}
     action_ids = {"test111": 23}

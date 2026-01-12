@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 
 import logging
-from typing import Dict, Optional
 
 from django.conf import settings
 from django.db import models
@@ -162,7 +160,7 @@ class BCSClusterInfo(models.Model):
         is_skip_ssl_verify: bool = True,
         transfer_cluster_id: str = None,
         bk_env: str = settings.BCS_CLUSTER_BK_ENV_LABEL,
-        is_fed_cluster: Optional[bool] = False,
+        is_fed_cluster: bool | None = False,
     ) -> "BCSClusterInfo":
         """
         注册一个新的bcs集群信息
@@ -277,7 +275,7 @@ class BCSClusterInfo(models.Model):
 
         return cluster
 
-    def compose_dataid_resource_name(self, name: str, is_fed_cluster: Optional[bool] = False) -> str:
+    def compose_dataid_resource_name(self, name: str, is_fed_cluster: bool | None = False) -> str:
         """组装下发的配置资源的名称"""
         if self.bk_env_label:
             name = f"{self.bk_env_label}-{name}"
@@ -286,13 +284,13 @@ class BCSClusterInfo(models.Model):
             name = f"{name}-{self.cluster_id.lower()}-fed"
         return name
 
-    def compose_dataid_resource_label(self, labels: Dict) -> Dict:
+    def compose_dataid_resource_label(self, labels: dict) -> dict:
         """组装下发的配置资源的标签"""
         if self.bk_env_label:
             labels["bk_env"] = self.bk_env_label
         return labels
 
-    def refresh_common_resource(self, is_fed_cluster: Optional[bool] = False):
+    def refresh_common_resource(self, is_fed_cluster: bool | None = False):
         """
         刷新内置公共dataid资源信息，追加部署的资源，更新未同步的资源
         :param cluster_id: 集群ID
@@ -387,7 +385,7 @@ class BCSClusterInfo(models.Model):
         }
         return result
 
-    def init_resource(self, is_fed_cluster: Optional[bool] = False) -> bool:
+    def init_resource(self, is_fed_cluster: bool | None = False) -> bool:
         """初始化resource信息并绑定data_id"""
         # 基于各dataid，生成配置并写入bcs集群
         for usage, register_info in self.DATASOURCE_REGISTER_INFO.items():

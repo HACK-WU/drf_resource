@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -14,7 +13,6 @@ import json
 import logging
 import uuid
 from itertools import chain
-from typing import Dict, List
 
 import yaml
 from confluent_kafka import Consumer as ConfluentConsumer
@@ -238,7 +236,7 @@ class ListResultTableResource(Resource):
         # 判断是否有结果表类型的过滤
         datasource_type = request_data["datasource_type"]
         if datasource_type is not None:
-            result_table_queryset = result_table_queryset.filter(table_id__startswith="%s." % datasource_type)
+            result_table_queryset = result_table_queryset.filter(table_id__startswith=f"{datasource_type}.")
 
         # 判断是否有全业务和单业务的过滤需求
         bk_biz_id = []
@@ -910,7 +908,7 @@ class QueryEventGroupResource(Resource):
         # 组装数据
         return self._compose_in_event(query_set)
 
-    def _compose_in_event(self, event_query_set: QuerySet) -> List:
+    def _compose_in_event(self, event_query_set: QuerySet) -> list:
         """组装数据, 添加内置事件"""
         built_events = get_built_in_k8s_events()
         built_event_map = {event["event_name"]: event for event in built_events}
@@ -1329,7 +1327,7 @@ class QueryBCSMetricsResource(Resource):
 
         return results
 
-    def _refine_built_in_metric_dimensions(self, metric_datas: Dict, k8s_metrics: List):
+    def _refine_built_in_metric_dimensions(self, metric_datas: dict, k8s_metrics: list):
         """获取 k8s 内置指标和维度"""
         for metric in k8s_metrics:
             field_name = metric["field_name"]
@@ -1348,12 +1346,12 @@ class QueryBCSMetricsResource(Resource):
 
     def _refine_metric_dimensions_from_redis(
         self,
-        bk_biz_ids: List,
-        cluster_ids: List,
+        bk_biz_ids: list,
+        cluster_ids: list,
         dimension_name: str,
         dimension_value: str,
-        metric_datas: Dict,
-        built_in_metric_field_list: List,
+        metric_datas: dict,
+        built_in_metric_field_list: list,
     ):
         """通过 redis 中获取指标和维度"""
         # 当参数 指标名称和指标值 的内容全部存在时，查询内置和自定义指标
@@ -1508,7 +1506,7 @@ class ModifyBCSResourceInfoResource(Resource):
         }
         resource_cls = type_to_class.get(resource_type)
         if resource_cls is None:
-            raise ValueError("unknown resource type:{}".format(resource_type))
+            raise ValueError(f"unknown resource type:{resource_type}")
 
         target_resource = resource_cls.objects.get(
             cluster_id=validated_request_data["cluster_id"], name=validated_request_data["resource_name"]
@@ -1546,7 +1544,7 @@ class ListBCSResourceInfoResource(Resource):
 
             resource_cls = type_to_class.get(resource_type)
             if resource_cls is None:
-                raise ValueError("unknown resource type:{}".format(resource_type))
+                raise ValueError(f"unknown resource type:{resource_type}")
 
             if len(cluster_list) != 0:
                 resources += list(resource_cls.objects.filter(cluster_id__in=cluster_list))

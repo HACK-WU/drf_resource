@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 
 from collections import namedtuple
 
-import mock
+from unittest import mock
 import pytest
 
 from alarm_backends.service.detect.strategy.os_restart import OsRestart
@@ -27,7 +26,7 @@ datapoint800 = DataPoint(800, 100000000, "%", "item", {"ip": "127.0.0.1"})
 datapoint700 = DataPoint(700, 100000000, "%", "item", {"ip": "127.0.0.1"})
 
 
-class TestOsRestart(object):
+class TestOsRestart:
     def test_os_restart_1(self):
         with mock.patch(
             "alarm_backends.service.detect.strategy." "os_restart.OsRestart.history_point_fetcher",

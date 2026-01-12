@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from constants.cmdb import TargetNodeType
 from drf_resource import api
 

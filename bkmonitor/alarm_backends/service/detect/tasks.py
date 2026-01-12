@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,11 +28,11 @@ def run_detect(strategy_id):
         processor = DetectProcess(strategy_id)
         processor.process()
     except LockError:
-        logger.info("Failed to acquire lock. on strategy({})".format(strategy_id))
+        logger.info(f"Failed to acquire lock. on strategy({strategy_id})")
         client.delay("lpush", data_signal_key, strategy_id, delay=20)
     except Exception as e:
         exc = e
-        logger.exception("Process strategy({strategy_id}) exception, " "{msg}".format(strategy_id=strategy_id, msg=e))
+        logger.exception(f"Process strategy({strategy_id}) exception, " f"{e}")
     else:
         # 当前策略待检测数据过多
         if processor.is_busy:

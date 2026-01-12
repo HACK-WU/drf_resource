@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +23,7 @@ def clean_timestamp(apps, schema_editor):
     result_table_field = apps.get_model("metadata", "ResultTableField")
 
     field_list = result_table_field.objects.filter(field_type="timestamp").exclude(field_name="time")
-    logger.info("total all field_list->[%s]" % field_list.count())
+    logger.info(f"total all field_list->[{field_list.count()}]")
 
     field_list.delete()
 

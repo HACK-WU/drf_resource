@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 import logging
 
@@ -175,15 +174,15 @@ class ReplaceConfig(models.Model):
         for info in delete_list:
             data = info.__dict__
             info.delete()
-            print("delete replace config:{}".format(data))
-            logger.info("delete replace config:{}".format(data))
+            print(f"delete replace config:{data}")
+            logger.info(f"delete replace config:{data}")
 
         # 新增或更新主机信息
         for item in items:
             obj, created = cls.objects.update_or_create(rule_name=item["rule_name"], defaults=item)
             if created:
-                print("created replace config:{}".format(item))
-                logger.info("create new replace config:{}".format(str(item)))
+                print(f"created replace config:{item}")
+                logger.info(f"create new replace config:{str(item)}")
             else:
-                print("updated replace config:{}".format(item))
-                logger.info("update replace config to:{}".format(str(item)))
+                print(f"updated replace config:{item}")
+                logger.info(f"update replace config to:{str(item)}")

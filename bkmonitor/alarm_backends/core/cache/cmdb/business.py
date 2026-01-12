@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -21,7 +20,7 @@ class BusinessManager(CMDBCacheManager):
     """
 
     type = "biz"
-    CACHE_KEY = "{prefix}.cmdb.business".format(prefix=CMDBCacheManager.CACHE_KEY_PREFIX)
+    CACHE_KEY = f"{CMDBCacheManager.CACHE_KEY_PREFIX}.cmdb.business"
     ObjectClass = Business
 
     @classmethod
@@ -41,7 +40,7 @@ class BusinessManager(CMDBCacheManager):
         :param bk_biz_id: 获取业务ID
         :rtype: Business
         """
-        return super(BusinessManager, cls).get(bk_biz_id)
+        return super().get(bk_biz_id)
 
     @classmethod
     def refresh(cls):
@@ -69,9 +68,7 @@ class BusinessManager(CMDBCacheManager):
         pipeline.execute()
 
         cls.logger.info(
-            "refresh CMDB Business data finished, amount: updated: {}, removed: {}".format(
-                len(new_keys), len(deleted_keys)
-            )
+            f"refresh CMDB Business data finished, amount: updated: {len(new_keys)}, removed: {len(deleted_keys)}"
         )
 
 

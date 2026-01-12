@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -19,7 +18,7 @@ from .data import ALL_LABEL_MSG, HANDEL_LABEL_MSG
 
 
 @pytest.mark.usefixtures("mock_cache")
-class TestGetScenarioListResource(object):
+class TestGetScenarioListResource:
     def test_get_all_label(self, mocker):
         request_data = {"label_type": LabelType.ResultTableLabel, "include_admin_only": True}
 

@@ -11,7 +11,6 @@ import json
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 from django.utils.translation import gettext_lazy as _
 from opentelemetry import trace
@@ -50,18 +49,18 @@ class APIParams:
     biz_id: str
     app: str
 
-    service_name: Optional[str] = None
+    service_name: str | None = None
     start: int = None
     end: int = None
-    type: Optional[str] = None
-    label_key: Optional[str] = None
-    label_filter: Optional[dict] = None
+    type: str | None = None
+    label_key: str | None = None
+    label_filter: dict | None = None
     limit: dict = None
     order: dict = None
     # dimension_fields: 仅在 select_count / query_sample_by_json 接口生效
     dimension_fields: str = None
     # general_filters:  仅在 select_count / query_sample_by_json 接口生效
-    general_filters: Optional[dict] = None
+    general_filters: dict | None = None
     # metric_fields:  仅在 select_count / query_sample_by_json 接口生效
     metric_fields: str = None
 
@@ -111,7 +110,7 @@ class Query:
         }
         return r
 
-    def execute(self, retry_if_empty_handler=None) -> Optional[dict]:
+    def execute(self, retry_if_empty_handler=None) -> dict | None:
         res = self._execute()
 
         if (not res or not res.get("list")) and retry_if_empty_handler:

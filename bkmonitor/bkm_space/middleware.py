@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 from django.conf import settings
@@ -14,7 +13,7 @@ class ParamInjectMiddleware(MiddlewareMixin):
     """
 
     def __init__(self, *args, **kwargs):
-        super(ParamInjectMiddleware, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.inject_request_enabled = getattr(settings, "BKM_SPACE_INJECT_REQUEST_ENABLED", True)
         self.inject_response_enabled = getattr(settings, "BKM_SPACE_INJECT_RESPONSE_ENABLED", False)
 

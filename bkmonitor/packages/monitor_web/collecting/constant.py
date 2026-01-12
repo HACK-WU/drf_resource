@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,7 +14,7 @@ from django.utils.translation import gettext_lazy as _lazy
 from monitor_web.models.plugin import CollectorPluginMeta
 
 
-class Status(object):
+class Status:
     """
     采集配置状态
     """
@@ -29,7 +28,7 @@ class Status(object):
     PREPARING = "PREPARING"
 
 
-class CollectStatus(object):
+class CollectStatus:
     SUCCESS = "SUCCESS"
     RUNNING = "RUNNING"
     FAILED = "FAILED"
@@ -38,7 +37,7 @@ class CollectStatus(object):
     NODATA = "NODATA"
 
 
-class OperationType(object):
+class OperationType:
     ROLLBACK = "ROLLBACK"
     UPGRADE = "UPGRADE"
     CREATE = "CREATE"
@@ -48,7 +47,7 @@ class OperationType(object):
     ADD_DEL = "ADD_DEL"
 
 
-class OperationResult(object):
+class OperationResult:
     SUCCESS = "SUCCESS"
     WARNING = "WARNING"
     FAILED = "FAILED"
@@ -56,7 +55,7 @@ class OperationResult(object):
     PREPARING = "PREPARING"
 
 
-class TaskStatus(object):
+class TaskStatus:
     PENDING = "PENDING"
     FAILED = "FAILED"
     WARNING = "WARNING"

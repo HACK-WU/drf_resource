@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +23,7 @@ from query_api.drivers.client_pool import BaseClientFactory, ClientPoolManage
 
 class InfluxDBClientFactory(BaseClientFactory):
     def client_key(self, host="127.0.0.1", port=8086, **context):
-        return "{}:{}".format(host, port)
+        return f"{host}:{port}"
 
     def new_client(self, host="127.0.0.1", port=8086, retries=-1, **context):
         key_words = [

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +7,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from typing import Dict, List
 
 from django.db.models import Q
 from django.http import Http404
@@ -44,7 +42,7 @@ from monitor_web.data_explorer.serializers import (
 from monitor_web.models import FavoriteGroup, QueryHistory
 
 
-def order_records_by_config(records: List[Dict], order: List) -> List[Dict]:
+def order_records_by_config(records: list[dict], order: list) -> list[dict]:
     """
     按排序配置对数据进行排序
     """
@@ -60,7 +58,7 @@ def order_records_by_config(records: List[Dict], order: List) -> List[Dict]:
     )
 
 
-def order_records_by_type(records: List[Dict], order_type: str) -> List[Dict]:
+def order_records_by_type(records: list[dict], order_type: str) -> list[dict]:
     """
     根据排序类型进行排序
     """

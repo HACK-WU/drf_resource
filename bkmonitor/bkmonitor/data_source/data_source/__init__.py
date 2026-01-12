@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -91,14 +90,14 @@ def q_to_dict(q: tree.Node):
     if not q.children:
         return {}
 
-    sub_dicts: List[Dict[str, Any]] = []
+    sub_dicts: list[dict[str, Any]] = []
     for idx, child in enumerate(q.children):
         if isinstance(child, tree.Node):
             sub_dicts.append(q_to_dict(child))
         else:
             sub_dicts.append({child[0]: child[1]})
 
-    filter_dict: Dict[str, Any] = {}
+    filter_dict: dict[str, Any] = {}
     for idx, sub_dict in enumerate(sub_dicts):
         if q.connector == Q.AND:
             for k, v in sub_dict.items():
@@ -124,10 +123,10 @@ def q_to_dict(q: tree.Node):
             filter_dict.setdefault(_inner_or, []).append(sub_dict)
 
     cursor = 0
-    k_count_map: Dict[str, int] = defaultdict(int)
+    k_count_map: dict[str, int] = defaultdict(int)
     while True:
         and_k: str = f"{_inner_and}_{cursor}"
-        sub: Optional[Dict[str, Any]] = filter_dict.get(and_k)
+        sub: dict[str, Any] | None = filter_dict.get(and_k)
         if sub is None:
             break
 
@@ -136,7 +135,7 @@ def q_to_dict(q: tree.Node):
             filter_dict[f"{_inner_or}_{cursor}"] = filter_dict.pop(and_k)[_inner_or]
 
         if isinstance(sub, dict):
-            keys: List[str] = list(sub.keys())
+            keys: list[str] = list(sub.keys())
             for k in keys:
                 if k.startswith(_inner_or) or k.startswith(_inner_and):
                     continue
@@ -210,7 +209,7 @@ def conditions_to_q(conditions):
         field_lookup = "{}__{}".format(cond["key"], cond["method"])
         value = cond["value"]
 
-        if not isinstance(value, (list, tuple)):
+        if not isinstance(value, list | tuple):
             value = [value]
 
         condition = cond.get("condition") or "and"
@@ -222,7 +221,7 @@ def conditions_to_q(conditions):
                 ret = (ret | q) if ret else q
             where_cond = [Q(**{field_lookup: value})]
         else:
-            raise Exception("Unsupported connector(%s)" % condition)
+            raise Exception(f"Unsupported connector({condition})")
 
     if where_cond:
         q = Q(reduce(lambda x, y: x & y, where_cond))
@@ -231,7 +230,7 @@ def conditions_to_q(conditions):
     return ret
 
 
-def filter_dict_to_conditions(filter_dict: Dict, conditions: List[Dict]):
+def filter_dict_to_conditions(filter_dict: dict, conditions: list[dict]):
     return _filter_dict_to_conditions(filter_dict, conditions)
 
 
@@ -297,13 +296,13 @@ def _operator_is_exist(key):
     return operator, operator_is_false
 
 
-def _filter_dict_to_conditions(filter_dict: Dict, conditions: List[Dict]) -> List[Dict]:
+def _filter_dict_to_conditions(filter_dict: dict, conditions: list[dict]) -> list[dict]:
     """
     将filter_dict解析为condition，filter_dict最多只有两层嵌套
     """
 
     def parse_key(_k: str):
-        _key: List[str] = _k.split("__")
+        _key: list[str] = _k.split("__")
         if len(_key) > 1 and _key[-2]:
             return "__".join(_key[:-1]), _key[-1]
         else:
@@ -312,26 +311,26 @@ def _filter_dict_to_conditions(filter_dict: Dict, conditions: List[Dict]) -> Lis
     filter_dict = copy.deepcopy(filter_dict)
     conditions = copy.deepcopy(conditions)
 
-    filter_conditions_list: List[List[Dict]] = []
-    extend_conditions_list: List[List[List[Dict]]] = []
+    filter_conditions_list: list[list[dict]] = []
+    extend_conditions_list: list[list[list[dict]]] = []
     filter_dict_list = [filter_dict]
     while filter_dict_list:
         filter_dict = filter_dict_list.pop()
         filter_conditions = []
         for key, value in filter_dict.items():
-            if isinstance(value, Dict):
+            if isinstance(value, dict):
                 for k, v in value.items():
                     k, method = parse_key(k)
                     v = v if isinstance(v, list) else [v]
                     v = [str(value) for value in v]
                     filter_conditions.append({"condition": "and", "key": k, "value": v, "method": method})
-            elif isinstance(value, List):
+            elif isinstance(value, list):
                 if not value:
                     continue
-                if isinstance(value[0], Dict):
+                if isinstance(value[0], dict):
                     _conditions_list = []
                     for record in value:
-                        _conditions: List[Dict] = []
+                        _conditions: list[dict] = []
                         for k, v in record.items():
                             k, method = parse_key(k)
                             v = v if isinstance(v, list) else [v]
@@ -351,7 +350,7 @@ def _filter_dict_to_conditions(filter_dict: Dict, conditions: List[Dict]) -> Lis
             continue
         filter_conditions_list.append(filter_conditions)
 
-    conditions_list: List[List[Dict]] = []
+    conditions_list: list[list[dict]] = []
     _conditions = []
     for condition in conditions:
         if condition.get("condition") == "or":
@@ -392,41 +391,41 @@ class DataSource(metaclass=ABCMeta):
     data_source_label = ""
     data_type_label = ""
 
-    metrics: List[Dict]
-    group_by: List[str]
+    metrics: list[dict]
+    group_by: list[str]
     interval: int
     time_field: str
-    where: List[Dict]
-    _advance_where: List[Dict]
-    functions: List[Dict]
+    where: list[dict]
+    _advance_where: list[dict]
+    functions: list[dict]
 
     DEFAULT_TIME_FIELD = "time"
     ADVANCE_CONDITION_METHOD = AdvanceConditionMethod
 
-    def __init__(self, *args, name="", functions: List[Dict] = None, **kwargs):
+    def __init__(self, *args, name="", functions: list[dict] = None, **kwargs):
         self.name = name
         self.functions = functions or []
         self.functions, self.time_shift, self.time_offset = self._parse_time_shift_function(functions)
         self._advance_where = []
 
     @classmethod
-    def query_data(cls, *args, **kwargs) -> List:
+    def query_data(cls, *args, **kwargs) -> list:
         return []
 
     @classmethod
-    def query_dimensions(cls, *args, **kwargs) -> List:
+    def query_dimensions(cls, *args, **kwargs) -> list:
         return []
 
     @classmethod
-    def query_log(cls, *args, **kwargs) -> Tuple[List, int]:
+    def query_log(cls, *args, **kwargs) -> tuple[list, int]:
         return [], 0
 
     @classmethod
-    def init_by_query_config(cls, query_config: Dict, *args, **kwargs) -> "DataSource":
+    def init_by_query_config(cls, query_config: dict, *args, **kwargs) -> "DataSource":
         return cls()
 
     @property
-    def id(self) -> Tuple[str, str]:
+    def id(self) -> tuple[str, str]:
         return self.data_source_label, self.data_type_label
 
     @classmethod
@@ -435,7 +434,7 @@ class DataSource(metaclass=ABCMeta):
             return
         return f"time({interval}s)"
 
-    def _parse_time_shift_function(self, functions: List) -> Tuple[List, str, int]:
+    def _parse_time_shift_function(self, functions: list) -> tuple[list, str, int]:
         time_shift = None
         functions = functions or []
         for f in functions:
@@ -454,20 +453,20 @@ class DataSource(metaclass=ABCMeta):
     def _get_queryset(
         cls,
         *,
-        metrics: List[Dict] = None,
-        select: List[str] = None,
+        metrics: list[dict] = None,
+        select: list[str] = None,
         table: str = None,
-        agg_condition: List = None,
-        where: Dict = None,
-        group_by: List[str] = None,
-        distinct: Optional[str] = None,
+        agg_condition: list = None,
+        where: dict = None,
+        group_by: list[str] = None,
+        distinct: str | None = None,
         index_set_id: int = None,
         query_string: str = "",
-        nested_paths: List[str] = None,
+        nested_paths: list[str] = None,
         limit: int = None,
         offset: int = None,
         slimit: int = None,
-        order_by: List[str] = None,
+        order_by: list[str] = None,
         time_field: str = None,
         interval: int = None,
         start_time: int = None,
@@ -533,7 +532,7 @@ class DataSource(metaclass=ABCMeta):
             .time_field(time_field)
         )
 
-    def _format_time_series_records(self, records: List[Dict]):
+    def _format_time_series_records(self, records: list[dict]):
         """
         数据标准化
         """
@@ -554,7 +553,7 @@ class DataSource(metaclass=ABCMeta):
 
         return records
 
-    def _filter_by_advance_method(self, records: List):
+    def _filter_by_advance_method(self, records: list):
         """
         根据高级条件过滤数据
         """
@@ -601,7 +600,7 @@ class DataSource(metaclass=ABCMeta):
         return False
 
 
-class InfluxdbDimensionFetcher(object):
+class InfluxdbDimensionFetcher:
     def query_dimensions(
         self, dimension_field, limit=settings.SQL_MAX_LIMIT, start_time=None, end_time=None, *args, **kwargs
     ):
@@ -640,7 +639,7 @@ class PrometheusTimeSeriesDataSource(DataSource):
     time_field = "time"
 
     @classmethod
-    def init_by_query_config(cls, query_config: Dict, *args, bk_biz_id=None, **kwargs):
+    def init_by_query_config(cls, query_config: dict, *args, bk_biz_id=None, **kwargs):
         if bk_biz_id is None:
             raise ValueError("bk_biz_id can not be empty")
 
@@ -656,7 +655,7 @@ class PrometheusTimeSeriesDataSource(DataSource):
         self.promql = promql
         self.interval = interval
         self.filter_dict = filter_dict or {}
-        super(PrometheusTimeSeriesDataSource, self).__init__()
+        super().__init__()
 
     @staticmethod
     def filter_dict_to_promql_match(filter_dict: dict) -> str:
@@ -682,7 +681,7 @@ class PrometheusTimeSeriesDataSource(DataSource):
             match = f"{{{','.join(match_items)}}}"
         return match
 
-    def query_data(self, start_time: int = None, end_time: int = None, *args, **kwargs) -> List:
+    def query_data(self, start_time: int = None, end_time: int = None, *args, **kwargs) -> list:
         from bkmonitor.data_source.unify_query.query import UnifyQuery
 
         start_time = time_interval_align(start_time // 1000, self.interval)
@@ -717,7 +716,7 @@ class TimeSeriesDataSource(DataSource):
         raise NotImplementedError("Not implemented yet")
 
     @classmethod
-    def init_by_query_config(cls, query_config: Dict, *args, bk_biz_id=0, name="", **kwargs):
+    def init_by_query_config(cls, query_config: dict, *args, bk_biz_id=0, name="", **kwargs):
         """
         根据查询配置实例化
         """
@@ -771,7 +770,7 @@ class TimeSeriesDataSource(DataSource):
             data_label=query_config.get("data_label", ""),
         )
 
-    def _parse_function_params(self) -> Tuple[Dict, List[Dict]]:
+    def _parse_function_params(self) -> tuple[dict, list[dict]]:
         """
         函数参数转换为查询配置
         """
@@ -858,7 +857,7 @@ class TimeSeriesDataSource(DataSource):
 
         return time_aggregation, functions
 
-    def to_unify_query_config(self) -> List[Dict]:
+    def to_unify_query_config(self) -> list[dict]:
         """
         生成统一查询配置
         """
@@ -901,7 +900,7 @@ class TimeSeriesDataSource(DataSource):
             ):
                 table, _, _ = table.partition("_cmdb_level")
 
-            query: Dict[str, Any] = {
+            query: dict[str, Any] = {
                 "table_id": self.data_label or table,
                 "time_aggregation": {},
                 "field_name": metric["field"],
@@ -972,19 +971,19 @@ class TimeSeriesDataSource(DataSource):
         self,
         *args,
         table,
-        metrics: List = None,
+        metrics: list = None,
         interval: int = 0,
-        where: List = None,
-        filter_dict: Dict = None,
-        group_by: List[str] = None,
-        order_by: List[str] = None,
+        where: list = None,
+        filter_dict: dict = None,
+        group_by: list[str] = None,
+        order_by: list[str] = None,
         time_field: str = None,
         index_set_id: int = None,
         query_string: str = "",
         data_label: str = "",
         **kwargs,
     ):
-        super(TimeSeriesDataSource, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.data_label = data_label
         self.table = table
         self.metrics = metrics or []
@@ -1005,11 +1004,11 @@ class TimeSeriesDataSource(DataSource):
         self,
         start_time: int = None,
         end_time: int = None,
-        limit: Optional[int] = settings.SQL_MAX_LIMIT,
-        slimit: Optional[int] = None,
+        limit: int | None = settings.SQL_MAX_LIMIT,
+        slimit: int | None = None,
         *args,
         **kwargs,
-    ) -> List:
+    ) -> list:
         filter_dict = self.filter_dict.copy()
         if self._is_system_disk():
             filter_dict[f"{settings.FILE_SYSTEM_TYPE_FIELD_NAME}__neq"] = settings.FILE_SYSTEM_TYPE_IGNORE
@@ -1048,11 +1047,11 @@ class TimeSeriesDataSource(DataSource):
         dimension_field: str,
         start_time: int = None,
         end_time: int = None,
-        limit: Optional[int] = None,
-        slimit: Optional[int] = None,
+        limit: int | None = None,
+        slimit: int | None = None,
         *args,
         **kwargs,
-    ) -> List:
+    ) -> list:
         if isinstance(dimension_field, list):
             dimension_field = dimension_field[0]
 
@@ -1097,7 +1096,7 @@ class BkMonitorTimeSeriesDataSource(TimeSeriesDataSource):
     ADVANCE_CONDITION_METHOD = []
 
     def __init__(self, *args, **kwargs):
-        super(BkMonitorTimeSeriesDataSource, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if settings.IS_ACCESS_BK_DATA and self.is_cmdb_level_query(
             where=self.where, filter_dict=self.filter_dict, group_by=self.group_by
@@ -1106,7 +1105,7 @@ class BkMonitorTimeSeriesDataSource(TimeSeriesDataSource):
             self.order_by = [f"{self.time_field} desc"]
 
     @classmethod
-    def is_cmdb_level_query(cls, where: List = None, filter_dict: Dict = None, group_by: List[str] = None):
+    def is_cmdb_level_query(cls, where: list = None, filter_dict: dict = None, group_by: list[str] = None):
         where = where or []
         filter_dict = filter_dict or {}
         group_by = group_by or []
@@ -1136,7 +1135,7 @@ class BkMonitorTimeSeriesDataSource(TimeSeriesDataSource):
 
     @classmethod
     def _get_queryset(
-        cls, *, table: str = None, agg_condition: List = None, where: Dict = None, group_by: List[str] = None, **kwargs
+        cls, *, table: str = None, agg_condition: list = None, where: dict = None, group_by: list[str] = None, **kwargs
     ):
         if settings.IS_ACCESS_BK_DATA and cls.is_cmdb_level_query(
             where=agg_condition, filter_dict=where, group_by=group_by
@@ -1147,7 +1146,7 @@ class BkMonitorTimeSeriesDataSource(TimeSeriesDataSource):
                 table=replace_table_id, agg_condition=agg_condition, where=where, group_by=group_by, **kwargs
             )
 
-        return super(BkMonitorTimeSeriesDataSource, cls)._get_queryset(
+        return super()._get_queryset(
             table=table, agg_condition=agg_condition, where=where, group_by=group_by, **kwargs
         )
 
@@ -1213,7 +1212,7 @@ class BkdataTimeSeriesDataSource(TimeSeriesDataSource):
             # 当计算平台查询走unify-query的时候，不额外处理高级过滤方法
             # 影响函数： _update_params_by_advance_method
             self.ADVANCE_CONDITION_METHOD = []
-        super(BkdataTimeSeriesDataSource, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # 对用户的请求进行鉴权
         if bk_biz_id:
@@ -1230,7 +1229,7 @@ class BkdataTimeSeriesDataSource(TimeSeriesDataSource):
                 logger.error(f"用户请求bkdata数据源无权限(result_table_id:{self.table}, 业务id: {bk_biz_id})")
                 raise PermissionDeniedError(action_name=bk_biz_id)
 
-    def to_unify_query_config(self) -> List[Dict]:
+    def to_unify_query_config(self) -> list[dict]:
         # unify 定义 bkdata 查询配置制定data_source字段
         query_list = super().to_unify_query_config()
         for query in query_list:
@@ -1238,7 +1237,7 @@ class BkdataTimeSeriesDataSource(TimeSeriesDataSource):
         return query_list
 
     @classmethod
-    def _get_queryset(cls, *, metrics: List[Dict] = None, **kwargs):
+    def _get_queryset(cls, *, metrics: list[dict] = None, **kwargs):
         # 计算平台查询的指标使用反引号，避免与关键字冲突
         metrics = copy.deepcopy(metrics)
         for metric in metrics:
@@ -1248,7 +1247,7 @@ class BkdataTimeSeriesDataSource(TimeSeriesDataSource):
             if metric.get("alias") and not metric["alias"].startswith("`"):
                 metric["alias"] = f"`{metric['alias']}`"
 
-        return super(BkdataTimeSeriesDataSource, cls)._get_queryset(metrics=metrics, **kwargs)
+        return super()._get_queryset(metrics=metrics, **kwargs)
 
     @classmethod
     def _get_time_field(cls, interval):
@@ -1258,12 +1257,12 @@ class BkdataTimeSeriesDataSource(TimeSeriesDataSource):
             raise Exception(_("计算平台聚合周期不能低于一分钟"))
         return f"minute{interval // 60}"
 
-    def _format_time_series_records(self, records: List[Dict]):
+    def _format_time_series_records(self, records: list[dict]):
         """
         数据标准化
         """
         # bkdata 数据源返回字段多了(minuteX)字段, 一并去除
-        records = super(BkdataTimeSeriesDataSource, self)._format_time_series_records(records)
+        records = super()._format_time_series_records(records)
         minute_field = self._get_time_field(self.interval)
         for record in records:
             record.pop(minute_field, None)
@@ -1274,11 +1273,11 @@ class BkdataTimeSeriesDataSource(TimeSeriesDataSource):
         dimension_field: str,
         start_time: int = None,
         end_time: int = None,
-        limit: Optional[int] = None,
-        slimit: Optional[int] = None,
+        limit: int | None = None,
+        slimit: int | None = None,
         *args,
         **kwargs,
-    ) -> List:
+    ) -> list:
         if not isinstance(dimension_field, list):
             dimension_field = [dimension_field]
         dimension_field = [dmf if dmf.startswith("`") else f"`{dmf}`" for dmf in dimension_field]
@@ -1305,7 +1304,7 @@ class CustomTimeSeriesDataSource(TimeSeriesDataSource):
     ADVANCE_CONDITION_METHOD = []
 
     def __init__(self, *args, **kwargs):
-        super(CustomTimeSeriesDataSource, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class LogSearchTimeSeriesDataSource(TimeSeriesDataSource):
@@ -1319,7 +1318,7 @@ class LogSearchTimeSeriesDataSource(TimeSeriesDataSource):
     DEFAULT_TIME_FIELD = "dtEventTimeStamp"
 
     def __init__(self, *args, **kwargs):
-        super(LogSearchTimeSeriesDataSource, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # 条件方法替换
         condition_mapping = {
@@ -1337,12 +1336,12 @@ class LogSearchTimeSeriesDataSource(TimeSeriesDataSource):
         end_time: int = None,
         *args,
         **kwargs,
-    ) -> List:
+    ) -> list:
         # 日志查询中limit仅能限制返回的原始日志数量，因此固定为1
         if "limit" in kwargs:
             kwargs.pop("limit")
 
-        return super(LogSearchTimeSeriesDataSource, self).query_data(start_time, end_time, limit=None, *args, **kwargs)
+        return super().query_data(start_time, end_time, limit=None, *args, **kwargs)
 
     def query_dimensions(
         self,
@@ -1352,7 +1351,7 @@ class LogSearchTimeSeriesDataSource(TimeSeriesDataSource):
         limit: int = None,
         *args,
         **kwargs,
-    ) -> List:
+    ) -> list:
         # 日志查询中limit仅能限制返回的原始日志数量，因此固定为1
         if "limit" in kwargs:
             kwargs.pop("limit")
@@ -1361,7 +1360,7 @@ class LogSearchTimeSeriesDataSource(TimeSeriesDataSource):
             assert len(dimension_field) > 0, _("维度查询参数，维度字段是必须的")
             dimension_field = dimension_field[0]
 
-        return super(LogSearchTimeSeriesDataSource, self).query_dimensions(
+        return super().query_dimensions(
             dimension_field, start_time, end_time, *args, **kwargs
         )[:limit]
 
@@ -1369,11 +1368,11 @@ class LogSearchTimeSeriesDataSource(TimeSeriesDataSource):
         self,
         start_time: int = None,
         end_time: int = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
+        limit: int | None = None,
+        offset: int | None = None,
         *args,
         **kwargs,
-    ) -> Tuple[List, int]:
+    ) -> tuple[list, int]:
         q = self._get_queryset(
             query_string=self.query_string,
             table=self.table,
@@ -1407,7 +1406,7 @@ class LogSearchLogDataSource(LogSearchTimeSeriesDataSource):
     DEFAULT_TIME_FIELD = "dtEventTimeStamp"
 
     def __init__(self, *args, **kwargs):
-        super(LogSearchLogDataSource, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.metrics = [{"field": "_index", "method": "COUNT"}]
 
     @property
@@ -1431,7 +1430,7 @@ class BkMonitorLogDataSource(DataSource):
     EXTRA_AGG_DIMENSIONS = ["dimensions.bk_target_ip", "dimensions.bk_target_cloud_id"]
 
     @classmethod
-    def init_by_query_config(cls, query_config: Dict, name="", *args, **kwargs):
+    def init_by_query_config(cls, query_config: dict, name="", *args, **kwargs):
         # 过滤空维度
         agg_dimension = [dimension for dimension in query_config.get("agg_dimension", []) if dimension]
 
@@ -1462,22 +1461,22 @@ class BkMonitorLogDataSource(DataSource):
         self,
         *,
         table,
-        metrics: List[Dict] = None,
+        metrics: list[dict] = None,
         interval: int = 0,
-        where: List = None,
-        filter_dict: Dict = None,
+        where: list = None,
+        filter_dict: dict = None,
         query_string: str = "",
-        nested_paths: List[str] = None,
-        group_by: List[str] = None,
-        order_by: List[str] = None,
+        nested_paths: list[str] = None,
+        group_by: list[str] = None,
+        order_by: list[str] = None,
         time_field: str = None,
-        topo_nodes: Dict[str, List] = None,
-        select: List[str] = None,
-        distinct: Optional[str] = None,
+        topo_nodes: dict[str, list] = None,
+        select: list[str] = None,
+        distinct: str | None = None,
         use_full_index_names: bool = False,
         **kwargs,
     ):
-        super(BkMonitorLogDataSource, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.metrics = metrics or []
         self.table = table
         self.interval = interval
@@ -1518,7 +1517,7 @@ class BkMonitorLogDataSource(DataSource):
             metrics.append({"field": self.EXTRA_DISTINCT_FIELD, "method": "distinct", "alias": "distinct"})
         return metrics
 
-    def _get_group_by(self, bk_obj_id: str = None) -> List:
+    def _get_group_by(self, bk_obj_id: str = None) -> list:
         """
         聚合维度处理，判断是否需要按节点聚合
         """
@@ -1552,7 +1551,7 @@ class BkMonitorLogDataSource(DataSource):
         where = [c for c in where if c["key"] != "dimensions.bk_collect_config_id"]
         return where
 
-    def _add_dimension_prefix(self, filter_dict: Dict) -> Dict:
+    def _add_dimension_prefix(self, filter_dict: dict) -> dict:
         """
         为filter_dict添加维度前缀
         """
@@ -1564,7 +1563,7 @@ class BkMonitorLogDataSource(DataSource):
 
         for key, value in filter_dict.items():
             # 如果value是数组类型且其中为字典，则需要遍历每一个子value
-            if isinstance(value, (list, Tuple)) and value and isinstance(value[0], Dict):
+            if isinstance(value, list | tuple) and value and isinstance(value[0], dict):
                 new_filter_dict[key] = [self._add_dimension_prefix(v) for v in value]
                 continue
 
@@ -1572,7 +1571,7 @@ class BkMonitorLogDataSource(DataSource):
                 continue
 
             # 如果是字典类型，则处理value中的key
-            if isinstance(value, Dict):
+            if isinstance(value, dict):
                 new_filter_dict[key] = self._add_dimension_prefix(value)
                 continue
 
@@ -1582,7 +1581,7 @@ class BkMonitorLogDataSource(DataSource):
             new_filter_dict[key] = value
         return new_filter_dict
 
-    def _get_filter_dict(self, bk_obj_id: str = None, bk_inst_ids: List = None) -> Dict:
+    def _get_filter_dict(self, bk_obj_id: str = None, bk_inst_ids: list = None) -> dict:
         """
         过滤条件按target过滤及添加dimensions.前缀
         """
@@ -1592,17 +1591,17 @@ class BkMonitorLogDataSource(DataSource):
 
         return self._add_dimension_prefix(filter_dict)
 
-    def _process_distinct_calculate_group_by(self, group_by: List[str]):
+    def _process_distinct_calculate_group_by(self, group_by: list[str]):
         group_by.append(self.time_field)
 
-    def _distinct_calculate(self, group_by: List[str], records: List[Dict]) -> List:
+    def _distinct_calculate(self, group_by: list[str], records: list[dict]) -> list:
         """
         根据聚合方法和bk_module_id的重复数量计算实际的值
         """
 
-        dimension_count: Dict[Tuple, int] = defaultdict(lambda: 0)
-        reserved_fields: Dict[Tuple, Dict[str, Any]] = defaultdict(lambda: {})
-        metric_values: Dict[Tuple, Dict[str, Union[int, float]]] = defaultdict(lambda: defaultdict(lambda: 0))
+        dimension_count: dict[tuple, int] = defaultdict(lambda: 0)
+        reserved_fields: dict[tuple, dict[str, Any]] = defaultdict(lambda: {})
+        metric_values: dict[tuple, dict[str, int | float]] = defaultdict(lambda: defaultdict(lambda: 0))
 
         self._process_distinct_calculate_group_by(group_by)
         for record in records:
@@ -1637,7 +1636,7 @@ class BkMonitorLogDataSource(DataSource):
                 value[alias] /= dimension_count[key]
 
         # 只保留需要的维度和指标
-        deduplicated_records: List[Dict] = []
+        deduplicated_records: list[dict] = []
         for key, value in metric_values.items():
             record = dict(key)
             record.update(value)
@@ -1647,7 +1646,7 @@ class BkMonitorLogDataSource(DataSource):
         return deduplicated_records
 
     @staticmethod
-    def _remove_dimensions_prefix(data: List, bk_obj_id=None):
+    def _remove_dimensions_prefix(data: list, bk_obj_id=None):
         """请求结果中去除dimensions.前缀"""
         result = []
         for record in data:
@@ -1665,7 +1664,7 @@ class BkMonitorLogDataSource(DataSource):
             result.append(new_record)
         return result
 
-    def _add_builtin_dimensions(self, group_by: List[str]):
+    def _add_builtin_dimensions(self, group_by: list[str]):
         for builtin_dimension in self.EXTRA_AGG_DIMENSIONS:
             if builtin_dimension not in group_by:
                 group_by.append(builtin_dimension)
@@ -1677,7 +1676,7 @@ class BkMonitorLogDataSource(DataSource):
         return queryset
 
     @classmethod
-    def handle_limit(cls, limit) -> Optional[int]:
+    def handle_limit(cls, limit) -> int | None:
         return None
 
     def query_data(
@@ -1685,10 +1684,10 @@ class BkMonitorLogDataSource(DataSource):
         start_time: int = None,
         end_time: int = None,
         limit: int = None,
-        search_after_key: Optional[Dict[str, Any]] = None,
+        search_after_key: dict[str, Any] | None = None,
         *args,
         **kwargs,
-    ) -> List:
+    ) -> list:
         metrics = self._get_metrics()
         where = self._get_where()
 
@@ -1741,7 +1740,7 @@ class BkMonitorLogDataSource(DataSource):
         limit: int = None,
         *args,
         **kwargs,
-    ) -> List:
+    ) -> list:
         if isinstance(dimension_field, list):
             dimension_field = dimension_field[0]
 
@@ -1772,7 +1771,7 @@ class BkMonitorLogDataSource(DataSource):
 
     def query_log(
         self, start_time: int = None, end_time: int = None, limit: int = None, offset: int = None, *args, **kwargs
-    ) -> Tuple[List, int]:
+    ) -> tuple[list, int]:
         q = self._get_queryset(
             table=self.table,
             select=self.select,
@@ -1822,7 +1821,7 @@ class BkApmTraceDataSource(BkMonitorLogDataSource):
         self.use_full_index_names = True
 
     @classmethod
-    def init_by_query_config(cls, query_config: Dict, *args, **kwargs):
+    def init_by_query_config(cls, query_config: dict, *args, **kwargs):
         return cls(
             table=query_config["table"],
             time_field=query_config["time_field"],
@@ -1843,13 +1842,13 @@ class BkApmTraceDataSource(BkMonitorLogDataSource):
         return False
 
     @staticmethod
-    def _remove_dimensions_prefix(data: List, bk_obj_id=None) -> List:
+    def _remove_dimensions_prefix(data: list, bk_obj_id=None) -> list:
         return data
 
-    def _add_dimension_prefix(self, filter_dict: Dict) -> Dict:
+    def _add_dimension_prefix(self, filter_dict: dict) -> dict:
         return filter_dict
 
-    def _process_distinct_calculate_group_by(self, group_by: List[str]):
+    def _process_distinct_calculate_group_by(self, group_by: list[str]):
         if self.interval:
             group_by.append(self.time_field)
 
@@ -1867,8 +1866,8 @@ class BkApmTraceDataSource(BkMonitorLogDataSource):
         return limit
 
     def _process_time_range(
-        self, start_time: Optional[int], end_time: Optional[int]
-    ) -> Tuple[Optional[int], Optional[int]]:
+        self, start_time: int | None, end_time: int | None
+    ) -> tuple[int | None, int | None]:
         if self.time_field == self.DEFAULT_TIME_FIELD:
             return start_time, end_time
 
@@ -1883,10 +1882,10 @@ class BkApmTraceDataSource(BkMonitorLogDataSource):
         start_time: int = None,
         end_time: int = None,
         limit: int = None,
-        search_after_key: Optional[Dict[str, Any]] = None,
+        search_after_key: dict[str, Any] | None = None,
         *args,
         **kwargs,
-    ) -> List:
+    ) -> list:
         if limit is not None:
             limit = min(limit, 10000)
 
@@ -1895,7 +1894,7 @@ class BkApmTraceDataSource(BkMonitorLogDataSource):
 
     def query_log(
         self, start_time: int = None, end_time: int = None, limit: int = None, offset: int = None, *args, **kwargs
-    ) -> Tuple[List, int]:
+    ) -> tuple[list, int]:
         start_time, end_time = self._process_time_range(start_time, end_time)
         return super().query_log(start_time, end_time, limit, offset, *args, **kwargs)
 
@@ -1915,7 +1914,7 @@ class CustomEventDataSource(BkMonitorLogDataSource):
     INNER_DIMENSIONS = ["target", "event_name"]
 
     @classmethod
-    def init_by_query_config(cls, query_config: Dict, name="", *args, **kwargs):
+    def init_by_query_config(cls, query_config: dict, name="", *args, **kwargs):
         # 过滤空维度
         agg_dimension = [dimension for dimension in query_config.get("agg_dimension", []) if dimension]
         time_fields = query_config.get("time_field")
@@ -1936,7 +1935,7 @@ class CustomEventDataSource(BkMonitorLogDataSource):
         )
 
     def __init__(self, *args, **kwargs):
-        super(CustomEventDataSource, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # 添加自定义事件过滤条件
         if kwargs.get("custom_event_name"):
@@ -1976,7 +1975,7 @@ class CustomEventDataSource(BkMonitorLogDataSource):
         limit: int = None,
         *args,
         **kwargs,
-    ) -> List:
+    ) -> list:
         where = self._get_where()
         filter_dict = self._get_filter_dict()
         group_by = self._get_group_by()
@@ -2026,7 +2025,7 @@ class BkFtaEventDataSource(DataSource):
     ADVANCE_CONDITION_METHOD = []
 
     @classmethod
-    def init_by_query_config(cls, query_config: Dict, name="", bk_biz_id=None, *args, **kwargs):
+    def init_by_query_config(cls, query_config: dict, name="", bk_biz_id=None, *args, **kwargs):
         return cls(
             name=name,
             metrics=[
@@ -2044,16 +2043,16 @@ class BkFtaEventDataSource(DataSource):
 
     def __init__(
         self,
-        metrics: List[Dict] = None,
+        metrics: list[dict] = None,
         interval: int = 60,
-        where: List = None,
-        group_by: List[str] = None,
-        filter_dict: Dict = None,
+        where: list = None,
+        group_by: list[str] = None,
+        filter_dict: dict = None,
         alert_name: str = None,
         bk_biz_id: int = None,
         **kwargs,
     ):
-        super(BkFtaEventDataSource, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.interval = interval // 60
         self.where = copy.deepcopy(where) or []
         self.group_by = [d for d in group_by if d] if group_by else []
@@ -2099,7 +2098,7 @@ class BkFtaEventDataSource(DataSource):
         limit: int = None,
         *args,
         **kwargs,
-    ) -> List:
+    ) -> list:
         if start_time:
             start_time = start_time + self.time_offset
         if end_time:
@@ -2126,10 +2125,10 @@ class BkFtaEventDataSource(DataSource):
         dimension_field: str,
         start_time: int = None,
         end_time: int = None,
-        limit: Optional[int] = None,
+        limit: int | None = None,
         *args,
         **kwargs,
-    ) -> List:
+    ) -> list:
         if isinstance(dimension_field, list):
             dimension_field = dimension_field[0]
 
@@ -2153,7 +2152,7 @@ class BkFtaEventDataSource(DataSource):
 
     def query_log(
         self, start_time: int = None, end_time: int = None, limit: int = None, offset: int = None, *args, **kwargs
-    ) -> Tuple[List, int]:
+    ) -> tuple[list, int]:
         q = self._get_queryset(
             table=f"{start_time}|{end_time}" if start_time and end_time else None,
             metrics=self.metrics,
@@ -2191,7 +2190,7 @@ class BkMonitorAlertDataSource(BkFtaEventDataSource):
     data_type_label = DataTypeLabel.ALERT
 
     @classmethod
-    def init_by_query_config(cls, query_config: Dict, name="", *args, **kwargs):
+    def init_by_query_config(cls, query_config: dict, name="", *args, **kwargs):
         return cls(
             name=name,
             metrics=[
@@ -2207,9 +2206,9 @@ class BkMonitorAlertDataSource(BkFtaEventDataSource):
         )
 
     def __init__(
-        self, metrics: List[Dict] = None, filter_dict: Dict = None, bkmonitor_strategy_id: int = None, *args, **kwargs
+        self, metrics: list[dict] = None, filter_dict: dict = None, bkmonitor_strategy_id: int = None, *args, **kwargs
     ):
-        super(BkMonitorAlertDataSource, self).__init__(metrics, *args, **kwargs)
+        super().__init__(metrics, *args, **kwargs)
 
         self.metrics = copy.deepcopy(metrics)
 
@@ -2307,7 +2306,7 @@ def judge_auto_filter(bk_biz_id: int, table_id: str) -> bool:
     return need_add_filter
 
 
-def load_data_source(data_source_label: str, data_type_label: str) -> Type[DataSource]:
+def load_data_source(data_source_label: str, data_type_label: str) -> type[DataSource]:
     """
     加载对应的DataSource
     """

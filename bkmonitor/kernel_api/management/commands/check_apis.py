@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,7 +19,7 @@ class Command(BaseCommand):
     doc_path = "kernel_api/docs/apidocs/zh_hans"
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument("-c", "--config", default=self.config)
         parser.add_argument("--doc_path", default=self.doc_path)
 
@@ -50,14 +49,14 @@ class Command(BaseCommand):
 
     def check_doc_exists(self, config):
         return self.for_each_config(
-            config, lambda x: "" if glob.glob1(self.doc_path, "%s.*" % x["name"]) else "doc not exists"
+            config, lambda x: "" if glob.glob1(self.doc_path, "{}.*".format(x["name"])) else "doc not exists"
         )
 
     def handle(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-        with open(self.config, "rt") as fp:
+        with open(self.config) as fp:
             config = yaml.load(fp.read(), Loader=yaml.FullLoader)
 
         if not config:

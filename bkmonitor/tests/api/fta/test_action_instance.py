@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -39,7 +38,7 @@ class TestActionInstanceResource(TestCase):
 
         self.callback_data = {
             "sn": "23312312312312312",
-            "title": "sjftestkwjrwer({})".format(self.ai.id),
+            "title": f"sjftestkwjrwer({self.ai.id})",
             "approve_result": True,
             "updated_by": "selina",
             "token": "24234234",
@@ -62,7 +61,7 @@ class TestActionInstanceResource(TestCase):
     def test_itsm_callback_resource(self):
         callback_data = {
             "sn": "23312312312312312",
-            "title": "sjftestkwjrwer({})".format(self.ai.id),
+            "title": f"sjftestkwjrwer({self.ai.id})",
             "approve_result": True,
             "updated_by": "selina",
             "token": "24234234",

@@ -10,7 +10,6 @@ specific language governing permissions and limitations under the License.
 import logging
 from collections import OrderedDict
 from dataclasses import dataclass
-from typing import List
 
 from django.utils.translation import gettext_lazy as _
 
@@ -32,10 +31,10 @@ class GrafanaFlameDiagrammer:
         self,
         node: FunctionNode,
         level: int = 0,
-        levels: List[int] = None,
-        labels: List[str] = None,
-        selfs: List[int] = None,
-        values: List[int] = None,
+        levels: list[int] = None,
+        labels: list[str] = None,
+        selfs: list[int] = None,
+        values: list[int] = None,
     ):
         if levels is None:
             levels = []

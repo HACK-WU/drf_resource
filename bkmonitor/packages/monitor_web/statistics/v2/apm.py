@@ -8,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 from collections import defaultdict
-from typing import Dict, List
 
 from django.utils.functional import cached_property
 
@@ -23,7 +22,7 @@ class APMCollector(BaseCollector):
     """APM 指标采集器"""
 
     @cached_property
-    def applications_biz_map(self) -> Dict[int, List[Application]]:
+    def applications_biz_map(self) -> dict[int, list[Application]]:
         biz_map = defaultdict(list)
         for app in Application.objects.filter(bk_biz_id__in=list(self.biz_info.keys()), is_enabled=True):
             biz_map[app.bk_biz_id].append(app)

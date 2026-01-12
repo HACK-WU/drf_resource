@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,7 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 import time
-from typing import Callable, Dict
+from collections.abc import Callable
 
 import pika
 from django.utils.translation import gettext_lazy as _
@@ -20,7 +19,7 @@ from pika.exceptions import ChannelClosedByBroker
 logger = logging.getLogger()
 
 
-class RabbitMQClient(object):
+class RabbitMQClient:
     _instance = None
 
     def __init__(self, broker_url: str) -> None:
@@ -37,7 +36,7 @@ class RabbitMQClient(object):
         except Exception as e:  # pylint: disable=broad-except
             logger.error(f"Failed to get rabbitmq infomation, err: {e}")
 
-    def ping(self) -> Dict:
+    def ping(self) -> dict:
         result = {"status": False, "data": None, "message": "", "suggestion": ""}
         start_time = time.time()
         try:
@@ -51,10 +50,10 @@ class RabbitMQClient(object):
             result["message"] = str(e)
             result["suggestion"] = _("确认RabbitMQ是否可用")
         spend_time = time.time() - start_time
-        result["data"] = "{}ms".format(int(spend_time * 1000))
+        result["data"] = f"{int(spend_time * 1000)}ms"
         return result
 
-    def get_queue_len(self, queue_name: str) -> Dict:
+    def get_queue_len(self, queue_name: str) -> dict:
         result = {"status": False, "data": None, "message": ""}
         try:
             channel = self.connection.channel()

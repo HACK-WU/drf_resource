@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -28,9 +27,9 @@ def convert_field(config):
         serializer = config.get_serializer()
     except Exception as e:
         serializer = serializers.CharField()
-        logger.exception("全局配置 [{}] 加载异常: {}".format(config.key, e))
+        logger.exception(f"全局配置 [{config.key}] 加载异常: {e}")
 
-    converter_cls = globals().get("{}FieldConverter".format(config.data_type), CharFieldConverter)
+    converter_cls = globals().get(f"{config.data_type}FieldConverter", CharFieldConverter)
     converter = converter_cls(config, serializer)
     return converter.convert()
 
@@ -92,7 +91,7 @@ class IntegerFieldConverter(BaseFieldConverter):
     #     rules.append()
 
     def get_form_child_props(self):
-        form_child_props = super(IntegerFieldConverter, self).get_form_child_props()
+        form_child_props = super().get_form_child_props()
         form_child_props["type"] = "number"
         if self.serializer.min_value is not None:
             form_child_props["min"] = self.serializer.min_value
@@ -101,7 +100,7 @@ class IntegerFieldConverter(BaseFieldConverter):
         return form_child_props
 
     def get_form_item_props(self):
-        form_item_props = super(IntegerFieldConverter, self).get_form_item_props()
+        form_item_props = super().get_form_item_props()
         form_item_props["required"] = True
         return form_item_props
 
@@ -114,7 +113,7 @@ class BooleanFieldConverter(BaseFieldConverter):
     FRONTEND_FORM_TYPE = "switcher"
 
     def get_form_child_props(self):
-        form_child_props = super(BooleanFieldConverter, self).get_form_child_props()
+        form_child_props = super().get_form_child_props()
         form_child_props["size"] = "min"
         form_child_props["theme"] = "primary"
         return form_child_props
@@ -124,7 +123,7 @@ class JSONFieldConverter(BaseFieldConverter):
     FRONTEND_FORM_TYPE = "input"
 
     def get_form_child_props(self):
-        form_child_props = super(JSONFieldConverter, self).get_form_child_props()
+        form_child_props = super().get_form_child_props()
         form_child_props["type"] = "textarea"
         return form_child_props
 
@@ -133,7 +132,7 @@ class ListFieldConverter(BaseFieldConverter):
     FRONTEND_FORM_TYPE = "tag-input"
 
     def get_form_child_props(self):
-        form_child_props = super(ListFieldConverter, self).get_form_child_props()
+        form_child_props = super().get_form_child_props()
         form_child_props["allowCreate"] = True
         form_child_props["hasDeleteIcon"] = True
         form_child_props["list"] = []
@@ -144,7 +143,7 @@ class ChoiceFieldConverter(BaseFieldConverter):
     FRONTEND_FORM_TYPE = "radio-group"
 
     def get_form_child_props(self):
-        form_child_props = super(ChoiceFieldConverter, self).get_form_child_props()
+        form_child_props = super().get_form_child_props()
         form_child_props["options"] = [
             {
                 "id": choice[0],
@@ -159,7 +158,7 @@ class MultipleChoiceFieldConverter(BaseFieldConverter):
     FRONTEND_FORM_TYPE = "checkbox-group"
 
     def get_form_child_props(self):
-        form_child_props = super(MultipleChoiceFieldConverter, self).get_form_child_props()
+        form_child_props = super().get_form_child_props()
         form_child_props["options"] = [
             {
                 "id": choice[0],

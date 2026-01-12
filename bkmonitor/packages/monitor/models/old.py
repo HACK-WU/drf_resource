@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -85,7 +84,7 @@ class DataCollector(OperateRecordModel):
     data_description = models.TextField("数据描述", null=True)
 
     def __str__(self):
-        return "{}: {}".format(self.id, self.biz_id)
+        return f"{self.id}: {self.biz_id}"
 
 
 class MonitorHostSticky(models.Model):
@@ -193,7 +192,7 @@ class ServiceAuthorization(models.Model):
 
         if not self.extra:
             self.extra = "{}"
-        return super(ServiceAuthorization, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
 
 class HostProperty(models.Model):
@@ -254,7 +253,7 @@ class Application(models.Model):
     )
 
     def __unicode__(self):
-        return "#{} {}".format(self.cc_biz_id, self.name)
+        return f"#{self.cc_biz_id} {self.name}"
 
 
 class ApplicationGroupMembership(models.Model):
@@ -281,11 +280,11 @@ class ScriptCollectorConfig(CollectorConfig):
     新脚本采集
     """
 
-    class ScriptType(object):
+    class ScriptType:
         FILE = "file"
         CMD = "cmd"
 
-    class Status(object):
+    class Status:
         DRAFT = "draft"
         SAVED = "saved"
 
@@ -412,7 +411,7 @@ class ShellCollectorParamsMixin(models.Model):
 class ShellCollectorConfig(ShellCollectorParamsMixin, OperateRecordModel):
     """脚本采集配置"""
 
-    class Status(object):
+    class Status:
         NEW_DRAFT = "new draft"
         EDIT_DRAFT = "edit draft"
         SAVED = "saved"
@@ -446,7 +445,7 @@ class ShellCollectorConfig(ShellCollectorParamsMixin, OperateRecordModel):
 class ShellCollectorDepositTask(ShellCollectorParamsMixin, OperateRecordModel):
     """脚本采集托管任务"""
 
-    class Status(object):
+    class Status:
         CREATED = "created"
         RUNNING = "running"
         SUCCESS = "success"
@@ -461,7 +460,7 @@ class ShellCollectorDepositTask(ShellCollectorParamsMixin, OperateRecordModel):
         (Status.EXCEPTION, _("任务执行过程异常")),
     )
 
-    class Process(object):
+    class Process:
         READY = "ready"
         CREATE_DATASET = "create dataset"
         CREATE_RT = "create rt"
@@ -628,7 +627,7 @@ class ExporterComponent(ExporterCollectorParamsMixin, CollectorConfig):
     Exporter自定义组件配置
     """
 
-    class Status(object):
+    class Status:
         DRAFT = "DRAFT"
         SAVED = "SAVED"
 
@@ -652,7 +651,7 @@ class ExporterDepositTask(ExporterCollectorParamsMixin, OperateRecordModel):
     自定义组件Exporter托管任务
     """
 
-    class Status(object):
+    class Status:
         CREATED = "CREATED"
         RUNNING = "RUNNING"
         SUCCESS = "SUCCESS"
@@ -667,7 +666,7 @@ class ExporterDepositTask(ExporterCollectorParamsMixin, OperateRecordModel):
         (Status.EXCEPTION, _("任务执行过程异常")),
     )
 
-    class Process(object):
+    class Process:
         READY = "READY"
         CREATE_DATASET = "CREATE_DATASET"
         CREATE_RT = "CREATE_RT"
@@ -736,7 +735,7 @@ class ComponentCategoryRelationship(models.Model):
 
 
 class ComponentImportTask(OperateRecordModel):
-    class Status(object):
+    class Status:
         CREATED = "CREATED"
         RUNNING = "RUNNING"
         SUCCESS = "SUCCESS"
@@ -750,7 +749,7 @@ class ComponentImportTask(OperateRecordModel):
         (Status.EXCEPTION, _("任务执行过程异常")),
     )
 
-    class Process(object):
+    class Process:
         READY = "READY"
         UNZIP_FILE = "UNZIP_FILE"
         CHECK_COMPONENT_NAME = "CHECK_COMPONENT_NAME"
@@ -797,7 +796,7 @@ class LogCollector(CollectorConfig):
     TSDB_NAME = "slog"
     permission_exempt = True
 
-    class Status(object):
+    class Status:
         STARTING = "create"
         NORMAL = "normal"
         STOPPING = "stop"
@@ -831,7 +830,7 @@ class LogCollector(CollectorConfig):
 class LogCollectorHost(OperateRecordModel):
     permission_exempt = True
 
-    class Status(object):
+    class Status:
         STARTING = "create"
         NORMAL = "normal"
         STOPPING = "stop"

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from alarm_backends.service.detect import DataPoint
 from alarm_backends.service.detect.strategy.abnormal_cluster import (
     AbnormalCluster,
@@ -46,7 +45,7 @@ class TestAbnormalCluster:
         anomaly_result = detect_engine.detect(datapoint_1)
         alert_message = parse_cluster(datapoint_1.values["cluster"])
         assert len(anomaly_result) == 1
-        assert anomaly_result[0].anomaly_message == " {} 维度值发生离群".format(alert_message)
+        assert anomaly_result[0].anomaly_message == f" {alert_message} 维度值发生离群"
 
     def test_value_gt_10_message(self):
         datapoint_10 = DataPoint(
@@ -67,4 +66,4 @@ class TestAbnormalCluster:
         anomaly_result = detect_engine.detect(datapoint_10)
         alert_message = parse_cluster(datapoint_10.values["cluster"])
         assert len(anomaly_result) == 1
-        assert anomaly_result[0].anomaly_message == " {} 等{}组维度值发生离群".format(alert_message, datapoint_10.value)
+        assert anomaly_result[0].anomaly_message == f" {alert_message} 等{datapoint_10.value}组维度值发生离群"

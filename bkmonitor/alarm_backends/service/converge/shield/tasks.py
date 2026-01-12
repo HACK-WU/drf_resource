@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -51,7 +50,7 @@ def do_check_and_send_shield_notice(ids):
         ).values()
     )
 
-    logger.info("[屏蔽通知] 开始处理。拉取到 {} 条屏蔽配置等待检测".format(len(shield_configs)))
+    logger.info(f"[屏蔽通知] 开始处理。拉取到 {len(shield_configs)} 条屏蔽配置等待检测")
     # TODO: 确定是否需要加锁，防止重复通知
     notice_config_ids = set()
     for shield_config in shield_configs:
@@ -60,14 +59,14 @@ def do_check_and_send_shield_notice(ids):
         try:
             start_notice_result, end_notice_result = shield_obj.check_and_send_notice()
         except Exception as e:
-            logger.info("[屏蔽通知] shield({}) 处理异常，原因: {}".format(config_id, e))
+            logger.info(f"[屏蔽通知] shield({config_id}) 处理异常，原因: {e}")
             continue
         if start_notice_result:
             notice_config_ids.add(config_id)
-            logger.info("[屏蔽通知] shield({}) 发送屏蔽开始通知，发送结果: {}".format(config_id, start_notice_result))
+            logger.info(f"[屏蔽通知] shield({config_id}) 发送屏蔽开始通知，发送结果: {start_notice_result}")
         if end_notice_result:
             notice_config_ids.add(config_id)
-            logger.info("[屏蔽通知] shield({}) 发送屏蔽结束通知，发送结果: {}".format(config_id, end_notice_result))
+            logger.info(f"[屏蔽通知] shield({config_id}) 发送屏蔽结束通知，发送结果: {end_notice_result}")
 
-    logger.info("[屏蔽通知] 结束处理。有 {} 条屏蔽告警发送了通知".format(len(notice_config_ids)))
+    logger.info(f"[屏蔽通知] 结束处理。有 {len(notice_config_ids)} 条屏蔽告警发送了通知")
     return notice_config_ids

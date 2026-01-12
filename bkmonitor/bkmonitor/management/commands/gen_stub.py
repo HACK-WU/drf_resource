@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -52,7 +51,7 @@ template = django_engine.from_string(TEMPLATE)
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument("-p", "--path")
         parser.add_argument("-o", "--output")
 
@@ -65,7 +64,7 @@ class Command(BaseCommand):
 
         if not output:
             source_file, ext = os.path.splitext(module.__file__)
-            output = "%s.pyi" % source_file
+            output = f"{source_file}.pyi"
 
         with open(output, "w+") as fp:
             fp.write(template.render({"tree": tree}))

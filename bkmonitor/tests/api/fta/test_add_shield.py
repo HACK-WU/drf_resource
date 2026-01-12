@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -35,9 +34,9 @@ class TestBatchShieldResource(TestCase):
             **{
                 "event_id": int(time.time()),
                 "plugin_id": "fta-test",
-                "alert_name": "test context-{}".format(event_time),
+                "alert_name": f"test context-{event_time}",
                 "time": int(time.time()),
-                "tags": [{"key": "device", "value": "cpu{}".format(event_time)}],
+                "tags": [{"key": "device", "value": f"cpu{event_time}"}],
                 "target": "127.0.0.1|0",
                 "ip": "127.0.0.1",
                 "bk_cloud_id": 0,

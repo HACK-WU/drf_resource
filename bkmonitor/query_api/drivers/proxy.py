@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -34,7 +33,7 @@ BKDATA_RT_REGEX = re.compile(r"^(?P<biz_id>\d+)_(?P<db_name>exporter_.+?|.+?)_(?
 BKMONITOR_RT_REGEX = re.compile(r"^((?P<bk_biz_id>\d+)_)?(?P<db_name>exporter_.+?|.+?)\.(?P<table_name>.*)")
 
 
-class DriverProxy(object):
+class DriverProxy:
     def __init__(self, origin_sql):
         if isinstance(origin_sql, SQLStatement):
             self.q = origin_sql
@@ -63,7 +62,7 @@ def load_driver_by_sql(sql):
     if not rt_instance.default_storage:
         raise StorageResultTableNotExist(_("结果表[%s]未配置物理存储") % rt_instance.table_id)
     try:
-        driver_module = __import__("query_api.drivers.%s" % rt_instance.default_storage, fromlist=["load_driver"])
+        driver_module = __import__(f"query_api.drivers.{rt_instance.default_storage}", fromlist=["load_driver"])
     except (ImportError, ValueError):
         raise StorageNotSupported(_("存储[%s]对应的查询引擎不存在") % rt_instance.default_storage)
     return driver_module.load_driver(proxy.q)

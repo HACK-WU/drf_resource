@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,7 +21,7 @@ class QueryExceptions(Exception):
         self.code = error_code or self.error_code
 
     def __str__(self):
-        return six.text_type("{} code: {}".format(self.message, self.code))
+        return six.text_type(f"{self.message} code: {self.code}")
 
 
 class ResultTableNotExist(QueryExceptions):

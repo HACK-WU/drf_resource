@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +12,8 @@ import logging
 import time
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, Type
+from typing import Any
+from collections.abc import Callable
 
 from celery import shared_task
 from django.conf import settings
@@ -51,7 +51,7 @@ def from_iso_format(start_time: str) -> datetime:
     return start_at_current_timezone_naive
 
 
-def get_model_value(model: BCSBase, field: str, datetime_fields: Set) -> Any:
+def get_model_value(model: BCSBase, field: str, datetime_fields: set) -> Any:
     """获得模型的值 ."""
     value = getattr(model, field)
     if datetime_fields and value and field in datetime_fields:
@@ -65,12 +65,12 @@ def get_model_value(model: BCSBase, field: str, datetime_fields: Set) -> Any:
 
 
 def bulk_save_resources(
-    resource: Type[BCSBase],
-    resource_models: List[BCSBase],
+    resource: type[BCSBase],
+    resource_models: list[BCSBase],
     sync_unique_field: str,
-    sync_fields: List,
-    sync_filter: Optional[Dict] = None,
-    datetime_fields: List = None,
+    sync_fields: list,
+    sync_filter: dict | None = None,
+    datetime_fields: list = None,
 ):
     """同步指定资源 ."""
     if datetime_fields:
@@ -146,7 +146,7 @@ def bulk_save_resources(
 
 
 @share_lock(identify="sync_bcs_cluster_to_db")
-def sync_bcs_cluster_to_db() -> List[BCSCluster]:
+def sync_bcs_cluster_to_db() -> list[BCSCluster]:
     """同步cluster数据到数据库 ."""
     # 获得全部集群信息，不包含资源使用量
     params = {}

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import time
-from typing import Any, List
+from typing import Any
 
 from bkmonitor.documents.base import BulkActionType
 from bkmonitor.documents.incident import IncidentOperationDocument
@@ -22,7 +21,7 @@ from constants.incident import (
 )
 
 
-class IncidentOperationManager(object):
+class IncidentOperationManager:
     @classmethod
     def record_operation(
         cls, incident_id: int, operation_type: IncidentOperationType, operate_time=None, **kwargs
@@ -47,7 +46,7 @@ class IncidentOperationManager(object):
 
     @classmethod
     def record_create_incident(
-        cls, incident_id: int, operate_time: int, alert_count: int, assignees: List[str]
+        cls, incident_id: int, operate_time: int, alert_count: int, assignees: list[str]
     ) -> IncidentOperationDocument:
         """记录生成故障
         文案: 生成故障，包含{alert_count}个告警，负责人为{handlers}
@@ -89,7 +88,7 @@ class IncidentOperationManager(object):
 
     @classmethod
     def record_notice_incident(
-        cls, incident_id: int, operate_time: int, receivers: List[str]
+        cls, incident_id: int, operate_time: int, receivers: list[str]
     ) -> IncidentOperationDocument:
         """记录故障通知
         文案: 故障通知已发送（接收人：{receivers}）
@@ -199,7 +198,7 @@ class IncidentOperationManager(object):
 
     @classmethod
     def record_incident_alert_notice(
-        cls, incident_id: int, operate_time: int, alert_name: str, alert_id: int, receivers: List[str]
+        cls, incident_id: int, operate_time: int, alert_name: str, alert_id: int, receivers: list[str]
     ) -> IncidentOperationDocument:
         """记录故障告警通知
         文案: 告警通知已发送（{alert_name}；接收人：{recievers}）
@@ -370,7 +369,7 @@ class IncidentOperationManager(object):
 
     @classmethod
     def record_incident_alert_dispatch(
-        cls, incident_id: int, operate_time: int, alert_name: str, alert_id: int, handlers: List[str]
+        cls, incident_id: int, operate_time: int, alert_name: str, alert_id: int, handlers: list[str]
     ) -> IncidentOperationDocument:
         """记录故障告警分派
         文案: 告警已分派（{alert_name}；处理人：{handlers}）

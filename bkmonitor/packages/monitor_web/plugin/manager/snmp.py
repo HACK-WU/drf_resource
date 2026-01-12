@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -190,7 +189,7 @@ class SNMPPluginManager(PluginManager):
                     }
                 )
         data["metric_json"] = metric_json
-        return super(SNMPPluginManager, self).create_version(data)
+        return super().create_version(data)
 
     def parse_snmp_yaml_to_metric(self, config_yaml):
         config = yaml.load(config_yaml, Loader=yaml.FullLoader)
@@ -204,7 +203,7 @@ class SNMPPluginManager(PluginManager):
                 # 当类型为枚举类型时，exporter会默认在指标名里加上_info, 这里进行对齐
                 if metric["type"] == "EnumAsInfo":
                     dimensions.append({"dimension_name": metric_name, "dimension_value": ""})
-                    metric_name = "{}_info".format(metric_name)
+                    metric_name = f"{metric_name}_info"
                 indexes = metric.get("indexes", [])
                 for index in indexes:
                     dimensions.append({"dimension_name": index["labelname"], "dimension_value": ""})
@@ -220,7 +219,7 @@ class SNMPPluginManager(PluginManager):
         """
         获取snmp主动采集调试信息，则指标以snmp.yaml文件为准
         """
-        debug_result = super(SNMPPluginManager, self).query_debug(task_id)
+        debug_result = super().query_debug(task_id)
         if debug_result.get("metric_json"):
             debug_result["metric_json"] = self.parse_snmp_yaml_to_metric(
                 self.version.config.collector_json["config_yaml"]

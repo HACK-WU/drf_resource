@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 
 import abc
-from typing import List
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _lazy
@@ -33,7 +31,7 @@ class ResourceMeta(metaclass=abc.ABCMeta):
     id: str = ""
     name: str = ""
     selection_mode: str = ""
-    related_instance_selections: List = ""
+    related_instance_selections: list = ""
 
     @classmethod
     def to_json(cls):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,12 +11,12 @@ import importlib
 import os
 import re
 from collections import defaultdict
-from typing import Callable, Dict, List, Type
+from collections.abc import Callable
 
 
 class BaseMigration:
-    dependencies: List[str] = []
-    operations: List[Callable] = []
+    dependencies: list[str] = []
+    operations: list[Callable] = []
 
 
 class Migrator:
@@ -29,16 +28,16 @@ class Migrator:
         """
         self.app: str = app
         self.path: str = path
-        self.migrations: Dict[str, Type[BaseMigration]] = {}
-        self.migrations_children: Dict[str, List[str]] = defaultdict(list)
+        self.migrations: dict[str, type[BaseMigration]] = {}
+        self.migrations_children: dict[str, list[str]] = defaultdict(list)
         # 用于检查是否有环，key为迁移文件名，value为[入度, 出度]
-        self.degrees: Dict[str, List[int, int]] = defaultdict(lambda: [0, 0])
+        self.degrees: dict[str, list[int, int]] = defaultdict(lambda: [0, 0])
 
     def load_migration(self):
         """
         加载path下的迁移文件
         """
-        dirname = os.path.dirname(importlib.import_module("{}".format(self.path)).__file__)
+        dirname = os.path.dirname(importlib.import_module(f"{self.path}").__file__)
 
         # 加载所有迁移文件
         for file in os.listdir(dirname):
@@ -46,7 +45,7 @@ class Migrator:
                 continue
 
             name = file[:-3]
-            m = importlib.import_module("{}.{}".format(self.path, name))
+            m = importlib.import_module(f"{self.path}.{name}")
             migration = getattr(m, "Migration", None)
             if not migration:
                 continue
@@ -93,7 +92,7 @@ class Migrator:
 
             # 检查是否有除0001_initial外的迁移文件没有入度
             if degree[0] == 0:
-                raise Exception("migration {} should not be root of dependency graph".format(name))
+                raise Exception(f"migration {name} should not be root of dependency graph")
 
             # 检查是否存在多个结束节点
             if degree[1] == 0:
@@ -124,7 +123,7 @@ class Migrator:
         """
         执行迁移
         """
-        print("start migrate {}...".format(self.app))
+        print(f"start migrate {self.app}...")
         from bkmonitor.models.config import MonitorMigration
 
         self.load_migration()
@@ -150,7 +149,7 @@ class Migrator:
             if name in migrated:
                 continue
 
-            print("iam migrate: {}".format(name))
+            print(f"iam migrate: {name}")
 
             # 执行迁移
             for operation in self.migrations[name].operations:
@@ -160,4 +159,4 @@ class Migrator:
             MonitorMigration.objects.create(app=self.app, name=name)
             migrated.add(name)
 
-        print("migrate {} success".format(self.app))
+        print(f"migrate {self.app} success")

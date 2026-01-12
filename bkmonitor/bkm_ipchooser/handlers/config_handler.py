@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import logging
-from typing import List
 
 from django.db.transaction import atomic
 
@@ -20,7 +18,7 @@ class ConfigHandler:
     def get_global_settings() -> dict:
         return {"CC_ROOT_URL": IP_CHOOSER_CC_ROOT_URL}
 
-    def batch_get(self, module_list: List[str] = None) -> dict:
+    def batch_get(self, module_list: list[str] = None) -> dict:
         """批量获取用户配置"""
         user_config_obj = IPChooserConfig.objects.filter(username=self.username).first()
         if not user_config_obj:
@@ -41,7 +39,7 @@ class ConfigHandler:
             user_config_obj.save()
 
     @atomic
-    def batch_delete(self, module_list: List[str] = None):
+    def batch_delete(self, module_list: list[str] = None):
         """批量删除用户配置"""
         user_config_obj = IPChooserConfig.objects.filter(username=self.username).first()
         if not user_config_obj:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -34,9 +33,9 @@ def no_data_check(strategy_id, now_timestamp):
     try:
         CheckProcessor(strategy_id).process(now_timestamp)
     except LockError:
-        logger.info("Failed to acquire lock. on strategy({})".format(strategy_id))
+        logger.info(f"Failed to acquire lock. on strategy({strategy_id})")
     except Exception as e:
-        logger.exception("Process strategy({strategy_id}) exception, " "{msg}".format(strategy_id=strategy_id, msg=e))
+        logger.exception(f"Process strategy({strategy_id}) exception, " f"{e}")
         exc = e
     duration = time.time() - start_time
     metrics.NODATA_PROCESS_TIME.labels(strategy_id=metrics.TOTAL_TAG).observe(duration)

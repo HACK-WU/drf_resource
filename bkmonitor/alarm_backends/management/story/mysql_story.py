@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -41,15 +40,13 @@ class TableSpace(CheckStep):
         cursor = connection.cursor()
         # get Size with MB
         cursor.execute(
-            """SELECT
+            f"""SELECT
         table_name AS `table`,
         round(((data_length + index_length) / 1024 / 1024), 2) `size`, TABLE_ROWS as `rows`,
         `AUTO_INCREMENT` AS `auto_increment`
         FROM information_schema.TABLES
-        WHERE table_schema = "{}"
-        order by `size` desc""".format(
-                backend_database_name
-            )
+        WHERE table_schema = "{backend_database_name}"
+        order by `size` desc"""
         )  # noqa
         columns = [col[0] for col in cursor.description]
         self.story.warning("table space top10: ")

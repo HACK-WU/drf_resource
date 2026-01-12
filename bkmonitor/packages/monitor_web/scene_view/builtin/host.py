@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import json
-from typing import Dict, List, Optional, Set, Tuple
 
 from django.utils.translation import gettext as _
 
@@ -198,7 +196,7 @@ def get_order_config(view: SceneViewModel):
         return default_order
 
 
-def get_panels(view: SceneViewModel) -> List[Dict]:
+def get_panels(view: SceneViewModel) -> list[dict]:
     """
     获取指标信息，包含指标信息及该指标需要使用的聚合方法、聚合维度、聚合周期等
     """
@@ -218,7 +216,7 @@ def get_panels(view: SceneViewModel) -> List[Dict]:
     return panels
 
 
-def get_metric_panel(bk_biz_id: int, metric: MetricListCache, view_id: str = "", type: str = "graph") -> Dict:
+def get_metric_panel(bk_biz_id: int, metric: MetricListCache, view_id: str = "", type: str = "graph") -> dict:
     metric_id = (
         f"{metric.data_source_label}.{metric.data_type_label}" f".{metric.result_table_id}.{metric.metric_field}"
     )
@@ -272,13 +270,13 @@ def get_metric_panel(bk_biz_id: int, metric: MetricListCache, view_id: str = "",
     return panel
 
 
-def get_auto_view_panels(view: SceneViewModel) -> Tuple[List[Dict], List[Dict]]:
+def get_auto_view_panels(view: SceneViewModel) -> tuple[list[dict], list[dict]]:
     """
     获取平铺视图配置
     """
     panels = get_panels(view)
     if view.id == "process":
-        extend_panels: List[Dict] = PROCESS_EXTERNAL_PANELS.copy()
+        extend_panels: list[dict] = PROCESS_EXTERNAL_PANELS.copy()
         for panel in extend_panels:
             panel["title"] = str(panel["title"])
         extend_panels = json.loads(json.dumps(extend_panels))
@@ -288,7 +286,7 @@ def get_auto_view_panels(view: SceneViewModel) -> Tuple[List[Dict], List[Dict]]:
 
 
 class HostBuiltinProcessor(BuiltinProcessor):
-    builtin_views: Dict = None
+    builtin_views: dict = None
 
     @classmethod
     def load_builtin_views(cls):
@@ -304,7 +302,7 @@ class HostBuiltinProcessor(BuiltinProcessor):
 
         cls.load_builtin_views()
 
-        existed_view_ids: Set[str] = {v.id for v in existed_views}
+        existed_view_ids: set[str] = {v.id for v in existed_views}
         create_view_ids = set(cls.builtin_views.keys()) - existed_view_ids
         new_views = []
         for view_id in create_view_ids:
@@ -335,7 +333,7 @@ class HostBuiltinProcessor(BuiltinProcessor):
             ).delete()
 
     @classmethod
-    def get_view_config(cls, view: SceneViewModel, *args, **kwargs) -> Dict:
+    def get_view_config(cls, view: SceneViewModel, *args, **kwargs) -> dict:
         cls.load_builtin_views()
 
         if view.id not in ["host", "process"]:
@@ -352,8 +350,8 @@ class HostBuiltinProcessor(BuiltinProcessor):
 
     @classmethod
     def create_or_update_view(
-        cls, bk_biz_id: int, scene_id: str, view_type: str, view_id: str, view_config: Dict
-    ) -> Optional[SceneViewModel]:
+        cls, bk_biz_id: int, scene_id: str, view_type: str, view_id: str, view_config: dict
+    ) -> SceneViewModel | None:
         view = SceneViewModel.objects.get(bk_biz_id=bk_biz_id, scene_id=scene_id, type=view_type, id=view_id)
         if "order" in view_config:
             view.order = view_config["order"]

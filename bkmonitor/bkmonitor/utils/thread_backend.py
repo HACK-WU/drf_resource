@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +12,6 @@ import logging
 from functools import partial
 from multiprocessing.pool import ThreadPool as _ThreadPool
 from threading import Thread
-from typing import List
 
 from django import db
 from django.utils import timezone, translation
@@ -28,7 +26,7 @@ logger = logging.getLogger(__name__)
 class InheritParentThread(Thread):
     def __init__(self, *args, **kwargs):
         self.register()
-        super(InheritParentThread, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def register(self):
         # sync all data in local object
@@ -62,14 +60,14 @@ class InheritParentThread(Thread):
     def run(self):
         self.sync()
         try:
-            super(InheritParentThread, self).run()
+            super().run()
         except Exception as e:
             logger.exception(e)
 
         self.unsync()
 
 
-def run_threads(th_list: List[InheritParentThread]):
+def run_threads(th_list: list[InheritParentThread]):
     [th.start() for th in th_list]
     [th.join() for th in th_list]
 
@@ -129,7 +127,7 @@ class ThreadPool(_ThreadPool):
         """
         futures = []
         for params in iterable:
-            if not isinstance(params, (tuple, list)):
+            if not isinstance(params, tuple | list):
                 params = (params,)
             futures.append(self.apply_async(func, args=params))
 
@@ -145,21 +143,21 @@ class ThreadPool(_ThreadPool):
         return results
 
     def map_async(self, func, iterable, chunksize=None, callback=None):
-        return super(ThreadPool, self).map_async(
+        return super().map_async(
             self.get_func_with_local(func), iterable, chunksize=chunksize, callback=callback
         )
 
     def apply_async(self, func, args=(), kwds=None, callback=None):
         kwds = kwds or {}
-        return super(ThreadPool, self).apply_async(
+        return super().apply_async(
             self.get_func_with_local(func), args=args, kwds=kwds, callback=callback
         )
 
     def imap(self, func, iterable, chunksize=1):
-        return super(ThreadPool, self).imap(self.get_func_with_local(func), iterable, chunksize)
+        return super().imap(self.get_func_with_local(func), iterable, chunksize)
 
     def imap_unordered(self, func, iterable, chunksize=1):
-        return super(ThreadPool, self).imap_unordered(self.get_func_with_local(func), iterable, chunksize=chunksize)
+        return super().imap_unordered(self.get_func_with_local(func), iterable, chunksize=chunksize)
 
 
 if __name__ == "__main__":

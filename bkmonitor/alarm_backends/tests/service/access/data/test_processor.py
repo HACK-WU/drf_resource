@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,7 +14,7 @@ import json
 import time
 from collections import defaultdict
 
-import mock
+from unittest import mock
 import pytest
 from django.conf import settings
 
@@ -46,7 +45,7 @@ class MockRecord:
         self.inhibitions = defaultdict(lambda: False)
 
 
-class TestAccessDataProcess(object):
+class TestAccessDataProcess:
     def setup_method(self):
         CacheNode.refresh_from_settings()
         c = key.ACCESS_BATCH_DATA_KEY.client

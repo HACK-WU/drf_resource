@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云 - Resource SDK (BlueKing - Resource SDK) available.
@@ -20,7 +19,7 @@ import hashlib
 import json
 import logging
 import traceback
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from django.conf import settings
 from django.utils.functional import cached_property
@@ -391,8 +390,8 @@ class PrecalculateStorage:
         return DataLink.create_global(pre_calculate_config=pre_calculate_config)
 
     @classmethod
-    def get_datalink_or_none(cls, bk_biz_id: int) -> Optional[DataLink]:
-        datalink: Optional[DataLink] = DataLink.get_data_link(bk_biz_id)
+    def get_datalink_or_none(cls, bk_biz_id: int) -> DataLink | None:
+        datalink: DataLink | None = DataLink.get_data_link(bk_biz_id)
         # 不存在则创建
         if not datalink or not datalink.pre_calculate_config:
             try:
@@ -405,12 +404,12 @@ class PrecalculateStorage:
         return datalink
 
     @classmethod
-    def fetch_cluster_simple_infos(cls, bk_biz_id) -> List[Dict[str, Union[int, str]]]:
-        datalink: Optional[DataLink] = cls.get_datalink_or_none(bk_biz_id)
+    def fetch_cluster_simple_infos(cls, bk_biz_id) -> list[dict[str, int | str]]:
+        datalink: DataLink | None = cls.get_datalink_or_none(bk_biz_id)
         if datalink is None:
             return []
 
-        cluster_infos: List[Dict[str, Any]] = datalink.pre_calculate_config.get("cluster") or []
+        cluster_infos: list[dict[str, Any]] = datalink.pre_calculate_config.get("cluster") or []
         if not cluster_infos:
             logger.warning("[PreCalculate] empty pre_calculate clusters, bk_biz_id -> %s", bk_biz_id)
             return []
@@ -421,33 +420,33 @@ class PrecalculateStorage:
         ]
 
     @classmethod
-    def fetch_result_table_ids(cls, bk_biz_id: int) -> List[str]:
-        cluster_infos: List[Dict[str, Union[int, str]]] = cls.fetch_cluster_simple_infos(bk_biz_id)
+    def fetch_result_table_ids(cls, bk_biz_id: int) -> list[str]:
+        cluster_infos: list[dict[str, int | str]] = cls.fetch_cluster_simple_infos(bk_biz_id)
         return [cluster_info["table_name"] for cluster_info in cluster_infos]
 
     @classmethod
     def list_nodes(
         cls, bk_biz_id: int, need_client: bool
-    ) -> Tuple[Optional[RendezvousHash], Optional[Dict[str, Any]], Optional[Dict[str, int]]]:
-        cluster_infos: List[Dict[str, Union[int, str]]] = cls.fetch_cluster_simple_infos(bk_biz_id)
+    ) -> tuple[RendezvousHash | None, dict[str, Any] | None, dict[str, int] | None]:
+        cluster_infos: list[dict[str, int | str]] = cls.fetch_cluster_simple_infos(bk_biz_id)
         if not cluster_infos:
             return None, None, None
 
-        table_ids: List[str] = [cluster_info["table_name"] for cluster_info in cluster_infos]
-        table_storage_mapping: Dict[str, ESStorage] = {
+        table_ids: list[str] = [cluster_info["table_name"] for cluster_info in cluster_infos]
+        table_storage_mapping: dict[str, ESStorage] = {
             storage.table_id: storage for storage in ESStorage.objects.filter(table_id__in=table_ids)
         }
 
-        nodes: List[str] = []
-        id_mapping: Dict[str, int] = {}
-        node_mapping: Dict[str, Any] = {}
+        nodes: list[str] = []
+        id_mapping: dict[str, int] = {}
+        node_mapping: dict[str, Any] = {}
 
         for cluster_info in cluster_infos:
             table_name: str = cluster_info["table_name"]
             cluster_id: str = cluster_info["cluster_id"]
             key: str = f"{cluster_id}-{table_name}"
 
-            storage: Optional[ESStorage] = table_storage_mapping.get(table_name)
+            storage: ESStorage | None = table_storage_mapping.get(table_name)
             if storage is None:
                 try:
                     storage: ESStorage = cls.create_storage_table(cluster_id, table_name)

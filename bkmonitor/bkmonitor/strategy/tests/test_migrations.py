@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -32,7 +31,7 @@ class TestMigrations(TransactionTestCase):
     def setUp(self):
         assert (
             self.migrate_from and self.migrate_to
-        ), "TestCase '{}' must define migrate_from and migrate_to properties".format(type(self).__name__)
+        ), f"TestCase '{type(self).__name__}' must define migrate_from and migrate_to properties"
         self.migrate_from = [(self.app, self.migrate_from)]
         self.migrate_to = [(self.app, self.migrate_to)]
         executor = MigrationExecutor(connections["monitor_api"])

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,7 +28,7 @@ class NodeManAPIGWResource(six.with_metaclass(abc.ABCMeta, APIResource)):
     TIMEOUT = 300
 
     base_url_statement = None
-    base_url = settings.BKNODEMAN_API_BASE_URL or "%s/api/c/compapi/v2/nodeman/" % settings.BK_COMPONENT_API_URL
+    base_url = settings.BKNODEMAN_API_BASE_URL or f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/nodeman/"
 
     # 模块名
     module_name = "node_man"
@@ -40,14 +39,14 @@ class NodeManAPIGWResource(six.with_metaclass(abc.ABCMeta, APIResource)):
 
     def get_request_url(self, validated_request_data):
         return (
-            super(NodeManAPIGWResource, self).get_request_url(validated_request_data).format(**validated_request_data)
+            super().get_request_url(validated_request_data).format(**validated_request_data)
         )
 
     def validate_response_data(self, response_data):
         return response_data
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super(NodeManAPIGWResource, self).full_request_data(validated_request_data)
+        validated_request_data = super().full_request_data(validated_request_data)
         # 业务id判定
         if "bk_biz_id" not in validated_request_data:
             return validated_request_data
@@ -535,7 +534,7 @@ class GetProxiesByBizResource(NodeManAPIGWResource):
         bk_biz_id = serializers.IntegerField(required=True, label="业务ID")
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super(GetProxiesByBizResource, self).full_request_data(validated_request_data)
+        validated_request_data = super().full_request_data(validated_request_data)
         validated_request_data["_origin_user"] = get_global_user()
         setattr(self, "bk_username", settings.COMMON_USERNAME)
         return validated_request_data

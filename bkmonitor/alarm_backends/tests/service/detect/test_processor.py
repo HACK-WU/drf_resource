@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,9 +11,8 @@ import copy
 import json
 from unittest import TestCase
 
-import mock
+from unittest import mock
 import pytest
-from six.moves import map
 
 from alarm_backends.constants import LATEST_POINT_WITH_ALL_KEY
 from alarm_backends.core.detect_result import ANOMALY_LABEL, CheckResult
@@ -180,7 +178,7 @@ class TestProcessorViews(TestCase):
             signal_client = key.ANOMALY_SIGNAL_KEY.client
             assert signal_client.llen(key.ANOMALY_SIGNAL_KEY.get_key()) == 1
             signal_body = signal_client.lrange(key.ANOMALY_SIGNAL_KEY.get_key(), 0, -1)[0]
-            assert signal_body == "{strategy_id}.{item_id}".format(strategy_id=strategy_id, item_id=item_id)
+            assert signal_body == f"{strategy_id}.{item_id}"
             assert 0 < signal_client.ttl(key.ANOMALY_SIGNAL_KEY.get_key()) <= key.ANOMALY_SIGNAL_KEY.ttl
 
             # check STRATEGY_SNAPSHOT_KEY

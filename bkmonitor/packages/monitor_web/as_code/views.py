@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -27,7 +26,7 @@ SCHEMA_CONFIGS = {}
 
 class AsCodeViewSet(ResourceViewSet):
     def get_authenticators(self):
-        authenticators = super(AsCodeViewSet, self).get_authenticators()
+        authenticators = super().get_authenticators()
         authenticators = [
             authenticator for authenticator in authenticators if not isinstance(authenticator, SessionAuthentication)
         ]

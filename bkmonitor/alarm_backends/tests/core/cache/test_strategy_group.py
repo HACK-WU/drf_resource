@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -49,7 +48,7 @@ item = {
 }
 
 
-class TestStrategyGroup(object):
+class TestStrategyGroup:
     def test_query_config_md5(self):
         query_md5 = StrategyCacheManager.get_query_md5(2, item)
         assert query_md5 == "4ca8defa2aed29a8371e665b610a2044"

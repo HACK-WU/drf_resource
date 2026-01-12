@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -292,7 +291,7 @@ class DetectAlgorithm(AbstractRecordModel):
         不同的算法有不同的配置内容
     """
 
-    class AlgorithmChoices(object):
+    class AlgorithmChoices:
         Threshold = "Threshold"
         SimpleRingRatio = "SimpleRingRatio"
         AdvancedRingRatio = "AdvancedRingRatio"
@@ -471,7 +470,7 @@ class Event(Model):
     经过检测范围匹配，收敛等判断后，生成事件
     """
 
-    class TargetKeyGenerator(object):
+    class TargetKeyGenerator:
         Host = event_target.HostKeyGenerator
         ServiceInstance = event_target.ServiceInstanceKeyGenerator
         Topo = event_target.TopoKeyGenerator
@@ -494,7 +493,7 @@ class Event(Model):
 
     DEFAULT_END_TIME = datetime.datetime(1980, 1, 1, 8, tzinfo=pytz.UTC)
 
-    class EventStatus(object):
+    class EventStatus:
         CLOSED = "CLOSED"  # 已关闭，对应数据表 10
         RECOVERED = "RECOVERED"  # 已恢复，对应数据表 20
         ABNORMAL = "ABNORMAL"  # 异常事件，对应数据表 30
@@ -572,7 +571,7 @@ class Event(Model):
             else:
                 message = self.origin_alarm["anomaly"][str(self.level)]["anomaly_message"]
         except KeyError:
-            return "anomaly_message not found in %s" % self.origin_alarm["anomaly"]
+            return "anomaly_message not found in {}".format(self.origin_alarm["anomaly"])
         return message
 
     @cached_property
@@ -612,7 +611,7 @@ class EventAction(Model):
     4. 事件关闭
     """
 
-    class Operate(object):
+    class Operate:
         ACK = "ACK"
         ANOMALY_NOTICE = "ANOMALY_NOTICE"
         RECOVERY_NOTICE = "RECOVERY_NOTICE"
@@ -655,7 +654,7 @@ class EventAction(Model):
         },
     }
 
-    class Status(object):
+    class Status:
         RUNNING = "RUNNING"
         SUCCESS = "SUCCESS"
         PARTIAL_SUCCESS = "PARTIAL_SUCCESS"

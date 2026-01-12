@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 from datetime import datetime
-from typing import Dict, List
 
 from django.conf import settings
 from django.db import transaction
@@ -89,7 +87,7 @@ class CollectorPluginViewSet(PermissionMixin, viewsets.ModelViewSet):
     serializer_class = Serializer
 
     def get_authenticators(self):
-        authenticators = super(CollectorPluginViewSet, self).get_authenticators()
+        authenticators = super().get_authenticators()
         authenticators = [
             authenticator for authenticator in authenticators if not isinstance(authenticator, SessionAuthentication)
         ]
@@ -104,10 +102,10 @@ class CollectorPluginViewSet(PermissionMixin, viewsets.ModelViewSet):
         if self.request.method not in permissions.SAFE_METHODS and not bk_biz_id:
             # 业务ID为0是全局插件，使用全局权限判断
             return [IAMPermission([ActionEnum.MANAGE_PUBLIC_PLUGIN])]
-        return super(CollectorPluginViewSet, self).get_permissions()
+        return super().get_permissions()
 
     @staticmethod
-    def get_virtual_plugins(plugin_id: str = "", with_detail: bool = False) -> List[Dict]:
+    def get_virtual_plugins(plugin_id: str = "", with_detail: bool = False) -> list[dict]:
         plugin_configs = []
         now_time: str = utc2biz_str(datetime.now())
 

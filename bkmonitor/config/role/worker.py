@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ import logging
 import os
 import sys
 
-from django.conf import settings
 from jinja2 import DebugUndefined
 
 from config.tools.consul import get_consul_settings
@@ -21,10 +19,8 @@ from config.tools.redis import get_cache_redis_settings, get_redis_settings
 
 from ..tools.environment import (
     DJANGO_CONF_MODULE,
-    ENVIRONMENT,
     IS_CONTAINER_MODE,
     NEW_ENV,
-    ROLE,
 )
 
 # 按照环境变量中的配置，加载对应的配置文件
@@ -32,7 +28,7 @@ try:
     _module = __import__(f"config.{NEW_ENV}", globals(), locals(), ["*"])
 except ImportError as e:
     logging.exception(e)
-    raise ImportError("Could not import config '{}' (Is it on sys.path?): {}".format(DJANGO_CONF_MODULE, e))
+    raise ImportError(f"Could not import config '{DJANGO_CONF_MODULE}' (Is it on sys.path?): {e}")
 
 for _setting in dir(_module):
     if _setting == _setting.upper():

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -56,7 +55,7 @@ def add_cmdb_level_field(apps, schema_editor):
             creator="system",
             description="CMDB层级信息",
         )
-        logger.info("table->[{}] now has create cmdb_level".format(result_table.table_id))
+        logger.info(f"table->[{result_table.table_id}] now has create cmdb_level")
 
 
 class Migration(migrations.Migration):

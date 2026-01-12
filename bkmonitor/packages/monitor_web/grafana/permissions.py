@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
-from typing import Dict, Set, Tuple
 
 from django.utils import timezone
 from iam import ObjectSet, make_expression
@@ -30,7 +28,7 @@ class DashboardPermission(BasePermission):
     """
 
     @classmethod
-    def get_policy_dashboard_uids(cls, org_id: int, bk_biz_id: int, policy: Dict) -> Set[str]:
+    def get_policy_dashboard_uids(cls, org_id: int, bk_biz_id: int, policy: dict) -> set[str]:
         """
         从权限策略中获取仪表盘 ID
         """
@@ -94,7 +92,7 @@ class DashboardPermission(BasePermission):
     @classmethod
     def get_user_permission(
         cls, username: str, org_name: str, force_check: bool = False
-    ) -> Tuple[bool, GrafanaRole, Dict[str, GrafanaPermission]]:
+    ) -> tuple[bool, GrafanaRole, dict[str, GrafanaPermission]]:
         role = GrafanaRole.Anonymous
         p = Permission(username=username)
         if force_check:
@@ -138,7 +136,7 @@ class DashboardPermission(BasePermission):
     @classmethod
     def has_permission(
         cls, request, view, org_name: str, force_check: bool = False
-    ) -> Tuple[bool, GrafanaRole, Dict[str, GrafanaPermission]]:
+    ) -> tuple[bool, GrafanaRole, dict[str, GrafanaPermission]]:
         """
         仪表盘权限校验
         """

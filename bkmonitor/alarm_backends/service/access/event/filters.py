@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,8 +28,8 @@ class BizIdFilter(Filter):
     def filter(self, event_record):
         if event_record.bk_biz_id not in self.bk_biz_ids:
             logger.info(
-                "Discard the alarm (%s) because it bk_biz_id not in "
-                "biz_list(%s)" % (event_record.raw_data, self.bk_biz_ids)
+                f"Discard the alarm ({event_record.raw_data}) because it bk_biz_id not in "
+                f"biz_list({self.bk_biz_ids})"
             )
             return True
         return False
@@ -43,8 +42,8 @@ class StrategyFilter(Filter):
     def filter(self, event_record):
         if event_record.strategy_id not in self.strategies:
             logger.info(
-                "Discard the alarm (%s) because it strategy_id(%s) not"
-                " in strategies_list(%s)" % (event_record.raw_data, event_record.strategy_id, self.strategies)
+                f"Discard the alarm ({event_record.raw_data}) because it strategy_id({event_record.strategy_id}) not"
+                f" in strategies_list({self.strategies})"
             )
             return True
         return False
@@ -59,7 +58,7 @@ class ExpireFilter(Filter):
         utctime = event_record.event_time
         # 丢弃超过半个小时的告警
         if arrow.utcnow().timestamp - arrow.get(utctime).timestamp > 30 * constants.CONST_MINUTES:
-            logger.info("Discard the alarm (%s) because " "it takes more than 30 minutes" % event_record.raw_data)
+            logger.info(f"Discard the alarm ({event_record.raw_data}) because " "it takes more than 30 minutes")
             return True
         else:
             return False

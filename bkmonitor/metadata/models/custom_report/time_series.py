@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +12,6 @@ import json
 import logging
 import math
 import time
-from typing import Dict, List, Optional, Set, Tuple, Union
 
 from django.conf import settings
 from django.db import models
@@ -91,9 +89,9 @@ class TimeSeriesGroup(CustomGroupBase):
     @staticmethod
     def make_table_id(bk_biz_id, bk_data_id, table_name=None):
         if str(bk_biz_id) != "0":
-            return "{}_bkmonitor_time_series_{}.{}".format(bk_biz_id, bk_data_id, TimeSeriesGroup.DEFAULT_MEASUREMENT)
+            return f"{bk_biz_id}_bkmonitor_time_series_{bk_data_id}.{TimeSeriesGroup.DEFAULT_MEASUREMENT}"
 
-        return "bkmonitor_time_series_{}.{}".format(bk_data_id, TimeSeriesGroup.DEFAULT_MEASUREMENT)
+        return f"bkmonitor_time_series_{bk_data_id}.{TimeSeriesGroup.DEFAULT_MEASUREMENT}"
 
     def make_metric_table_id(self, field_name):
         # 结果表是bk_k8s开头，保证这些的结果表和用户的结果表是区别开的
@@ -101,7 +99,7 @@ class TimeSeriesGroup(CustomGroupBase):
 
     @atomic(config.DATABASE_CONNECTION_NAME)
     def update_tag_fields(
-        self, table_id: str, tag_list: List[Tuple[str, str]], update_description: bool = False
+        self, table_id: str, tag_list: list[tuple[str, str]], update_description: bool = False
     ) -> bool:
         """
         更新维度信息
@@ -206,7 +204,7 @@ class TimeSeriesGroup(CustomGroupBase):
             table_id=self.table_id, name='enable_field_black_list', value="false"
         ).exists()
 
-    def _refine_metric_tags(self, metric_info: List) -> Dict:
+    def _refine_metric_tags(self, metric_info: list) -> dict:
         """去除重复的维度"""
         metric_dict, tag_dict = {}, {}
         # 标识是否需要更新描述
@@ -235,9 +233,9 @@ class TimeSeriesGroup(CustomGroupBase):
     def _bulk_create_or_update_metrics(
         self,
         table_id: str,
-        metric_dict: Dict,
-        need_create_metrics: Set,
-        need_update_metrics: Set,
+        metric_dict: dict,
+        need_create_metrics: set,
+        need_update_metrics: set,
     ):
         """批量创建或更新字段"""
         logger.info("bulk create or update rt metrics")
@@ -279,9 +277,9 @@ class TimeSeriesGroup(CustomGroupBase):
     def _bulk_create_or_update_tags(
         self,
         table_id: str,
-        tag_dict: Dict,
-        need_create_tags: Set,
-        need_update_tags: Set,
+        tag_dict: dict,
+        need_create_tags: set,
+        need_update_tags: set,
         update_description: bool,
     ):
         """批量创建或更新 tag"""
@@ -329,7 +327,7 @@ class TimeSeriesGroup(CustomGroupBase):
         ResultTableField.objects.bulk_update(update_records, ["description"], batch_size=BULK_UPDATE_BATCH_SIZE)
         logger.info("batch update tag successfully")
 
-    def bulk_refresh_rt_fields(self, table_id: str, metric_info: List):
+    def bulk_refresh_rt_fields(self, table_id: str, metric_info: list):
         """批量刷新结果表打平的指标和维度"""
         # 创建或更新
         metric_tag_info = self._refine_metric_tags(metric_info)
@@ -452,9 +450,9 @@ class TimeSeriesGroup(CustomGroupBase):
 
     @property
     def metric_consul_path(self):
-        return "{}/influxdb_metrics/{}/time_series_metric".format(config.CONSUL_PATH, self.bk_data_id)
+        return f"{config.CONSUL_PATH}/influxdb_metrics/{self.bk_data_id}/time_series_metric"
 
-    def get_metric_from_bkdata(self) -> List:
+    def get_metric_from_bkdata(self) -> list:
         """通过bkdata获取数据信息"""
         from metadata.models import AccessVMRecord, BCSClusterInfo
 
@@ -494,7 +492,7 @@ class TimeSeriesGroup(CustomGroupBase):
             ret_data.append(item)
         return ret_data
 
-    def get_metrics_from_redis(self, expired_time: Optional[int] = settings.TIME_SERIES_METRIC_EXPIRED_SECONDS):
+    def get_metrics_from_redis(self, expired_time: int | None = settings.TIME_SERIES_METRIC_EXPIRED_SECONDS):
         """从 redis 中获取数据
 
         其中，redis 中数据有 transfer 上报
@@ -520,7 +518,7 @@ class TimeSeriesGroup(CustomGroupBase):
         for i in range(math.ceil(client.zcount(**metrics_filter_params) / fetch_step)):
             try:
                 # 0. 首先获取有效期内的所有 metrics
-                metrics_with_scores: List[Tuple[bytes, float]] = client.zrangebyscore(
+                metrics_with_scores: list[tuple[bytes, float]] = client.zrangebyscore(
                     **metrics_filter_params, start=fetch_step * i, num=fetch_step, withscores=True
                 )
             except Exception:
@@ -530,7 +528,7 @@ class TimeSeriesGroup(CustomGroupBase):
 
             # 1. 获取当前这批 metrics 的 dimensions 信息
             try:
-                dimensions_list: List[bytes] = client.hmget(metric_dimensions_key, [x[0] for x in metrics_with_scores])
+                dimensions_list: list[bytes] = client.hmget(metric_dimensions_key, [x[0] for x in metrics_with_scores])
             except Exception:
                 logger.exception("failed to get dimensions from metrics")
                 continue
@@ -581,12 +579,10 @@ class TimeSeriesGroup(CustomGroupBase):
         # 删除所有的metrics信息
         metrics_queryset = TimeSeriesMetric.objects.filter(group_id=self.time_series_group_id)
         logger.debug(
-            "going to delete all metrics->[{}] for {}->[{}] deletion.".format(
-                metrics_queryset.count(), self.__class__.__name__, self.time_series_group_id
-            )
+            f"going to delete all metrics->[{metrics_queryset.count()}] for {self.__class__.__name__}->[{self.time_series_group_id}] deletion."
         )
         metrics_queryset.delete()
-        logger.info("all metrics about {}->[{}] is deleted.".format(self.__class__.__name__, self.time_series_group_id))
+        logger.info(f"all metrics about {self.__class__.__name__}->[{self.time_series_group_id}] is deleted.")
 
     @classmethod
     @atomic(config.DATABASE_CONNECTION_NAME)
@@ -602,8 +598,8 @@ class TimeSeriesGroup(CustomGroupBase):
         is_split_measurement=True,
         is_builtin=False,
         default_storage_config=None,
-        additional_options: Optional[dict] = None,
-        data_label: Optional[str] = None,
+        additional_options: dict | None = None,
+        data_label: str | None = None,
     ):
         """
         创建一个新的自定义分组记录
@@ -654,7 +650,7 @@ class TimeSeriesGroup(CustomGroupBase):
         field_list=None,
         enable_field_black_list=None,
         metric_info_list=None,
-        data_label: Optional[str] = None,
+        data_label: str | None = None,
     ):
         """
         修改一个自定义时序组
@@ -762,7 +758,7 @@ class TimeSeriesGroup(CustomGroupBase):
             "last_modify_time": self.last_modify_time.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
-    def _filter_metric_by_dimension(self, metrics: List, dimension_name: str, dimension_value: str) -> (Set, Set):
+    def _filter_metric_by_dimension(self, metrics: list, dimension_name: str, dimension_value: str) -> (set, set):
         metric_by_dimension_name = set()
         metric_by_dimension_value = set()
         for d in metrics:
@@ -782,7 +778,7 @@ class TimeSeriesGroup(CustomGroupBase):
                     metric_by_dimension_value.add(d.get("field_name"))
         return metric_by_dimension_name, metric_by_dimension_value
 
-    def get_ts_metrics_by_dimension(self, dimension_name: str, dimension_value: str) -> List:
+    def get_ts_metrics_by_dimension(self, dimension_name: str, dimension_value: str) -> list:
         """获取指标名称
         从 redis 中获取数据，然后比对满足条件的记录，获取到指标名称
 
@@ -958,9 +954,9 @@ class TimeSeriesMetric(models.Model):
 
     def make_table_id(self, bk_biz_id, bk_data_id, table_name=None):
         if str(bk_biz_id) != "0":
-            return "{}_bkmonitor_time_series_{}.{}".format(bk_biz_id, bk_data_id, self.field_name)
+            return f"{bk_biz_id}_bkmonitor_time_series_{bk_data_id}.{self.field_name}"
 
-        return "bkmonitor_time_series_{}.{}".format(bk_data_id, self.field_name)
+        return f"bkmonitor_time_series_{bk_data_id}.{self.field_name}"
 
     def to_rt_field_json(self):
         """
@@ -1011,7 +1007,7 @@ class TimeSeriesMetric(models.Model):
         return result
 
     @classmethod
-    def get_metric_tag_from_metric_info(cls, metric_info: Dict) -> List:
+    def get_metric_tag_from_metric_info(cls, metric_info: dict) -> list:
         # 获取 tag
         if "tag_value_list" in metric_info:
             tags = set(metric_info["tag_value_list"].keys())
@@ -1025,8 +1021,8 @@ class TimeSeriesMetric(models.Model):
     @classmethod
     def _bulk_create_metrics(
         cls,
-        metrics_dict: Dict,
-        need_create_metrics: Union[List, Set],
+        metrics_dict: dict,
+        need_create_metrics: list | set,
         group_id: int,
         table_id: str,
         is_auto_discovery: bool,
@@ -1057,7 +1053,7 @@ class TimeSeriesMetric(models.Model):
 
     @classmethod
     def _bulk_update_metrics(
-        cls, metrics_dict: Dict, need_update_metrics: Union[List, Set], group_id: int, is_auto_discovery: bool
+        cls, metrics_dict: dict, need_update_metrics: list | set, group_id: int, is_auto_discovery: bool
     ) -> bool:
         """批量更新指标，针对记录仅更新最后更新时间和 tag 字段"""
         qs_objs = filter_model_by_in_page(
@@ -1112,7 +1108,7 @@ class TimeSeriesMetric(models.Model):
 
     @classmethod
     def bulk_refresh_ts_metrics(
-        cls, group_id: int, table_id: str, metric_info_list: List, is_auto_discovery: bool
+        cls, group_id: int, table_id: str, metric_info_list: list, is_auto_discovery: bool
     ) -> bool:
         """
             更新或创建时序指标数据
@@ -1173,7 +1169,7 @@ class TimeSeriesMetric(models.Model):
         """
         # 0. 判断是否真的存在某个group_id
         if not TimeSeriesGroup.objects.filter(time_series_group_id=group_id).exists():
-            logger.info("time_series_group_id->[{}] not exists, nothing will do.".format(group_id))
+            logger.info(f"time_series_group_id->[{group_id}] not exists, nothing will do.")
             raise ValueError(_("自定义时序组ID[{}]不存在，请确认后重试").format(group_id))
         group = TimeSeriesGroup.objects.get(time_series_group_id=group_id)
 
@@ -1217,7 +1213,7 @@ class TimeSeriesMetric(models.Model):
                 # 如果不存在指标，创建一个新的
                 metric_obj = cls.objects.create(field_name=field_name, group_id=group_id)
                 created = True
-                logger.info("new metric_obj->[{}] is create for group_id->[{}].".format(metric_obj, group_id))
+                logger.info(f"new metric_obj->[{metric_obj}] is create for group_id->[{group_id}].")
                 # NOTE: 如果有新增, 则标识要更新，删除时，可以不立即更新
                 is_updated = True
 
@@ -1227,9 +1223,7 @@ class TimeSeriesMetric(models.Model):
 
             if created or last_modify_time > metric_obj.last_modify_time:
                 logger.info(
-                    "time_series_group_id->[{}],field_name->[{}] will change index from->[{}] to [{}]".format(
-                        group_id, metric_obj.field_name, metric_obj.last_index, last_modify_time
-                    )
+                    f"time_series_group_id->[{group_id}],field_name->[{metric_obj.field_name}] will change index from->[{metric_obj.last_index}] to [{last_modify_time}]"
                 )
                 # 如果指标被禁用
                 if not metric_info.get("is_active", True):
@@ -1259,9 +1253,7 @@ class TimeSeriesMetric(models.Model):
 
                 # 后续可以在此处追加其他修改内容
                 logger.info(
-                    "time_series_group_id->[{}] has update field_name->[{}] all tags->[{}]".format(
-                        group_id, metric_obj.field_name, metric_obj.tag_list
-                    )
+                    f"time_series_group_id->[{group_id}] has update field_name->[{metric_obj.field_name}] all tags->[{metric_obj.tag_list}]"
                 )
 
         if white_list_disabled_metric:
@@ -1411,7 +1403,7 @@ class TimeSeriesMetric(models.Model):
 class TimeSeriesTagManager(models.Manager):
     """自定义时序标签(维度)管理器"""
 
-    def create_by_infos(self, metric_obj: TimeSeriesMetric, tag_infos: Dict[str, dict]) -> List["TimeSeriesTag"]:
+    def create_by_infos(self, metric_obj: TimeSeriesMetric, tag_infos: dict[str, dict]) -> list["TimeSeriesTag"]:
         """通过关键信息批量构建标签实例"""
         _ins = []
         for tag_name, tag_info in tag_infos.items():

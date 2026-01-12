@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from typing import List
 
 from django.utils.translation import gettext as _
 
@@ -8,14 +6,13 @@ from drf_resource import api
 from monitor_web.search.handlers.base import (
     BaseSearchHandler,
     SearchResultItem,
-    SearchScope,
 )
 
 
 class DashboardSearchHandler(BaseSearchHandler):
     SCENE = "dashboard"
 
-    def search(self, query: str, limit: int = 10) -> List[SearchResultItem]:
+    def search(self, query: str, limit: int = 10) -> list[SearchResultItem]:
         all_organization = api.grafana.get_all_organization()["data"]
 
         orgs = {}

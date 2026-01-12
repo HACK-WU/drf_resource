@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +23,7 @@ def deep_parsing_metric_info(metric_info):
         status = item.pop("status", parent_value["status"])
         message = item.pop("message", parent_value["message"])
         if not message:
-            message = " ".join(["{}: {}".format(k, v) for k, v in list(item.items())])
+            message = " ".join([f"{k}: {v}" for k, v in list(item.items())])
         sub_metric_info["result"] = {
             "name": name,
             "value": value,

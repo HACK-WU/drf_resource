@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -42,7 +41,7 @@ class SopsBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
         for index, username in enumerate(assignee):
             self.bk_username = username
             try:
-                return super(SopsBaseResource, self).perform_request(params)
+                return super().perform_request(params)
             except BKAPIError as error:
                 code = error.data.get("code")
                 if code == 3599999:
@@ -52,7 +51,7 @@ class SopsBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
                 raise error
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super(SopsBaseResource, self).full_request_data(validated_request_data)
+        validated_request_data = super().full_request_data(validated_request_data)
         # 业务id判定
         if "bk_biz_id" not in validated_request_data:
             return validated_request_data

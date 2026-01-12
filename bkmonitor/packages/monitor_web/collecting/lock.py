@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -19,7 +18,7 @@ from django.utils.translation import gettext as _
 from core.errors.collecting import LockTimeout
 
 
-class CacheLock(object):
+class CacheLock:
     def __init__(self, module, expires=60, wait_timeout=0):
         self.cache = cache
         self.module = module
@@ -48,7 +47,7 @@ def lock(cache_lock):
     def my_decorator(func):
         def wrapper(*args, **kwargs):
             collect_config = args[1]
-            lock_key = "bk_monitor:lock:{}_{}".format(cache_lock.module, collect_config.id)
+            lock_key = f"bk_monitor:lock:{cache_lock.module}_{collect_config.id}"
             identifier = cache_lock.get_lock(lock_key)
             try:
                 return func(*args, **kwargs)

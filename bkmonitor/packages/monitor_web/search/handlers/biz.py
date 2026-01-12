@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from typing import List
 
 from bkmonitor.iam import ActionEnum
 from monitor_web.search.handlers.base import BaseSearchHandler, SearchResultItem
@@ -9,7 +7,7 @@ class BizSearchHandler(BaseSearchHandler):
 
     SCENE = "biz"
 
-    def search(self, query: str, limit: int = 10) -> List[SearchResultItem]:
+    def search(self, query: str, limit: int = 10) -> list[SearchResultItem]:
 
         matched_bizs = []
 

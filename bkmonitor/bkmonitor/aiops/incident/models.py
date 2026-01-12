@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 import copy
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
-from typing import Dict, List, Tuple
 
 from bkmonitor.documents.incident import IncidentDocument
 from constants.incident import (
@@ -94,17 +92,17 @@ class IncidentGraphEntity:
     is_anomaly: bool
     is_root: bool
     rank: IncidentGraphRank
-    dimensions: Dict
+    dimensions: dict
     anomaly_score: float = 0
     anomaly_type: str = ""
     is_on_alert: bool = False
     bk_biz_id: int = None
-    tags: Dict = field(default_factory=dict)
-    aggregated_entities: List["IncidentGraphEntity"] = field(default_factory=list)
+    tags: dict = field(default_factory=dict)
+    aggregated_entities: list["IncidentGraphEntity"] = field(default_factory=list)
     component_type: IncidentGraphComponentType = IncidentGraphComponentType.PRIMARY
-    properties: Dict = field(default_factory=dict)
-    observe_time_rage: Dict = field(default_factory=dict)
-    rca_trace_info: Dict = field(default_factory=dict)
+    properties: dict = field(default_factory=dict)
+    observe_time_rage: dict = field(default_factory=dict)
+    rca_trace_info: dict = field(default_factory=dict)
 
     def to_src_dict(self):
         data = asdict(self)
@@ -136,7 +134,7 @@ class IncidentGraphEdgeEvent:
     event_name: str
     event_time: int
     direction: IncidentGraphEdgeEventDirection = IncidentGraphEdgeEventDirection.FORWARD
-    time_series: List = field(default_factory=list)
+    time_series: list = field(default_factory=list)
     metric_name: str = ""
 
     def to_src_dict(self):
@@ -175,13 +173,13 @@ class IncidentGraphEdge:
     source: IncidentGraphEntity
     target: IncidentGraphEntity
     edge_type: IncidentGraphEdgeType
-    events: List[IncidentGraphEdgeEvent] = field(default_factory=list)
+    events: list[IncidentGraphEdgeEvent] = field(default_factory=list)
     is_anomaly: bool = False
     anomaly_score: float = 0
     edge_cluster_id: str = None
-    aggregated_edges: List["IncidentGraphEdge"] = field(default_factory=list)
+    aggregated_edges: list["IncidentGraphEdge"] = field(default_factory=list)
     component_type: IncidentGraphComponentType = IncidentGraphComponentType.PRIMARY
-    properties: Dict = field(default_factory=dict)
+    properties: dict = field(default_factory=dict)
 
     def to_src_dict(self):
         return {
@@ -235,12 +233,12 @@ class IncidentAlert:
 
 
 @dataclass
-class IncidentSnapshot(object):
+class IncidentSnapshot:
     """
     用于处理故障根因定位结果快照数据的类.
     """
 
-    incident_snapshot_content: Dict
+    incident_snapshot_content: dict
 
     def __post_init__(self, prepare: bool = True):
         self.incident_graph_categories = {}
@@ -315,14 +313,14 @@ class IncidentSnapshot(object):
             incident_alert = IncidentAlert(**incident_alert_info)
             self.alert_entity_mapping[incident_alert.id] = incident_alert
 
-    def get_related_alert_ids(self) -> List[int]:
+    def get_related_alert_ids(self) -> list[int]:
         """检索故障根因定位快照关联的告警详情列表.
 
         :return: 告警详情列表
         """
         return [str(item["id"]) for item in self.incident_snapshot_content["incident_alerts"]]
 
-    def entity_alerts(self, entity_id) -> List[int]:
+    def entity_alerts(self, entity_id) -> list[int]:
         """实体告警列表
 
         :param entity_id: 实体ID
@@ -397,7 +395,7 @@ class IncidentSnapshot(object):
         return IncidentSnapshot(sub_incident_snapshot_content)
 
     def move_upstream_to_sub_graph_content(
-        self, entity: IncidentGraphEntity, direct_key: str, graph_content: Dict
+        self, entity: IncidentGraphEntity, direct_key: str, graph_content: dict
     ) -> None:
         """把节点关联的上游或下游加入到子图内容内容中
 
@@ -429,7 +427,7 @@ class IncidentSnapshot(object):
             if incident_alert.entity.entity_id == entity.entity_id:
                 graph_content["incident_alerts"].append(incident_alert.to_src_dict())
 
-    def group_by_rank(self) -> List[Dict]:
+    def group_by_rank(self) -> list[dict]:
         """根据实体ID找到所有上下游全链路，并按照rank维度分层
 
         :return: 按rank分层的上下游
@@ -475,7 +473,7 @@ class IncidentSnapshot(object):
 
         return final_ranks
 
-    def find_entity_type_depths(self, entity_type: str, current_depth: int, entity_type_depths: Dict) -> None:
+    def find_entity_type_depths(self, entity_type: str, current_depth: int, entity_type_depths: dict) -> None:
         """递归设置每种实体在拓扑图中的深度.
 
         :param entity_type: 实体类型
@@ -497,9 +495,9 @@ class IncidentSnapshot(object):
     def aggregate_graph(
         self,
         incident: IncidentDocument,
-        aggregate_config: Dict = None,
+        aggregate_config: dict = None,
         aggregate_cluster: bool = False,
-        entities_orders: Dict = None,
+        entities_orders: dict = None,
     ) -> None:
         """聚合图谱
 
@@ -521,8 +519,8 @@ class IncidentSnapshot(object):
             self.aggregate_by_groups(groups_by_clusters, entities_orders)
 
     def generate_groups_by_aggregate_configs(
-        self, incident: IncidentDocument, aggregate_config: Dict = None
-    ) -> Dict[Tuple, set]:
+        self, incident: IncidentDocument, aggregate_config: dict = None
+    ) -> dict[tuple, set]:
         """根据从属关系的聚合配置生成需要聚合的分组.
 
         :param incident: 故障详情
@@ -560,7 +558,7 @@ class IncidentSnapshot(object):
 
         return group_by_entities
 
-    def generate_groups_by_edge_clusters(self) -> Dict[Tuple, set]:
+    def generate_groups_by_edge_clusters(self) -> dict[tuple, set]:
         """根据调用关系聚类结果进行分组.
 
         :param incident: 故障详情
@@ -654,7 +652,7 @@ class IncidentSnapshot(object):
 
         return False
 
-    def drop_groups_duplicates(self, groups_by_clusters: Dict[Tuple, set]) -> Dict[Tuple, set]:
+    def drop_groups_duplicates(self, groups_by_clusters: dict[tuple, set]) -> dict[tuple, set]:
         """分组去重，如果任意一个分组属于其中一个分组的子集，则去掉这个分组
 
         :param groups_by_clusters: 按照边聚类结果的分组情况
@@ -677,7 +675,7 @@ class IncidentSnapshot(object):
 
         return result_groups
 
-    def split_by_logic_key(self, groups_by_clusters: Dict[Tuple, set]) -> Dict[Tuple, set]:
+    def split_by_logic_key(self, groups_by_clusters: dict[tuple, set]) -> dict[tuple, set]:
         """分组去重，如果任意一个分组属于其中一个分组的子集，则去掉这个分组
 
         :param groups_by_clusters: 按照边聚类结果的分组情况
@@ -695,7 +693,7 @@ class IncidentSnapshot(object):
 
         return result_groups
 
-    def aggregate_by_groups(self, groups_by_entities: Dict[Tuple, set], entities_orders: Dict = None):
+    def aggregate_by_groups(self, groups_by_entities: dict[tuple, set], entities_orders: dict = None):
         """按照分组合并节点和边.
 
         :param groups_by_entities: 根据特定规则合并节点的分组
@@ -708,7 +706,7 @@ class IncidentSnapshot(object):
                 sorted_entities = sorted(list(entity_ids), key=lambda x: (entities_orders.get(x, x), x))
                 self.merge_entities(sorted_entities)
 
-    def generate_aggregate_key(self, entity: IncidentGraphEntity, aggregate_config: Dict) -> frozenset:
+    def generate_aggregate_key(self, entity: IncidentGraphEntity, aggregate_config: dict) -> frozenset:
         """根据聚合配置生成用于聚合的key
 
         :param entity: 图谱试图
@@ -737,7 +735,7 @@ class IncidentSnapshot(object):
 
         return frozenset(aggregate_bys.items())
 
-    def merge_entities(self, entity_ids: List[str]) -> None:
+    def merge_entities(self, entity_ids: list[str]) -> None:
         """合并同类实体
 
         :param entity_ids: 待合并实体列表
@@ -778,7 +776,7 @@ class IncidentSnapshot(object):
             del self.entity_sources[entity.entity_id]
             del self.incident_graph_entities[entity.entity_id]
 
-    def merge_edges(self, _from: Tuple[str, str], _to: Tuple[str, str]):
+    def merge_edges(self, _from: tuple[str, str], _to: tuple[str, str]):
         """合并两条边
 
         :param _from: 被合并的边

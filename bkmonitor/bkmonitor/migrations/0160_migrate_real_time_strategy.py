@@ -2,7 +2,6 @@
 
 import re
 from collections import defaultdict
-from typing import Dict, List
 
 from django.db import migrations
 
@@ -109,11 +108,11 @@ def migrate_real_time_strategy(apps, schema_editor):
         algorithm_query = AlgorithmModel.objects.filter(strategy_id__in=strategy_ids)
         item_query = ItemModel.objects.filter(strategy_id__in=strategy_ids)
 
-    algorithms_mapping: Dict[int, List[AlgorithmModel]] = defaultdict(list)
+    algorithms_mapping: dict[int, list[AlgorithmModel]] = defaultdict(list)
     for algorithm in algorithm_query:
         algorithms_mapping[algorithm.strategy_id].append(algorithm)
 
-    items_mapping: Dict[int, List[ItemModel]] = defaultdict(list)
+    items_mapping: dict[int, list[ItemModel]] = defaultdict(list)
     for item in item_query:
         items_mapping[item.strategy_id].append(item)
 

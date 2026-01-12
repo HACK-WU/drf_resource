@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -23,7 +22,6 @@ from django.conf import settings
 from kombu.utils.url import parse_url
 from redis.exceptions import ConnectionError
 from redis.sentinel import Sentinel
-from six.moves import map, range
 
 from core.cache import InstanceCache
 
@@ -40,7 +38,7 @@ redis中的db分配[7，8，9，10]，共4个db
 """
 
 
-class CacheBackendType(object):
+class CacheBackendType:
     CELERY = "celery"
     SERVICE = "service"
     QUEUE = "queue"
@@ -95,7 +93,7 @@ def cache_conf_with_router(router_id):
     return parts
 
 
-class BaseRedisCache(object):
+class BaseRedisCache:
     def __init__(self, redis_class=None):
         self.redis_class = redis_class or redis.Redis
         self._instance = None
@@ -117,7 +115,7 @@ class BaseRedisCache(object):
         :return:
         """
         # 构建实例属性名称，以避免直接属性访问的不透明度
-        _instance = "_%s_instance" % backend
+        _instance = f"_{backend}_instance"
 
         # 检查是否已经为给定的后端创建了实例,如果创建了直接返回，所以这是一个单例模式
         # 相当于它变成了一个全局的redis工具类
@@ -137,7 +135,7 @@ class BaseRedisCache(object):
                 if config is not None:
                     setattr(cls, _instance, Cache.__new__(Cache, backend, config))
                 else:
-                    raise Exception("unknown redis backend %s" % backend)
+                    raise Exception(f"unknown redis backend {backend}")
 
         return getattr(cls, _instance)
 
@@ -231,7 +229,7 @@ class RedisCache(BaseRedisCache):
         if decode_responses:
             # 插入默认参数
             self.redis_conf.update({"decode_responses": True, "encoding": "utf-8"})
-        super(RedisCache, self).__init__(redis_class)
+        super().__init__(redis_class)
 
     def create_instance(self):
         client = self.redis_class(**self.redis_conf)
@@ -259,7 +257,7 @@ class SentinelRedisCache(BaseRedisCache):
         # 插入默认参数
         if decode_responses:
             self.redis_conf.update({"decode_responses": True, "encoding": "utf-8"})
-        super(SentinelRedisCache, self).__init__(redis_class)
+        super().__init__(redis_class)
 
     def create_instance(self):
         sentinel_kwargs = {

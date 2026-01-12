@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -25,8 +24,8 @@ logger = logging.getLogger(__name__)
 
 def validate_license_info(url, cert_path, key_path, platform, now=None):
     if not os.path.exists(cert_path):
-        message = "cert not found at: %s" % cert_path
-        raise ValueError("cert not found at: %s" % cert_path)
+        message = f"cert not found at: {cert_path}"
+        raise ValueError(f"cert not found at: {cert_path}")
 
     with open(cert_path, "rb") as fp:
         cert = fp.read()
@@ -44,10 +43,10 @@ def validate_license_info(url, cert_path, key_path, platform, now=None):
     )
     result = response.json()
     if not result.get("status"):
-        message = "validate license failed: %s" % result.get(
+        message = "validate license failed: {}".format(result.get(
             "message",
             "unknown",
-        )
+        ))
         raise ValueError(message)
     validate_result = result.get("result")
     validate_message = result.get("message", "unknown")
@@ -60,7 +59,7 @@ def check_system_license():
     cert_path = os.path.join(settings.CERT_PATH, "platform.cert")
     key_path = os.path.join(settings.CERT_PATH, "platform.key")
     validate_license_info(
-        "https://{}:{}/certificate".format(settings.LICENSE_HOST, settings.LICENSE_PORT),
+        f"https://{settings.LICENSE_HOST}:{settings.LICENSE_PORT}/certificate",
         cert_path,
         key_path,
         "bkdata",

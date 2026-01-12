@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 from collections import defaultdict
-from typing import Dict, List
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -102,7 +100,7 @@ class CheckAllowedByApmApplicationResource(Resource):
                 app = Application.objects.get(bk_biz_id=validated_request_data["bk_biz_id"], app_name=application_name)
                 application_id = app.application_id
             except Application.DoesNotExist:
-                raise ValueError("Application({}) does not exist".format(application_name))
+                raise ValueError(f"Application({application_name}) does not exist")
 
         apm_resource = Permission.make_resource(resource_type=ApmApplication.id, instance_id=application_id)
         client = Permission()
@@ -477,7 +475,7 @@ class GetExternalPermissionList(Resource):
                     resource_to_user[resource_key]["status"] = permission_status
                     resource_to_user[resource_key]["bk_biz_id"] = permission.bk_biz_id
 
-            permission_list: List[Dict] = list(resource_to_user.values())
+            permission_list: list[dict] = list(resource_to_user.values())
 
         for permission in permission_list:
             permission["authorizer"] = authorizer_map.value.get(str(permission["bk_biz_id"]), "")

@@ -1,24 +1,23 @@
-# -*- coding: utf-8 -*-
 import typing
 
-Scope = typing.Dict[str, typing.Union[int, str]]
+Scope = dict[str, int | str]
 
-ScopeList = typing.List[Scope]
+ScopeList = list[Scope]
 
 MetaData = Scope
 
-TreeNode = typing.Dict[str, typing.Any]
+TreeNode = dict[str, typing.Any]
 
-ReadableTreeNode = typing.Dict[str, typing.Any]
+ReadableTreeNode = dict[str, typing.Any]
 
-HostInfo = typing.Dict[str, typing.Any]
+HostInfo = dict[str, typing.Any]
 
-FormatHostInfo = typing.Dict[str, typing.Any]
+FormatHostInfo = dict[str, typing.Any]
 
-Condition = typing.Dict[str, typing.Union[int, str, typing.Iterable]]
+Condition = dict[str, int | str | typing.Iterable]
 
-Template = typing.Dict[str, typing.Any]
+Template = dict[str, typing.Any]
 
-TemplateNode = typing.Dict[str, typing.Any]
+TemplateNode = dict[str, typing.Any]
 
-DynamicGroup = typing.Dict[str, typing.Any]
+DynamicGroup = dict[str, typing.Any]

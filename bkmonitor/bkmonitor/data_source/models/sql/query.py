@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -89,7 +88,7 @@ def load_backends(using):
     query_func = config["query"]
     backend_name = config["backends"]
     try:
-        return query_func, import_module("%s.connection" % backend_name)
+        return query_func, import_module(f"{backend_name}.connection")
     except ImportError:
         raise
 
@@ -108,7 +107,7 @@ def get_limit_range(low=None, high=None, low_mark=None, high_mark=None):
     return low_mark, high_mark
 
 
-class RawQuery(object):
+class RawQuery:
     """
     A single raw SQL query
     """
@@ -126,7 +125,7 @@ class RawQuery(object):
         return conn.execute(sql)
 
 
-class Query(object):
+class Query:
     """
     A single SQL query.
     """
@@ -263,4 +262,4 @@ class InsertQuery(Query):
     compiler = "SQLInsertCompiler"
 
     def __init__(self, *args, **kwargs):
-        super(InsertQuery, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)

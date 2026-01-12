@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +23,7 @@ def is_backend(app_label):
 backend_router = "monitor_api"
 
 
-class BackendRouter(object):
+class BackendRouter:
     def db_for_read(self, model, **hints):
         # 动态路由判断
         if getattr(local, "DB_FOR_READ_OVERRIDE", []):
@@ -63,7 +62,7 @@ class BackendRouter(object):
             return False
 
 
-class UsingDB(object):
+class UsingDB:
     """A decorator and context manager to do queries on a given database.
     Usage as a context manager:
     .. code-block:: python

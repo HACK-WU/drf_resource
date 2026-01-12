@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,16 +28,16 @@ def task_duration(task_name, queue_name=None):
         @functools.wraps(_func)
         def _inner(*args, **kwargs):
             start = time.time()
-            logger.info("^[Cron Task](%s)" % task_name)
+            logger.info(f"^[Cron Task]({task_name})")
             exception = None
             try:
                 return _func(*args, **kwargs)
             except Exception as e:
-                logger.exception("![Cron Task]({}) error: {}".format(task_name, e))
+                logger.exception(f"![Cron Task]({task_name}) error: {e}")
                 exception = e
             finally:
                 time_cost = time.time() - start
-                logger.info("$[Cron Task]({}) cost: {}".format(task_name, time_cost))
+                logger.info(f"$[Cron Task]({task_name}) cost: {time_cost}")
                 metrics.CRON_TASK_EXECUTE_TIME.labels(task_name=task_name, queue=queue_name).observe(time_cost)
                 metrics.CRON_TASK_EXECUTE_COUNT.labels(
                     task_name=task_name,
@@ -59,7 +58,7 @@ def _get_func(module_path, queue=None):
             process_func = import_string(module_path)
             process_func = getattr(process_func, "main", process_func)
         except ImportError:
-            process_func = import_string("%s.main" % module_path)
+            process_func = import_string(f"{module_path}.main")
 
         return task_duration(module_path, queue)(process_func)(*args, **kwargs)
 

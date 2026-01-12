@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -39,13 +38,13 @@ class AbnormalCluster(BasicAlgorithmsCollection):
         )
 
     def get_context(self, data_point):
-        context = super(AbnormalCluster, self).get_context(data_point)
+        context = super().get_context(data_point)
         abnormal_clusters = parse_cluster(data_point.values["cluster"])
         context.update({"abnormal_clusters": abnormal_clusters})
         return context
 
     def anomaly_message_template_tuple(self, data_point):
-        prefix, suffix = super(AbnormalCluster, self).anomaly_message_template_tuple(data_point)
+        prefix, suffix = super().anomaly_message_template_tuple(data_point)
         return prefix, ""
 
 
@@ -53,6 +52,6 @@ def parse_cluster(cluster_str):
     clusters = json.loads(f"[{cluster_str}]")
     result = []
     for key, value in clusters[0].items():
-        result.append("{}({})".format(key, value))
+        result.append(f"{key}({value})")
     result = "[{}]".format("-".join(result))
     return result

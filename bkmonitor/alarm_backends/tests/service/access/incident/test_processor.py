@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,7 @@ specific language governing permissions and limitations under the License.
 import json
 
 import pytest
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from alarm_backends.service.access.incident.processor import AccessIncidentProcess
 
@@ -770,7 +769,7 @@ def patch_snapshot_api():
         yield
 
 
-class TestIncidentAccessProcesor(object):
+class TestIncidentAccessProcesor:
     @pytest.mark.usefixtures("patch_rabbitmq_client")
     @pytest.mark.usefixtures("patch_snapshot_api")
     def test_processor(self):

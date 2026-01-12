@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -1263,9 +1262,7 @@ class QueryTraceByIdsResource(Resource):
         trace_ids = list(set(validated_request_data["trace_ids"]))
         if len(trace_ids) > settings.APM_APP_QUERY_TRACE_MAX_COUNT:
             logger.warning(
-                "QueryTraceByIdsResource len of trace_ids({}) has exceeded the maximum number({})".format(
-                    len(trace_ids), settings.APM_APP_QUERY_TRACE_MAX_COUNT
-                )
+                f"QueryTraceByIdsResource len of trace_ids({len(trace_ids)}) has exceeded the maximum number({settings.APM_APP_QUERY_TRACE_MAX_COUNT})"
             )
             validated_request_data["trace_ids"] = trace_ids[: settings.APM_APP_QUERY_TRACE_MAX_COUNT]
 
@@ -1312,9 +1309,7 @@ class QueryAppByTraceResource(Resource):
         trace_ids = validated_request_data["trace_ids"]
         if len(trace_ids) > settings.APM_APP_QUERY_TRACE_MAX_COUNT:
             logger.warning(
-                "QueryTraceByIdsResource len of trace_ids({}) has exceeded the maximum number({})".format(
-                    len(trace_ids), settings.APM_APP_QUERY_TRACE_MAX_COUNT
-                )
+                f"QueryTraceByIdsResource len of trace_ids({len(trace_ids)}) has exceeded the maximum number({settings.APM_APP_QUERY_TRACE_MAX_COUNT})"
             )
             trace_ids = trace_ids[: settings.APM_APP_QUERY_TRACE_MAX_COUNT]
 

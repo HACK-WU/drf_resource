@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +9,6 @@ specific language governing permissions and limitations under the License.
 """
 
 import json
-from typing import Dict, List, Optional, Set, Union
 
 from django.db.models import Q
 
@@ -19,7 +17,7 @@ from metadata.models.space.constants import EtlConfigs, MeasurementType, SpaceTy
 from metadata.utils.db import filter_model_by_in_page
 
 
-def get_result_tables_by_data_ids(data_id_list: Optional[List] = None, table_id_list: Optional[List] = None) -> Dict:
+def get_result_tables_by_data_ids(data_id_list: list | None = None, table_id_list: list | None = None) -> dict:
     """通过数据源 ID 获取结果表数据"""
     query_filter = Q()
     if data_id_list:
@@ -31,7 +29,7 @@ def get_result_tables_by_data_ids(data_id_list: Optional[List] = None, table_id_
 
 
 # 缓存平台或者类型级的数据源
-def get_platform_data_ids(space_type: Optional[str] = None) -> Dict[int, str]:
+def get_platform_data_ids(space_type: str | None = None) -> dict[int, str]:
     """获取平台级的数据源
     NOTE: 仅针对当前空间类型，比如 bkcc，特殊的是 all 类型
     """
@@ -43,7 +41,7 @@ def get_platform_data_ids(space_type: Optional[str] = None) -> Dict[int, str]:
     return data_ids
 
 
-def get_table_info_for_influxdb_and_vm(table_id_list: Optional[List] = None) -> Dict:
+def get_table_info_for_influxdb_and_vm(table_id_list: list | None = None) -> dict:
     """获取influxdb 和 vm的结果表"""
     vm_tables = models.AccessVMRecord.objects.values("result_table_id", "vm_cluster_id", "vm_result_table_id")
     # 如果结果表存在，则过滤指定的结果表
@@ -121,7 +119,7 @@ def get_table_info_for_influxdb_and_vm(table_id_list: Optional[List] = None) -> 
     return table_id_info
 
 
-def compose_monitor_table_detail_for_bkbase_type(table_id_list: Optional[List] = None) -> Dict:
+def compose_monitor_table_detail_for_bkbase_type(table_id_list: list | None = None) -> dict:
     """
     针对接入过计算平台类型的结果表，组装其详情信息，为RESULT_TABLE_DETAIL使用,现阶段只有VM类型
     @param table_id_list: 监控平台自身结果表列表
@@ -170,11 +168,11 @@ def compose_monitor_table_detail_for_bkbase_type(table_id_list: Optional[List] =
 def get_space_table_id_data_id(
     space_type: str,
     space_id: str,
-    table_id_list: Optional[List] = None,
-    from_authorization: Optional[bool] = None,
-    include_platform_data_id: Optional[bool] = True,
-    exclude_data_id_list: Optional[List] = None,
-) -> Dict:
+    table_id_list: list | None = None,
+    from_authorization: bool | None = None,
+    include_platform_data_id: bool | None = True,
+    exclude_data_id_list: list | None = None,
+) -> dict:
     """获取空间下的结果表和数据源信息"""
     # 如果结果表存在，则直接过滤对应的数据
     if table_id_list:
@@ -209,7 +207,7 @@ def get_space_table_id_data_id(
     return {data["table_id"]: data["bk_data_id"] for data in _filter_data}
 
 
-def get_measurement_type_by_table_id(table_ids: Set, table_list: List, table_id_data_id: Dict) -> Dict:
+def get_measurement_type_by_table_id(table_ids: set, table_list: list, table_id_data_id: dict) -> dict:
     """通过结果表 ID, 获取节点表对应的 option 配置
     通过 option 转到到 measurement 类型
     """
@@ -244,7 +242,7 @@ def get_measurement_type_by_table_id(table_ids: Set, table_list: List, table_id_
 
 
 def get_measurement_type(
-    schema_type: str, is_split_measurement: bool, is_disable_metric_cutter: bool, etl_config: Optional[str] = None
+    schema_type: str, is_split_measurement: bool, is_disable_metric_cutter: bool, etl_config: str | None = None
 ) -> str:
     """获取表类型
     - 当 schema_type 为 fixed 时，为多指标单表
@@ -273,7 +271,7 @@ def get_measurement_type(
     return MeasurementType.BK_TRADITIONAL.value
 
 
-def get_cluster_data_ids(cluster_id_list: List, table_id_list: Optional[List] = None) -> Dict:
+def get_cluster_data_ids(cluster_id_list: list, table_id_list: list | None = None) -> dict:
     """获取集群及数据源"""
     # 如果指定结果表, 则仅过滤结果表对应的数据源
     data_id_list = []
@@ -318,7 +316,7 @@ def get_cluster_data_ids(cluster_id_list: List, table_id_list: Optional[List] = 
     return data_id_cluster_id
 
 
-def get_table_id_cluster_id(table_id_list: Union[List, Set]) -> Dict[str, str]:
+def get_table_id_cluster_id(table_id_list: list | set) -> dict[str, str]:
     """获取结果表对应的集群 ID"""
     table_id_data_id = {
         data["table_id"]: data["bk_data_id"]

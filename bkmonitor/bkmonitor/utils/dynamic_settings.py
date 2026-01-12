@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +15,7 @@ from django.utils.functional import cached_property, empty
 from core.cache import InstanceCache
 
 
-class DynamicSettings(object):
+class DynamicSettings:
     __cache_expires__ = 60
     __name_list__ = set()
 
@@ -53,7 +52,7 @@ class DynamicSettings(object):
         elif name.isupper():
             setattr(self._wrapped, name, value)
         else:
-            super(DynamicSettings, self).__setattr__(name, value)
+            super().__setattr__(name, value)
 
     def __delattr__(self, name):
         if hasattr(self, name):

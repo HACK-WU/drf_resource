@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,14 +21,14 @@ from drf_resource.utils.common import count_md5
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument("--strategy", help="clear alert qos keys  for the input strategy")
         parser.add_argument("--severity", help="clear alert qos keys for the input severity")
 
     def handle(self, *args, **options):
         strategy = options.get("strategy") or "all"
         severity = options.get("severity") or "all"
-        print("clear alert qos key for strategy({}), severity({})".format(strategy, severity))
+        print(f"clear alert qos key for strategy({strategy}), severity({severity})")
         current_time = int(time.time())
         end_time = current_time
         start_time = current_time - CONST_ONE_DAY
@@ -73,6 +72,6 @@ class Command(BaseCommand):
                 invalid_keys_count += 1
 
         print(
-            "clear alert qos key for strategy({}), severity({}) finished, "
-            "total invalid keys count({})".format(strategy, severity, invalid_keys_count)
+            f"clear alert qos key for strategy({strategy}), severity({severity}) finished, "
+            f"total invalid keys count({invalid_keys_count})"
         )

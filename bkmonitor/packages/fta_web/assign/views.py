@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -43,7 +42,7 @@ class AssignGroupViewSet(viewsets.ModelViewSet):
             if not permission.has_object_permission(request, self, obj):
                 self.permission_denied(request, message=getattr(permission, "message", None))
         else:
-            super(AssignGroupViewSet, self).check_object_permissions(request, obj)
+            super().check_object_permissions(request, obj)
 
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
@@ -54,12 +53,12 @@ class AssignGroupViewSet(viewsets.ModelViewSet):
         request_biz_id = request.query_params.get("bk_biz_id", 0)
         if request_biz_id:
             self.queryset = self.queryset.filter(bk_biz_id__in=[GLOBAL_BIZ_ID, request_biz_id])
-        response = super(AssignGroupViewSet, self).list(request, *args, **kwargs)
+        response = super().list(request, *args, **kwargs)
         return response
 
     def perform_destroy(self, instance):
         AlertAssignRule.objects.filter(assign_group_id=instance.id).delete()
-        super(AssignGroupViewSet, self).perform_destroy(instance)
+        super().perform_destroy(instance)
 
 
 class AssignRuleViewSet(viewsets.ModelViewSet):
@@ -75,7 +74,7 @@ class AssignRuleViewSet(viewsets.ModelViewSet):
             if not permission.has_object_permission(request, self, obj):
                 self.permission_denied(request, message=getattr(permission, "message", None))
         else:
-            super(AssignRuleViewSet, self).check_object_permissions(request, obj)
+            super().check_object_permissions(request, obj)
 
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
@@ -83,7 +82,7 @@ class AssignRuleViewSet(viewsets.ModelViewSet):
         return [BusinessActionPermission([ActionEnum.MANAGE_RULE])]
 
     def get_queryset(self):
-        queryset = super(AssignRuleViewSet, self).get_queryset()
+        queryset = super().get_queryset()
         request = get_request(peaceful=True)
         biz_list = [request.biz_id, GLOBAL_BIZ_ID] if request.biz_id else [GLOBAL_BIZ_ID]
         queryset = queryset.filter(bk_biz_id__in=biz_list)

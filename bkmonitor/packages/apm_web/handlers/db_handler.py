@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-from typing import List, Tuple
 
 from django.utils.functional import classproperty
 from django.utils.translation import gettext_lazy as _
@@ -186,7 +184,7 @@ class DbInstanceHandler:
         return rules[0]
 
     @staticmethod
-    def get_topo_instance_key(keys: List[Tuple[str, str]], item):
+    def get_topo_instance_key(keys: list[tuple[str, str]], item):
         instance_keys = []
         for first_key, second_key in keys:
             key = item.get(first_key, item).get(second_key, "")
