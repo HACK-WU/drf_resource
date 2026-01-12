@@ -19,11 +19,11 @@ from django.conf import settings
 from django.http import StreamingHttpResponse
 from django.utils import translation
 from django.utils.translation import gettext as _
-from requests.exceptions import HTTPError, ReadTimeout
-
-from bkmonitor.utils.user import make_userinfo
 from drf_resource.contrib.cache import CacheResource
 from drf_resource.utils.request import get_request
+from drf_resource.utils.user import make_userinfo
+from requests.exceptions import HTTPError, ReadTimeout
+
 from core.errors.api import BKAPIError
 from core.errors.iam import APIPermissionDeniedError
 from core.prometheus import metrics

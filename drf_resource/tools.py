@@ -15,10 +15,9 @@ import logging
 from collections import OrderedDict
 
 from django.utils.encoding import force_str
+from drf_resource.utils.text import camel_to_underscore
 from rest_framework import serializers
 from rest_framework.fields import empty
-
-from bkmonitor.utils.text import camel_to_underscore
 
 logger = logging.getLogger(__name__)
 

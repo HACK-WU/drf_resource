@@ -16,11 +16,6 @@ import logging
 import six
 from django.db import models
 from django.utils.translation import gettext as _
-from opentelemetry import trace
-from opentelemetry.trace.status import Status, StatusCode
-
-from bkmonitor.utils.request import get_request_username
-from bkmonitor.utils.thread_backend import ThreadPool
 from drf_resource.exceptions import CustomException, record_exception
 from drf_resource.tasks import run_perform_request
 from drf_resource.tools import (
@@ -28,6 +23,10 @@ from drf_resource.tools import (
     get_serializer_fields,
     render_schema,
 )
+from drf_resource.utils.thread_backend import ThreadPool
+from drf_resource.utils.user import get_request_username
+from opentelemetry import trace
+from opentelemetry.trace.status import Status, StatusCode
 
 tracer = trace.get_tracer(__name__)
 logger = logging.getLogger(__name__)
