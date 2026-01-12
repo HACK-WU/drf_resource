@@ -15,14 +15,13 @@ from typing import Optional
 
 from django.http import Http404
 from django.utils.translation import gettext_lazy as _lazy
+from drf_resource.errors import Error, ErrorDetails
+from drf_resource.errors.common import DrfApiError, HTTP404Error, UnknownError
 from opentelemetry.trace.span import Span
 from opentelemetry.util import types
 from rest_framework import status
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
-
-from core.errors import Error, ErrorDetails
-from core.errors.common import DrfApiError, HTTP404Error, UnknownError
 
 logger = logging.getLogger(__name__)
 
@@ -147,18 +146,26 @@ def record_exception(
         if out_limit and out_limit > 0:
             out_frames = out_frames[:out_limit]
         for item in reversed(out_frames):
-            row.append('  File "{}", line {}, in {}\n'.format(item.filename, item.lineno, item.function))
+            row.append(
+                '  File "{}", line {}, in {}\n'.format(
+                    item.filename, item.lineno, item.function
+                )
+            )
             for line in item.code_context:
                 if line:
-                    row.append('    {}\n'.format(line.strip()))
+                    row.append("    {}\n".format(line.strip()))
 
         for item in inspect.getinnerframes(tb):
-            row.append('  File "{}", line {}, in {}\n'.format(item.filename, item.lineno, item.function))
+            row.append(
+                '  File "{}", line {}, in {}\n'.format(
+                    item.filename, item.lineno, item.function
+                )
+            )
             for line in item.code_context:
                 if line:
-                    row.append('    {}\n'.format(line.strip()))
+                    row.append("    {}\n".format(line.strip()))
 
-        stacktrace = ''.join(row)
+        stacktrace = "".join(row)
     except Exception:  # pylint: disable=broad-except
         # workaround for python 3.4, format_exc can raise
         # an AttributeError if the __context__ on
