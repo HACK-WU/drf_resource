@@ -4,7 +4,7 @@
 
 API Explorer 提供了一套 RESTful API 接口，用于查看和调试项目中的 API 资源。所有接口均需要在测试/开发环境下访问。
 
-**基础 URL**：`http://your-domain/api-explorer/`
+**基础 URL**：`http://your-domain/`
 
 **环境要求**：
 - 测试环境（`DEBUG=True` 或 `ENV in ['dev', 'test', 'development', 'testing', 'local']`）
@@ -52,7 +52,7 @@ API Explorer 提供了一套 RESTful API 接口，用于查看和调试项目中
 
 获取 API Explorer 的主页信息和可用端点。
 
-**接口地址**：`GET /api-explorer/`
+**接口地址**：`GET /api_index/`
 
 **请求参数**：无
 
@@ -64,14 +64,16 @@ API Explorer 提供了一套 RESTful API 接口，用于查看和调试项目中
 | data | object | 返回数据 |
 | data.title | string | 标题 |
 | data.description | string | 描述 |
-| data.endpoints | object | 端点路径映射 |
+| data.endpoints | object | 端点完整URL映射（包含域名） |
 | data.endpoints_info | array | 端点详细信息列表 |
 | data.endpoints_info[].name | string | 端点名称 |
-| data.endpoints_info[].url | string | 端点 URL |
+| data.endpoints_info[].url | string | 端点完整URL（包含域名） |
 | data.endpoints_info[].method | string | HTTP 方法 |
 | data.endpoints_info[].description | string | 端点描述 |
 | data.endpoints_info[].params | array | 参数列表 |
 | message | string | 响应消息 |
+
+**注意**：返回的URL是完整的绝对URL，包含协议、域名和路径，会根据当前请求的域名动态生成。
 
 **响应示例**：
 
@@ -83,15 +85,15 @@ API Explorer 提供了一套 RESTful API 接口，用于查看和调试项目中
         "title": "API Explorer",
         "description": "用于查看和调试项目中的 API 资源",
         "endpoints": {
-            "catalog": "/api-explorer/catalog/",
-            "api_detail": "/api-explorer/api_detail/",
-            "invoke": "/api-explorer/invoke/",
-            "modules": "/api-explorer/modules/"
+            "catalog": "http://localhost:8000/catalog/",
+            "api_detail": "http://localhost:8000/api_detail/",
+            "invoke": "http://localhost:8000/invoke/",
+            "modules": "http://localhost:8000/api_modules/"
         },
         "endpoints_info": [
             {
                 "name": "catalog",
-                "url": "/api-explorer/catalog/",
+                "url": "http://localhost:8000/catalog/",
                 "method": "GET",
                 "description": "获取 API 目录列表，支持搜索和模块过滤",
                 "params": [
@@ -113,7 +115,7 @@ API Explorer 提供了一套 RESTful API 接口，用于查看和调试项目中
             },
             {
                 "name": "api_detail",
-                "url": "/api-explorer/api_detail/",
+                "url": "http://localhost:8000/api_detail/",
                 "method": "GET",
                 "description": "获取单个 API 的详细信息，包括请求/响应参数结构",
                 "params": [
@@ -135,7 +137,7 @@ API Explorer 提供了一套 RESTful API 接口，用于查看和调试项目中
             },
             {
                 "name": "invoke",
-                "url": "/api-explorer/invoke/",
+                "url": "http://localhost:8000/invoke/",
                 "method": "POST",
                 "description": "在线调用指定的第三方 API，并返回调用结果",
                 "params": [
@@ -164,7 +166,7 @@ API Explorer 提供了一套 RESTful API 接口，用于查看和调试项目中
             },
             {
                 "name": "modules",
-                "url": "/api-explorer/modules/",
+                "url": "http://localhost:8000/api_modules/",
                 "method": "GET",
                 "description": "获取所有可用的模块列表，支持模糊查询",
                 "params": [
@@ -185,7 +187,7 @@ API Explorer 提供了一套 RESTful API 接口，用于查看和调试项目中
 **cURL 示例**：
 
 ```bash
-curl -X GET "http://localhost:8000/api-explorer/"
+curl -X GET "http://localhost:8000/api_index/"
 ```
 
 ---
@@ -194,7 +196,7 @@ curl -X GET "http://localhost:8000/api-explorer/"
 
 获取项目中所有可用的模块列表，支持模糊搜索。
 
-**接口地址**：`GET /api-explorer/modules/`
+**接口地址**：`GET /api_modules/`
 
 **请求参数**（Query Parameters）：
 
@@ -248,10 +250,10 @@ curl -X GET "http://localhost:8000/api-explorer/"
 
 ```bash
 # 获取所有模块
-curl -X GET "http://localhost:8000/api-explorer/modules/"
+curl -X GET "http://localhost:8000/api_modules/"
 
 # 搜索包含 "data" 的模块
-curl -X GET "http://localhost:8000/api-explorer/modules/?search=data"
+curl -X GET "http://localhost:8000/api_modules/?search=data"
 ```
 
 **错误响应**：
@@ -272,7 +274,7 @@ curl -X GET "http://localhost:8000/api-explorer/modules/?search=data"
 
 获取项目中所有 API 资源的目录列表，支持搜索和模块过滤。
 
-**接口地址**：`GET /api-explorer/catalog/`
+**接口地址**：`GET /catalog/`
 
 **请求参数**（Query Parameters）：
 
@@ -370,16 +372,16 @@ curl -X GET "http://localhost:8000/api-explorer/modules/?search=data"
 
 ```bash
 # 获取所有 API
-curl -X GET "http://localhost:8000/api-explorer/catalog/"
+curl -X GET "http://localhost:8000/catalog/"
 
 # 搜索包含 "query" 关键词的 API
-curl -X GET "http://localhost:8000/api-explorer/catalog/?search=query"
+curl -X GET "http://localhost:8000/catalog/?search=query"
 
 # 获取指定模块的 API
-curl -X GET "http://localhost:8000/api-explorer/catalog/?module=bkdata"
+curl -X GET "http://localhost:8000/catalog/?module=bkdata"
 
 # 组合使用
-curl -X GET "http://localhost:8000/api-explorer/catalog/?module=bkdata&search=data"
+curl -X GET "http://localhost:8000/catalog/?module=bkdata&search=data"
 ```
 
 **错误响应**：
@@ -400,7 +402,7 @@ curl -X GET "http://localhost:8000/api-explorer/catalog/?module=bkdata&search=da
 
 获取单个 API 的详细信息，包括请求/响应参数结构。
 
-**接口地址**：`GET /api-explorer/api_detail/`
+**接口地址**：`GET /api_detail/`
 
 **请求参数**（Query Parameters）：
 
@@ -490,7 +492,7 @@ curl -X GET "http://localhost:8000/api-explorer/catalog/?module=bkdata&search=da
 **cURL 示例**：
 
 ```bash
-curl -X GET "http://localhost:8000/api-explorer/api_detail/?module=bkdata&api_name=query_data"
+curl -X GET "http://localhost:8000/api_detail/?module=bkdata&api_name=query_data"
 ```
 
 **错误响应**：
@@ -524,7 +526,7 @@ curl -X GET "http://localhost:8000/api-explorer/api_detail/?module=bkdata&api_na
 
 在线调用指定的第三方 API，并返回调用结果。
 
-**接口地址**：`POST /api-explorer/invoke/`
+**接口地址**：`POST /invoke/`
 
 **Content-Type**：`application/json`
 
@@ -621,7 +623,7 @@ curl -X GET "http://localhost:8000/api-explorer/api_detail/?module=bkdata&api_na
 **cURL 示例**：
 
 ```bash
-curl -X POST "http://localhost:8000/api-explorer/invoke/" \
+curl -X POST "http://localhost:8000/invoke/" \
   -H "Content-Type: application/json" \
   -d '{
     "module": "bkdata",
@@ -744,30 +746,30 @@ HTTP 状态码：`403 Forbidden`
 
 ```bash
 # 1. 获取 API 目录
-curl -X GET "http://localhost:8000/api-explorer/catalog/"
+curl -X GET "http://localhost:8000/catalog/"
 
 # 2. 搜索特定 API
-curl -X GET "http://localhost:8000/api-explorer/catalog/?search=query"
+curl -X GET "http://localhost:8000/catalog/?search=query"
 
 # 3. 查看某个模块的所有 API
-curl -X GET "http://localhost:8000/api-explorer/catalog/?module=bkdata"
+curl -X GET "http://localhost:8000/catalog/?module=bkdata"
 ```
 
 ### 场景 2：查看 API 详情
 
 ```bash
 # 获取 API 的详细文档
-curl -X GET "http://localhost:8000/api-explorer/api_detail/?module=bkdata&api_name=query_data"
+curl -X GET "http://localhost:8000/api_detail/?module=bkdata&api_name=query_data"
 ```
 
 ### 场景 3：调试 API
 
 ```bash
 # 1. 查看 API 详情，了解参数结构
-curl -X GET "http://localhost:8000/api-explorer/api_detail/?module=bkdata&api_name=query_data"
+curl -X GET "http://localhost:8000/api_detail/?module=bkdata&api_name=query_data"
 
 # 2. 调用 API 进行测试
-curl -X POST "http://localhost:8000/api-explorer/invoke/" \
+curl -X POST "http://localhost:8000/invoke/" \
   -H "Content-Type: application/json" \
   -d '{
     "module": "bkdata",
@@ -782,7 +784,7 @@ curl -X POST "http://localhost:8000/api-explorer/invoke/" \
 
 ```javascript
 // 获取 API 目录
-fetch('/api-explorer/catalog/')
+fetch('/catalog/')
   .then(response => response.json())
   .then(data => {
     console.log('API 总数:', data.data.total);
@@ -790,7 +792,7 @@ fetch('/api-explorer/catalog/')
   });
 
 // 调用 API
-fetch('/api-explorer/invoke/', {
+fetch('/invoke/', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
@@ -827,8 +829,8 @@ DRF_RESOURCE = {
     # False: 强制禁用
     'API_EXPLORER_ENABLED': None,
     
-    # URL 前缀（默认 'api-explorer'）
-    'API_EXPLORER_URL_PREFIX': 'api-explorer',
+    # URL 前缀（默认为空，直接使用路径）
+    'API_EXPLORER_URL_PREFIX': '',
     
     # 是否启用在线调用功能
     'API_EXPLORER_ENABLE_INVOKE': True,
