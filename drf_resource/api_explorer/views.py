@@ -11,6 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import logging
 
+from django.urls import reverse
 from drf_resource.api_explorer.exceptions import ResourceNotFoundError
 from drf_resource.api_explorer.permissions import IsTestEnvironment
 from drf_resource.api_explorer.services import APIDiscoveryService, APIInvokeService
@@ -36,6 +37,20 @@ class IndexView(APIView):
 
         返回所有可用端点的访问路径和参数说明
         """
+        # 使用反向解析获取 URL，并构建完整的绝对 URL
+        try:
+            catalog_url = request.build_absolute_uri(reverse("catalog"))
+            api_detail_url = request.build_absolute_uri(reverse("api_detail"))
+            invoke_url = request.build_absolute_uri(reverse("invoke"))
+            modules_url = request.build_absolute_uri(reverse("modules"))
+        except Exception as e:
+            # 如果反向解析失败，记录错误并使用默认值
+            logger.warning(f"URL 反向解析失败: {e}")
+            catalog_url = request.build_absolute_uri("/api-explorer/catalog/")
+            api_detail_url = request.build_absolute_uri("/api-explorer/api_detail/")
+            invoke_url = request.build_absolute_uri("/api-explorer/invoke/")
+            modules_url = request.build_absolute_uri("/api-explorer/modules/")
+
         return Response(
             {
                 "result": True,
@@ -44,15 +59,15 @@ class IndexView(APIView):
                     "title": "API Explorer",
                     "description": "用于查看和调试项目中的 API 资源",
                     "endpoints": {
-                        "catalog": "/api-explorer/catalog/",
-                        "api_detail": "/api-explorer/api_detail/",
-                        "invoke": "/api-explorer/invoke/",
-                        "modules": "/api-explorer/modules/",
+                        "catalog": catalog_url,
+                        "api_detail": api_detail_url,
+                        "invoke": invoke_url,
+                        "modules": modules_url,
                     },
                     "endpoints_info": [
                         {
                             "name": "catalog",
-                            "url": "/api-explorer/catalog/",
+                            "url": catalog_url,
                             "method": "GET",
                             "description": "获取 API 目录列表，支持搜索和模块过滤",
                             "params": [
@@ -74,7 +89,7 @@ class IndexView(APIView):
                         },
                         {
                             "name": "api_detail",
-                            "url": "/api-explorer/api_detail/",
+                            "url": api_detail_url,
                             "method": "GET",
                             "description": "获取单个 API 的详细信息，包括请求/响应参数结构",
                             "params": [
@@ -96,7 +111,7 @@ class IndexView(APIView):
                         },
                         {
                             "name": "invoke",
-                            "url": "/api-explorer/invoke/",
+                            "url": invoke_url,
                             "method": "POST",
                             "description": "在线调用指定的第三方 API，并返回调用结果",
                             "params": [
@@ -125,7 +140,7 @@ class IndexView(APIView):
                         },
                         {
                             "name": "api_modules",
-                            "url": "/api-explorer/modules/",
+                            "url": modules_url,
                             "method": "GET",
                             "description": "获取所有可用的模块列表，支持模糊查询",
                             "params": [
