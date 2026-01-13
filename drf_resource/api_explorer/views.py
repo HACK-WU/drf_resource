@@ -11,6 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import logging
 
+from django.shortcuts import render
 from django.urls import reverse
 from drf_resource.api_explorer.exceptions import ResourceNotFoundError
 from drf_resource.api_explorer.permissions import IsTestEnvironment
@@ -20,6 +21,22 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 logger = logging.getLogger(__name__)
+
+
+class HomeView(APIView):
+    """
+    API Explorer 主页面 HTML 视图
+
+    渲染 API Explorer 的前端页面
+    """
+
+    permission_classes = [IsTestEnvironment]
+
+    def get(self, request):
+        """
+        渲染主页面
+        """
+        return render(request, "api_explorer/index.html")
 
 
 class IndexView(APIView):
@@ -37,19 +54,30 @@ class IndexView(APIView):
 
         返回所有可用端点的访问路径和参数说明
         """
-        # 使用反向解析获取 URL，并构建完整的绝对 URL
+        # 使用反向解析获取 URL,并构建完整的绝对 URL
         try:
-            catalog_url = request.build_absolute_uri(reverse("catalog"))
-            api_detail_url = request.build_absolute_uri(reverse("api_detail"))
-            invoke_url = request.build_absolute_uri(reverse("invoke"))
-            modules_url = request.build_absolute_uri(reverse("modules"))
+            catalog_url = request.build_absolute_uri(reverse("api_explorer:catalog"))
+            api_detail_url = request.build_absolute_uri(
+                reverse("api_explorer:api_detail")
+            )
+            invoke_url = request.build_absolute_uri(reverse("api_explorer:invoke"))
+            modules_url = request.build_absolute_uri(reverse("api_explorer:modules"))
         except Exception as e:
-            # 如果反向解析失败，记录错误并使用默认值
+            # 如果反向解析失败,记录错误并使用默认值
             logger.warning(f"URL 反向解析失败: {e}")
-            catalog_url = request.build_absolute_uri("/api-explorer/catalog/")
-            api_detail_url = request.build_absolute_uri("/api-explorer/api_detail/")
-            invoke_url = request.build_absolute_uri("/api-explorer/invoke/")
-            modules_url = request.build_absolute_uri("/api-explorer/modules/")
+            # 尝试不带命名空间的反向解析
+            try:
+                catalog_url = request.build_absolute_uri(reverse("catalog"))
+                api_detail_url = request.build_absolute_uri(reverse("api_detail"))
+                invoke_url = request.build_absolute_uri(reverse("invoke"))
+                modules_url = request.build_absolute_uri(reverse("modules"))
+            except Exception:
+                # 都失败则使用相对路径
+                base_path = request.path.rstrip("/") + "/"
+                catalog_url = request.build_absolute_uri(base_path + "catalog/")
+                api_detail_url = request.build_absolute_uri(base_path + "api_detail/")
+                invoke_url = request.build_absolute_uri(base_path + "invoke/")
+                modules_url = request.build_absolute_uri(base_path + "api_modules/")
 
         return Response(
             {

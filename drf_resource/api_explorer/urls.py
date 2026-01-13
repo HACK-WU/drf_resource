@@ -13,15 +13,19 @@ from django.urls import path
 from drf_resource.api_explorer.views import (
     APIDetailView,
     CatalogView,
+    HomeView,
     IndexView,
     InvokeView,
+    ModulesView,
 )
 
-app_name = 'api_explorer'
+app_name = "api_explorer"
 
 urlpatterns = [
-    path('', IndexView.as_view(), name='index'),
-    path('catalog/', CatalogView.as_view(), name='catalog'),
-    path('api_detail/', APIDetailView.as_view(), name='api_detail'),
-    path('invoke/', InvokeView.as_view(), name='invoke'),
+    path("api_home/", HomeView.as_view(), name="api_home"),
+    path("api_index/", IndexView.as_view(), name="index"),
+    path("catalog/", CatalogView.as_view(), name="catalog"),
+    path("api_detail/", APIDetailView.as_view(), name="api_detail"),
+    path("invoke/", InvokeView.as_view(), name="invoke"),
+    path("api_modules/", ModulesView.as_view(), name="modules"),
 ]

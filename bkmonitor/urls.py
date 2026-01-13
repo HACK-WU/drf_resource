@@ -92,6 +92,7 @@ if settings.ENVIRONMENT != "production":
 
     # 导入 API explorer views
     from drf_resource.api_explorer.views import (
+        HomeView,
         IndexView,
         CatalogView,
         APIDetailView,
@@ -100,7 +101,8 @@ if settings.ENVIRONMENT != "production":
     )
 
     urlpatterns += [
-        path("api_index/", IndexView.as_view(), name="index"),
+        path("api_home/", HomeView.as_view(), name="api_home"),
+        path("api_home/api_index/", IndexView.as_view(), name="index"),
         path("catalog/", CatalogView.as_view(), name="catalog"),
         path("api_detail/", APIDetailView.as_view(), name="api_detail"),
         path("invoke/", InvokeView.as_view(), name="invoke"),
