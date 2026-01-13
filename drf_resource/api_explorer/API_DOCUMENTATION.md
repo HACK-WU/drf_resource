@@ -462,7 +462,9 @@ curl -X GET "http://localhost:8000/catalog/?module=bkdata&search=data"
                 "type": "string",
                 "required": false,
                 "description": "优先存储类型",
-                "default": ""
+                "default": "elastic",
+                "choices": ["elastic","mysql"],
+                "items_type": "string"
             },
             {
                 "name": "bk_username",

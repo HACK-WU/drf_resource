@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Explorer - API 调试工具</title>
+    <style>
+        :root {
+            /* 主色调 */
+            --primary-color: #3a8ee6;
+            --primary-hover: #2d7ad6;
+            --primary-light: #ecf5ff;
+            
+            /* 背景色 */
+            --bg-color: #f5f7fa;
+            --bg-white: #ffffff;
+            --bg-sidebar: #2c3e50;
+            --bg-sidebar-hover: #34495e;
+            
+            /* 文字色 */
+            --text-primary: #303133;
+            --text-secondary: #606266;
+            --text-placeholder: #c0c4cc;
+            --text-white: #ffffff;
+            
+            /* 边框色 */
+            --border-color: #dcdfe6;
+            --border-light: #ebeef5;
+            
+            /* HTTP 方法颜色 */
+            --method-get: #67c23a;
+            --method-post: #409eff;
+            --method-put: #e6a23c;
+            --method-delete: #f56c6c;
+            
+            /* 状态颜色 */
+            --success-color: #67c23a;
+            --error-color: #f56c6c;
+            --warning-color: #e6a23c;
+            --info-color: #909399;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+                         'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background-color: var(--bg-color);
+        }
+
+        code, pre, .json-editor {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+            font-size: 13px;
+        }
+
+        /* Header */
+        .header {
+            height: 60px;
+            background-color: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            font-size: 24px;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input {
+            width: 300px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-white);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-color);
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            margin-top: 60px;
+            height: calc(100vh - 60px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            color: var(--text-white);
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .module-list {
+            list-style: none;
+        }
+
+        .module-item {
+            cursor: pointer;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background-color 0.3s;
+        }
+
+        .module-item:hover {
+            background-color: var(--bg-sidebar-hover);
+        }
+
+        .module-item.active {
+            background-color: var(--primary-color);
+        }
+
+        .module-name {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .module-count {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .module-display-name {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .api-list-container {
+            background-color: var(--bg-white);
+            border-radius: 4px;
+            padding: 20px;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .list-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* API Card */
+        .api-card {
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .api-card:hover {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .api-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .method-badge {
+            padding: 4px 8px;
+            border-radius: 3px;
+            color: var(--text-white);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .method-get { background-color: var(--method-get); }
+        .method-post { background-color: var(--method-post); }
+        .method-put { background-color: var(--method-put); }
+        .method-delete { background-color: var(--method-delete); }
+
+        .api-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .api-label {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .api-url {
+            color: var(--text-placeholder);
+            font-size: 12px;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+
+        .api-meta {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .meta-tag {
+            padding: 2px 6px;
+            border-radius: 3px;
+            background-color: var(--bg-color);
+            color: var(--text-secondary);
+        }
+
+        .meta-tag.has { color: var(--success-color); }
+        .meta-tag.none { color: var(--text-placeholder); }
+
+        /* Detail Panel */
+        .detail-panel {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            width: 600px;
+            height: calc(100vh - 60px);
+            background-color: var(--bg-white);
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            z-index: 50;
+            overflow-y: auto;
+        }
+
+        .detail-panel.visible {
+            transform: translateX(0);
+        }
+
+        .detail-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-white);
+            z-index: 10;
+        }
+
+        .detail-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .detail-content {
+            padding: 20px;
+        }
+
+        .detail-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        /* Params Table */
+        .params-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .params-table th,
+        .params-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .params-table th {
+            background-color: var(--bg-color);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .required-mark {
+            color: var(--error-color);
+            margin-left: 4px;
+        }
+
+        /* Invoke Panel */
+        .invoke-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .invoke-panel.visible {
+            display: flex;
+        }
+
+        .invoke-content {
+            background-color: var(--bg-white);
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .invoke-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .invoke-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .json-editor-container {
+            margin-bottom: 16px;
+        }
+
+        .json-editor {
+            width: 100%;
+            min-height: 200px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            resize: vertical;
+            outline: none;
+        }
+
+        .json-editor:focus {
+            border-color: var(--primary-color);
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .response-container {
+            margin-top: 20px;
+        }
+
+        .response-status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .response-status.success {
+            background-color: #f0f9ff;
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .response-status.error {
+            background-color: #fef0f0;
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+        }
+
+        .response-body {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .response-body pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            border: 3px solid var(--border-light);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 4px;
+            background-color: var(--bg-white);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            z-index: 2000;
+            animation: slideIn 0.3s;
+        }
+
+        .toast-success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .toast-error {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .toast-info {
+            border-left: 4px solid var(--info-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-placeholder);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <span class="logo">🔍</span>
+            <h1 class="title">API Explorer</h1>
+        </div>
+        <div class="search-container">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput" 
+                placeholder="搜索 API..."
+            >
+            <button class="btn btn-primary" id="searchBtn">搜索</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">📦 模块列表</div>
+            <ul class="module-list" id="moduleList">
+                <li class="module-item active" data-module="">
+                    <div class="module-name">
+                        <span>全部</span>
+                        <span class="module-count" id="totalCount">0</span>
+                    </div>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="api-list-container">
+                <div class="list-header">
+                    <h2 class="list-title" id="listTitle">📋 API 列表 (0 个接口)</h2>
+                </div>
+                <div id="apiList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div>加载中...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="detail-panel" id="detailPanel">
+        <div class="detail-header">
+            <h3 class="detail-title">📖 API 详情</h3>
+            <button class="close-btn" id="closeDetailBtn">&times;</button>
+        </div>
+        <div class="detail-content" id="detailContent">
+            <!-- 动态填充 -->
+        </div>
+    </div>
+
+    <!-- Invoke Panel -->
+    <div class="invoke-panel" id="invokePanel">
+        <div class="invoke-content">
+            <div class="invoke-header">
+                <h3 class="detail-title">🚀 在线调用</h3>
+                <button class="close-btn" id="closeInvokeBtn">&times;</button>
+            </div>
+            <div class="invoke-body">
+                <div class="detail-section">
+                    <div class="section-title">📝 请求参数 (JSON)</div>
+                    <div class="json-editor-container">
+                        <textarea class="json-editor" id="paramsEditor">{}</textarea>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn btn-secondary btn-small" id="generateTemplateBtn">生成模板</button>
+                        <button class="btn btn-secondary btn-small" id="formatJsonBtn">格式化</button>
+                        <button class="btn btn-secondary btn-small" id="clearParamsBtn">清空</button>
+                    </div>
+                </div>
+                <div style="text-align: center; margin: 20px 0;">
+                    <button class="btn btn-primary" id="invokeBtn">▶ 发送请求</button>
+                </div>
+                <div class="response-container" id="responseContainer" style="display: none;">
+                    <div class="detail-section">
+                        <div class="section-title">📊 响应结果</div>
+                        <div id="responseStatus"></div>
+                        <div class="response-body">
+                            <pre id="responseBody"></pre>
+                        </div>
+                        <div class="editor-actions">
+                            <button class="btn btn-secondary btn-small" id="copyResponseBtn">📋 复制结果</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局状态
+        const AppState = {
+            endpoints: {},
+            endpointsInfo: [],
+            initialized: false,
+            modules: [],
+            currentModule: null,
+            apiList: [],
+            searchKeyword: '',
+            selectedAPI: null,
+            apiDetail: null,
+            invokePanel: {
+                visible: false,
+                params: '{}',
+                loading: false,
+                response: null
+            }
+        };
+
+        // API 请求函数
+        async function request(url, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+            
+            try {
+                const response = await fetch(url, { ...defaultOptions, ...options });
+                
+                // 检查响应类型
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    // 如果不是 JSON 响应,可能是错误页面
+                    if (response.status === 403) {
+                        throw new Error('API Explorer 仅在开发/测试环境可用，请检查环境配置');
+                    } else if (response.status === 404) {
+                        throw new Error('接口不存在，请检查 URL 配置是否正确');
+                    } else {
+                        throw new Error(`服务器返回非 JSON 响应 (HTTP ${response.status})，请检查路由配置`);
+                    }
+                }
+                
+                const data = await response.json();
+                
+                if (!data.result) {
+                    throw new Error(data.message || '请求失败');
+                }
+                
+                return data.data;
+            } catch (error) {
+                console.error('API 请求失败:', error);
+                // 不在这里显示 toast，让调用方处理
+                throw error;
+            }
+        }
+
+        // 初始化端点配置
+        function initEndpoints(endpoints, endpointsInfo) {
+            AppState.endpoints = endpoints;
+            AppState.endpointsInfo = endpointsInfo;
+            AppState.initialized = true;
+        }
+
+        // 获取接口 URL
+        function getEndpointUrl(name) {
+            if (!AppState.initialized) {
+                throw new Error('请先调用 api_index 接口初始化');
+            }
+            return AppState.endpoints[name];
+        }
+
+        // 获取 API 元信息
+        async function fetchApiIndex() {
+            // 构建 api_index 的 URL
+            const baseUrl = window.location.pathname.replace(/\/$/, '');
+            const apiIndexUrl = baseUrl + '/api_index/';
+            const data = await request(apiIndexUrl);
+            initEndpoints(data.endpoints, data.endpoints_info);
+            return data;
+        }
+
+        // 获取模块列表
+        async function fetchModules(search = '') {
+            const baseUrl = getEndpointUrl('modules');
+            const url = search ? `${baseUrl}?search=${encodeURIComponent(search)}` : baseUrl;
+            return request(url);
+        }
+
+        // 获取 API 目录
+        async function fetchCatalog(module = '', search = '') {
+            const baseUrl = getEndpointUrl('catalog');
+            const params = new URLSearchParams();
+            if (module) params.append('module', module);
+            if (search) params.append('search', search);
+            const queryString = params.toString();
+            const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+            return request(url);
+        }
+
+        // 获取 API 详情
+        async function fetchAPIDetail(module, apiName) {
+            const baseUrl = getEndpointUrl('api_detail');
+            return request(`${baseUrl}?module=${encodeURIComponent(module)}&api_name=${encodeURIComponent(apiName)}`);
+        }
+
+        // 调用 API
+        async function invokeAPI(module, apiName, params) {
+            const url = getEndpointUrl('invoke');
+            return request(url, {
+                method: 'POST',
+                body: JSON.stringify({ module, api_name: apiName, params }),
+            });
+        }
+
+        // 渲染模块列表
+        function renderModules(modules) {
+            const moduleList = document.getElementById('moduleList');
+            const totalCount = modules.reduce((sum, m) => sum + m.api_count, 0);
+            
+            document.getElementById('totalCount').textContent = totalCount;
+            
+            const items = modules.map(module => `
+                <li class="module-item" data-module="${module.name}">
+                    <div class="module-name">
+                        <span>${module.name}</span>
+                        <span class="module-count">${module.api_count}</span>
+                    </div>
+                    <div class="module-display-name">${module.display_name}</div>
+                </li>
+            `).join('');
+            
+            moduleList.innerHTML += items;
+            
+            // 绑定点击事件
+            moduleList.querySelectorAll('.module-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const moduleName = item.dataset.module;
+                    selectModule(moduleName);
+                });
+            });
+        }
+
+        // 选择模块
+        async function selectModule(moduleName) {
+            AppState.currentModule = moduleName;
+            
+            // 更新高亮
+            document.querySelectorAll('.module-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.module === moduleName);
+            });
+            
+            // 加载 API 列表
+            showLoading();
+            try {
+                const data = await fetchCatalog(moduleName, AppState.searchKeyword);
+                renderAPIList(data);
+            } catch (error) {
+                showError('加载 API 列表失败');
+            }
+        }
+
+        // 渲染 API 列表
+        function renderAPIList(data) {
+            const apiListEl = document.getElementById('apiList');
+            const listTitleEl = document.getElementById('listTitle');
+            
+            const apis = [];
+            data.modules.forEach(module => {
+                module.apis.forEach(api => {
+                    apis.push(api);
+                });
+            });
+            
+            listTitleEl.textContent = `📋 API 列表 (${data.total} 个接口)`;
+            
+            if (apis.length === 0) {
+                apiListEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <div>暂无 API</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const items = apis.map(api => `
+                <div class="api-card" data-module="${api.module}" data-api="${api.name}">
+                    <div class="api-card-header">
+                        <span class="method-badge method-${api.method.toLowerCase()}">${api.method}</span>
+                        <span class="api-name">${api.name}</span>
+                    </div>
+                    <div class="api-label">${api.label}</div>
+                    <div class="api-url">${api.action || api.full_url}</div>
+                    <div class="api-meta">
+                        <span class="meta-tag ${api.has_request_serializer ? 'has' : 'none'}">
+                            ${api.has_request_serializer ? '✓' : '✗'} Request
+                        </span>
+                        <span class="meta-tag ${api.has_response_serializer ? 'has' : 'none'}">
+                            ${api.has_response_serializer ? '✓' : '✗'} Response
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            
+            apiListEl.innerHTML = items;
+            
+            // 绑定点击事件
+            apiListEl.querySelectorAll('.api-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const module = card.dataset.module;
+                    const apiName = card.dataset.api;
+                    showAPIDetail(module, apiName);
+                });
+            });
+        }
+
+        // 显示 API 详情
+        async function showAPIDetail(module, apiName) {
+            AppState.selectedAPI = { module, api_name: apiName };
+            
+            const detailPanel = document.getElementById('detailPanel');
+            const detailContent = document.getElementById('detailContent');
+            
+            detailContent.innerHTML = '<div class="loading"><div class="spinner"></div><div>加载中...</div></div>';
+            detailPanel.classList.add('visible');
+            
+            try {
+                const detail = await fetchAPIDetail(module, apiName);
+                AppState.apiDetail = detail;
+                renderAPIDetail(detail);
+            } catch (error) {
+                detailContent.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><div>加载失败</div></div>';
+            }
+        }
+
+        // 渲染 API 详情
+        function renderAPIDetail(detail) {
+            const detailContent = document.getElementById('detailContent');
+            
+            const requestParams = detail.request_params && detail.request_params.length > 0
+                ? `
+                    <table class="params-table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                                <th>默认值</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${detail.request_params.map(param => `
+                                <tr>
+                                    <td><code>${param.name}</code>${param.required ? '<span class="required-mark">*</span>' : ''}</td>
+                                    <td>${param.type}</td>
+                                    <td>${param.required ? '✓' : ''}</td>
+                                    <td>${param.description || '-'}</td>
+                                    <td>${param.default !== null && param.default !== undefined ? param.default : '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `
+                : '<div style="color: var(--text-secondary);">无参数定义</div>';
+            
+            const responseParams = detail.response_params && detail.response_params.length > 0
+                ? `
+                    <table class="params-table">
+                        <thead>
+                            <tr>
+                                <th>字段名</th>
+                                <th>类型</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${detail.response_params.map(param => `
+                                <tr>
+                                    <td><code>${param.name}</code></td>
+                                    <td>${param.type}</td>
+                                    <td>${param.description || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `
+                : '<div style="color: var(--text-secondary);">无参数定义</div>';
+            
+            detailContent.innerHTML = `
+                <div class="detail-section">
+                    <div class="section-title">基本信息</div>
+                    <div class="info-grid">
+                        <div class="info-label">模块:</div>
+                        <div class="info-value">${detail.module}</div>
+                        <div class="info-label">接口:</div>
+                        <div class="info-value">${detail.api_name}</div>
+                        <div class="info-label">类名:</div>
+                        <div class="info-value">${detail.class_name}</div>
+                        <div class="info-label">方法:</div>
+                        <div class="info-value">
+                            <span class="method-badge method-${detail.method.toLowerCase()}">${detail.method}</span>
+                        </div>
+                        <div class="info-label">URL:</div>
+                        <div class="info-value" style="font-family: monospace; font-size: 12px;">${detail.full_url}</div>
+                    </div>
+                    ${detail.doc ? `<div style="margin-top: 12px; padding: 10px; background: var(--bg-color); border-radius: 4px;">${detail.doc}</div>` : ''}
+                </div>
+                
+                <div class="detail-section">
+                    <div class="section-title">📥 请求参数</div>
+                    ${requestParams}
+                </div>
+                
+                <div class="detail-section">
+                    <div class="section-title">📤 响应参数</div>
+                    ${responseParams}
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-primary" id="openInvokeBtn">🚀 立即调用</button>
+                </div>
+            `;
+            
+            // 绑定调用按钮
+            document.getElementById('openInvokeBtn').addEventListener('click', openInvokePanel);
+        }
+
+        // 打开调用面板
+        function openInvokePanel() {
+            const invokePanel = document.getElementById('invokePanel');
+            const paramsEditor = document.getElementById('paramsEditor');
+            
+            // 生成参数模板
+            if (AppState.apiDetail && AppState.apiDetail.request_params) {
+                const template = generateParamsTemplate(AppState.apiDetail.request_params);
+                paramsEditor.value = template;
+            } else {
+                paramsEditor.value = '{}';
+            }
+            
+            // 清空响应
+            document.getElementById('responseContainer').style.display = 'none';
+            
+            invokePanel.classList.add('visible');
+        }
+
+        // 生成参数模板
+        function generateParamsTemplate(requestParams) {
+            const template = {};
+            
+            requestParams.forEach(param => {
+                if (param.default !== null && param.default !== undefined) {
+                    template[param.name] = param.default;
+                } else if (param.required) {
+                    switch (param.type) {
+                        case 'string': template[param.name] = ''; break;
+                        case 'integer': template[param.name] = 0; break;
+                        case 'boolean': template[param.name] = false; break;
+                        case 'array': template[param.name] = []; break;
+                        case 'object': template[param.name] = {}; break;
+                        default: template[param.name] = null;
+                    }
+                }
+            });
+            
+            return JSON.stringify(template, null, 2);
+        }
+
+        // 调用 API
+        async function handleInvoke() {
+            const paramsEditor = document.getElementById('paramsEditor');
+            const invokeBtn = document.getElementById('invokeBtn');
+            const responseContainer = document.getElementById('responseContainer');
+            const responseStatus = document.getElementById('responseStatus');
+            const responseBody = document.getElementById('responseBody');
+            
+            let params;
+            try {
+                params = JSON.parse(paramsEditor.value);
+            } catch (error) {
+                showToast('JSON 格式错误', 'error');
+                return;
+            }
+            
+            invokeBtn.disabled = true;
+            invokeBtn.textContent = '⏳ 调用中...';
+            responseContainer.style.display = 'none';
+            
+            const startTime = Date.now();
+            
+            try {
+                const result = await invokeAPI(
+                    AppState.selectedAPI.module,
+                    AppState.selectedAPI.api_name,
+                    params
+                );
+                
+                const duration = ((Date.now() - startTime) / 1000).toFixed(3);
+                
+                responseStatus.className = 'response-status ' + (result.success ? 'success' : 'error');
+                responseStatus.innerHTML = `
+                    <span>${result.success ? '✅ 成功' : '❌ 失败'}</span>
+                    <span>耗时: ${duration}s</span>
+                `;
+                
+                responseBody.textContent = JSON.stringify(
+                    result.success ? result.response : {
+                        error_code: result.error_code,
+                        error_message: result.error_message
+                    },
+                    null,
+                    2
+                );
+                
+                responseContainer.style.display = 'block';
+                showToast(result.success ? '调用成功' : '调用失败', result.success ? 'success' : 'error');
+            } catch (error) {
+                responseStatus.className = 'response-status error';
+                responseStatus.innerHTML = '<span>❌ 请求失败</span>';
+                responseBody.textContent = error.message;
+                responseContainer.style.display = 'block';
+            } finally {
+                invokeBtn.disabled = false;
+                invokeBtn.textContent = '▶ 发送请求';
+            }
+        }
+
+        // 搜索
+        function debounce(fn, delay = 300) {
+            let timer = null;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        const handleSearch = debounce(async (keyword) => {
+            AppState.searchKeyword = keyword;
+            showLoading();
+            try {
+                const data = await fetchCatalog(AppState.currentModule || '', keyword);
+                renderAPIList(data);
+            } catch (error) {
+                showError('搜索失败');
+            }
+        }, 300);
+
+        // 显示 Toast
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // 显示加载中
+        function showLoading() {
+            const apiListEl = document.getElementById('apiList');
+            apiListEl.innerHTML = '<div class="loading"><div class="spinner"></div><div>加载中...</div></div>';
+        }
+
+        // 显示错误
+        function showError(message) {
+            const apiListEl = document.getElementById('apiList');
+            apiListEl.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><div>${message}</div></div>`;
+        }
+
+        // 初始化应用
+        async function initApp() {
+            try {
+                // 步骤 1: 获取 API 元信息
+                showToast('正在初始化...', 'info');
+                const indexData = await fetchApiIndex();
+                console.log('API Explorer 初始化完成', AppState.endpoints);
+                
+                // 步骤 2: 加载模块列表
+                const modulesData = await fetchModules();
+                AppState.modules = modulesData.modules;
+                renderModules(modulesData.modules);
+                
+                // 步骤 3: 加载默认 API 列表
+                const catalogData = await fetchCatalog();
+                renderAPIList(catalogData);
+                
+                showToast('加载完成!', 'success');
+            } catch (error) {
+                console.error('初始化失败:', error);
+                showError(error.message || '加载失败,请刷新页面重试');
+                showToast(error.message || '初始化失败', 'error');
+            }
+        }
+
+        // 事件绑定
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化
+            initApp();
+            
+            // 搜索
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            searchInput.addEventListener('input', (e) => {
+                handleSearch(e.target.value);
+            });
+            
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSearch(e.target.value);
+                }
+            });
+            
+            searchBtn.addEventListener('click', () => {
+                handleSearch(searchInput.value);
+            });
+            
+            // 关闭详情面板
+            document.getElementById('closeDetailBtn').addEventListener('click', () => {
+                document.getElementById('detailPanel').classList.remove('visible');
+            });
+            
+            // 关闭调用面板
+            document.getElementById('closeInvokeBtn').addEventListener('click', () => {
+                document.getElementById('invokePanel').classList.remove('visible');
+            });
+            
+            // 点击遮罩关闭
+            document.getElementById('invokePanel').addEventListener('click', (e) => {
+                if (e.target.id === 'invokePanel') {
+                    document.getElementById('invokePanel').classList.remove('visible');
+                }
+            });
+            
+            // 生成模板
+            document.getElementById('generateTemplateBtn').addEventListener('click', () => {
+                if (AppState.apiDetail && AppState.apiDetail.request_params) {
+                    const template = generateParamsTemplate(AppState.apiDetail.request_params);
+                    document.getElementById('paramsEditor').value = template;
+                }
+            });
+            
+            // 格式化 JSON
+            document.getElementById('formatJsonBtn').addEventListener('click', () => {
+                const editor = document.getElementById('paramsEditor');
+                try {
+                    const json = JSON.parse(editor.value);
+                    editor.value = JSON.stringify(json, null, 2);
+                    showToast('格式化成功', 'success');
+                } catch (error) {
+                    showToast('JSON 格式错误', 'error');
+                }
+            });
+            
+            // 清空参数
+            document.getElementById('clearParamsBtn').addEventListener('click', () => {
+                document.getElementById('paramsEditor').value = '{}';
+            });
+            
+            // 发送请求
+            document.getElementById('invokeBtn').addEventListener('click', handleInvoke);
+            
+            // 复制响应
+            document.getElementById('copyResponseBtn').addEventListener('click', () => {
+                const responseBody = document.getElementById('responseBody');
+                navigator.clipboard.writeText(responseBody.textContent).then(() => {
+                    showToast('已复制到剪贴板', 'success');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

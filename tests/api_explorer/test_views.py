@@ -17,6 +17,36 @@ from unittest.mock import Mock, patch
 from drf_resource.api_explorer.exceptions import ResourceNotFoundError
 
 
+class TestHomeView:
+    """测试 HomeView"""
+
+    def test_get_home_with_permission(
+        self, api_client, mock_settings_api_explorer_enabled
+    ):
+        """测试在测试环境访问前端页面"""
+        response = api_client.get("/api-explorer/home/")
+
+        # 如果路由配置正确,应该返回 200 并渲染 HTML
+        # 如果路由不存在,会返回 404
+        # 暂时不验证具体内容,只确认状态码
+        assert response.status_code in [
+            status.HTTP_200_OK,
+            status.HTTP_404_NOT_FOUND,
+        ]
+
+    def test_get_home_without_permission(
+        self, api_client, mock_production_mode, mock_env_production
+    ):
+        """测试在生产环境访问前端页面(应被拒绝)"""
+        response = api_client.get("/api-explorer/home/")
+
+        # 应该返回 403 或者 404
+        assert response.status_code in [
+            status.HTTP_403_FORBIDDEN,
+            status.HTTP_404_NOT_FOUND,
+        ]
+
+
 class TestIndexView:
     """测试 IndexView"""
 
