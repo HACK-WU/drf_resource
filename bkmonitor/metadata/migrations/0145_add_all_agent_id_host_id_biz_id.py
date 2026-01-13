@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 from itertools import product
+from typing import List
 
 from django.db import migrations
 from django.db.models.base import ModelBase
@@ -123,7 +125,7 @@ def add_all_agent_id_host_id_biz_id(apps, schema_editor):
     models["ResultTableFieldOption"].objects.bulk_create(log_field_option_objs, batch_size=BULK_CREATE_SIZE)
 
 
-def filter_table_ids(data_source_model: ModelBase, ds_rt_model: ModelBase) -> list:
+def filter_table_ids(data_source_model: ModelBase, ds_rt_model: ModelBase) -> List:
     """根据 etl_config 过滤到对应的数据源"""
     exclude_etl_config_list = [
         "bk_standard_v2_time_series",
@@ -135,7 +137,7 @@ def filter_table_ids(data_source_model: ModelBase, ds_rt_model: ModelBase) -> li
     return list(ds_rt_model.objects.filter(bk_data_id__in=data_ids).values_list("table_id", flat=True))
 
 
-def compose_rt_field_objs(rt_field_model: ModelBase, table_ids: list, fields: list) -> list:
+def compose_rt_field_objs(rt_field_model: ModelBase, table_ids: List, fields: List) -> List:
     """组装结果表对应字段对象"""
     field_objs = []
     for table_id, field in product(table_ids, fields):

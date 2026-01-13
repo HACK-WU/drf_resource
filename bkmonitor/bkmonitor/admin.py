@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -142,7 +143,7 @@ class PrettyJSONWidget(widgets.Textarea):
             self.attrs["cols"] = min(max(max(row_lengths) + 2, 40), 120)
         except Exception:  # noqa
             pass
-        return super().render(name, value, attrs, renderer)
+        return super(PrettyJSONWidget, self).render(name, value, attrs, renderer)
 
 
 class GlobalConfigAdmin(admin.ModelAdmin):
@@ -158,7 +159,7 @@ class GlobalConfigAdmin(admin.ModelAdmin):
             q["is_advanced__exact"] = "0"
             request.GET = q
             request.META["QUERY_STRING"] = request.GET.urlencode()
-        return super().changelist_view(request, extra_context=extra_context)
+        return super(GlobalConfigAdmin, self).changelist_view(request, extra_context=extra_context)
 
 
 class HealthzMetricConfigAdmin(admin.ModelAdmin):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -34,7 +35,7 @@ class BcsProjectBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
 
     def get_request_url(self, validated_request_data):
         return (
-            super().get_request_url(validated_request_data).format(**validated_request_data)
+            super(BcsProjectBaseResource, self).get_request_url(validated_request_data).format(**validated_request_data)
         )
 
     def get_headers(self):
@@ -67,7 +68,7 @@ class GetProjectsResource(BcsProjectBaseResource):
         is_detail = serializers.BooleanField(required=False, default=False)
 
     def perform_request(self, validated_request_data):
-        projects = super().perform_request(validated_request_data)
+        projects = super(GetProjectsResource, self).perform_request(validated_request_data)
         count = projects["total"]
         project_list = projects.get("results") or []
         # 如果每页的数量大于count，则不用继续请求，否则需要继续请求
@@ -76,7 +77,7 @@ class GetProjectsResource(BcsProjectBaseResource):
             start_offset = 1
             while start_offset <= max_offset:
                 validated_request_data.update({"limit": self.default_limit, "offset": start_offset})
-                resp_data = super().perform_request(validated_request_data)
+                resp_data = super(GetProjectsResource, self).perform_request(validated_request_data)
                 project_list.extend(resp_data.get("results") or [])
                 start_offset += 1
         # 因为返回数据内容太多，抽取必要的字段

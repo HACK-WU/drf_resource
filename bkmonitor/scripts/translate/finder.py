@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -58,7 +59,7 @@ def main():
     collected_words = []
     for each_file in file_lists:
         try:
-            print(f"processing: {each_file}")
+            print("processing: %s" % each_file)
             checker = TranslateChecker(None, filename=each_file)
             finder = checker.parse()
             for word in finder.words:
@@ -77,12 +78,12 @@ def main():
             import traceback
 
             traceback.print_exc()
-            print(f"Error: process file:{each_file}, message: {e}", file=sys.stderr)
+            print("Error: process file:{}, message: {}".format(each_file, e), file=sys.stderr)
 
     with open(COLLECTED_WORDS_FILE, "w+") as f:
         f.write(json.dumps(collected_words, indent=2, ensure_ascii=False))
 
-    print(f"process {process_count} files, error {error_count} files, collect {len(collected_words)} words")
+    print("process {} files, error {} files, collect {} words".format(process_count, error_count, len(collected_words)))
 
 
 if __name__ == "__main__":

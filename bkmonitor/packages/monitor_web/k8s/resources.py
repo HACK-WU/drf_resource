@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 from collections import OrderedDict
+from typing import Dict, List
 
 from django.core.exceptions import FieldError
 from django.core.paginator import Paginator
@@ -139,7 +141,7 @@ class GetResourceDetail(Resource):
         workload_name: str = serializers.CharField(required=False, allow_null=True)
         workload_type: str = serializers.CharField(required=False, allow_null=True)
 
-    def validate_request_data(self, request_data: dict):
+    def validate_request_data(self, request_data: Dict):
         resource_type = request_data["resource_type"]
         if resource_type == "pod":
             fields = ["pod_name"]
@@ -155,7 +157,7 @@ class GetResourceDetail(Resource):
         return super().validate_request_data(request_data)
 
     @classmethod
-    def validate_field_exist(cls, resource_type: str, fields: list[str], request_data: dict) -> None:
+    def validate_field_exist(cls, resource_type: str, fields: List[str], request_data: Dict) -> None:
         for field in fields:
             if not request_data.get(field):
                 raise serializers.ValidationError(
@@ -163,7 +165,7 @@ class GetResourceDetail(Resource):
                 )
 
     @classmethod
-    def link_to_string(cls, item: dict):
+    def link_to_string(cls, item: Dict):
         """
         当返回的资源详情中 type == "link" 时,
 
@@ -181,7 +183,7 @@ class GetResourceDetail(Resource):
         resource_type = validated_request_data["resource_type"]
 
         # 不同的 resource_type 对应不同要调用的接口，并且记录额外要传递的参数
-        resource_router: dict[str, list[dict]] = {
+        resource_router: Dict[str, List[Dict]] = {
             "cluster": [resource.scene_view.get_kubernetes_cluster, []],
             "pod": [resource.scene_view.get_kubernetes_pod, ["namespace", "pod_name"]],
             "workload": [resource.scene_view.get_kubernetes_workload, ["namespace", "workload_name", "workload_type"]],
@@ -319,7 +321,7 @@ class ListK8sResources(Resource):
         # 3.0 基于promql 查询历史上报数据。 确认数据是否达到分页要求
         order_by = validated_request_data["order_by"]
         column = validated_request_data["column"]
-        order_by = column if order_by == "asc" else f"-{column}"
+        order_by = column if order_by == "asc" else "-{}".format(column)
 
         history_resource_list = resource_meta.get_from_promql(
             validated_request_data["start_time"],
@@ -353,7 +355,7 @@ class ListK8sResources(Resource):
             resource_list = resource_list[:page_count]
         return {"count": total_count, "items": resource_list}
 
-    def add_filter(self, meta: K8sResourceMeta, filter_dict: dict):
+    def add_filter(self, meta: K8sResourceMeta, filter_dict: Dict):
         """
         filter_dict = {
             "pod": ["pod1", "pod2"],
@@ -400,7 +402,7 @@ class ResourceTrendResource(Resource):
         bk_biz_id: int = validated_request_data["bk_biz_id"]
         bcs_cluster_id: str = validated_request_data["bcs_cluster_id"]
         resource_type: str = validated_request_data["resource_type"]
-        resource_list: list[str] = validated_request_data["resource_list"]
+        resource_list: List[str] = validated_request_data["resource_list"]
         if not resource_list:
             return []
         start_time: int = validated_request_data["start_time"]

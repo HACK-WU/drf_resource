@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -150,7 +151,7 @@ class AlgorithmModel(Model):
         2. 基于算法类型
     """
 
-    class AlgorithmChoices:
+    class AlgorithmChoices(object):
         Threshold = "Threshold"
         SimpleRingRatio = "SimpleRingRatio"
         AdvancedRingRatio = "AdvancedRingRatio"
@@ -913,8 +914,8 @@ class DutyPlan(Model):
                 # 处于排除时间段内，直接去掉
                 exclude_date = exclude_setting["date"]
                 work_time = exclude_setting["work_time"]
-                begin_time = f"{exclude_date} 00:00:00"
-                end_time = f"{exclude_date} 23:59:59"
+                begin_time = "{} 00:00:00".format(exclude_date)
+                end_time = "{} 23:59:59".format(exclude_date)
                 if self.is_time_match(work_time, begin_time, end_time, data_time):
                     # 在排除时间段内，直接排除
                     break

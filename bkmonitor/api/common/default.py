@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -42,13 +43,13 @@ class CommonBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
         )
         self.method = kwargs.pop("method", "GET")
         self.plugin_key = self.module_name
-        super().__init__(**kwargs)
+        super(CommonBaseResource, self).__init__(**kwargs)
 
     def perform_request(self, params):
         self.plugin_key = params.pop("action_plugin_key", None) or self.plugin_key
         params["_origin_user"] = get_global_user()
         try:
-            return super().perform_request(params)
+            return super(CommonBaseResource, self).perform_request(params)
         except BKAPIError as api_error:
             # 重新设置异常内容
             error_message = api_error.data.get("message", "第三方系统异常")

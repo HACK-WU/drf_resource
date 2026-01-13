@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 import json
 import logging
+from typing import Dict, List, Optional, Tuple
 
 import influxdb.client
 from django.conf import settings
@@ -69,14 +71,16 @@ class influxTool:
         return cls.instances[database][host]
 
     @classmethod
-    def list_client(cls, database: str) -> list:
+    def list_client(cls, database: str) -> List:
         """
         通过 database -> proxy_cluster_name -> host_name -> domain_name/port 获取InfluxDB的实例列表
         :return:
         """
         if not cls.instances[database]:
             logger.info(
-                f"influxdb database->[{database}] load client"
+                "influxdb database->[{}] load client".format(
+                    database,
+                )
             )
             for cluster in InfluxDBStorage.objects.filter(database=database).values("proxy_cluster_name").distinct():
                 for info in (
@@ -95,7 +99,7 @@ class influxTool:
 class DownsampledDatabase(models.Model):
     """downsampled 数据库基本配置"""
 
-    CONSUL_PATH = f"{config.CONSUL_PATH}/downsampled"
+    CONSUL_PATH = "%s/downsampled" % config.CONSUL_PATH
 
     database = models.CharField("数据库名", max_length=128, unique=True)
     tag_name = models.CharField("维度KEY", max_length=128, blank=True)
@@ -161,7 +165,11 @@ class DownsampledDatabase(models.Model):
                         client.kv.delete("/".join([consul_key, ""]))
 
                     logger.info(
-                        f"consul delete key->[{consul_key}],because database->[{key_list[-2]}] not in database_list->[{database_list}]"
+                        "consul delete key->[{}],because database->[{}] not in database_list->[{}]".format(
+                            consul_key,
+                            key_list[-2],
+                            database_list,
+                        )
                     )
         return
 
@@ -182,14 +190,14 @@ class DownsampledDatabase(models.Model):
         """
         # 刷新consul
         self.refresh_consul_config()
-        logger.debug(f"consul database->[{self.database}] refresh consul config success.")
+        logger.debug("consul database->[%s] refresh consul config success." % self.database)
         return
 
 
 class DownsampledRetentionPolicies(models.Model):
     """downsampled rp 基本配置"""
 
-    CONSUL_PATH = f"{config.CONSUL_PATH}/downsampled"
+    CONSUL_PATH = "%s/downsampled" % config.CONSUL_PATH
 
     database = models.CharField("数据库名", max_length=128)
     name = models.CharField("RP名称", max_length=128)
@@ -252,7 +260,7 @@ class DownsampledRetentionPolicies(models.Model):
         # 2. 刷新当前RP的配置
         hash_consul.put(key=self.consul_config_path, value=self.consul_config_json)
 
-    def get_retention_policy(self, host: str) -> dict:
+    def get_retention_policy(self, host: str) -> Dict:
         """
         获取 rp
         :param host:
@@ -262,7 +270,10 @@ class DownsampledRetentionPolicies(models.Model):
             client = influxTool.get_client(database=self.database, host=host)
             res = client.get_list_retention_policies(database=self.database)
             logger.info(
-                f"influxdb host->[{host}] database->[{self.database}] get list retention policies"
+                "influxdb host->[{}] database->[{}] get list retention policies".format(
+                    host,
+                    self.database,
+                )
             )
             for r in res:
                 self.retentionPolicies[host][self.database][r["name"]]["duration"] = r.get("duration", "")
@@ -284,7 +295,12 @@ class DownsampledRetentionPolicies(models.Model):
         )
         self.retentionPolicies[host][self.database][self.rp_name]["duration"] = self.duration
         logger.info(
-            f"influxdb database->[{self.database}] rp->[{self.rp_name} | {self.duration}] is create on client->[{client}]"
+            "influxdb database->[{}] rp->[{} | {}] is create on client->[{}]".format(
+                self.database,
+                self.rp_name,
+                self.duration,
+                client,
+            )
         )
 
     def update_retention_policy(self, host: str) -> None:
@@ -298,7 +314,12 @@ class DownsampledRetentionPolicies(models.Model):
         client.alter_retention_policy(name=self.rp_name, database=self.database, duration=self.duration)
         self.retentionPolicies[host][self.database][self.rp_name]["duration"] = self.duration
         logger.info(
-            f"influxdb database->[{self.database}] rp->[{self.rp_name} | {self.duration}] is updated on host->[{host}]"
+            "influxdb database->[{}] rp->[{} | {}] is updated on host->[{}]".format(
+                self.database,
+                self.rp_name,
+                self.duration,
+                host,
+            )
         )
 
     def delete_retention_policy(self, host: str) -> None:
@@ -311,7 +332,11 @@ class DownsampledRetentionPolicies(models.Model):
             del self.retentionPolicies[host][self.database][self.rp_name]
 
         logger.info(
-            f"influxdb database->[{self.database}] rp->[{self.rp_name}] is delete on host->[{host}]"
+            "influxdb database->[{}] rp->[{}] is delete on host->[{}]".format(
+                self.database,
+                self.rp_name,
+                host,
+            )
         )
 
     def sync_retention_policy(self) -> None:
@@ -343,7 +368,7 @@ class DownsampledRetentionPolicies(models.Model):
 
         # 刷新consul
         self.refresh_consul_config()
-        logger.debug(f"consul database->[{self.database}] refresh consul config success.")
+        logger.debug("consul database->[%s] refresh consul config success." % self.database)
         return
 
     @classmethod
@@ -371,7 +396,11 @@ class DownsampledRetentionPolicies(models.Model):
                 if key_list[-1] not in rp_list:
                     client.kv.delete(consul_key)
                     logger.info(
-                        f"consul delete key->[{consul_key}],because rp->[{key_list[-1]}] not in rp_list->[{rp_list}]"
+                        "consul delete key->[{}],because rp->[{}] not in rp_list->[{}]".format(
+                            consul_key,
+                            key_list[-1],
+                            rp_list,
+                        )
                     )
         return
 
@@ -398,7 +427,7 @@ class DownsampledRetentionPolicies(models.Model):
 class DownsampledContinuousQueries(models.Model):
     """downsampled measurement 配置"""
 
-    CONSUL_PATH = f"{config.CONSUL_PATH}/downsampled"
+    CONSUL_PATH = "%s/downsampled" % config.CONSUL_PATH
 
     database = models.CharField("数据库名", max_length=128)
     measurement = models.CharField("表名", max_length=128, default="__all__")
@@ -449,10 +478,10 @@ class DownsampledContinuousQueries(models.Model):
         downsampled_database = DownsampledDatabase.objects.get(database=self.database)
         if downsampled_database.tag_name != "" and downsampled_database.tag_value != "":
             for val in downsampled_database.tag_value.split(","):
-                cq_name = f"{self.target_rp}.{self.measurement}.{downsampled_database.tag_name}.{val}"
-                result_list[cq_name] = f"{quote_ident(downsampled_database.tag_name)}='{val}'"
+                cq_name = "{}.{}.{}.{}".format(self.target_rp, self.measurement, downsampled_database.tag_name, val)
+                result_list[cq_name] = "{}='{}'".format(quote_ident(downsampled_database.tag_name), val)
         else:
-            cq_name = f"{self.target_rp}.{self.measurement}"
+            cq_name = "{}.{}".format(self.target_rp, self.measurement)
             result_list[cq_name] = ""
         return result_list
 
@@ -481,7 +510,7 @@ class DownsampledContinuousQueries(models.Model):
         for aggregation in self.aggregation_list:
             for field in self.field_list:
                 new_field = field
-                alias_filed = f"{aggregation}_{field}"
+                alias_filed = "{}_{}".format(aggregation, field)
                 new_aggregation = aggregation
                 if self.is_downsampled_rp:
                     new_field = alias_filed
@@ -490,7 +519,11 @@ class DownsampledContinuousQueries(models.Model):
                         new_aggregation = "sum"
 
                 items.append(
-                    f"{new_aggregation.lower()}({quote_ident(new_field)}) AS {alias_filed}"
+                    "{}({}) AS {}".format(
+                        new_aggregation.lower(),
+                        quote_ident(new_field),
+                        alias_filed,
+                    )
                 )
         return ", ".join(items)
 
@@ -539,14 +572,14 @@ class DownsampledContinuousQueries(models.Model):
                 quote_ident(self.database),
                 quote_ident(self.source_rp),
                 self.table,
-                self.cq_name_where[cq_name] != "" and f" WHERE {self.cq_name_where[cq_name]}" or "",
+                self.cq_name_where[cq_name] != "" and " WHERE {}".format(self.cq_name_where[cq_name]) or "",
                 self.target_rp,
             )
         return query_list.items()
 
     @staticmethod
     def drop_continuous_query_ql(database: str, cq_name: str) -> str:
-        query_string = f"DROP CONTINUOUS QUERY {quote_ident(cq_name)} ON {quote_ident(database)}"
+        query_string = "DROP CONTINUOUS QUERY {} ON {}".format(quote_ident(cq_name), quote_ident(database))
         return query_string
 
     def get_continuous_query(self, host: str, cq_name: str) -> str:
@@ -639,8 +672,14 @@ class DownsampledContinuousQueries(models.Model):
                         if field_key not in self.field_list or aggregation_key not in self.aggregation_list:
                             client.kv.delete(consul_key)
                             logger.info(
-                                f"consul key->[{consul_key}] deleted,because field_key->[{field_key}] not in field_list->[{self.field_list}] "
-                                f"or aggregation_key->[{aggregation_key}] not in aggregation_list->[{self.aggregation_list}]"
+                                "consul key->[{}] deleted,because field_key->[{}] not in field_list->[{}] "
+                                "or aggregation_key->[{}] not in aggregation_list->[{}]".format(
+                                    consul_key,
+                                    field_key,
+                                    self.field_list,
+                                    aggregation_key,
+                                    self.aggregation_list,
+                                )
                             )
 
         # 配置对应的consul
@@ -648,7 +687,10 @@ class DownsampledContinuousQueries(models.Model):
         for consul_key in self.consul_config_path:
             hash_consul.put(key=consul_key, value=self.consul_config_json)
             logger.info(
-                f"consul put key->[{consul_key}], value->[{self.consul_config_json}]"
+                "consul put key->[{}], value->[{}]".format(
+                    consul_key,
+                    self.consul_config_json,
+                )
             )
 
     def sync_continuous_query(self) -> None:
@@ -675,7 +717,7 @@ class DownsampledContinuousQueries(models.Model):
                             self.update_continuous_query(host, cq_name, cq_query)
         # 刷新consul
         self.refresh_consul_config()
-        logger.debug(f"consul refresh_consul_config database->[{self.database}]")
+        logger.debug("consul refresh_consul_config database->[%s]" % self.database)
 
     @classmethod
     def clean_consul_config(cls, database: str) -> None:
@@ -711,7 +753,11 @@ class DownsampledContinuousQueries(models.Model):
                     if measurement not in measurement_list:
                         client.kv.delete(consul_key)
                         logger.info(
-                            f"consul delete key->[{consul_key}],because measurement->[{measurement}] not in measurement_list->[{measurement_list}]"
+                            "consul delete key->[{}],because measurement->[{}] not in measurement_list->[{}]".format(
+                                consul_key,
+                                measurement,
+                                measurement_list,
+                            )
                         )
 
                     # 判断 target_rp 是否存在
@@ -719,7 +765,11 @@ class DownsampledContinuousQueries(models.Model):
                     if target_rp not in target_rp_list:
                         client.kv.delete(consul_key)
                         logger.info(
-                            f"consul delete key->[{consul_key}],because target_rp->[{target_rp}] not in target_rp_list->[{target_rp_list}]"
+                            "consul delete key->[{}],because target_rp->[{}] not in target_rp_list->[{}]".format(
+                                consul_key,
+                                target_rp,
+                                target_rp_list,
+                            )
                         )
 
     @classmethod
@@ -900,7 +950,7 @@ class DownsampleByDateFlow(models.Model):
             is_split = True if rto.value == "true" else False
         return self._get_table_type(schema_type, is_split, etl_config)
 
-    def _get_table_type(self, schema_type: str, is_split_measurement: bool, etl_config: str | None = None) -> str:
+    def _get_table_type(self, schema_type: str, is_split_measurement: bool, etl_config: Optional[str] = None) -> str:
         if schema_type == ResultTable.SCHEMA_TYPE_FIXED:
             return MeasurementType.BK_TRADITIONAL.value
         if schema_type == ResultTable.SCHEMA_TYPE_FREE:
@@ -1006,7 +1056,7 @@ class DownsampleByDateFlow(models.Model):
         except Exception as e:
             logger.error("get flow status failed, flow id: %s, error: %s", self.flow_id, e)
 
-    def get_kafka_config(self) -> dict:
+    def get_kafka_config(self) -> Dict:
         """获取 kafka 的配置"""
         kafka_storage = KafkaStorage.objects.filter(table_id=self.table_id).first()
         if not kafka_storage:
@@ -1030,7 +1080,7 @@ class DownsampleByDateFlow(models.Model):
 
         return config
 
-    def render_clean_flow_config(self, table_type: str, result_table_name: str, result_table_name_alias: str) -> dict:
+    def render_clean_flow_config(self, table_type: str, result_table_name: str, result_table_name_alias: str) -> Dict:
         """渲染清洗模板配置"""
         if table_type not in [
             MeasurementType.BK_TRADITIONAL.value,
@@ -1060,19 +1110,19 @@ class DownsampleByDateFlow(models.Model):
             logger.exception("render clean config failed, %s", e)
             return
 
-    def _get_time_format_and_len(self, table_type: str) -> tuple[str, int]:
+    def _get_time_format_and_len(self, table_type: str) -> Tuple[str, int]:
         """获取时间格式及长度"""
         if table_type == MeasurementType.BK_TRADITIONAL.value:
             return SECOND_TIMESTAMP_FORMAT, SECOND_TIMESTAMP_LEN
         else:
             return DEFAULT_TIME_FORMAT, DEFAULT_TIMESTAMP_LEN
 
-    def _get_table_metric_fields(self) -> list:
+    def _get_table_metric_fields(self) -> List:
         return list(
             ResultTableField.objects.filter(table_id=self.table_id, tag="metric").values_list("field_name", flat=True)
         )
 
-    def _get_field_assign_content(self, table_type: str) -> tuple[str, str]:
+    def _get_field_assign_content(self, table_type: str) -> Tuple[str, str]:
         """获取对应的表指标
 
         1. 针对单指标单表，按照固定metric value 处理
@@ -1115,7 +1165,7 @@ class DownsampleByDateFlow(models.Model):
             )
             return json.dumps(assigns), json.dumps(fields)
 
-    def render_calc_flow_config(self, bk_data_result_table_id: str, table_type: str) -> dict:
+    def render_calc_flow_config(self, bk_data_result_table_id: str, table_type: str) -> Dict:
         """渲染计算模板配置
 
         :param source_table: 数据源
@@ -1218,7 +1268,7 @@ class DownsampleByDateFlow(models.Model):
         DownsampledRetentionPolicies.sync_all(database)
         DownsampledContinuousQueries.refresh_consul_for_cq(database)
 
-    def _get_measurement_and_fields(self, table_type: str) -> tuple[str, str]:
+    def _get_measurement_and_fields(self, table_type: str) -> Tuple[str, str]:
         """通过类型，获取measurement和字段信息
         - 多指标单表，返回表名和 半角逗号连接的 metric field
         - 固定指标单表，返回表名和 metric_value

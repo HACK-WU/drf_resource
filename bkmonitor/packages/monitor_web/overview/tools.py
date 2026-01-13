@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import datetime
 from collections import defaultdict
-from typing import Any
+from typing import Any, Dict, List, Union
 
 import arrow
 from django.db.models import Q
@@ -27,14 +28,14 @@ from monitor_web.models.uptime_check import UptimeCheckNode, UptimeCheckTask
 from monitor_web.uptime_check.constants import BEAT_STATUS, UPTIME_CHECK_DB
 
 
-class MonitorStatus:
+class MonitorStatus(object):
     UNSET = "unset"
     SLIGHT = "slight"
     SERIOUS = "serious"
     NORMAL = "normal"
 
 
-class BaseMonitorInfo:
+class BaseMonitorInfo(object):
     SCENARIO = []
 
     @classmethod
@@ -335,11 +336,11 @@ class UptimeCheckMonitorInfo(BaseMonitorInfo):
         return {"step": 2 if node_exist else 1}
 
     @classmethod
-    def get_task_data(cls, task: dict[str, Any]) -> dict[str, Any]:
-        recent_task_data: dict[str, str | float | int] = resource.uptime_check.get_recent_task_data(
+    def get_task_data(cls, task: Dict[str, Any]) -> Dict[str, Any]:
+        recent_task_data: Dict[str, Union[str, float, int]] = resource.uptime_check.get_recent_task_data(
             {"task_id": task["id"], "type": "available"}
         )
-        task_data: dict[str, Any] = {
+        task_data: Dict[str, Any] = {
             "task_id": task["id"],
             "task_name": task["name"],
             "available": recent_task_data.get("available"),
@@ -351,11 +352,11 @@ class UptimeCheckMonitorInfo(BaseMonitorInfo):
     @classmethod
     def collect_task_datas(
         cls,
-        task: dict[str, Any],
-        task_id__notice_data_map: dict[int, dict[str, Any]],
-        task_id__warning_data_map: dict[int, dict[str, Any]],
+        task: Dict[str, Any],
+        task_id__notice_data_map: Dict[int, Dict[str, Any]],
+        task_id__warning_data_map: Dict[int, Dict[str, Any]],
     ):
-        task_data: dict[str, Any] = cls.get_task_data(task)
+        task_data: Dict[str, Any] = cls.get_task_data(task)
         if task_data["available"] is not None:
             if task_data["available"] < 60:
                 task_id__warning_data_map[task["id"]] = task_data
@@ -364,7 +365,7 @@ class UptimeCheckMonitorInfo(BaseMonitorInfo):
 
     def normal_info(self):
         # 1. 按需取字段，在字段均命中索引时 DB 查询无需回表，同时数据行数多的情况下也能加速返回
-        task_list: list[dict[str, Any]] = list(
+        task_list: List[Dict[str, Any]] = list(
             # 默认取100条拨测任务
             UptimeCheckTask.objects.filter(bk_biz_id=self.bk_biz_id)
             .values("id", "name", "protocol", "config")
@@ -467,7 +468,7 @@ class UptimeCheckMonitorInfo(BaseMonitorInfo):
         ]
         for task in task_list:
             title = abnormal_events_dick[task.id]["title"]
-            title = f"{task.name}{title}"
+            title = "{}{}".format(task.name, title)
             abnormal_events_dick[task.id].update(title=title)
 
         now_time = now()

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -17,6 +18,7 @@ import re
 from collections import defaultdict
 from functools import reduce
 from itertools import chain
+from typing import Dict, List, Optional, Tuple
 from urllib.parse import parse_qs
 
 from django.conf import settings
@@ -63,7 +65,7 @@ class AIOPSManager(abc.ABC):
         (DataSourceLabel.BK_MONITOR_COLLECTOR, DataTypeLabel.EVENT),
     )
 
-    def __init__(self, alert: AlertDocument, ai_settings: ReadOnlyAiSetting | None = None):
+    def __init__(self, alert: AlertDocument, ai_settings: Optional[ReadOnlyAiSetting] = None):
         self.alert = alert
 
         if ai_settings:
@@ -103,7 +105,7 @@ class AIOPSManager(abc.ABC):
     def get_graph_panel(
         cls,
         alert: AlertDocument,
-        compare_function: dict | None = None,
+        compare_function: Optional[Dict] = None,
         use_raw_query_config: bool = False,
         with_anomaly: bool = True,
     ):
@@ -480,8 +482,8 @@ class AIOPSManager(abc.ABC):
 
 class DimensionDrillManager(AIOPSManager):
     def parse_serving_result(
-        self, metric: MetricListCache, serving_output: dict
-    ) -> tuple[dict, list[dict], list[dict]]:
+        self, metric: MetricListCache, serving_output: Dict
+    ) -> Tuple[Dict, List[Dict], List[Dict]]:
         """解析维度下钻算法的预测结果.
 
         :param metric: 告警指标详情
@@ -523,8 +525,8 @@ class DimensionDrillManager(AIOPSManager):
 
     @classmethod
     def generate_anomaly_graph_panels(
-        cls, alert: AlertDocument, metric: MetricListCache, graph_panel: dict, graph_dimensions: list[dict]
-    ) -> list[dict]:
+        cls, alert: AlertDocument, metric: MetricListCache, graph_panel: Dict, graph_dimensions: List[Dict]
+    ) -> List[Dict]:
         """生成异常分值较高的维度图表参数.
 
         :param alert: 告警信息
@@ -589,7 +591,7 @@ class DimensionDrillManager(AIOPSManager):
         return sorted(graph_panels, key=lambda x: -x["anomaly_score"])
 
     @classmethod
-    def generate_anomaly_score_top10(cls, root_dimension: dict) -> list[dict]:
+    def generate_anomaly_score_top10(cls, root_dimension: Dict) -> List[Dict]:
         """根据API Serving的异常维度信息构建异常分值Top10的维度组合列表.
         :param root_dimension: 异常维度信息
             {
@@ -641,7 +643,7 @@ class DimensionDrillManager(AIOPSManager):
         ]
 
     @classmethod
-    def generate_anomaly_score_distribution(cls, metric: MetricListCache, root_dimension: dict) -> dict:
+    def generate_anomaly_score_distribution(cls, metric: MetricListCache, root_dimension: Dict) -> Dict:
         """根据API Serving的异常维度信息构建异常维度分布.
 
         :param alert: 告警详情
@@ -755,7 +757,7 @@ class DimensionDrillManager(AIOPSManager):
         }
 
     @classmethod
-    def generate_id_by_dimension_dict(cls, dimensions: dict) -> str:
+    def generate_id_by_dimension_dict(cls, dimensions: Dict) -> str:
         """根据维度字典生成某个维度组合的唯一ID.
 
         :param dimensions: 维度字典
@@ -765,7 +767,7 @@ class DimensionDrillManager(AIOPSManager):
         return "&".join(f"{key}-{dimensions[key]}" for key in keys)
 
     @classmethod
-    def generate_anomaly_dimension_detail(cls, dimension_keys: list, dimension_data: list) -> dict:
+    def generate_anomaly_dimension_detail(cls, dimension_keys: List, dimension_data: List) -> Dict:
         """根据异常维度数据生成维度详情.
 
         :param dimension_keys: 维度列表
@@ -781,7 +783,7 @@ class DimensionDrillManager(AIOPSManager):
     def is_enable(self):
         return self.ai_setting.dimension_drill.is_enabled
 
-    def generate_predict_args(self, metric: MetricListCache, query_configs: list[dict]) -> dict:
+    def generate_predict_args(self, metric: MetricListCache, query_configs: List[dict]) -> Dict:
         """基于告警信息构建维度下钻API Serving的预测参数
         :param metric: 告警指标详情
         :param query_configs: 告警指标默认查询参数
@@ -815,7 +817,7 @@ class DimensionDrillManager(AIOPSManager):
             ),
         }
 
-    def get_serving_output(self, metric: MetricListCache, graph_panel: dict):
+    def get_serving_output(self, metric: MetricListCache, graph_panel: Dict):
         processing_id = settings.BK_DATA_DIMENSION_DRILL_PROCESSING_ID
         query_configs = copy.deepcopy(graph_panel["targets"][0]["data"]["query_configs"])
 
@@ -857,7 +859,7 @@ class DimensionDrillManager(AIOPSManager):
 
         return self.format_result(metric, serving_output, graph_panel)
 
-    def format_result(self, metric: MetricListCache, serving_output: dict, graph_panel: dict):
+    def format_result(self, metric: MetricListCache, serving_output: Dict, graph_panel: Dict):
         info, anomaly_dimensions, graph_dimensions = self.parse_serving_result(metric, serving_output)
         graph_panels = self.generate_anomaly_graph_panels(self.alert, metric, graph_panel, graph_dimensions)
 
@@ -873,7 +875,7 @@ class RecommendMetricManager(AIOPSManager):
     def is_enable(self):
         return self.ai_setting.metric_recommend.is_enabled
 
-    def generate_predict_args(self, exp_config: dict) -> dict:
+    def generate_predict_args(self, exp_config: Dict) -> Dict:
         """
         基于告警信息构建指标推荐PI Serving的预测参数.
         :param exp_config: 查询表达式配置
@@ -951,8 +953,8 @@ class RecommendMetricManager(AIOPSManager):
 
     @classmethod
     def generate_recommended_metric_panels(
-        cls, alert: AlertDocument, graph_panel: dict, recommended_results: dict
-    ) -> list[dict]:
+        cls, alert: AlertDocument, graph_panel: Dict, recommended_results: Dict
+    ) -> List[Dict]:
         """
         生成推荐指标的图表配置
         :param alert: 告警信息
@@ -1101,7 +1103,7 @@ class RecommendMetricManager(AIOPSManager):
         return graph_panels
 
     @classmethod
-    def parse_recommend_metric(cls, recommend_metric: str) -> tuple[str, dict]:
+    def parse_recommend_metric(cls, recommend_metric: str) -> Tuple[str, Dict]:
         """解析推荐的指标及其维度信息.
 
         :param recommend_metric: 推荐的指标
@@ -1115,7 +1117,7 @@ class RecommendMetricManager(AIOPSManager):
         return metric_tokens[0], dimensions
 
     @classmethod
-    def classify_recommended_metrics(cls, recommended_metric_panels: list[dict]) -> list[dict]:
+    def classify_recommended_metrics(cls, recommended_metric_panels: List[Dict]) -> List[Dict]:
         """把推荐指标进行分类.
 
         :param recommended_metric_panels: 未分类的推荐指标列表，包含画图的panels信息
@@ -1149,7 +1151,7 @@ class RecommendMetricManager(AIOPSManager):
 
 
 class DimensionDrillLightManager(DimensionDrillManager):
-    def format_result(self, metric: MetricListCache, serving_output: dict, graph_panel: dict):
+    def format_result(self, metric: MetricListCache, serving_output: Dict, graph_panel: Dict):
         root_dimensions = json.loads(serving_output["root_dims"])
         return {
             "info": {

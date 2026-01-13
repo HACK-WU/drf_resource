@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 import urllib.parse
+from typing import Optional
 
 import requests
 from django.conf import settings
@@ -20,7 +22,7 @@ from core.prometheus.tools import get_metric_agg_gateway_url
 logger = logging.getLogger("bkmonitor")
 
 
-def get_agg_gateway_url() -> str | None:
+def get_agg_gateway_url() -> Optional[str]:
     """获取聚合网关 URL"""
     # TODO: agg_gateway_url should include scheme part
     agg_gateway_url = get_metric_agg_gateway_url()

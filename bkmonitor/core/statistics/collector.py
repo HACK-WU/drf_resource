@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from typing import Dict, List
 
 from core.statistics.metric import MC, Metric
 from core.statistics.storage import Storage
@@ -64,7 +66,7 @@ class Collector:
         metrics = self.storage.get(metric_names=list(metric_functions.keys()))
         return metrics
 
-    def export_json(self) -> list[dict]:
+    def export_json(self) -> List[Dict]:
         """
         输出指标字典
         """

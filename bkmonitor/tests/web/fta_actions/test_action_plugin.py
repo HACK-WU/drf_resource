@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -25,7 +26,7 @@ class TestActionPlugin(TestCase):
     def test_get_itsm_plugin_url(self):
         ap = ActionPlugin.objects.get(id=5)
         new_info = ap.get_plugin_template_create_url()
-        itsm_url = f"{settings.BK_ITSM_HOST}#/project/service/new/basic?project_id=0"
+        itsm_url = "{}#/project/service/new/basic?project_id=0".format(settings.BK_ITSM_HOST)
         self.assertEqual(itsm_url, new_info["url"])
 
     def test_get_sops_plugin_url(self):
@@ -36,12 +37,12 @@ class TestActionPlugin(TestCase):
         sops_project_mock.start()
         ap = ActionPlugin.objects.get(id=4)
         new_info = ap.get_plugin_template_create_url(**{"bk_biz_id": 2})
-        sops_url = f"{settings.BK_SOPS_HOST}template/new/2/"
+        sops_url = "{}template/new/2/".format(settings.BK_SOPS_HOST)
         sops_project_mock.stop()
         self.assertEqual(sops_url, new_info["url"])
 
     def test_get_job_plugin_url(self):
         ap = ActionPlugin.objects.get(id=3)
         new_info = ap.get_plugin_template_create_url(**{"bk_biz_id": 2})
-        job_url = f"{settings.JOB_URL}/2/task_manage/create"
+        job_url = "{}/2/task_manage/create".format(settings.JOB_URL)
         self.assertEqual(job_url, new_info["url"])

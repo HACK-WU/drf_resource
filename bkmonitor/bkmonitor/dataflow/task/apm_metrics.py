@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -266,7 +267,7 @@ class APMVirtualMetricTask(BaseTask):
     """
 
     def __init__(self, result_table_id, bk_biz_id, app_name):
-        super().__init__()
+        super(APMVirtualMetricTask, self).__init__()
         self.bk_biz_id = bk_biz_id
         self.app_name = app_name
         self.rt_id = result_table_id

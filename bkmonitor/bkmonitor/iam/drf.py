@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 
-from typing import Literal
+from typing_extensions import Literal
 
 from bkmonitor.utils.thread_backend import ThreadPool
 
@@ -17,7 +18,7 @@ from bkmonitor.utils.thread_backend import ThreadPool
 DRF 插件
 """
 from functools import wraps
-from collections.abc import Callable
+from typing import Callable, List, Optional
 
 from iam import Resource
 from rest_framework import permissions
@@ -32,7 +33,7 @@ logger = logging.getLogger("apm")
 
 
 class IAMPermission(permissions.BasePermission):
-    def __init__(self, actions: list[ActionMeta], resources: list[Resource] = None):
+    def __init__(self, actions: List[ActionMeta], resources: List[Resource] = None):
         self.actions = actions
         self.resources = resources or []
 
@@ -72,14 +73,14 @@ class BusinessActionPermission(IAMPermission):
     关联业务的动作权限检查
     """
 
-    def __init__(self, actions: list[ActionMeta]):
-        super().__init__(actions)
+    def __init__(self, actions: List[ActionMeta]):
+        super(BusinessActionPermission, self).__init__(actions)
 
     def has_permission(self, request, view):
         if not request.biz_id:
             return True
         self.resources = [ResourceEnum.BUSINESS.create_instance(request.biz_id)]
-        return super().has_permission(request, view)
+        return super(BusinessActionPermission, self).has_permission(request, view)
 
     def has_object_permission(self, request, view, obj):
         # 先查询对象中有没有业务ID相关属性
@@ -88,7 +89,7 @@ class BusinessActionPermission(IAMPermission):
             bk_biz_id = obj.bk_biz_id
         if bk_biz_id:
             self.resources = [ResourceEnum.BUSINESS.create_instance(bk_biz_id)]
-            return super().has_object_permission(request, view, obj)
+            return super(BusinessActionPermission, self).has_object_permission(request, view, obj)
         # 没有就尝试取请求的业务ID
         return self.has_permission(request, view)
 
@@ -99,7 +100,7 @@ class ViewBusinessPermission(BusinessActionPermission):
     """
 
     def __init__(self):
-        super().__init__([ActionEnum.VIEW_BUSINESS])
+        super(ViewBusinessPermission, self).__init__([ActionEnum.VIEW_BUSINESS])
 
 
 class InstanceActionPermission(IAMPermission):
@@ -107,24 +108,24 @@ class InstanceActionPermission(IAMPermission):
     关联其他资源的权限检查
     """
 
-    def __init__(self, actions: list[ActionMeta], resource_meta: ResourceMeta):
+    def __init__(self, actions: List[ActionMeta], resource_meta: ResourceMeta):
         self.resource_meta = resource_meta
-        super().__init__(actions)
+        super(InstanceActionPermission, self).__init__(actions)
 
     def has_permission(self, request, view):
         instance_id = view.kwargs[self.get_look_url_kwarg(view)]
         resource = self.resource_meta.create_instance(instance_id)
         self.resources = [resource]
-        return super().has_permission(request, view)
+        return super(InstanceActionPermission, self).has_permission(request, view)
 
     def get_look_url_kwarg(self, view):
         # Perform the lookup filtering.
         lookup_url_kwarg = view.lookup_url_kwarg or view.lookup_field
 
         assert lookup_url_kwarg in view.kwargs, (
-            f"Expected view {self.__class__.__name__} to be called with a URL keyword argument "
-            f'named "{lookup_url_kwarg}". Fix your URL conf, or set the `.lookup_field` '
-            "attribute on the view correctly."
+            "Expected view %s to be called with a URL keyword argument "
+            'named "%s". Fix your URL conf, or set the `.lookup_field` '
+            "attribute on the view correctly." % (self.__class__.__name__, lookup_url_kwarg)
         )
         return lookup_url_kwarg
 
@@ -138,7 +139,7 @@ class InstanceActionForDataPermission(InstanceActionPermission):
     ):
         self.iam_instance_id_key = iam_instance_id_key
         self.get_instance_id = get_instance_id
-        super().__init__(*args)
+        super(InstanceActionForDataPermission, self).__init__(*args)
 
     def has_permission(self, request, view):
         if request.method == "GET":
@@ -154,13 +155,13 @@ class InstanceActionForDataPermission(InstanceActionPermission):
 
 
 def insert_permission_field(
-    actions: list[ActionMeta],
+    actions: List[ActionMeta],
     resource_meta: ResourceMeta,
     id_field: Callable = lambda item: item["id"],
     data_field: Callable = lambda data_list: data_list,
     always_allowed: Callable = lambda item: False,
     many: bool = True,
-    instance_create_func: Callable[[dict], Resource] | None = None,
+    instance_create_func: Optional[Callable[[dict], Resource]] = None,
     batch_create: bool = False,
 ):
     """
@@ -230,7 +231,7 @@ def batch_create_instance(
     result_list: list,
     resource_meta: ResourceMeta,
     id_field: Callable = lambda item: item["id"],
-    instance_create_func: Callable[[dict], Resource] | None = None,
+    instance_create_func: Optional[Callable[[dict], Resource]] = None,
 ):
     """
     批量创建实例
@@ -272,14 +273,14 @@ def extract_attribute(item):
 
 
 def filter_data_by_permission(
-    data: list[dict],
-    actions: list[ActionMeta],
+    data: List[dict],
+    actions: List[ActionMeta],
     resource_meta: ResourceMeta,
     id_field: Callable[[dict], str] = lambda item: item["id"],
     always_allowed: Callable[[dict], bool] = lambda item: False,
-    instance_create_func: Callable[[dict], Resource] | None = None,
+    instance_create_func: Optional[Callable[[dict], Resource]] = None,
     mode: Literal["any", "all", "insert"] = "any",
-) -> list[dict]:
+) -> List[dict]:
     """
     根据权限过滤数据
     :param mode: 过滤模式，"any" 表示只要有一个权限通过就返回，"all" 表示所有权限通过才返回, "insert" 表示插入权限信息，但不过滤数据

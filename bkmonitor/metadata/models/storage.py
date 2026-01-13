@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +17,7 @@ import logging
 import re
 import time
 import traceback
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple
 
 import arrow
 import curator
@@ -90,8 +91,8 @@ class ClusterInfo(models.Model):
     如果需要看到influxDB-proxy后面的实际集群信息，请看InfluxDBClusterInfo记录
     """
 
-    CONSUL_PREFIX_PATH = f"{config.CONSUL_PATH}/unify-query/data/storage"
-    CONSUL_VERSION_PATH = f"{config.CONSUL_PATH}/unify-query/version/storage"
+    CONSUL_PREFIX_PATH = "%s/unify-query/data/storage" % config.CONSUL_PATH
+    CONSUL_VERSION_PATH = "%s/unify-query/version/storage" % config.CONSUL_PATH
 
     TYPE_INFLUXDB = "influxdb"
     TYPE_KAFKA = "kafka"
@@ -165,7 +166,7 @@ class ClusterInfo(models.Model):
         verbose_name = "集群配置信息"
         verbose_name_plural = "集群配置信息"
 
-    def to_dict(self, fields: list | None = None, exclude: list | None = None) -> dict:
+    def to_dict(self, fields: Optional[List] = None, exclude: Optional[List] = None) -> Dict:
         data = {}
         for f in self._meta.concrete_fields + self._meta.many_to_many:
             value = f.value_from_object(self)
@@ -196,7 +197,7 @@ class ClusterInfo(models.Model):
         info_list = cls.objects.all()
 
         total_count = info_list.count()
-        logger.debug(f"total find->[{total_count}] es storage info to refresh")
+        logger.debug("total find->[{}] es storage info to refresh".format(total_count))
 
         # 2. 构建需要刷新的字典信息
         refresh_dict = {}
@@ -210,17 +211,17 @@ class ClusterInfo(models.Model):
             hash_consul.put(
                 key=consul_path,
                 value={
-                    "address": f"http://{storage_info.domain_name}:{storage_info.port}",
+                    "address": "http://{}:{}".format(storage_info.domain_name, storage_info.port),
                     "username": storage_info.username,
                     "password": storage_info.password,
                     "type": storage_info.cluster_type,
                 },
             )
-            logger.debug(f"consul path->[{consul_path}] is refresh with value->[{refresh_dict}] success.")
+            logger.debug("consul path->[{}] is refresh with value->[{}] success.".format(consul_path, refresh_dict))
 
         hash_consul.put(key=cls.CONSUL_VERSION_PATH, value={"time": time.time()})
 
-        logger.info(f"all es table info is refresh to consul success count->[{total_count}].")
+        logger.info("all es table info is refresh to consul success count->[%s]." % total_count)
 
     def base64_with_prefix(self, content: str) -> str:
         """编码，并添加上前缀"""
@@ -327,9 +328,9 @@ class ClusterInfo(models.Model):
                             "persistent": {"action": {"auto_create_index": new_auto_create_index}},
                         }
                     )
-                    logger.info(f"cluster({self.cluster_name}) init success, ret({ret})")
+                    logger.info("cluster({}) init success, ret({})".format(self.cluster_name, ret))
             except Exception as e:  # pylint: disable=broad-except
-                logger.error(f"cluster({self.cluster_name}) init error, {e}")
+                logger.error("cluster({}) init error, {}".format(self.cluster_name, e))
 
     @classmethod
     @atomic(config.DATABASE_CONNECTION_NAME)
@@ -350,13 +351,13 @@ class ClusterInfo(models.Model):
         is_ssl_verify=False,
         label="",
         default_settings=None,
-        ssl_verification_mode: str | None = "",
-        ssl_certificate_authorities: str | None = "",
-        ssl_certificate: str | None = "",
-        ssl_certificate_key: str | None = "",
-        ssl_insecure_skip_verify: bool | None = False,
-        extranet_domain_name: str | None = "",
-        extranet_port: int | None = 0,
+        ssl_verification_mode: Optional[str] = "",
+        ssl_certificate_authorities: Optional[str] = "",
+        ssl_certificate: Optional[str] = "",
+        ssl_certificate_key: Optional[str] = "",
+        ssl_insecure_skip_verify: Optional[bool] = False,
+        extranet_domain_name: Optional[str] = "",
+        extranet_port: Optional[int] = 0,
     ):
         """
         创建一个存储集群信息
@@ -389,23 +390,25 @@ class ClusterInfo(models.Model):
         # 基本数据校验
         if cls.objects.filter(cluster_name=cluster_name).exists():
             logger.error(
-                f"reg_system->[{registered_system}] try to add cluster with name->[{cluster_name}] which is already exists, nothing "
-                "will do"
+                "reg_system->[{}] try to add cluster with name->[{}] which is already exists, nothing "
+                "will do".format(registered_system, cluster_name)
             )
             raise ValueError(_("集群名【{}】与已有集群冲突，请确认后重试").format(cluster_name))
 
         if cluster_type not in (cls.TYPE_INFLUXDB, cls.TYPE_ES, cls.TYPE_KAFKA, cls.TYPE_REDIS, cls.TYPE_ARGUS):
             logger.error(
-                f"reg_system->[{registered_system}] try to add cluster type->[{cluster_type}] but is not at CLUSTER_TYPE_CHOICES, nothing "
-                "will do"
+                "reg_system->[{}] try to add cluster type->[{}] but is not at CLUSTER_TYPE_CHOICES, nothing "
+                "will do".format(registered_system, cluster_type)
             )
             raise ValueError(_("存储集群【{}】暂不支持，请确认后重试").format(cluster_type))
 
         # 判断集群信息是否有存在冲突的
         if cls.objects.filter(domain_name=domain_name, port=port, username=username).exists():
             logger.error(
-                f"reg_system->[{registered_system}] try to add cluster->[{cluster_type}] with domain->[{domain_name}] port->[{port}] username->[{username}] "
-                f"pass->[{password}] which already has the same cluster config , nothing will do."
+                "reg_system->[{}] try to add cluster->[{}] with domain->[{}] port->[{}] username->[{}] "
+                "pass->[{}] which already has the same cluster config , nothing will do.".format(
+                    registered_system, cluster_type, domain_name, port, username, password
+                )
             )
             raise ValueError(_("存在同样配置集群，请确认后重试"))
 
@@ -438,7 +441,9 @@ class ClusterInfo(models.Model):
             ssl_insecure_skip_verify=ssl_insecure_skip_verify,
         )
         logger.info(
-            f"reg_system->[{registered_system}] created new cluster->[{new_cluster.cluster_id}] type->[{cluster_type}]"
+            "reg_system->[{}] created new cluster->[{}] type->[{}]".format(
+                registered_system, new_cluster.cluster_id, cluster_type
+            )
         )
         new_cluster.cluster_init()
 
@@ -457,13 +462,13 @@ class ClusterInfo(models.Model):
         version=None,
         label="",
         default_settings=None,
-        ssl_verification_mode: str | None = None,
-        ssl_certificate_authorities: str | None = None,
-        ssl_certificate: str | None = None,
-        ssl_certificate_key: str | None = None,
-        ssl_insecure_skip_verify: bool | None = None,
-        extranet_domain_name: str | None = None,
-        extranet_port: int | None = None,
+        ssl_verification_mode: Optional[str] = None,
+        ssl_certificate_authorities: Optional[str] = None,
+        ssl_certificate: Optional[str] = None,
+        ssl_certificate_key: Optional[str] = None,
+        ssl_insecure_skip_verify: Optional[bool] = None,
+        extranet_domain_name: Optional[str] = None,
+        extranet_port: Optional[int] = None,
     ):
         """
         修改存储集群信息
@@ -511,11 +516,13 @@ class ClusterInfo(models.Model):
                 # 由于已经有更新了，所以需要更新最后更新者
                 self.last_modify_user = operator
                 logger.info(
-                    f"cluster->[{self.cluster_name}] attribute->[{attribute_name}] is set to->[{value}] by->[{operator}]"
+                    "cluster->[{}] attribute->[{}] is set to->[{}] by->[{}]".format(
+                        self.cluster_name, attribute_name, value, operator
+                    )
                 )
 
         self.save()
-        logger.info(f"cluster->[{self.cluster_name}] update success.")
+        logger.info("cluster->[{}] update success.".format(self.cluster_name))
         return True
 
     @atomic(config.DATABASE_CONNECTION_NAME)
@@ -538,10 +545,12 @@ class ClusterInfo(models.Model):
             )
             raise ValueError(_("存在未关闭的结果表 {}").format(','.join(enable_rts)))
 
-        super().delete(*args, **kwargs)
+        super(ClusterInfo, self).delete(*args, **kwargs)
 
         logger.info(
-            f"cluster->[{self.cluster_name}] cluster_type->[{self.cluster_type}] has deleted by [{self.registered_system}]"
+            "cluster->[{}] cluster_type->[{}] has deleted by [{}]".format(
+                self.cluster_name, self.cluster_type, self.registered_system
+            )
         )
 
 
@@ -575,8 +584,8 @@ class KafkaTopicInfo(models.Model):
         # 1. 判断是否已经存在该data_id的配置
         if cls.objects.filter(bk_data_id=bk_data_id).exists():
             logger.error(
-                f"try to create kafka topic for data_id->[{bk_data_id}], but which is already exists, "
-                "something go wrong?"
+                "try to create kafka topic for data_id->[%s], but which is already exists, "
+                "something go wrong?" % bk_data_id
             )
             raise ValueError(_("数据源已经配置，请确认"))
 
@@ -585,21 +594,22 @@ class KafkaTopicInfo(models.Model):
             bk_data_id=bk_data_id,
             # 如果topic没有指定，则设定为该data_id同名
             # TOPIC的生成规范，可以参考DataSource.gse_config注释
-            topic=topic if topic is not None else f"{config.KAFKA_TOPIC_PREFIX}{bk_data_id}0",
+            topic=topic if topic is not None else "{}{}0".format(config.KAFKA_TOPIC_PREFIX, bk_data_id),
             partition=partition,
             batch_size=batch_size,
             flush_interval=flush_interval,
             consume_rate=consume_rate,
         )
         logger.info(
-            f"new kafka topic is set for data_id->[{info.bk_data_id}] topic->[{info.topic}] partition->[{info.partition}]"
+            "new kafka topic is set for data_id->[%s] topic->[%s] partition->[%s]"
+            % (info.bk_data_id, info.topic, info.partition)
         )
 
         # 3. 返回新的实例
         return info
 
 
-class StorageResultTable:
+class StorageResultTable(object):
     """实际结果表基类，提供公共方法的模板"""
 
     STORAGE_TYPE = None
@@ -706,8 +716,8 @@ class StorageResultTable:
 
             if upgrade_config is None:
                 logger.info(
-                    f"table_id->[{self.table_id}] try to upgrade storage->[{self.STORAGE_TYPE}] config->[{field_name}] but is not exists, "
-                    "nothing will do."
+                    "table_id->[{}] try to upgrade storage->[{}] config->[{}] but is not exists, "
+                    "nothing will do.".format(self.table_id, self.STORAGE_TYPE, field_name)
                 )
                 continue
 
@@ -719,12 +729,14 @@ class StorageResultTable:
                 setattr(self, field_name, upgrade_config)
 
             logger.info(
-                f"table_id->[{self.table_id}] storage->[{self.STORAGE_TYPE}] has upgrade attribute->[{field_name}] to->[{upgrade_config}]"
+                "table_id->[{}] storage->[{}] has upgrade attribute->[{}] to->[{}]".format(
+                    self.table_id, self.STORAGE_TYPE, field_name, upgrade_config
+                )
             )
 
         self.save()
 
-        logger.info(f"table->[{self.table_id}] storage->[{self.STORAGE_TYPE}] upgrade operation success.")
+        logger.info("table->[{}] storage->[{}] upgrade operation success.".format(self.table_id, self.STORAGE_TYPE))
 
         return True
 
@@ -742,7 +754,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
     """TSDB物理表配置"""
 
     # TODO: consul 中 router 的信息，待 redis 数据稳定后，可以删除
-    CONSUL_CONFIG_CLUSTER_PATH = f"{config.CONSUL_PATH}/influxdb_info/router"
+    CONSUL_CONFIG_CLUSTER_PATH = "%s/influxdb_info/router" % config.CONSUL_PATH
 
     STORAGE_TYPE = ClusterInfo.TYPE_INFLUXDB
     UPGRADE_FIELD_CONFIG = ("source_duration_time",)
@@ -820,7 +832,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         for info in delete_list:
             data = info.__dict__
             info.delete()
-            logger.info(f"delete route info:{data}")
+            logger.info("delete route info:{}".format(data))
 
         for item in items:
             # info = InfluxDBTagInfo(**item)
@@ -830,9 +842,9 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
                 defaults=item,
             )
             if created:
-                logger.info(f"create new route info:{str(item)}")
+                logger.info("create new route info:{}".format(str(item)))
             else:
-                logger.info(f"update route info to:{str(item)}")
+                logger.info("update route info to:{}".format(str(item)))
 
     @property
     def influxdb_proxy_storage(self) -> InfluxDBProxyStorage:
@@ -851,9 +863,9 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
 
     def get_influxdb_storage(
         self,
-        influxdb_proxy_storage_id: int | None = None,
-        proxy_cluster_name: str | None = None,
-        storage_cluster_id: int | None = None,
+        influxdb_proxy_storage_id: Optional[int] = None,
+        proxy_cluster_name: Optional[str] = None,
+        storage_cluster_id: Optional[int] = None,
     ) -> InfluxDBProxyStorage:
         """获取 proxy 集群和存储集群名称
 
@@ -943,7 +955,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         if not InfluxDBClusterInfo.objects.filter(cluster_name=proxy_cluster_name).exists():
             # 如果调入此处，表示指定的proxy并没有对应的任何机器
             logger.error(
-                f"proxy_cluster->[{proxy_cluster_name}] has no config, maybe something go wrong?Nothing will do."
+                "proxy_cluster->[%s] has no config, maybe something go wrong?Nothing will do." % proxy_cluster_name
             )
             raise ValueError(_("请求集群[%s]不存在，请确认后重试") % proxy_cluster_name)
 
@@ -966,7 +978,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
             influxdb_proxy_storage_id=influxdb_proxy_storage_id,
             **kwargs,
         )
-        logger.info(f"result_table->[{new_storage.table_id}] now has create influxDB storage.")
+        logger.info("result_table->[%s] now has create influxDB storage." % new_storage.table_id)
 
         if is_sync_db:
             new_storage.sync_db()
@@ -975,7 +987,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         # 由于是创建结果表，必须强行刷新到consul配置中
         new_storage.refresh_consul_cluster_config(is_version_refresh=True)
 
-        logger.info(f"result_table->[{new_storage.table_id}] all database create is done.")
+        logger.info("result_table->[%s] all database create is done." % new_storage.table_id)
         return new_storage
 
     @property
@@ -1050,7 +1062,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         if self.use_default_rp:
             return ""
 
-        return f"bkmonitor_rp_{self.table_id}"
+        return "bkmonitor_rp_{}".format(self.table_id)
 
     def create_database(self):
         """
@@ -1069,10 +1081,10 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
             return True
         # 1. 数据库的创建
         result = requests.post(
-            url=f"http://{self.storage_cluster.domain_name}:{self.storage_cluster.port}/create_database",
+            url="http://{}:{}/create_database".format(self.storage_cluster.domain_name, self.storage_cluster.port),
             params={
                 # 语句是供非表路由的proxy使用
-                "q": f'CREATE DATABASE "{self.database}"',
+                "q": 'CREATE DATABASE "%s"' % self.database,
                 # cluster及DB名是供表路由proxy使用
                 "db": self.database,
                 "cluster": self.influxdb_proxy_storage.instance_cluster_name,
@@ -1083,12 +1095,15 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         # 判断数据库创建是否正常
         if result.status_code >= 300:
             logger.error(
-                f"failed to create database->[{self.database}] for status->[{result.status_code}] content->[{result.content}]"
+                "failed to create database->[%s] for status->[%s] content->[%s]"
+                % (self.database, result.status_code, result.content)
             )
             raise ValueError(_("创建数据库[%s]失败，请联系管理员") % self.database)
 
         logger.info(
-            f"database->[{self.database}] is create on host->[{self.storage_cluster.domain_name}:{self.storage_cluster.port}]"
+            "database->[{}] is create on host->[{}:{}]".format(
+                self.database, self.storage_cluster.domain_name, self.storage_cluster.port
+            )
         )
         return True
 
@@ -1106,7 +1121,8 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
             cluster_name=proxy_cluster_name, host_name=host_info.host_name
         ).exists():
             logger.error(
-                f"cluster_info->[{host_info.cluster_name}] is not same as storage cluster_id->[{proxy_cluster_name}]"
+                "cluster_info->[%s] is not same as storage cluster_id->[%s]"
+                % (host_info.cluster_name, proxy_cluster_name)
             )
             raise ValueError(_("创建集群信息非结果表配置，请确认"))
 
@@ -1126,7 +1142,9 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         else:
             client.create_retention_policy(**rp_config)
         logger.info(
-            f"database->[{self.database}] now has rp duration->[{self.source_duration_time}] on host->[{host_info.domain_name}] port->[{host_info.port}] host_name->[{host_info.host_name}]"
+            "database->[{}] now has rp duration->[{}] on host->[{}] port->[{}] host_name->[{}]".format(
+                self.database, self.source_duration_time, host_info.domain_name, host_info.port, host_info.host_name
+            )
         )
 
         return True
@@ -1138,11 +1156,11 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         """
         # 判断是否使用独立的策略，否则不需要配置
         if self.use_default_rp:
-            logger.info(f"table->[{self.table_id}] use default rp, nothing will refresh for it.")
+            logger.info("table->[{}] use default rp, nothing will refresh for it.".format(self.table_id))
             return True
 
         if not self.enable_refresh_rp:
-            logger.info(f"table->[{self.table_id}] disabled refresh rp, nothing will refresh for it.")
+            logger.info("table->[{}] disabled refresh rp, nothing will refresh for it.".format(self.table_id))
             return True
 
         # 否则，需要在相关的所有机器上，遍历判断RP是否正确配置了
@@ -1162,7 +1180,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
             # 如果用户名和密码有配置，需要配置生效使用
             if host_info.username or host_info.password:
                 client.switch_user(username=host_info.username, password=host_info.password)
-                logger.debug(f"host->[{host_info.domain_name}] is set with username and password.")
+                logger.debug("host->[{}] is set with username and password.".format(host_info.domain_name))
 
             rp_result = client.get_list_retention_policies(database=self.database)
 
@@ -1177,7 +1195,9 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
                 # 判断duration是否一致
                 if go_time.parse_duration(duration) == go_time.parse_duration(self.source_duration_time):
                     logger.info(
-                        f"table->[{self.table_id}] rp->[{self.rp_name} | {self.source_duration_time}] check fine on host->[{host_info.domain_name}]"
+                        "table->[{}] rp->[{} | {}] check fine on host->[{}]".format(
+                            self.table_id, self.rp_name, self.source_duration_time, host_info.domain_name
+                        )
                     )
                     # 可以直接找下一个机器了
                     break
@@ -1188,7 +1208,9 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
                     shard_group_duration = InfluxDBHostInfo.judge_shard(self.source_duration_time)
                 except ValueError as e:
                     logger.error(
-                        f"table->[{self.table_id}] rp->[{self.rp_name} | {self.source_duration_time}] is updated on host->[{host_info.domain_name}] failed: [{e}]"
+                        "table->[{}] rp->[{} | {}] is updated on host->[{}] failed: [{}]".format(
+                            self.table_id, self.rp_name, self.source_duration_time, host_info.domain_name, e
+                        )
                     )
                     break
                 client.alter_retention_policy(
@@ -1198,7 +1220,13 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
                     shard_duration=shard_group_duration,
                 )
                 logger.info(
-                    f"table->[{self.table_id}] rp->[{self.rp_name} | {self.source_duration_time} | {shard_group_duration}] is updated on host->[{host_info.domain_name}]"
+                    "table->[{}] rp->[{} | {} | {}] is updated on host->[{}]".format(
+                        self.table_id,
+                        self.rp_name,
+                        self.source_duration_time,
+                        shard_group_duration,
+                        host_info.domain_name,
+                    )
                 )
                 break
             # 如果没有找到, 那么需要创建一个RP
@@ -1208,7 +1236,9 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
                     shard_group_duration = InfluxDBHostInfo.judge_shard(self.source_duration_time)
                 except ValueError as e:
                     logger.error(
-                        f"table->[{self.table_id}] rp->[{self.rp_name} | {self.source_duration_time}] is create on host->[{host_info.domain_name}] failed: [{e}]"
+                        "table->[{}] rp->[{} | {}] is create on host->[{}] failed: [{}]".format(
+                            self.table_id, self.rp_name, self.source_duration_time, host_info.domain_name, e
+                        )
                     )
                     break
                 client.create_retention_policy(
@@ -1224,7 +1254,13 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
                     default=False,
                 )
                 logger.info(
-                    f"table->[{self.table_id}] rp->[{self.rp_name} | {self.source_duration_time} | {shard_group_duration}] is create on host->[{host_info.domain_name}]"
+                    "table->[{}] rp->[{} | {} | {}] is create on host->[{}]".format(
+                        self.table_id,
+                        self.rp_name,
+                        self.source_duration_time,
+                        shard_group_duration,
+                        host_info.domain_name,
+                    )
                 )
         return True
 
@@ -1238,7 +1274,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         # if self.is_database_exists():
         self.create_database()
         # self.create_rp()
-        logger.debug(f"table_id->[{self.table_id}] now is sync to db success")
+        logger.debug("table_id->[%s] now is sync to db success" % self.table_id)
 
         return True
 
@@ -1279,9 +1315,9 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
             length = len(cls.objects.filter(real_table_name=measurement, database=db))
             if length == 0:
                 hash_consul.delete(key)
-                logger.info(f"route info:{key} deleted in consul")
+                logger.info("route info:{} deleted in consul".format(key))
             else:
-                logger.info(f"route:{key} has {length} result,not delete")
+                logger.info("route:{} has {} result,not delete".format(key, length))
 
     @classmethod
     def clean_redis_cluster_config(cls):
@@ -1299,7 +1335,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
 
         hash_consul = consul_tools.HashConsul()
         hash_consul.put(key=self.consul_cluster_path, value=self.consul_cluster_config)
-        logger.info(f"result_table->[{self.table_id}] refresh cluster_info to consul success.")
+        logger.info("result_table->[%s] refresh cluster_info to consul success." % self.table_id)
 
         # TODO: 待推送 redis 数据稳定后，删除推送 consul 功能
         self.push_redis_data(is_publish)
@@ -1399,7 +1435,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         RedisTools.publish(constants.INFLUXDB_KEY_PREFIX, [constants.INFLUXDB_ADDITIONAL_INFO_FOR_UNIFY_QUERY])
 
     @classmethod
-    def _get_table_id_access_vm_data(cls, table_ids: list[str]) -> dict:
+    def _get_table_id_access_vm_data(cls, table_ids: List[str]) -> Dict:
         """获取结果表和集群 ID 的关系"""
         from metadata.models import AccessVMRecord
 
@@ -1414,7 +1450,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         }
 
     @classmethod
-    def _get_vm_cluster_id_name(cls) -> dict:
+    def _get_vm_cluster_id_name(cls) -> Dict:
         """获取 vm 集群 ID"""
         return {
             obj["cluster_id"]: obj["cluster_name"]
@@ -1422,7 +1458,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         }
 
     @classmethod
-    def _get_table_info_by_table_ids(cls, table_ids: list[str]) -> dict[str, dict]:
+    def _get_table_info_by_table_ids(cls, table_ids: List[str]) -> Dict[str, Dict]:
         """获取结果表信息"""
         rt_qs = ResultTable.objects.filter(table_id__in=table_ids).values("table_id", "schema_type", "bk_biz_id")
         return {
@@ -1435,7 +1471,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         }
 
     @classmethod
-    def _get_data_source_by_table_ids(cls, table_ids: list[str]) -> dict[str, dict]:
+    def _get_data_source_by_table_ids(cls, table_ids: List[str]) -> Dict[str, Dict]:
         """获取结果表对应的数据源信息"""
         from metadata.models import DataSource, DataSourceResultTable
 
@@ -1460,7 +1496,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         }
 
     @classmethod
-    def _get_biz_id_by_table_ids(cls, table_id_map: dict, table_id_data_source_map: dict):
+    def _get_biz_id_by_table_ids(cls, table_id_map: Dict, table_id_data_source_map: Dict):
         """获取结果表所属的业务"""
         filter_params = {
             "bk_data_id__in": [table_id_data_source_map[table_id]["data_id"] for table_id in table_id_data_source_map]
@@ -1499,7 +1535,7 @@ class InfluxDBStorage(models.Model, StorageResultTable, InfluxDBTool):
         return table_id_biz_id_map
 
     @classmethod
-    def _get_measurement_type(cls, table_id_map: dict) -> dict:
+    def _get_measurement_type(cls, table_id_map: Dict) -> Dict:
         """获取 measurement 类型"""
         from metadata.models.space.ds_rt import get_measurement_type_by_table_id
 
@@ -1570,13 +1606,13 @@ class RedisStorage(models.Model, StorageResultTable):
                 cluster_type=ClusterInfo.TYPE_REDIS, cluster_id=storage_cluster_id
             ).exists():
                 logger.error(
-                    f"cluster_id->[{storage_cluster_id}] is not exists or is not redis cluster, something go wrong?"
+                    "cluster_id->[%s] is not exists or is not redis cluster, something go wrong?" % storage_cluster_id
                 )
                 raise ValueError(_("存储集群配置有误，请确认或联系管理员处理"))
 
         # 1. 校验table_id， key是否存在冲突
         if cls.objects.filter(table_id=table_id).exists():
-            logger.error(f"result_table->[{table_id}] already has redis storage config, nothing will add.")
+            logger.error("result_table->[%s] already has redis storage config, nothing will add." % table_id)
             raise ValueError(_("结果表[%s]配置已存在，请确认后重试") % table_id)
 
         # 如果未有执行key，则改为table_id
@@ -1594,7 +1630,7 @@ class RedisStorage(models.Model, StorageResultTable):
             master_name=master_name,
         )
 
-        logger.info(f"table->[{table_id}] now has create redis storage config")
+        logger.info("table->[%s] now has create redis storage config" % table_id)
         return new_record
 
     @property
@@ -1645,7 +1681,7 @@ class KafkaStorage(models.Model, StorageResultTable):
     retention = models.IntegerField("保存数据超时时间", default=1800000)
 
     def __unicode__(self):
-        return f"{self.table_id}->[t:{self.topic} p:{self.partition}]"
+        return "{}->[t:{} p:{}]".format(self.table_id, self.topic, self.partition)
 
     class Meta:
         verbose_name = "Kafka存储配置"
@@ -1691,13 +1727,13 @@ class KafkaStorage(models.Model, StorageResultTable):
                 cluster_type=ClusterInfo.TYPE_KAFKA, cluster_id=storage_cluster_id
             ).exists():
                 logger.error(
-                    f"cluster_id->[{storage_cluster_id}] is not exists or is not redis cluster, something go wrong?"
+                    "cluster_id->[%s] is not exists or is not redis cluster, something go wrong?" % storage_cluster_id
                 )
                 raise ValueError(_("存储集群配置有误，请确认或联系管理员处理"))
 
         # 1. 校验table_id， key是否存在冲突
         if cls.objects.filter(table_id=table_id).exists():
-            logger.error(f"result_table->[{table_id}] already has redis storage config, nothing will add.")
+            logger.error("result_table->[%s] already has redis storage config, nothing will add." % table_id)
             raise ValueError(_("结果表[%s]配置已存在，请确认后重试") % table_id)
 
         # 如果未有指定key，则改为table_id
@@ -1718,7 +1754,7 @@ class KafkaStorage(models.Model, StorageResultTable):
         if is_sync_db:
             new_record.ensure_topic()
 
-        logger.info(f"table->[{table_id}] now has create kafka storage config")
+        logger.info("table->[%s] now has create kafka storage config" % table_id)
         return new_record
 
     @property
@@ -1755,8 +1791,8 @@ class KafkaStorage(models.Model, StorageResultTable):
 class ESStorage(models.Model, StorageResultTable):
     """ES存储配置信息"""
 
-    CONSUL_PREFIX_PATH = f"{config.CONSUL_PATH}/unify-query/data/es/info"
-    CONSUL_VERSION_PATH = f"{config.CONSUL_PATH}/unify-query/version/es/info"
+    CONSUL_PREFIX_PATH = "%s/unify-query/data/es/info" % config.CONSUL_PATH
+    CONSUL_VERSION_PATH = "%s/unify-query/version/es/info" % config.CONSUL_PATH
     CONSUL_ALIAS_FORMAT = "{index}_{time}_read"
     CONSUL_DATE_FORMAT = "20060102"
 
@@ -1827,7 +1863,7 @@ class ESStorage(models.Model, StorageResultTable):
         info_list = cls.objects.all()
 
         total_count = info_list.count()
-        logger.debug(f"total find->[{total_count}] es table info to refresh")
+        logger.debug("total find->[{}] es table info to refresh".format(total_count))
 
         # 2. 构建需要刷新的字典信息
         refresh_dict = {}
@@ -1864,10 +1900,10 @@ class ESStorage(models.Model, StorageResultTable):
                     "date_step": table_info.slice_gap,
                 },
             )
-            logger.debug(f"consul path->[{consul_path}] is refresh with value->[{refresh_dict}] success.")
+            logger.debug("consul path->[{}] is refresh with value->[{}] success.".format(consul_path, refresh_dict))
 
         hash_consul.put(key=cls.CONSUL_VERSION_PATH, value={"time": time.time()})
-        logger.info(f"all es table info is refresh to consul success count->[{total_count}].")
+        logger.info("all es table info is refresh to consul success count->[%s]." % total_count)
 
     def create_es_index(self, is_sync_db: bool):
         """创建 es 索引"""
@@ -1875,12 +1911,12 @@ class ESStorage(models.Model, StorageResultTable):
         if is_sync_db:
             # 只往前创建一个index
             self.create_index_and_aliases(self.slice_gap)
-            logger.info(f"result_table->[{table_id}] has create es storage index")
+            logger.info("result_table->[{}] has create es storage index".format(table_id))
         else:
             from metadata.task import tasks
 
             tasks.create_es_storage_index.delay(table_id=table_id)
-            logger.info(f"result_table->[{table_id}] create async with celery task")
+            logger.info("result_table->[{}] create async with celery task".format(table_id))
 
     @classmethod
     def create_table(
@@ -1931,24 +1967,24 @@ class ESStorage(models.Model, StorageResultTable):
         # 如果有提供集群信息，需要判断
         else:
             if not ClusterInfo.objects.filter(cluster_type=ClusterInfo.TYPE_ES, cluster_id=cluster_id).exists():
-                logger.error(f"cluster_id->[{cluster_id}] is not exists or is not redis cluster, something go wrong?")
+                logger.error("cluster_id->[%s] is not exists or is not redis cluster, something go wrong?" % cluster_id)
                 raise ValueError(_("存储集群配置有误，请确认或联系管理员处理"))
 
         # 1. 校验table_id， key是否存在冲突
         if cls.objects.filter(table_id=table_id).exists():
-            logger.error(f"result_table->[{table_id}] already has redis storage config, nothing will add.")
+            logger.error("result_table->[%s] already has redis storage config, nothing will add." % table_id)
             raise ValueError(_("结果表[%s]配置已存在，请确认后重试") % table_id)
 
         # 测试date_format是否正确可用的 -- 格式化结果的数据只能包含数字，不能有其他结果
         test_str = datetime.datetime.utcnow().strftime(date_format)
         if re.match(r"^\d+$", test_str) is None:
-            logger.error(f"result_table->[{table_id}] date_format contains none digit info, it is bad.")
+            logger.error("result_table->[{}] date_format contains none digit info, it is bad.".format(table_id))
             raise ValueError(_("时间格式不允许包含非数字格式"))
 
         # 校验分配配置
         if warm_phase_days > 0:
             if not warm_phase_settings:
-                logger.error(f"result_table->[{table_id}] warm_phase_settings is empty, but min_days > 0.")
+                logger.error("result_table->[{}] warm_phase_settings is empty, but min_days > 0.".format(table_id))
                 raise ValueError(_("warm_phase_settings 不能为空"))
             for required_field in ["allocation_attr_name", "allocation_attr_value", "allocation_type"]:
                 if not warm_phase_settings.get(required_field):
@@ -1981,7 +2017,7 @@ class ESStorage(models.Model, StorageResultTable):
             index_set=index_set,
             need_create_index=need_create_index,
         )
-        logger.info(f"result_table->[{table_id}] now has es_storage will try to create index.")
+        logger.info("result_table->[{}] now has es_storage will try to create index.".format(table_id))
 
         storage_record, tag = StorageClusterRecord.objects.update_or_create(
             table_id=table_id,
@@ -2110,37 +2146,37 @@ class ESStorage(models.Model, StorageResultTable):
     @property
     def index_re_v1(self):
         """获取这个存储的正则匹配内容"""
-        pattern = rf"{self.index_name}_(?P<datetime>\d+)_(?P<index>\d+)"
+        pattern = r"{}_(?P<datetime>\d+)_(?P<index>\d+)".format(self.index_name)
         return re.compile(pattern)
 
     @property
     def index_re_v2(self):
         """获取这个存储的正则匹配内容"""
-        pattern = rf"^v2_{self.index_name}_(?P<datetime>\d+)_(?P<index>\d+)$"
+        pattern = r"^v2_{}_(?P<datetime>\d+)_(?P<index>\d+)$".format(self.index_name)
         return re.compile(pattern)
 
     @property
     def index_re_common(self):
         """获取这个存储的正则匹配内容"""
-        pattern = rf"^(v2_)?{self.index_name}_(?P<datetime>\d+)_(?P<index>\d+)$"
+        pattern = r"^(v2_)?{}_(?P<datetime>\d+)_(?P<index>\d+)$".format(self.index_name)
         return re.compile(pattern)
 
     @property
     def write_alias_re(self):
         """获取写入别名的正则匹配"""
-        pattern = rf"write_(?P<datetime>\d+)_{self.index_name}"
+        pattern = r"write_(?P<datetime>\d+)_{}".format(self.index_name)
         return re.compile(pattern)
 
     @property
     def old_write_alias_re(self):
         """获取旧版写入别名的正则匹配"""
-        pattern = rf"{self.index_name}_(?P<datetime>\d+)_write"
+        pattern = r"{}_(?P<datetime>\d+)_write".format(self.index_name)
         return re.compile(pattern)
 
     @property
     def read_alias_re(self):
         """获取读取别名的正则匹配"""
-        pattern = rf"{self.index_name}_(?P<datetime>\d+)_read"
+        pattern = r"{}_(?P<datetime>\d+)_read".format(self.index_name)
         return re.compile(pattern)
 
     @property
@@ -2158,7 +2194,7 @@ class ESStorage(models.Model, StorageResultTable):
             cluster_version = int(cluster_info.version.split(".")[0])
         except Exception:
             logger.error(
-                f"cluster_id->[{self.storage_cluster_id}] get version error->[{traceback.format_exc()}] "
+                "cluster_id->[{}] get version error->[{}] ".format(self.storage_cluster_id, traceback.format_exc())
             )
             cluster_version = config.ES_CLUSTER_VERSION_DEFAULT
         return cluster_version
@@ -2170,7 +2206,7 @@ class ESStorage(models.Model, StorageResultTable):
 
         consul_config = {
             "storage_config": {
-                "index_datetime_format": f"write_{standard_time.strftime(self.date_format)}",
+                "index_datetime_format": "write_{}".format(standard_time.strftime(self.date_format)),
                 "index_datetime_timezone": self.time_zone,
                 "date_format": self.date_format,
                 "slice_size": self.slice_size,
@@ -2261,7 +2297,7 @@ class ESStorage(models.Model, StorageResultTable):
         logger.info("table_id->[%s] no index", self.table_id)
         return False
 
-    def _get_index_infos(self, namespaced: str) -> tuple[dict[str, dict[str, Any]], str]:
+    def _get_index_infos(self, namespaced: str) -> Tuple[Dict[str, Dict[str, Any]], str]:
         index_version = ""
         extra = {ESNamespacedClientType.CAT.value: {"format": "json"}, ESNamespacedClientType.INDICES.value: {}}[
             namespaced
@@ -2275,24 +2311,24 @@ class ESStorage(models.Model, StorageResultTable):
             ESNamespacedClientType.INDICES.value: self.es_client.indices.stats,
         }[namespaced]
 
-        index_info_map: dict[str, dict[str, Any]] = getdata(func(index=self.search_format_v2(), **extra))
+        index_info_map: Dict[str, Dict[str, Any]] = getdata(func(index=self.search_format_v2(), **extra))
         if len(index_info_map) != 0:
             index_version = "v2"
         else:
-            index_info_map: dict[str, dict[str, Any]] = getdata(func(index=self.search_format_v1(), **extra))
+            index_info_map: Dict[str, Dict[str, Any]] = getdata(func(index=self.search_format_v1(), **extra))
             if len(index_info_map) != 0:
                 index_version = "v1"
 
         return index_info_map, index_version
 
-    def get_index_names(self) -> list[str]:
+    def get_index_names(self) -> List[str]:
         index_info_map, index_version = self._get_index_infos(ESNamespacedClientType.CAT.value)
         if index_version == "v2":
             index_re = self.index_re_v2
         else:
             index_re = self.index_re_v1
 
-        index_names: list[str] = []
+        index_names: List[str] = []
         for index_name in index_info_map:
             if index_re.match(index_name) is None:
                 logger.warning("index->[%s] is not match re, skipped", index_name)
@@ -2461,7 +2497,7 @@ class ESStorage(models.Model, StorageResultTable):
                 current_time = now_time + datetime.timedelta(minutes=now_gap)
                 current_time_str = current_time.strftime(self.date_format)
 
-                current_index_wildcard = f"{self.index_name}_{current_time_str}_*"
+                current_index_wildcard = "{}_{}_*".format(self.index_name, current_time_str)
 
                 # 获取这个index的大小信息，这是需要兼容判断是否有未来数据写入到index上了
                 stat_info = self.es_client.indices.stats(current_index_wildcard)
@@ -2472,7 +2508,7 @@ class ESStorage(models.Model, StorageResultTable):
                     re_result = self.index_re.match(stat_index_name)
                     if re_result is None:
                         # 去掉一个整体index的计数
-                        logger.warning(f"index->[{index_name}] is not match re, maybe something go wrong?")
+                        logger.warning("index->[{}] is not match re, maybe something go wrong?".format(index_name))
                         continue
 
                     current_index_count = int(re_result.group("index"))
@@ -2481,7 +2517,7 @@ class ESStorage(models.Model, StorageResultTable):
 
                 # 获取现在当前最大的index
                 # 注意，这时候的index有可能是-1的名字，例如：2_test_log_20191112_-1
-                max_index_name = f"{self.index_name}_{current_time_str}_{max_index}"
+                max_index_name = "{}_{}_{}".format(self.index_name, current_time_str, max_index)
 
                 # 如果已经存在的index，不必重复创建
                 is_index_exists = self.es_client.indices.exists(index=max_index_name)
@@ -2495,8 +2531,8 @@ class ESStorage(models.Model, StorageResultTable):
                     # 判断字段是否一致，如果不一致，需要创建新的删除并创建新的
                     if not self.is_mapping_same(max_index_name):
                         logger.info(
-                            f"index->[{max_index_name}] is exists, and field type is not the same as database, "
-                            "will create a new index."
+                            "index->[{}] is exists, and field type is not the same as database, "
+                            "will create a new index.".format(max_index_name)
                         )
                         should_create = True
 
@@ -2505,19 +2541,19 @@ class ESStorage(models.Model, StorageResultTable):
                         size_in_bytes = stat_info["indices"][max_index_name]["total"]["store"]["size_in_bytes"]
                     except KeyError:
                         logger.warning(
-                            f"ops, index->[{max_index_name}] is not exists in stat_info, maybe is not exists?"
+                            "ops, index->[{}] is not exists in stat_info, maybe is not exists?".format(max_index_name)
                         )
                     else:
                         if size_in_bytes / 1024.0 / 1024.0 / 1024.0 > self.slice_size:
                             logger.info(
-                                f"index->[{max_index_name}] size->[{size_in_bytes}]bytes now is bigger than slice_size->[{self.slice_size}]GB, will "
-                                "create new one"
+                                "index->[{}] size->[{}]bytes now is bigger than slice_size->[{}]GB, will "
+                                "create new one".format(max_index_name, size_in_bytes, self.slice_size)
                             )
                             should_create = True
 
                 # 判断是否需要重建了，不用重建的，直接下一个周期
                 if not should_create:
-                    logger.info(f"index->[{max_index_name}] meet all config, nothing will create.")
+                    logger.info("index->[{}] meet all config, nothing will create.".format(max_index_name))
                     # gap的更新在finally进行
                     continue
 
@@ -2526,10 +2562,10 @@ class ESStorage(models.Model, StorageResultTable):
                     # 如果是存在数据的，需要创建一个新的index
                     if self.es_client.count(index=max_index_name).get("count", 0) != 0:
                         logger.info(
-                            f"index->[{max_index_name}] already has data, will keep it and create new index."
+                            "index->[{}] already has data, will keep it and create new index.".format(max_index_name)
                         )
                         # 有数据的，需要增加index
-                        current_index = f"{index_name}_{current_time_str}_{max_index + 1}"
+                        current_index = "{}_{}_{}".format(index_name, current_time_str, max_index + 1)
                         delete_index_list.append(max_index_name)
 
                     # 不存在数据的，则删除并重新创建
@@ -2537,8 +2573,8 @@ class ESStorage(models.Model, StorageResultTable):
                         self.es_client.indices.delete(max_index_name)
 
                         logger.warning(
-                            f"index->[{max_index_name}] is differ from database config, "
-                            "will be delete and recreated."
+                            "index->[{}] is differ from database config, "
+                            "will be delete and recreated.".format(max_index_name)
                         )
                         # 创建的新index，使用已有的最大index名即可
                         # 此处可以保留已有的别名配置，不用删除
@@ -2549,24 +2585,26 @@ class ESStorage(models.Model, StorageResultTable):
                     logger.warning("index->[{}] may not exists, cannot found count? will create new one.")
                     # 看下是否-1的index，需要调整为0的
                     current_index = (
-                        f"{index_name}_{current_time_str}_0" if max_index == -1 else max_index_name
+                        "{}_{}_0".format(index_name, current_time_str) if max_index == -1 else max_index_name
                     )
 
                 # 创建索引需要增加一个请求超时的防御
-                logger.info(f"index->[{index_name}] trying to create, index_body->[{self.index_body}]")
+                logger.info("index->[{}] trying to create, index_body->[{}]".format(index_name, self.index_body))
                 response = self._create_index_with_retry(current_index)
-                logger.info(f"index->[{index_name}] now is created, response->[{response}]")
+                logger.info("index->[{}] now is created, response->[{}]".format(index_name, response))
 
                 # 需要将对应的别名指向这个新建的index
                 # 新旧类型的alias都会创建，防止transfer未更新导致异常
-                new_current_alias_name = f"write_{current_time_str}_{index_name}"
-                old_current_alias_name = f"{index_name}_{current_time_str}_write"
+                new_current_alias_name = "write_{}_{}".format(current_time_str, index_name)
+                old_current_alias_name = "{}_{}_write".format(index_name, current_time_str)
 
                 self.es_client.indices.put_alias(index=current_index, name=new_current_alias_name)
                 self.es_client.indices.put_alias(index=current_index, name=old_current_alias_name)
 
                 logger.info(
-                    f"index->[{current_index}] now has write alias->[{new_current_alias_name} | {old_current_alias_name}]"
+                    "index->[{}] now has write alias->[{} | {}]".format(
+                        current_index, new_current_alias_name, old_current_alias_name
+                    )
                 )
 
                 # 清理别名
@@ -2574,11 +2612,13 @@ class ESStorage(models.Model, StorageResultTable):
                     self.es_client.indices.delete_alias(index=",".join(delete_index_list), name=old_current_alias_name)
                     self.es_client.indices.delete_alias(index=",".join(delete_index_list), name=new_current_alias_name)
                     logger.info(
-                        f"index->[{delete_index_list}] has delete relation to alias->[{old_current_alias_name} | {new_current_alias_name}]"
+                        "index->[{}] has delete relation to alias->[{} | {}]".format(
+                            delete_index_list, old_current_alias_name, new_current_alias_name
+                        )
                     )
 
             finally:
-                logger.info(f"all operations for index->[{self.table_id}] gap->[{now_gap}] now is done.")
+                logger.info("all operations for index->[{}] gap->[{}] now is done.".format(self.table_id, now_gap))
                 now_gap += self.slice_gap
 
         return True
@@ -2753,7 +2793,9 @@ class ESStorage(models.Model, StorageResultTable):
             finally:
                 # 2.9 结束当前轮次循环，进入下一次循环
                 logger.info(
-                    f"create_or_update_aliases: all operations for index->[{self.table_id}] gap->[{now_gap}] now is done."
+                    "create_or_update_aliases: all operations for index->[{}] gap->[{}] now is done.".format(
+                        self.table_id, now_gap
+                    )
                 )
                 # slice_gap maybe zero, will cause dead loop
                 if self.slice_gap <= 0:
@@ -3157,11 +3199,13 @@ class ESStorage(models.Model, StorageResultTable):
         # 1. 计算获取当前超时时间节点
         expired_datetime_point = self.now - datetime.timedelta(days=self.retention)
         logger.debug(
-            f"going to clean table->[{self.table_id}] es storage index, expired time is->[{expired_datetime_point.strftime(self.date_format)}]"
+            "going to clean table->[{}] es storage index, expired time is->[{}]".format(
+                self.table_id, expired_datetime_point.strftime(self.date_format)
+            )
         )
 
         # 2. 获取这个table_id相关的所有index名字
-        index_list = self.es_client.indices.get(f"{self.index_name}*")
+        index_list = self.es_client.indices.get("{}*".format(self.index_name))
         delete_count = 0
 
         # 3. 遍历所有的index
@@ -3171,7 +3215,9 @@ class ESStorage(models.Model, StorageResultTable):
             # 如果拿不到正则的匹配成功，需要跳过
             if result is None:
                 logger.warning(
-                    f"table_id->[{self.table_id}] got index->[{index_name}] which is not match index_re, something go wrong?"
+                    "table_id->[{}] got index->[{}] which is not match index_re, something go wrong?".format(
+                        self.table_id, index_name
+                    )
                 )
                 continue
 
@@ -3181,8 +3227,8 @@ class ESStorage(models.Model, StorageResultTable):
                 index_datetime_object = datetime.datetime.strptime(datetime_str, self.date_format)
             except ValueError:
                 logger.error(
-                    f"table_id->[{self.table_id}] got index->[{index_name}] with datetime_str->[{datetime_str}] which is not match date_format->"
-                    f"[{self.date_format}], something go wrong?"
+                    "table_id->[{}] got index->[{}] with datetime_str->[{}] which is not match date_format->"
+                    "[{}], something go wrong?".format(self.table_id, index_name, datetime_str, self.date_format)
                 )
                 continue
 
@@ -3190,18 +3236,22 @@ class ESStorage(models.Model, StorageResultTable):
             if index_datetime_object > expired_datetime_point:
                 # 未小于，放过他
                 logger.info(
-                    f"table_id->[{self.table_id}] got index->[{index_name}] which still available, clean later?"
+                    "table_id->[{}] got index->[{}] which still available, clean later?".format(
+                        self.table_id, index_name
+                    )
                 )
                 continue
 
             # 如果小于时间节点，需要将index清理
             self.es_client.indices.delete(index_name)
             logger.info(
-                f"table_id->[{self.table_id}] now has delete index_name->[{index_name}] for datetime->[{datetime_str}]"
+                "table_id->[{}] now has delete index_name->[{}] for datetime->[{}]".format(
+                    self.table_id, index_name, datetime_str
+                )
             )
             delete_count += 1
 
-        logging.info(f"table_id->[{self.table_id}] clean es index success with count->[{delete_count}]")
+        logging.info("table_id->[{}] clean es index success with count->[{}]".format(self.table_id, delete_count))
         return delete_count
 
     def get_alias_datetime_str(self, alias_name):
@@ -3497,7 +3547,7 @@ class ESStorage(models.Model, StorageResultTable):
                 current_mapping = es_mappings["properties"]
 
         except (KeyError, elasticsearch5.NotFoundError, elasticsearch.NotFoundError, elasticsearch6.NotFoundError):
-            logger.info(f"index_name->[{index_name}] is not exists, will think the mapping is not same.")
+            logger.info("index_name->[{}] is not exists, will think the mapping is not same.".format(index_name))
             return False
 
         # 判断字段列表是否一致的: _type在ES7.x版本后取消
@@ -3511,7 +3561,9 @@ class ESStorage(models.Model, StorageResultTable):
         field_diff_set = set(database_field_list) - set(current_field_list)
         if len(field_diff_set) != 0:
             logger.info(
-                f"table_id->[{self.table_id}] index->[{index_name}] found differ field->[{field_diff_set}] will thing not same"
+                "table_id->[{}] index->[{}] found differ field->[{}] will thing not same".format(
+                    self.table_id, index_name, field_diff_set
+                )
             )
             return False
 
@@ -3536,24 +3588,28 @@ class ESStorage(models.Model, StorageResultTable):
                     # object 字段动态写入数据后 不再有type这个字段 只有 properties
                     if current_field_properties and database_value != ResultTableField.FIELD_TYPE_OBJECT:
                         logger.info(
-                            f"table_id->[{self.table_id}] index->[{index_name}] field->[{field_name}] config->[{field_config}] database->[{database_value}] es field type is object"
-                            "so not same"
+                            "table_id->[{}] index->[{}] field->[{}] config->[{}] database->[{}] es field type is object"
+                            "so not same".format(self.table_id, index_name, field_name, field_config, database_value)
                         )
                         return False
                     logger.info(
-                        f"table_id->[{self.table_id}] index->[{index_name}] field->[{field_name}] config->[{field_config}] database->[{database_value}] es config is None, "
-                        "so nothing will do."
+                        "table_id->[{}] index->[{}] field->[{}] config->[{}] database->[{}] es config is None, "
+                        "so nothing will do.".format(
+                            self.table_id, index_name, field_name, field_config, database_value
+                        )
                     )
                     continue
 
                 if database_value != current_value:
                     logger.info(
-                        f"table_id->[{self.table_id}] index->[{index_name}] field->[{field_name}] config->[{field_config}] database->[{database_value}] es->[{current_value}] is "
-                        "not the same, "
+                        "table_id->[{}] index->[{}] field->[{}] config->[{}] database->[{}] es->[{}] is "
+                        "not the same, ".format(
+                            self.table_id, index_name, field_name, field_config, database_value, current_value
+                        )
                     )
                     return False
 
-        logger.info(f"table_id->[{self.table_id}] index->[{index_name}] field config same.")
+        logger.info("table_id->[{}] index->[{}] field config same.".format(self.table_id, index_name))
         return True
 
     def get_tag_values(self, tag_name):
@@ -3593,7 +3649,7 @@ class ESStorage(models.Model, StorageResultTable):
             }
         }
         """
-        index_list = self.es_client.indices.get(f"{self.index_name}*")
+        index_list = self.es_client.indices.get("{}*".format(self.index_name))
 
         result = []
         for index_name in index_list:
@@ -3605,7 +3661,7 @@ class ESStorage(models.Model, StorageResultTable):
 
         return result
 
-    def group_expired_alias(self, alias_list, expired_days, need_delay_delete_alias: bool | None = True):
+    def group_expired_alias(self, alias_list, expired_days, need_delay_delete_alias: Optional[bool] = True):
         """
         将每个索引的别名进行分组，分为已过期和未过期
         :param alias_list: 别名列表，格式
@@ -4168,7 +4224,7 @@ class BkDataStorage(models.Model, StorageResultTable):
     bk_data_result_table_id = models.CharField("计算平台的结果表名", max_length=64)
 
     def __unicode__(self):
-        return f"{self.table_id}->{self.raw_data_id}"
+        return "{}->{}".format(self.table_id, self.raw_data_id)
 
     class Meta:
         verbose_name = "bkdata存储配置"
@@ -4234,7 +4290,7 @@ class BkDataStorage(models.Model, StorageResultTable):
         # NOTE: kafka broker_url 以实际配置为准，如果没有配置，再使用默认的 broker url
         broker_url = settings.BK_DATA_KAFKA_BROKER_URL
         if domain and port:
-            broker_url = f"{domain}:{port}"
+            broker_url = "{}:{}".format(domain, port)
         is_sasl = consul_config.get("cluster_config", {}).get("is_ssl_verify")
         user = consul_config.get("auth_info", {}).get("username")
         passwd = consul_config.get("auth_info", {}).get("password")
@@ -4333,7 +4389,7 @@ class BkDataStorage(models.Model, StorageResultTable):
         json_config, fields = self.generate_bk_data_etl_config()
         etl_json_config = json.dumps(json_config)
         bk_data_rt_id_without_biz_id = gen_bk_data_rt_id_without_biz_id(self.table_id)
-        result_table_id = f"{settings.BK_DATA_BK_BIZ_ID}_{bk_data_rt_id_without_biz_id}"
+        result_table_id = "{}_{}".format(settings.BK_DATA_BK_BIZ_ID, bk_data_rt_id_without_biz_id)
         params = {
             "raw_data_id": self.raw_data_id,
             "json_config": etl_json_config,
@@ -4444,14 +4500,18 @@ class BkDataStorage(models.Model, StorageResultTable):
                 flow_deploy_info = api.bkdata.get_latest_deploy_data_flow(flow_id=task.data_flow.flow_id)
                 if flow_deploy_info.get("status") == "success":
                     logger.info(
-                        f"create flow({task.flow_name}) successfully, result_id:({self.bk_data_result_table_id})"
+                        "create flow({}) successfully, result_id:({})".format(
+                            task.flow_name, self.bk_data_result_table_id
+                        )
                     )
                     return True
                 else:
                     time.sleep(1)
         except Exception as e:  # pylint: disable=broad-except
             logger.exception(
-                f"create/start flow({task.flow_name}) failed, result_id:({self.bk_data_result_table_id}), reason: {e}"
+                "create/start flow({}) failed, result_id:({}), reason: {}".format(
+                    task.flow_name, self.bk_data_result_table_id, e
+                )
             )
             return False
 
@@ -4613,10 +4673,10 @@ class BkDataStorage(models.Model, StorageResultTable):
             task.start_flow()
         except Exception:  # noqa
             logger.exception(
-                f"create/start flow({task.flow_name}) failed, result_id:({self.bk_data_result_table_id})"
+                "create/start flow({}) failed, result_id:({})".format(task.flow_name, self.bk_data_result_table_id)
             )
             return
-        logger.info(f"create flow({task.flow_name}) successfully, result_id:({self.bk_data_result_table_id})")
+        logger.info("create flow({}) successfully, result_id:({})".format(task.flow_name, self.bk_data_result_table_id))
 
     def full_cmdb_node_info_to_result_table(self):
         if not settings.IS_ALLOW_ALL_CMDB_LEVEL:
@@ -4648,10 +4708,10 @@ class BkDataStorage(models.Model, StorageResultTable):
             task.start_flow()
         except Exception:  # noqa
             logger.exception(
-                f"create/start flow({task.flow_name}) failed, result_id:({self.bk_data_result_table_id})"
+                "create/start flow({}) failed, result_id:({})".format(task.flow_name, self.bk_data_result_table_id)
             )
             return
-        logger.info(f"create flow({task.flow_name}) successfully, result_id:({self.bk_data_result_table_id})")
+        logger.info("create flow({}) successfully, result_id:({})".format(task.flow_name, self.bk_data_result_table_id))
 
 
 class ArgusStorage(models.Model, StorageResultTable):
@@ -4669,7 +4729,7 @@ class ArgusStorage(models.Model, StorageResultTable):
     tenant_id = models.CharField("argus租户ID", max_length=64)
 
     def __str__(self):
-        return f"<{self.table_id}, {self.storage_cluster_id}>"
+        return "<{}, {}>".format(self.table_id, self.storage_cluster_id)
 
     @classmethod
     def create_table(cls, table_id, tenant_id, storage_cluster_id=None, **kwargs):
@@ -4693,13 +4753,13 @@ class ArgusStorage(models.Model, StorageResultTable):
                 cluster_type=ClusterInfo.TYPE_ARGUS, cluster_id=storage_cluster_id
             ).exists():
                 logger.error(
-                    f"cluster_id->[{storage_cluster_id}] is not exists or is not argus cluster, something go wrong?"
+                    "cluster_id->[%s] is not exists or is not argus cluster, something go wrong?" % storage_cluster_id
                 )
                 raise ValueError(_("存储集群配置有误，请确认或联系管理员处理"))
 
         # 1. 校验table_id， key是否存在冲突
         if cls.objects.filter(table_id=table_id).exists():
-            logger.error(f"result_table->[{table_id}] already has argus storage config, nothing will add.")
+            logger.error("result_table->[%s] already has argus storage config, nothing will add." % table_id)
             raise ValueError(_("结果表[%s]配置已存在，请确认后重试") % table_id)
 
         new_record = cls.objects.create(
@@ -4708,7 +4768,7 @@ class ArgusStorage(models.Model, StorageResultTable):
             storage_cluster_id=storage_cluster_id,
         )
 
-        logger.info(f"table->[{table_id}] now has create argus storage config")
+        logger.info("table->[%s] now has create argus storage config" % table_id)
         return new_record
 
     @property

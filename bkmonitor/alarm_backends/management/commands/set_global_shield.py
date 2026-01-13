@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +14,7 @@ from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        super().add_arguments(parser)
+        super(Command, self).add_arguments(parser)
 
         parser.add_argument(
             "args", metavar="status", nargs=1, choices=["on", "off"], help="enable(on) or disable(off) global shield"
@@ -27,4 +28,4 @@ class Command(BaseCommand):
             settings.GLOBAL_SHIELD_ENABLED = False
             print("GLOBAL_SHIELD_ENABLEDd is set to [OFF], will be effective in 1 min")
         else:
-            print(f"Invalid operate: {status}")
+            print("Invalid operate: {}".format(status))

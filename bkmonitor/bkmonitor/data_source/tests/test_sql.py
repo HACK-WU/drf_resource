@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +17,7 @@ from django.db.models import Q
 from bkmonitor.data_source.handler import DataQueryHandler
 
 
-class TestSQL:
+class TestSQL(object):
     def setup_method(self, method):
         self.q_obj = DataQueryHandler("bk_monitor", "time_series")
         print("before {}: {}".format(method, self.q_obj), file=sys.stderr)  # noqa
@@ -50,15 +51,15 @@ class TestSQL:
         assert str(qs.query) == "SELECT * FROM 2_system_cpu_summary LIMIT 1"
 
 
-class TestComplexQuerySQL:
+class TestComplexQuerySQL(object):
     def setup_method(self, method):
         self.q_obj = DataQueryHandler("bk_monitor", "time_series")
         self.q_obj = self.q_obj.table("2_system_cpu_summary")
-        print(f"before {method}: {self.q_obj}", file=sys.stderr)
+        print("before {}: {}".format(method, self.q_obj), file=sys.stderr)
 
     def teardown_method(self, method):
         self.q_obj = None
-        print(f"after {method}: {self.q_obj}", file=sys.stderr)
+        print("after {}: {}".format(method, self.q_obj), file=sys.stderr)
 
     def test_single_condition(self):
         qs = self.q_obj.filter(ip="127.0.0.1")
@@ -106,7 +107,7 @@ class TestComplexQuerySQL:
         )
 
 
-class TestLookupCondition:
+class TestLookupCondition(object):
     """
     Lookup unittest
 
@@ -125,11 +126,11 @@ class TestLookupCondition:
     def setup_method(self, method):
         self.q_obj = DataQueryHandler("bk_monitor", "time_series")
         self.q_obj = self.q_obj.table("2_system_cpu_summary")
-        print(f"before {method}: {self.q_obj}", file=sys.stderr)
+        print("before {}: {}".format(method, self.q_obj), file=sys.stderr)
 
     def teardown_method(self, method):
         self.q_obj = None
-        print(f"after {method}: {self.q_obj}", file=sys.stderr)
+        print("after {}: {}".format(method, self.q_obj), file=sys.stderr)
 
     def test_default_lookup(self):
         qs = self.q_obj.filter(ip="127.0.0.1")
@@ -193,15 +194,15 @@ class TestLookupCondition:
         )
 
 
-class TestSpecialCondition:
+class TestSpecialCondition(object):
     def setup_method(self, method):
         self.q_obj = DataQueryHandler("bk_monitor", "time_series")
         self.q_obj = self.q_obj.table("2_system_cpu_summary")
-        print(f"before {method}: {self.q_obj}", file=sys.stderr)
+        print("before {}: {}".format(method, self.q_obj), file=sys.stderr)
 
     def teardown_method(self, method):
         self.q_obj = None
-        print(f"after {method}: {self.q_obj}", file=sys.stderr)
+        print("after {}: {}".format(method, self.q_obj), file=sys.stderr)
 
     def test_special_sql(self):
         qs = (

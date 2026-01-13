@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,14 +16,14 @@ import random
 import redis
 from django.conf import settings
 from redis.sentinel import Sentinel
-from typing import Literal
+from typing_extensions import Literal
 
 from bkmonitor.utils.common_utils import ignored
 
 logger = logging.getLogger(__name__)
 
 
-class Singleton:
+class Singleton(object):
     _instance = None
 
     def __new__(cls, *args, **kwargs):

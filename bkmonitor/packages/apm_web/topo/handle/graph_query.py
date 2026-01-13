@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 import logging
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field, fields
+from typing import Dict, List, Union
 
 import networkx
 
@@ -61,7 +63,7 @@ class Node:
 
 @dataclass
 class NodeContainer:
-    _nodes: list[Node] = field(default_factory=list)
+    _nodes: List[Node] = field(default_factory=list)
 
     def __or__(self, other: "NodeContainer"):
         combined_nodes = {}
@@ -123,7 +125,7 @@ class Edge:
 
 @dataclass
 class EdgeContainer:
-    _edges: list[Edge] = field(default_factory=list)
+    _edges: List[Edge] = field(default_factory=list)
 
     def __or__(self, other):
         b = {hash(node): node for node in self._edges}
@@ -191,7 +193,7 @@ class Graph:
             )
         )
 
-    def __lshift__(self, patch: NodeContainer | EdgeContainer | PluginProvider.Container):
+    def __lshift__(self, patch: Union[NodeContainer, EdgeContainer, PluginProvider.Container]):
         if isinstance(patch, NodeContainer):
             self._node_merge_attrs = merge_dicts(patch.to_nodes_attrs_mapping(), self._nodes_attrs)
             self._refresh()
@@ -229,7 +231,7 @@ class Graph:
         else:
             raise ValueError(f"Graph received an unsupported type: {type(patch)}")
 
-    def __rshift__(self, other: ViewConverter) -> dict:
+    def __rshift__(self, other: ViewConverter) -> Dict:
         self << self.converter_plugins
         return other.convert(self._graph)
 

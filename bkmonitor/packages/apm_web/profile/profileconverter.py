@@ -9,7 +9,7 @@ specific language governing permissions and limitations under the License.
 """
 import random
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Dict, Optional, Type
 from uuid import UUID
 
 from apm_web.profile.constants import InputType
@@ -24,28 +24,28 @@ def generate_profile_id() -> str:
 class ProfileConverter:
     """Any input format should be converted to Profile"""
 
-    profile: Profile | None = None
+    profile: Optional[Profile] = None
     # preset profile_id for querying
     # if preset_profile_id is not None, force insert it to labels of sample
-    preset_profile_id: str | None = None
+    preset_profile_id: Optional[str] = None
     inject_labels: dict = field(default_factory=dict)
     raw_data: list = field(default_factory=list)
     init_first_empty_str: bool = True
 
     # mappings for deduplication
-    _location_mapping: dict[str, Location] = field(default_factory=dict)
-    _mapping_mapping: dict[str, Mapping] = field(default_factory=dict)
-    _function_mapping: dict[str, Function] = field(default_factory=dict)
+    _location_mapping: Dict[str, Location] = field(default_factory=dict)
+    _mapping_mapping: Dict[str, Mapping] = field(default_factory=dict)
+    _function_mapping: Dict[str, Function] = field(default_factory=dict)
 
     # mappings for quick query by id
-    _location_id_mapping: dict[int, Location] = field(default_factory=dict)
-    _mapping_id_mapping: dict[int, Mapping] = field(default_factory=dict)
-    _function_id_mapping: dict[int, Function] = field(default_factory=dict)
+    _location_id_mapping: Dict[int, Location] = field(default_factory=dict)
+    _mapping_id_mapping: Dict[int, Mapping] = field(default_factory=dict)
+    _function_id_mapping: Dict[int, Function] = field(default_factory=dict)
 
     def __post_init__(self):
         self.init_profile()
 
-    def convert(self, raw: Any) -> Profile | None:
+    def convert(self, raw: Any) -> Optional[Profile]:
         raise NotImplementedError
 
     def init_profile(self):
@@ -93,14 +93,14 @@ class ProfileConverter:
         return {"type": self.get_string(target_sample_type.type), "unit": self.get_string(target_sample_type.unit)}
 
 
-_profile_converters: dict[str, type[ProfileConverter]] = {}
+_profile_converters: Dict[str, Type[ProfileConverter]] = {}
 
 
-def register_profile_converter(input_type: str, converter: type[ProfileConverter]):
+def register_profile_converter(input_type: str, converter: Type[ProfileConverter]):
     _profile_converters[input_type] = converter
 
 
-def list_profile_converter() -> dict[str, type[ProfileConverter]]:
+def list_profile_converter() -> Dict[str, Type[ProfileConverter]]:
     return _profile_converters
 
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import collections
 import json
 import logging
@@ -245,13 +246,13 @@ class MigrateFTAStrategy:
                 type="monitor",
                 bk_biz_id=self.bk_biz_id,
                 scenario="other_rt",
-                name=f"[{alarm_def.id}]{strategy_name}",
+                name="[{}]{}".format(alarm_def.id, strategy_name),
                 is_enabled=False,
             )
             # 创建一个监控数据
             item_id = ItemModel.objects.create(
                 strategy_id=new_strategy_inst.id,
-                name=f"COUNT({alert_name})",
+                name="COUNT({})".format(alert_name),
                 expression="a",
                 no_data_config={"continuous": 10, "is_enabled": False, "agg_dimension": [], "level": 2},
                 origin_sql="",
@@ -270,7 +271,7 @@ class MigrateFTAStrategy:
                 alias="a",
                 data_source_label="bk_fta",
                 data_type_label="event",
-                metric_id=f"bk_fta.event.{alert_name}",
+                metric_id="bk_fta.event.{}".format(alert_name),
                 config={
                     "result_table_id": "event",
                     "agg_method": "COUNT",
@@ -506,7 +507,7 @@ class MigrateFTAStrategy:
             except BaseException as error:
                 logger.error("get solution config error, %s, solution id  %s", str(error), solution.id)
                 continue
-            convert_function = getattr(self, f"convert_{solution.solution_type}", None)
+            convert_function = getattr(self, "convert_{}".format(solution.solution_type), None)
             if convert_function is None:
                 continue
             actions[str(solution.id)] = ActionConfig.objects.create(
@@ -634,7 +635,7 @@ class MigrateFTAStrategy:
             if param_prefix not in key:
                 continue
             [category, field] = key.lstrip(param_prefix).split("_")
-            new_key = f"{field}_{category}"
+            new_key = "{}_{}".format(field, category)
             for fta_v, monitor_v in FTA_MONITOR_MAPPING.items():
                 if fta_v in value:
                     value = value.replace(fta_v, monitor_v)

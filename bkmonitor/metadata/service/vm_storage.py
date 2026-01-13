@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import json
 import logging
+from typing import Dict, List, Optional
 
 from django.db.models import Q
 from rest_framework.exceptions import ValidationError
@@ -21,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 def disable_influxdb_router_for_vm_table(
-    table_ids: list, switched_storage_id: int | None = 0, can_deleted: bool | None = False
+    table_ids: List, switched_storage_id: Optional[int] = 0, can_deleted: Optional[bool] = False
 ) -> bool:
     """禁用接入 vm 的结果表的写入 influxdb 的路由
     :param table_ids: 结果表 id
@@ -86,7 +88,7 @@ def disable_influxdb_router_for_vm_table(
     logger.info("disable influxdb router for vm table successfully")
 
 
-def query_vm_datalink(bk_data_id: int) -> dict:
+def query_vm_datalink(bk_data_id: int) -> Dict:
     """查询 vm 的链路"""
     try:
         ds = models.DataSource.objects.get(bk_data_id=bk_data_id)
@@ -145,7 +147,7 @@ def query_vm_datalink(bk_data_id: int) -> dict:
     return ret_data
 
 
-def query_bcs_cluster_vm_rts(bcs_cluster_id: str) -> dict:
+def query_bcs_cluster_vm_rts(bcs_cluster_id: str) -> Dict:
     """查询 bcs 集群接入 vm 的结果表"""
     # 获取集群信息，如果已经废弃，则忽略
     cluster_infos = models.BCSClusterInfo.objects.filter(cluster_id=bcs_cluster_id).exclude(
@@ -201,7 +203,7 @@ def query_bcs_cluster_vm_rts(bcs_cluster_id: str) -> dict:
     return data
 
 
-def get_table_id_from_vm(bk_base_data_id: int | None = None, vm_table_id: str | None = None) -> str:
+def get_table_id_from_vm(bk_base_data_id: Optional[int] = None, vm_table_id: Optional[str] = None) -> str:
     """获取vm下面的结果表"""
     if not (bk_base_data_id or vm_table_id):
         return ""

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -36,7 +37,7 @@ from core.errors.alarm_backends import StrategyNotFound
 logger = logging.getLogger("fta_action")
 
 
-class ShieldObj:
+class ShieldObj(object):
     """
     每条屏蔽配置对应的obj
     """
@@ -342,8 +343,12 @@ class ShieldObj:
 
         for notice_way in self.config["notice_config"]["notice_way"]:
             sender = Sender(
-                title_template_path=f"notice/shield/{notice_way}_title.jinja",
-                content_template_path=f"notice/shield/{notice_way}_content.jinja",
+                title_template_path="notice/shield/{notice_way}_title.jinja".format(
+                    notice_way=notice_way,
+                ),
+                content_template_path="notice/shield/{notice_way}_content.jinja".format(
+                    notice_way=notice_way,
+                ),
                 context=context,
             )
             logger.debug(

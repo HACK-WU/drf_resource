@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -35,7 +36,7 @@ def get_serializer(model):
         fields = "__all__"
         extra_kwargs = _extra_kwargs
 
-    cls_name = f"{model.__name__}Serializer"
+    cls_name = "%sSerializer" % model.__name__
     return cls_name, type(
         str(cls_name),
         (serializers.ModelSerializer,),

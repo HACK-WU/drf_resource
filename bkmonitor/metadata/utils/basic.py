@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,12 +11,12 @@ specific language governing permissions and limitations under the License.
 import hashlib
 import logging
 from functools import reduce
-from typing import Any
+from typing import Any, Dict, List, Union
 
 logger = logging.getLogger("metadata")
 
 
-def getitems(obj: dict, items: list | str, default: Any = None) -> Any:
+def getitems(obj: Dict, items: Union[List, str], default: Any = None) -> Any:
     """
     递归获取数据
     注意：使用字符串作为键路径时，须确保 Key 值均为字符串

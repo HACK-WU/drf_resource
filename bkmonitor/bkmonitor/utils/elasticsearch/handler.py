@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import copy
+from typing import List
 
 from luqum.tree import FieldGroup, OrOperation, SearchField, Word
 from luqum.visitor import TreeTransformer
@@ -58,7 +60,7 @@ class BaseTreeTransformer(TreeTransformer):
         return f'"{value}"'
 
     @classmethod
-    def transform_condition_fields(cls, conditions: list):
+    def transform_condition_fields(cls, conditions: List):
         if not conditions:
             return []
         new_conditions = copy.deepcopy(conditions)
@@ -68,7 +70,7 @@ class BaseTreeTransformer(TreeTransformer):
         return new_conditions
 
     @classmethod
-    def transform_ordering_fields(cls, ordering: list):
+    def transform_ordering_fields(cls, ordering: List):
         if not ordering:
             return []
         new_ordering = []

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -26,7 +27,7 @@ from drf_resource import api
 from core.errors import logger
 
 
-class BaseReportHandler:
+class BaseReportHandler(object):
     """
     基础订阅管理器
     """
@@ -91,7 +92,7 @@ class BaseReportHandler:
         raise NotImplementedError("send_check() method is not implemented.")
 
 
-class SendChannelHandler:
+class SendChannelHandler(object):
     """
     订阅渠道处理器
     """

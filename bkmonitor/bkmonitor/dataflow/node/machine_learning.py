@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ specific language governing permissions and limitations under the License.
 
 import abc
 import logging
+from typing import Dict, List
 
 import arrow
 from django.conf import settings
@@ -48,9 +50,9 @@ class SceneServiceNode(MachineLearnNode):
         plan_id: int,
         source_rt_id: str,
         metric_field: str,
-        agg_dimensions: list[str],
+        agg_dimensions: List[str],
         time_field: str = None,
-        plan_args: dict = None,
+        plan_args: Dict = None,
         *args,
         **kwargs,
     ):
@@ -64,7 +66,7 @@ class SceneServiceNode(MachineLearnNode):
         self.plan_id = plan_id
         self.plan_args = plan_args
 
-        super().__init__(*args, **kwargs)
+        super(SceneServiceNode, self).__init__(*args, **kwargs)
 
     def __eq__(self, other):
         if isinstance(other, dict):
@@ -183,7 +185,7 @@ class SceneServiceNode(MachineLearnNode):
         }
 
     def get_api_params(self, flow_id):
-        params = super().get_api_params(flow_id)
+        params = super(SceneServiceNode, self).get_api_params(flow_id)
         params["config"]["dedicated_config"]["flow_id"] = flow_id
         return params
 
@@ -213,7 +215,7 @@ class SceneServiceNode(MachineLearnNode):
 class MultivariateAnomalySceneServiceNode(SceneServiceNode):
     @property
     def config(self):
-        config = super().config
+        config = super(MultivariateAnomalySceneServiceNode, self).config
 
         mapping = {
             field: {
@@ -241,13 +243,13 @@ class MultivariateAnomalySceneServiceNode(SceneServiceNode):
 # 由于主机异常检测算法的输入字段不再是value，所以需要继承重写一个
 class HostAnomalySceneServiceNode(SceneServiceNode):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(HostAnomalySceneServiceNode, self).__init__(*args, **kwargs)
         strategy_id = kwargs.get("strategy_id")
         self.process_rt_id = f"host_anomaly_detect_{strategy_id}_plan"
 
     @property
     def config(self):
-        config = super().config
+        config = super(HostAnomalySceneServiceNode, self).config
 
         mapping = {
             field: {
@@ -307,7 +309,7 @@ class SimilarMetricClusteringServiceNode(SceneServiceNode):
             METRIC_RECOMMAND_INPUT_MAPPINGS,
         )
 
-        config = super().config
+        config = super(SimilarMetricClusteringServiceNode, self).config
 
         mapping = {
             field: {
@@ -390,7 +392,7 @@ class ModelApiServingNode(MachineLearnNode):
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super(ModelApiServingNode, self).__init__(*args, **kwargs)
         self.access_bk_biz_id = access_bk_biz_id
         self.model_release_id = model_release_id
         self.input_node = input_node

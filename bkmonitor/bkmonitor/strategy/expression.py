@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -87,7 +88,7 @@ class VarItem(Item):
             lower_context = {k.lower(): v for k, v in context.items()}
             return lower_context[self.var.lower()]
         except KeyError:
-            raise ValueError(f"variable '{self.var}' is not defined")
+            raise ValueError("variable '%s' is not defined" % self.var)
 
     def translate(self, context: dict = None) -> str:
         return context.get(self.var, self.var)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import datetime
 import logging
-from typing import Any
+from typing import Any, Dict, List
 
 import pytz
 from django.conf import settings
@@ -66,8 +67,8 @@ class TrackSiteVisitMiddleware(MiddlewareMixin):
 
         username: str = request.user.username
         source: str = getattr(request, "source", "web")
-        space_info: dict[str, Any] = {"bk_biz_id": request.biz_id}
-        base_params: dict[str, Any] = {"username": username, "space_info": space_info}
+        space_info: Dict[str, Any] = {"bk_biz_id": request.biz_id}
+        base_params: Dict[str, Any] = {"username": username, "space_info": space_info}
 
         def _run_task(_task, kwargs):
             try:
@@ -75,7 +76,7 @@ class TrackSiteVisitMiddleware(MiddlewareMixin):
             except Exception:  # noqa
                 logger.exception("[TrackSiteVisitMiddleware] failed to run task: task -> %s", _task)
 
-        th_list: list[InheritParentThread] = [
+        th_list: List[InheritParentThread] = [
             InheritParentThread(target=_run_task, args=(active_business, base_params)),
             InheritParentThread(
                 target=_run_task,

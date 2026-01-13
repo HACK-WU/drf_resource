@@ -4,6 +4,7 @@ from datetime import datetime
 import pytz
 from django.db import migrations
 
+import bkmonitor.middlewares.source
 from constants.common import DutyCategory
 
 
@@ -24,15 +25,15 @@ def migrate_duty_groups(apps, schema_editor):
     for user_group in group_queryset:
         if user_group.duty_rules:
             # 新版本的，忽略
-            print(f"new duty group({user_group.name}), turn to next one")
+            print("new duty group({}), turn to next one".format(user_group.name))
             continue
         duty_arranges = list(DutyArrange.objects.filter(user_group_id=user_group.id).order_by("order"))
 
         if not duty_arranges:
-            print(f"empty duty group({user_group.name}), turn to next one")
+            print("empty duty group({}), turn to next one".format(user_group.name))
             continue
 
-        print(f"start to migrate duty group({user_group.name})")
+        print("start to migrate duty group({})".format(user_group.name))
 
         category = DutyCategory.HANDOFF if any([d.need_rotation for d in duty_arranges]) else DutyCategory.REGULAR
         duty_rule = DutyRule.objects.create(
@@ -67,7 +68,7 @@ def migrate_duty_groups(apps, schema_editor):
     # 如果有需要迁移修改的，需要更新一下用户组里的duty_rules
     group_names = ",".join([group.name for group in migrated_user_group])
     group_ids = [group.id for group in migrated_user_group]
-    print(f"create duty rule relations for duty groups({group_names})")
+    print("create duty rule relations for duty groups({})".format(group_names))
     UserGroup.objects.bulk_update(migrated_user_group, fields=["duty_rules"])
     DutyArrange.objects.bulk_update(migrated_duty_arranges, fields=["duty_rule_id", "duty_time"])
     DutyRuleRelation.objects.bulk_create(duty_rule_relations)
@@ -76,7 +77,7 @@ def migrate_duty_groups(apps, schema_editor):
         print("delete invalid duty_arranges")
         DutyArrange.objects.filter(id__in=deleted_duty_arranges).delete()
     # 历史的轮值规则删除掉
-    print(f"delete history plans of duty group({group_names})")
+    print("delete history plans of duty group({})".format(group_names))
     DutyPlan.objects.filter(user_group_id__in=group_ids).delete()
 
     print("migrate duty user group config done!!")

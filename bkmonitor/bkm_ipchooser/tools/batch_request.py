@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from copy import deepcopy
 from multiprocessing.pool import ThreadPool

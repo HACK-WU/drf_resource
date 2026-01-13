@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import calendar
 import logging
-from typing import Optional, Any
+from typing import Dict, List, Optional, Any
 from collections import defaultdict
 from datetime import datetime
 from datetime import time as dt_time
@@ -141,7 +142,7 @@ class DutyRuleManager:
         return self._last_duty_plans
 
     @staticmethod
-    def _calculate_end_date(rule_end_time: str | None, snap_end_time: str | None) -> datetime.date:
+    def _calculate_end_date(rule_end_time: Optional[str], snap_end_time: Optional[str]) -> datetime.date:
         """结束日期，包括这一天，除非是一天的开始。"""
         rule_end_datetime = end_time_to_datetime(rule_end_time)
         snap_end_datetime = end_time_to_datetime(snap_end_time)
@@ -527,7 +528,7 @@ class DutyRuleManager:
         return duty_work_time
 
     @classmethod
-    def refresh_duty_rule_from_any_begin_time(cls, duty_rule: dict[str, Any], begin_time: str) \
+    def refresh_duty_rule_from_any_begin_time(cls, duty_rule: Dict[str, Any], begin_time: str) \
             -> Optional["DutyRuleManager"]:
         """
         从任何起点刷新 duty_rule 排班
@@ -557,7 +558,7 @@ class GroupDutyRuleManager:
     告警组的轮值规则管理
     """
 
-    def __init__(self, user_group: UserGroup, duty_rules: dict):
+    def __init__(self, user_group: UserGroup, duty_rules: Dict):
         """
         :param user_group: 告警组
         :param duty_rules: 轮值规则配置内容
@@ -609,7 +610,7 @@ class GroupDutyRuleManager:
                 continue
 
             # 当前轮值的旧的轮值规则快照
-            old_duty_snaps: list[DutyRuleSnap] = rule_id_to_snaps[rule_id]
+            old_duty_snaps: List[DutyRuleSnap] = rule_id_to_snaps[rule_id]
 
             # 规则没有变化，跳过
             old_hashes = {snap.rule_snap["hash"] for snap in old_duty_snaps}
@@ -672,7 +673,7 @@ class GroupDutyRuleManager:
                 #    同时下次值班时间，也同时作为下次获取值班计划时，使用的开始时间。
                 # Q: 刷新期间干了什么？
                 # A: 其实就是根据当前时间调用了一下duty_manager.get_duty_plan()获取值班计划，值班计划中包含了下生效时间和下次值班用户。
-                refresh_duty_manager: DutyRuleManager | None = DutyRuleManager.refresh_duty_rule_from_any_begin_time(
+                refresh_duty_manager: Optional[DutyRuleManager] = DutyRuleManager.refresh_duty_rule_from_any_begin_time(
                     new_group_rule_snap.rule_snap, begin_time=task_time
                 )
                 if refresh_duty_manager:
@@ -1053,7 +1054,7 @@ class GroupDutyRuleManager:
         )
 
 
-def end_time_to_datetime(end_time: str | None) -> datetime:
+def end_time_to_datetime(end_time: Optional[str]) -> datetime:
     """返回 datetime 类型的结束时间。"""
     if not end_time:
         return datetime.max

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from .data_link import DataLink  # noqa
 from .data_link_configs import (  # noqa

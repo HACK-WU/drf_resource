@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -43,7 +44,7 @@ class ConfigDataField(models.TextField):
     description = "Stores data with json"
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(ConfigDataField, self).__init__(*args, **kwargs)
 
     def get_db_prep_value(self, value, connection, prepared=False):
         data = json.dumps({"_data": value})
@@ -62,7 +63,7 @@ class JsonField(models.TextField):
     description = "Stores data with json"
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(JsonField, self).__init__(*args, **kwargs)
 
     def to_python(self, value):
         """
@@ -95,7 +96,7 @@ class EventStatusField(models.IntegerField):
     query_status_map = {30: "ABNORMAL", 20: "RECOVERED", 10: "CLOSED"}
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(EventStatusField, self).__init__(*args, **kwargs)
 
     def get_prep_value(self, value):
         return self.insert_status_map[value]
@@ -108,7 +109,7 @@ class YamlField(models.TextField):
     description = "Stores data with yaml"
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(YamlField, self).__init__(*args, **kwargs)
 
     def get_db_prep_value(self, value, connection, prepared=False):
         return yaml.safe_dump(value)
@@ -121,14 +122,14 @@ class SymmetricJsonField(SymmetricTextField):
     """基于SymmetricTextField实现的自动序列化和反序列化的加密Field"""
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(SymmetricJsonField, self).__init__(*args, **kwargs)
 
     def get_db_prep_value(self, value, connection, prepared=False):
         value = json.dumps(value)
-        return super().get_db_prep_value(value, connection, prepared)
+        return super(SymmetricJsonField, self).get_db_prep_value(value, connection, prepared)
 
     def from_db_value(self, value, expression, connection, context=None):
-        value = super().from_db_value(value, expression, connection, context)
+        value = super(SymmetricJsonField, self).from_db_value(value, expression, connection, context)
         return json.loads(value or "null")
 
 

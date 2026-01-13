@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +13,7 @@ import logging
 import typing
 from collections import defaultdict
 from multiprocessing.pool import ApplyResult
-from typing import Any
+from typing import Any, Dict, List
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -187,7 +188,7 @@ def get_service_instance_by_biz(bk_biz_id):
     return batch_request(client.list_service_instance_detail, {"bk_biz_id": bk_biz_id})
 
 
-def _trans_topo_node_to_module_ids(bk_biz_id: int, topo_nodes: dict[str, typing.Iterable[int]]) -> set[int]:
+def _trans_topo_node_to_module_ids(bk_biz_id: int, topo_nodes: Dict[str, typing.Iterable[int]]) -> typing.Set[int]:
     """
     将待查询的拓扑节点转为模块ID
     :param topo_nodes: 拓扑节点
@@ -207,14 +208,14 @@ def _trans_topo_node_to_module_ids(bk_biz_id: int, topo_nodes: dict[str, typing.
         return module_ids
 
     # 查询拓扑树
-    topo_tree: dict = _get_topo_tree(bk_biz_id)
+    topo_tree: Dict = _get_topo_tree(bk_biz_id)
 
     # 调整待查询拓扑节点结构，合并相同类型的节点
     for bk_obj_id in topo_nodes:
         topo_nodes[bk_obj_id] = {int(topo_node_id) for topo_node_id in topo_nodes[bk_obj_id]}
 
     # 广度优先遍历拓扑树，找到节点下所有的模块ID
-    queue: list[dict] = topo_tree["child"]
+    queue: List[Dict] = topo_tree["child"]
     while queue:
         node = queue.pop()
 
@@ -240,7 +241,7 @@ class HostRequestSerializer(serializers.Serializer):
     fields = serializers.ListField(label="查询字段", default=Host.Fields, allow_empty=True)
 
     def to_internal_value(self, data):
-        params = super().to_internal_value(data)
+        params = super(HostRequestSerializer, self).to_internal_value(data)
         params["fields"] = list(set(list(params["fields"]) + settings.HOST_DYNAMIC_FIELDS))
         return params
 
@@ -864,7 +865,7 @@ def full_host_topo_inst(bk_biz_id, host_list):
         del node["child"]
 
     for host in host_list:
-        module_list = [f"module|{x}" for x in host["bk_module_ids"]]
+        module_list = ["module|%s" % x for x in host["bk_module_ids"]]
         topo_dict = {"module": [], "set": []}
         for module_key in module_list:
             for inst_key in topo_link_dict.get(module_key, []):
@@ -887,7 +888,7 @@ class GetHostWithoutBiz(Resource):
         bk_biz_id = serializers.IntegerField(label="业务ID", required=False)
 
     @classmethod
-    def convert_host(cls, host: dict[str, Any], **kwargs):
+    def convert_host(cls, host: Dict[str, Any], **kwargs):
         return Host(host, **kwargs)
 
     def perform_request(self, params):
@@ -962,7 +963,7 @@ class GetHostWithoutBizV2(CacheResource, GetHostWithoutBiz):
     cache_type = CacheType.CC_BACKEND(timeout=60)
 
     @classmethod
-    def convert_host(cls, host: dict[str, Any], **kwargs):
+    def convert_host(cls, host: Dict[str, Any], **kwargs):
         host.update(kwargs)
         return host
 
@@ -1031,7 +1032,7 @@ class SearchDynamicGroup(Resource):
         # 查询动态分组中的实例信息
         if params.get("with_count") or params.get("with_instance_id"):
             pool = ThreadPool(self.MAX_CONCURRENCY_NUMBER)
-            tasks: dict[str, ApplyResult] = {}
+            tasks: Dict[str, ApplyResult] = {}
             for dg in dgs:
                 if params.get("with_instance_id"):
                     tasks[dg["id"]] = pool.apply_async(
@@ -1127,7 +1128,7 @@ class BatchExecuteDynamicGroup(Resource):
 
     def perform_request(self, params):
         pool = ThreadPool(self.MAX_CONCURRENCY_NUMBER)
-        tasks: dict[str, ApplyResult] = {}
+        tasks: Dict[str, ApplyResult] = {}
         for dg_id in params["ids"]:
             tasks[dg_id] = pool.apply_async(
                 ExecuteDynamicGroup().request,

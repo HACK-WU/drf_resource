@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -21,7 +22,7 @@ def _get_file_path(instance, filename: str) -> str:
     else:
         ext = ".zip"
     filename = f"{uuid.uuid4()}{ext}"
-    return f"as_code/{filename}"
+    return "as_code/{filename}".format(filename=filename)
 
 
 class AsCodeImportTask(models.Model):

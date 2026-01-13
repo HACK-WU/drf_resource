@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,6 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import List
 
 from django.utils.translation import gettext_lazy as _lazy
 
@@ -18,7 +20,7 @@ k8s 性能场景配置, 初版
 
 
 # 每个场景需要配置一个 get_metrics函数 以返回指标列表
-def get_metrics() -> list:
+def get_metrics() -> List:
     return [
         Category(
             id="CPU",

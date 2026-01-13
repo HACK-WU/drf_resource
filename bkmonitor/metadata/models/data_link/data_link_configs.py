@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,9 +10,11 @@ specific language governing permissions and limitations under the License.
 """
 import json
 import logging
+from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.db import models
+from jinja2 import Template
 
 from metadata.models.data_link import constants, utils
 from metadata.models.data_link.constants import DataLinkKind
@@ -80,7 +83,7 @@ class DataIdConfig(DataLinkResourceConfigBase):
         verbose_name = "数据源配置"
         verbose_name_plural = verbose_name
 
-    def compose_config(self) -> dict:
+    def compose_config(self) -> Dict:
         """
         数据源下发计算平台的资源配置
         """
@@ -127,7 +130,7 @@ class VMResultTableConfig(DataLinkResourceConfigBase):
         verbose_name = "VM结果表配置"
         verbose_name_plural = verbose_name
 
-    def compose_config(self) -> dict:
+    def compose_config(self) -> Dict:
         """
         组装数据源结果表配置
         """
@@ -179,7 +182,7 @@ class VMStorageBindingConfig(DataLinkResourceConfigBase):
 
     def compose_config(
         self,
-    ) -> dict:
+    ) -> Dict:
         """
         组装VM存储配置，与结果表相关联
         """
@@ -236,11 +239,11 @@ class DataBusConfig(DataLinkResourceConfigBase):
 
     def compose_config(
         self,
-        sinks: list,
-        transform_kind: str | None = constants.DEFAULT_METRIC_TRANSFORMER_KIND,
-        transform_name: str | None = constants.DEFAULT_METRIC_TRANSFORMER,
-        transform_format: str | None = constants.DEFAULT_METRIC_TRANSFORMER_FORMAT,
-    ) -> dict:
+        sinks: List,
+        transform_kind: Optional[str] = constants.DEFAULT_METRIC_TRANSFORMER_KIND,
+        transform_name: Optional[str] = constants.DEFAULT_METRIC_TRANSFORMER,
+        transform_format: Optional[str] = constants.DEFAULT_METRIC_TRANSFORMER_FORMAT,
+    ) -> Dict:
         """
         组装清洗任务配置，需要声明 where -> how -> where
         需要注意：DataBusConfig和Sink的name需要相同
@@ -309,7 +312,7 @@ class ConditionalSinkConfig(DataLinkResourceConfigBase):
         verbose_name = "条件处理配置"
         verbose_name_plural = verbose_name
 
-    def compose_conditional_sink_config(self, conditions: list) -> dict:
+    def compose_conditional_sink_config(self, conditions: List) -> Dict:
         """
         组装条件处理配置
         @param conditions: 条件列表

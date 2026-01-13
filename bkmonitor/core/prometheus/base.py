@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import copy
 
@@ -63,7 +64,7 @@ class LabelHandleMixin:
         labelkwargs = {
             key: type(value).__name__ if isinstance(value, Exception) else value for key, value in labelkwargs.items()
         }
-        return super().labels(*labelvalues, **labelkwargs)
+        return super(LabelHandleMixin, self).labels(*labelvalues, **labelkwargs)
 
 
 # 定制化指标类，目前仅支持 Histogram, Counter, Gauge
@@ -71,10 +72,10 @@ class Histogram(LabelHandleMixin, BaseHistogram):
     DEFAULT_BUCKETS = (0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 2.5, 5.0, 7.5, 10.0, 30.0, INF)
 
     def __init__(self, *args, registry=REGISTRY, buckets=DEFAULT_BUCKETS, **kwargs):
-        super().__init__(*args, registry=registry, buckets=buckets, **kwargs)
+        super(Histogram, self).__init__(*args, registry=registry, buckets=buckets, **kwargs)
 
     def labels(self, *labelvalues, **labelkwargs) -> BaseHistogram:
-        return super().labels(*labelvalues, **labelkwargs)
+        return super(Histogram, self).labels(*labelvalues, **labelkwargs)
 
     def _child_samples(self):
         samples = []
@@ -93,10 +94,10 @@ class Histogram(LabelHandleMixin, BaseHistogram):
 
 class Counter(LabelHandleMixin, BaseCounter):
     def __init__(self, *args, registry=REGISTRY, **kwargs):
-        super().__init__(*args, registry=registry, **kwargs)
+        super(Counter, self).__init__(*args, registry=registry, **kwargs)
 
     def labels(self, *labelvalues, **labelkwargs) -> BaseCounter:
-        return super().labels(*labelvalues, **labelkwargs)
+        return super(Counter, self).labels(*labelvalues, **labelkwargs)
 
     def _child_samples(self):
         if not self._value.get():
@@ -106,7 +107,7 @@ class Counter(LabelHandleMixin, BaseCounter):
 
 class Gauge(LabelHandleMixin, BaseGauge):
     def __init__(self, *args, registry=REGISTRY, **kwargs):
-        super().__init__(*args, registry=registry, **kwargs)
+        super(Gauge, self).__init__(*args, registry=registry, **kwargs)
 
     def labels(self, *labelvalues, **labelkwargs) -> BaseGauge:
-        return super().labels(*labelvalues, **labelkwargs)
+        return super(Gauge, self).labels(*labelvalues, **labelkwargs)

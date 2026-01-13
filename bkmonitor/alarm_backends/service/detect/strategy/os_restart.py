@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -65,6 +66,6 @@ class OsRestart(SimpleRingRatio):
         return [0, agg_interval, 60 * 10, 60 * 25]
 
     def gen_anomaly_point(self, data_point, detect_result, level, auto_format=True):
-        ap = super().gen_anomaly_point(data_point, detect_result, level)
+        ap = super(OsRestart, self).gen_anomaly_point(data_point, detect_result, level)
         ap.anomaly_message = self._format_message(data_point)
         return ap

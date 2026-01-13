@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -53,7 +54,7 @@ class LogGroup(CustomGroupBase):
             "log_group_name": self.log_group_name,
             "label": self.label,
             "is_enable": self.is_enable,
-            "bk_data_token": self.bk_data_token if with_token else "",
+            "bk_data_token": self.bk_data_token if with_token else str(),
             "creator": self.creator,
             "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
             "last_modify_user": self.last_modify_user,

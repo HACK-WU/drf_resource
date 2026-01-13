@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -35,18 +36,22 @@ OLD_CONF = "uptimecheckbeat.conf"
 BACKUP_CONF = "uptimecheckbeat.conf.task.bk"
 EMPTY_CONF_LINUX = "/tmp/uptimecheckbeat.conf.empty"
 EMPTY_CONF_WINDOWS = "c:\\temp\\uptimecheckbeat.conf.empty"
-SCRIPT_PATH_LINUX = f"{settings.BASE_DIR}/packages/monitor_web/management/commands/script/mv_uptimecheck_linux"
-SCRIPT_PATH_WINDOWS = f"{settings.BASE_DIR}/packages/monitor_web/management/commands/script/mv_uptimecheck_windows"
+SCRIPT_PATH_LINUX = "{base}/packages/monitor_web/management/commands/script/mv_uptimecheck_linux".format(
+    base=settings.BASE_DIR
+)
+SCRIPT_PATH_WINDOWS = "{base}/packages/monitor_web/management/commands/script/mv_uptimecheck_windows".format(
+    base=settings.BASE_DIR
+)
 
 
 class Command(BaseCommand):
     def __init__(self):
         self.timestamp = 0
         self.os_type_dict = {}
-        super().__init__(self)
+        super(Command, self).__init__(self)
 
     def make_script_linux(self, node):
-        f = open(SCRIPT_PATH_LINUX)
+        f = open(SCRIPT_PATH_LINUX, "r")
         script_template = f.read()
         script_content = script_template.format(
             bin_path=BIN_PATH_LINUX,
@@ -62,7 +67,7 @@ class Command(BaseCommand):
         return script_content
 
     def make_script_windows(self, node):
-        f = open(SCRIPT_PATH_WINDOWS)
+        f = open(SCRIPT_PATH_WINDOWS, "r")
         script_template = f.read()
         script_content = script_template.format(
             bin_path=BIN_PATH_WINDOWS,
@@ -95,10 +100,10 @@ class Command(BaseCommand):
             result = api.job.get_job_instance_log(job_instance_id=info["job_instance_id"], bk_biz_id=bk_biz_id)
             is_finished = result[0].get("is_finished", False)
         if result[0]["status"] == 3 and result[0]["step_results"][0]["ip_status"] == 9:
-            logger.info("节点{}拨测配置文件迁移完成".format(host_key(ip=ip_list[0]["ip"], bk_cloud_id=ip_list[0]["bk_cloud_id"])))
+            logger.info("节点%s拨测配置文件迁移完成" % host_key(ip=ip_list[0]["ip"], bk_cloud_id=ip_list[0]["bk_cloud_id"]))
             print(_("节点%s拨测配置文件迁移完成") % host_key(ip=ip_list[0]["ip"], bk_cloud_id=ip_list[0]["bk_cloud_id"]))
         else:
-            logger.error(f"节点拨测配置文件迁移失败：{result}")
+            logger.error("节点拨测配置文件迁移失败：%s" % result)
             print(_("节点拨测配置文件迁移失败：%s") % result)
 
     def get_system_by_node(self, nodes):
@@ -145,5 +150,5 @@ class Command(BaseCommand):
                 # 逐个node迁移旧拨测配置文件
                 self.move_old_conf(node)
             else:
-                logger.info(f"不存在节点{host_key(ip=node.ip, plat_id=node.plat_id)}对应的主机，请联系节点管理进行处理")
+                logger.info("不存在节点%s对应的主机，请联系节点管理进行处理" % host_key(ip=node.ip, plat_id=node.plat_id))
                 print(_("不存在节点%s对应的主机，请联系节点管理进行处理") % host_key(ip=node.ip, plat_id=node.plat_id))

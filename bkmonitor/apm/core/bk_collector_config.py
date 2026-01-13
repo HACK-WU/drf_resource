@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
+from typing import List
 
 from django.conf import settings
 
@@ -16,12 +18,12 @@ from drf_resource import api
 logger = logging.getLogger("apm")
 
 
-class BkCollectorConfig:
+class BkCollectorConfig(object):
     # bk-collector 插件名称
     PLUGIN_NAME = "bk-collector"
 
     @classmethod
-    def get_target_hosts(cls) -> list[int]:
+    def get_target_hosts(cls) -> List[int]:
         """
         查询云区域下所有的Proxy机器列表
         """

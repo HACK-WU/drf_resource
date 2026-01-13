@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
+from typing import List, Optional
 
 from django.core.management import BaseCommand, CommandError
 
@@ -36,7 +38,7 @@ class Command(BaseCommand):
 
         print("update space type of data source successfully")
 
-    def _validate_data_source(self, data_id_list: list) -> None:
+    def _validate_data_source(self, data_id_list: List) -> None:
         """校验数据源是否存在"""
         if not data_id_list:
             return
@@ -54,7 +56,7 @@ class Command(BaseCommand):
         if space_type_id not in space_type_list:
             raise CommandError("space type not found")
 
-    def _update(self, space_type_id: str, data_id_list: list | None = None):
+    def _update(self, space_type_id: str, data_id_list: Optional[List] = None):
         """更改类型"""
         ds_qs = models.DataSource.objects.all()
         if data_id_list:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,6 +14,7 @@ import logging
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
+from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.db import transaction
@@ -386,15 +388,17 @@ def _manage_es_storage(es_storage):
         logger.info("manage_es_storage:table_id->[%s] try to reallocate index", es_storage.table_id)
         es_storage.reallocate_index()
 
-        logger.info(f"manage_es_storage:es_storage->[{es_storage.table_id}] cron task success")
+        logger.info("manage_es_storage:es_storage->[{}] cron task success".format(es_storage.table_id))
     except RetryError as e:
         logger.error(
-            f"manage_es_storage:es_storage index lifecycle failed,table_id->{es_storage.table_id},error->{e.__cause__}"
+            "manage_es_storage:es_storage index lifecycle failed,table_id->{},error->{}".format(
+                es_storage.table_id, e.__cause__
+            )
         )
         logger.exception(e)
     except Exception as e:  # pylint: disable=broad-except
         # 记录异常集群的信息
-        logger.error(f"manage_es_storage:es_storage index lifecycle failed,table_id->{es_storage.table_id}")
+        logger.error("manage_es_storage:es_storage index lifecycle failed,table_id->{}".format(es_storage.table_id))
         logger.exception(e)
 
     cost_time = time.time() - start_time
@@ -411,9 +415,9 @@ def _manage_es_storage(es_storage):
 
 @app.task(ignore_result=True, queue="celery_metadata_task_worker")
 def push_and_publish_space_router(
-    space_type: str | None = None,
-    space_id: str | None = None,
-    table_id_list: list | None = None,
+    space_type: Optional[str] = None,
+    space_id: Optional[str] = None,
+    table_id_list: Optional[List] = None,
 ):
     """推送并发布空间路由功能"""
     logger.info(
@@ -458,7 +462,7 @@ def push_and_publish_space_router(
     logger.info("push and publish space_type: %s, space_id: %s router successfully", space_type, space_id)
 
 
-def multi_push_space_table_ids(space_list: list[dict]):
+def multi_push_space_table_ids(space_list: List[Dict]):
     """批量推送数据"""
     logger.info("start to multi push space table ids")
     from metadata.models.space.space_table_id_redis import SpaceTableIDRedis
@@ -477,8 +481,8 @@ def _access_bkdata_vm(
     bk_biz_id: int,
     table_id: str,
     data_id: int,
-    bcs_cluster_id: str | None = None,
-    allow_access_v2_data_link: bool | None = False,
+    bcs_cluster_id: Optional[str] = None,
+    allow_access_v2_data_link: Optional[bool] = False,
 ):
     """接入计算平台 VM 任务
     NOTE: 根据环境变量判断是否启用新版vm链路
@@ -501,9 +505,9 @@ def access_bkdata_vm(
     bk_biz_id: int,
     table_id: str,
     data_id: int,
-    space_type: str | None = None,
-    space_id: str | None = None,
-    allow_access_v2_data_link: bool | None = False,
+    space_type: Optional[str] = None,
+    space_id: Optional[str] = None,
+    allow_access_v2_data_link: Optional[bool] = False,
 ):
     """接入计算平台 VM 任务"""
     logger.info("bk_biz_id: %s, table_id: %s, data_id: %s start access bkdata vm", bk_biz_id, table_id, data_id)

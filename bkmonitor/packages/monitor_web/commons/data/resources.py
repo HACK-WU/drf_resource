@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -39,7 +40,7 @@ def get_desc_by_field(rt_id, field):
         ret = get_key_alias(rt_id).get(field, field)
         return _(ret) if ret else ret
     except Exception as e:
-        logger.warning("获取表字段的中文描述失败" + f" rt_id:{rt_id} field:{field}, except:{e}")
+        logger.warning("获取表字段的中文描述失败" + " rt_id:{} field:{}, except:{}".format(rt_id, field, e))
         return field
 
 

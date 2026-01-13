@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -36,7 +37,7 @@ class MakoTemplates(BaseEngine):
     def __init__(self, params):
         params = params.copy()
         options = params.pop("OPTIONS").copy()
-        super().__init__(params)
+        super(MakoTemplates, self).__init__(params)
 
         # Defaut values for initializing the MakoTemplateLookup class
         # You can define them in the backend OPTIONS dict.
@@ -75,7 +76,7 @@ class MakoTemplates(BaseEngine):
             raise TemplateSyntaxError(e.args)
 
 
-class Template:
+class Template(object):
     def __init__(self, template, context_processors):
         self.template = template
         self.context_processors = context_processors

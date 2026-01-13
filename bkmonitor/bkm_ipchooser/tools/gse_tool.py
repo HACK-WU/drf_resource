@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, List
 
 from bkm_ipchooser.constants import ScopeType
 from drf_resource import api
@@ -6,7 +7,7 @@ from drf_resource import api
 logger = logging.getLogger("bkm_ipchooser")
 
 
-def fill_agent_status(cc_hosts: list[dict], bk_biz_id: int) -> list[dict]:
+def fill_agent_status(cc_hosts: List[Dict], bk_biz_id: int) -> List[Dict]:
     """填充主机agent状态"""
     if not cc_hosts:
         return cc_hosts

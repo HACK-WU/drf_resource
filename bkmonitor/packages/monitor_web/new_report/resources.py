@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -218,7 +219,7 @@ class GetReportListResource(Resource):
             # 过滤conditions中额外字段
             need_filter = False
             for key, value in external_filter_dict.items():
-                if report[key] not in value:
+                if not report[key] in value:
                     need_filter = True
                     break
             if not need_filter:
@@ -482,7 +483,7 @@ class SendReportResource(Resource):
         try:
             api.monitor.send_report(**validated_request_data)
         except Exception as e:  # pylint: disable=broad-except
-            logger.exception(f"send report error:{e}")
+            logger.exception("send report error:{}".format(e))
         return "success"
 
 

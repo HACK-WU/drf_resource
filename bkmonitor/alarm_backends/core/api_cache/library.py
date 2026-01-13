@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -23,6 +24,7 @@ from django.conf import settings
 from django.core.cache import caches
 from django.db import close_old_connections
 from gevent.monkey import saved
+from six.moves import range
 
 from alarm_backends.constants import CONST_MINUTES, CONST_ONE_HOUR
 from alarm_backends.core.lock.service_lock import share_lock

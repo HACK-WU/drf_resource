@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -30,6 +31,7 @@ from metadata.config import (
 from metadata.models.constants import DataIdCreatedFromSystem, EsSourceType
 from metadata.task.tasks import (
     bulk_check_and_delete_ds_consul_config,
+    bulk_refresh_data_link_status,
     clean_disable_es_storage,
     manage_es_storage,
 )
@@ -48,7 +50,7 @@ def refresh_consul_influxdb_tableinfo():
         logger.info("start to refresh metadata influxdb table info")
         models.ResultTable.refresh_consul_influxdb_tableinfo()
     except Exception as e:
-        logger.error(f"refresh influxdb table info failed for ->{e}")
+        logger.error("refresh influxdb table info failed for ->{}".format(e))
 
 
 @share_lock(ttl=PERIODIC_TASK_DEFAULT_TTL, identify="metadata_refreshConsulStorage")
@@ -66,7 +68,7 @@ def refresh_consul_storage():
         logger.info("start to refresh metadata es storage info")
         models.ClusterInfo.refresh_consul_storage_config()
     except Exception as e:
-        logger.error(f"refresh es storage failed for ->{e}")
+        logger.error("refresh es storage failed for ->{}".format(e))
 
     cost_time = time.time() - start_time
 
@@ -78,7 +80,7 @@ def refresh_consul_storage():
         cost_time
     )
     metrics.report_all()
-    logger.info(f"refresh_consul_storage:task finished, cost time: {cost_time}")
+    logger.info("refresh_consul_storage:task finished, cost time: %s" % cost_time)
 
 
 @share_lock(identify="metadata_refreshConsulESInfo")
@@ -96,7 +98,7 @@ def refresh_consul_es_info():
         logger.info("start to refresh metadata es table info")
         models.ESStorage.refresh_consul_table_config()
     except Exception as e:
-        logger.error(f"refresh es table failed for ->{e}")
+        logger.error("refresh es table failed for ->{}".format(e))
 
     cost_time = time.time() - start_time
 
@@ -108,7 +110,7 @@ def refresh_consul_es_info():
         cost_time
     )
     metrics.report_all()
-    logger.info(f"refresh_consul_es_info:task finished, cost time: {cost_time}")
+    logger.info("refresh_consul_es_info:task finished, cost time: %s" % cost_time)
 
 
 @share_lock(ttl=1800, identify="metadata_refreshInfluxdbRoute")
@@ -124,7 +126,7 @@ def refresh_influxdb_route():
     try:
         for host_info in models.InfluxDBHostInfo.objects.all():
             host_info.refresh_consul_cluster_config()
-            logger.debug(f"host->[{host_info.host_name}] refresh consul config success.")
+            logger.debug("host->[%s] refresh consul config success." % host_info.host_name)
 
         models.InfluxDBClusterInfo.refresh_consul_cluster_config()
         logger.debug("influxdb cluster refresh consul config success.")
@@ -133,14 +135,14 @@ def refresh_influxdb_route():
         for result_table in models.InfluxDBStorage.objects.all():
             index -= 1
             result_table.refresh_consul_cluster_config(is_publish=(index == 0))
-            logger.debug(f"result_table->[{result_table.table_id}] refresh consul config success.")
+            logger.debug("result_table->[%s] refresh consul config success." % result_table.table_id)
 
         # 更新 vm router
         models.AccessVMRecord.refresh_vm_router()
 
     except Exception:
         # 上述的内容对外统一是依赖consul，所以使用一个exception进行捕获
-        logger.error(f"failed to refresh influxdb router info for->[{traceback.format_exc()}]")
+        logger.error("failed to refresh influxdb router info for->[{}]".format(traceback.format_exc()))
 
     # 任务完成前，更新一下version
     consul_tools.refresh_router_version()
@@ -153,17 +155,19 @@ def refresh_influxdb_route():
             result_table.sync_db()
             # 确保存在可用的清理策略
             result_table.ensure_rp()
-            logger.debug(f"tsdb result_table->[{result_table.table_id}] sync_db success.")
+            logger.debug("tsdb result_table->[{}] sync_db success.".format(result_table.table_id))
         except Exception:
             logger.error(
-                f"result_table->[{result_table.table_id}] failed to sync database for->[{traceback.format_exc()}]"
+                "result_table->[{}] failed to sync database for->[{}]".format(
+                    result_table.table_id, traceback.format_exc()
+                )
             )
     # 刷新tag路由
     try:
         logger.info("start to refresh metadata tag")
         models.InfluxDBTagInfo.refresh_consul_tag_config()
     except Exception as e:
-        logger.error(f"refresh tag failed for ->{e}")
+        logger.error("refresh tag failed for ->{}".format(e))
 
 
 @share_lock(ttl=PERIODIC_TASK_DEFAULT_TTL, identify="metadata_cleanInfluxdbTag")
@@ -212,10 +216,12 @@ def refresh_datasource():
             datasource.clean_cache()
             # 2. 更新ETL及datasource的配置
             datasource.refresh_outer_config()
-            logger.debug(f"data_id->[{datasource.bk_data_id}] refresh all outer success")
+            logger.debug("data_id->[%s] refresh all outer success" % datasource.bk_data_id)
         except Exception:
             logger.error(
-                f"data_id->[{datasource.bk_data_id}] failed to refresh outer config for->[{traceback.format_exc()}]"
+                "data_id->[{}] failed to refresh outer config for->[{}]".format(
+                    datasource.bk_data_id, traceback.format_exc()
+                )
             )
 
 
@@ -234,10 +240,12 @@ def refresh_kafka_storage():
     for kafka_storage in models.KafkaStorage.objects.all():
         try:
             kafka_storage.ensure_topic()
-            logger.debug(f"kafka storage for result_table->[{kafka_storage.table_id}] is ensure create.")
+            logger.debug("kafka storage for result_table->[{}] is ensure create.".format(kafka_storage.table_id))
         except Exception:
             logger.error(
-                f"kafka->[{kafka_storage.table_id}] failed to make sure topic exists for->[{traceback.format_exc()}]"
+                "kafka->[{}] failed to make sure topic exists for->[{}]".format(
+                    kafka_storage.table_id, traceback.format_exc()
+                )
             )
     cost_time = time.time() - start_time
 
@@ -425,7 +433,7 @@ def refresh_bcs_info():
         logger.info("start to refresh resources")
         models.PodMonitorInfo.refresh_all_to_consul()
     except Exception as e:
-        logger.error(f"refresh bcs info into consul failed for ->{e}")
+        logger.error("refresh bcs info into consul failed for ->{}".format(e))
     # 清理到期的回溯索引
     models.EsSnapshotRestore.clean_expired_restore()
     cost_time = time.time() - start_time
@@ -467,7 +475,9 @@ def refresh_es_restore():
             not_done_restore.get_complete_doc_count()
         except Exception:
             logger.info(
-                f"es_restore->[{not_done_restore.restore_id}] failed to cron task for->[{traceback.format_exc()}]"
+                "es_restore->[{}] failed to cron task for->[{}]".format(
+                    not_done_restore.restore_id, traceback.format_exc()
+                )
             )
             continue
     cost_time = time.time() - start_time

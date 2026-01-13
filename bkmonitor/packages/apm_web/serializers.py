@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -134,8 +135,8 @@ class ComponentInstanceIdDynamicField(serializers.Field):
         return value
 
     def run_validation(self, data=empty):
-        res = super().run_validation(data)
-        if not isinstance(res, list | str):
+        res = super(ComponentInstanceIdDynamicField, self).run_validation(data)
+        if not isinstance(res, (list, str)):
             raise ValueError(_("组件实例id仅支持list/str"))
 
         return res

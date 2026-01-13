@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -69,10 +70,10 @@ class NodeRelationSerializer(serializers.Serializer):
 
     @property
     def validated_data(self):
-        res = super().validated_data
+        res = super(NodeRelationSerializer, self).validated_data
         if res["path_type"] == RelationResourcePathType.SPECIFIC.value:
             if not res.get("paths"):
-                raise ValueError("没有传递 path 参数")
+                raise ValueError(f"没有传递 path 参数")
             res["paths"] = res["paths"].split(",")
         return res
 
@@ -90,7 +91,7 @@ class NodeEndpointTopSerializer(serializers.Serializer):
 
     @property
     def validated_data(self):
-        res = super().validated_data
+        res = super(NodeEndpointTopSerializer, self).validated_data
         # 兼容前端参数名称 node_name == service_name
         res["service_name"] = res.pop("node_name")
 
@@ -118,14 +119,14 @@ class EndpointNameSerializer(TopoBaseRequestSerializer):
     source_info = serializers.DictField(label="资源信息", required=False)
 
     def validate(self, attrs):
-        res = super().validate(attrs)
+        res = super(EndpointNameSerializer, self).validate(attrs)
         if attrs["link_type"] == TopoLinkType.ALERT.value:
             if attrs.get("endpoint_name") and not attrs.get("service_name"):
-                raise ValueError("[获取链接]获取告警中心链接需要 endpoint_name 参数")
+                raise ValueError(f"[获取链接]获取告警中心链接需要 endpoint_name 参数")
 
         elif attrs["link_type"] == TopoLinkType.TOPO_SOURCE.value:
             if not attrs.get("source_type") or not attrs.get("source_info"):
-                raise ValueError("[获取链接]获取资源拓扑链接需要 source_type / source_info 参数")
+                raise ValueError(f"[获取链接]获取资源拓扑链接需要 source_type / source_info 参数")
 
         return res
 

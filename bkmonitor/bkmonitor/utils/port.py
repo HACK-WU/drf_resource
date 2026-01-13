@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -35,7 +36,7 @@ def merge_port(ports):
             if start_port == end_port:
                 port_ranges.append(str(start_port))
             else:
-                port_ranges.append(f"{start_port}-{end_port}")
+                port_ranges.append("{}-{}".format(start_port, end_port))
             start_port = port
             end_port = port
 
@@ -43,6 +44,6 @@ def merge_port(ports):
         if start_port == end_port:
             port_ranges.append(str(start_port))
         else:
-            port_ranges.append(f"{start_port}-{end_port}")
+            port_ranges.append("{}-{}".format(start_port, end_port))
 
     return port_ranges

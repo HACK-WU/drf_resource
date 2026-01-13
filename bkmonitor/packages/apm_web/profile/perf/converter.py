@@ -9,6 +9,7 @@ specific language governing permissions and limitations under the License.
 """
 import datetime
 from dataclasses import dataclass
+from typing import List, Optional
 
 from apm_web.profile.models import (
     Function,
@@ -27,7 +28,7 @@ from apm_web.profile.profileconverter import ProfileConverter
 class PerfScriptProfileConverter(ProfileConverter):
     """Convert perf script to Profile object"""
 
-    def convert(self, raw: bytes) -> Profile | None:
+    def convert(self, raw: bytes) -> Optional[Profile]:
         """parse single raw perf script data to Profile object"""
         self.add_string("")
         self.profile.sample_type = [ValueType(self.add_string("samples"), self.add_string("count"))]
@@ -76,7 +77,7 @@ class PerfScriptProfileConverter(ProfileConverter):
                 return lab.num
         return 0
 
-    def _parse_lines(self, lines: list[str]):
+    def _parse_lines(self, lines: List[str]):
         """parse multiple lines to a single sample"""
         if not lines:
             return

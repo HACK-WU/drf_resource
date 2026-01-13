@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +12,7 @@ import re
 import time
 from functools import wraps
 from threading import Semaphore
-from typing import Any
+from typing import Any, List
 
 import arrow
 from dateutil.rrule import DAILY, MONTHLY, rrule
@@ -46,7 +47,8 @@ def _scan(
 
     try:
         while scroll_id and resp["hits"]["hits"]:
-            yield from resp["hits"]["hits"]
+            for hit in resp["hits"]["hits"]:
+                yield hit
 
             # Default to 0 if the value isn't included in the response
             shards_successful = resp["_shards"].get("successful", 0)
@@ -120,7 +122,7 @@ class EsSearch(Search):
         self._es_query_proxy = EsQueryProxy(self, "query")
         self._es_post_filter_proxy = EsQueryProxy(self, "post_filter")
 
-    def fix_index(self, indices: list[str]):
+    def fix_index(self, indices: List[str]):
         """调整查询的目标索引列表"""
 
         if indices:
@@ -163,7 +165,7 @@ def limits(calls, period):
     return RateLimiter(calls, period)
 
 
-class QueryIndexOptimizer:
+class QueryIndexOptimizer(object):
     """es查询索引优化类"""
 
     def __init__(
@@ -189,7 +191,7 @@ class QueryIndexOptimizer:
     def index(self):
         return [self._index] if self._index else None
 
-    def index_filter(self, indices, start_time: arrow.Arrow, end_time: arrow.Arrow, time_zone: str) -> list[str]:
+    def index_filter(self, indices, start_time: arrow.Arrow, end_time: arrow.Arrow, time_zone: str) -> List[str]:
         """根据时间query时间对索引进行过滤， 返回经过过滤后的索引列表"""
 
         indices_list = set()
@@ -210,12 +212,12 @@ class QueryIndexOptimizer:
             date_end = now
 
         # 根据输入query的事件参数，生成能覆盖查询条件的"day"级别日期类表
-        date_day_list: list[Any] = list(
+        date_day_list: List[Any] = list(
             rrule(DAILY, interval=1, dtstart=date_start.floor("day").datetime, until=date_end.ceil("day").datetime)
         )
 
         # 根据输入query的事件参数，生成能覆盖查询条件的"month"级别日期类表
-        date_month_list: list[Any] = list(
+        date_month_list: List[Any] = list(
             rrule(
                 MONTHLY, interval=1, dtstart=date_start.floor("month").datetime, until=date_end.ceil("month").datetime
             )

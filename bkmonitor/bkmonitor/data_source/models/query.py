@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,7 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple
 
 from django.db.models import Q
 
@@ -22,7 +23,7 @@ class IterMixin:
         """
         Retrieves an item or slice from the set of results.
         """
-        if not isinstance(k, slice | int):
+        if not isinstance(k, (slice, int)):
             raise TypeError
 
         if self._result_cache is not None:
@@ -91,7 +92,8 @@ class IterMixin:
     def iterator(self):
         compiler = self.query.get_compiler(using=self.using)
         results = compiler.execute_sql()
-        yield from results
+        for row in results:
+            yield row
 
     @property
     def original_data(self):
@@ -99,7 +101,7 @@ class IterMixin:
         original_sql, params = compiler.as_sql()
         return compiler.connection.execute(original_sql, params)
 
-    def first(self) -> dict[str, Any] | None:
+    def first(self) -> Optional[Dict[str, Any]]:
         clone = self._clone().limit(1)
         if len(clone):
             return clone[0]
@@ -146,7 +148,7 @@ class QueryMixin:
         clone.query.add_ordering(*fields)
         return clone
 
-    def distinct(self, field: str | None):
+    def distinct(self, field: Optional[str]):
         clone = self._clone()
         if field:
             clone.query.distinct = field
@@ -156,13 +158,13 @@ class QueryMixin:
 class DslMixin:
     """ES DSL 相关"""
 
-    def use_full_index_names(self, use_full_index_names: bool | None):
+    def use_full_index_names(self, use_full_index_names: Optional[bool]):
         clone = self._clone()
         if use_full_index_names is not None:
             clone.query.use_full_index_names = use_full_index_names
         return clone
 
-    def dsl_raw_query_string(self, query_string: str, nested_paths: dict[str, str] | None = None):
+    def dsl_raw_query_string(self, query_string: str, nested_paths: Optional[Dict[str, str]] = None):
         clone = self._clone()
         clone.query.raw_query_string = query_string
         if nested_paths:
@@ -179,7 +181,7 @@ class DslMixin:
         clone.query.group_hits_size = size
         return clone
 
-    def dsl_search_after(self, search_after_key: dict[str, Any] | None):
+    def dsl_search_after(self, search_after_key: Optional[Dict[str, Any]]):
         clone = self._clone()
         if search_after_key is not None:
             clone.query.search_after_key = search_after_key
@@ -196,10 +198,10 @@ class BaseDataQuery:
     TYPE = "base"
     QUERY_CLASS = sql.Query
 
-    def __init__(self, using: tuple[str, str], query=None):
-        self.using: tuple[str, str] = using
+    def __init__(self, using: Tuple[str, str], query=None):
+        self.using: Tuple[str, str] = using
         self.query = query or self.QUERY_CLASS(self.using)
-        self._result_cache: list[Any] | None = None
+        self._result_cache: Optional[List[Any]] = None
 
     def _clone(self):
         query = self.query.clone()
@@ -216,7 +218,7 @@ class DataQuery(BaseDataQuery, IterMixin, QueryMixin, DslMixin):
     def raw(self, raw_query, params=None):
         return sql.RawQuery(raw_query, using=self.using, params=params).execute_query()
 
-    def metrics(self, metrics: list[dict]):
+    def metrics(self, metrics: List[Dict]):
         clone = self._clone()
         for metric in metrics:
             alias = metric.get("alias")

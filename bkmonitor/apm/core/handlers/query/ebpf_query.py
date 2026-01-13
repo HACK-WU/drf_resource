@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云 - Resource SDK (BlueKing - Resource SDK) available.
@@ -50,5 +51,5 @@ class DeepFlowQuery:
                 span_data = EBPFHandler.l7_flow_log_to_resource_span(item)
                 ebpf_spans.append(span_data)
         except Exception as e:
-            logging.info(f"get_ebpf, {e}")
+            logging.info("get_ebpf, {}".format(e))
         return ebpf_spans

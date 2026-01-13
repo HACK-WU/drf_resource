@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-class DimensionField:
+class DimensionField(object):
     def __init__(self, name, value):
         self.name = name
         self.value = value
@@ -20,7 +21,7 @@ class DimensionField:
     def to_str_list(self):
         """trans self.value to str list"""
         val_list = self.value
-        if not isinstance(val_list, list | tuple):
+        if not isinstance(val_list, (list, tuple)):
             val_list = [val_list]
         return [self.strip_str(v) for v in val_list]
 
@@ -28,7 +29,7 @@ class DimensionField:
         """trans self.value to float list"""
         from bkmonitor.utils.common_utils import safe_float
         val_list = self.value
-        if not isinstance(val_list, list | tuple):
+        if not isinstance(val_list, (list, tuple)):
             val_list = [val_list]
 
         return list(map(safe_float, val_list))
@@ -55,10 +56,10 @@ class IpDimensionField(DimensionField):
     """
 
     def get_value_from_data(self, data):
-        is_exists, ip_value = super().get_value_from_data(data)
+        is_exists, ip_value = super(IpDimensionField, self).get_value_from_data(data)
 
         first_value = self.value
-        if self.value and isinstance(self.value, list | tuple):
+        if self.value and isinstance(self.value, (list, tuple)):
             first_value = self.value[0]
 
         if isinstance(first_value, dict) and "bk_cloud_id" in first_value:
@@ -71,7 +72,7 @@ class IpDimensionField(DimensionField):
     def to_str_list(self):
         from bkmonitor.utils.common_utils import to_host_id
         val_list = self.value
-        if not isinstance(val_list, list | tuple):
+        if not isinstance(val_list, (list, tuple)):
             val_list = [val_list]
 
         ret = []
@@ -97,10 +98,10 @@ class BkTargetIpDimensionField(DimensionField):
     """
 
     def get_value_from_data(self, data):
-        is_exists, ip_value = super().get_value_from_data(data)
+        is_exists, ip_value = super(BkTargetIpDimensionField, self).get_value_from_data(data)
 
         first_value = self.value
-        if self.value and isinstance(self.value, list | tuple):
+        if self.value and isinstance(self.value, (list, tuple)):
             first_value = self.value[0]
 
         if isinstance(first_value, dict) and "bk_target_cloud_id" in first_value:
@@ -115,7 +116,7 @@ class BkTargetIpDimensionField(DimensionField):
 
     def to_str_list(self):
         val_list = self.value
-        if not isinstance(val_list, list | tuple):
+        if not isinstance(val_list, (list, tuple)):
             val_list = [val_list]
 
         ret = []
@@ -151,7 +152,7 @@ class TopoNodeDimensionField(DimensionField):
     """
 
     def get_value_from_data(self, data):
-        is_exists, topo_node_value = super().get_value_from_data(data)
+        is_exists, topo_node_value = super(TopoNodeDimensionField, self).get_value_from_data(data)
 
         if not is_exists and "bk_topo_node" in data:
             return True, data.get("bk_topo_node")
@@ -162,7 +163,7 @@ class TopoNodeDimensionField(DimensionField):
 
     def to_str_list(self):
         val_list = self.value
-        if not isinstance(val_list, list | tuple):
+        if not isinstance(val_list, (list, tuple)):
             val_list = [val_list]
 
         ret = []

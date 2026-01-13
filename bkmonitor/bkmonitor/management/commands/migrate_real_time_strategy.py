@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import re
 from collections import defaultdict
+from typing import Dict, List
 
 from django.core.management.base import BaseCommand
 
@@ -21,7 +23,7 @@ target_biz_list = []
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        super().add_arguments(parser)
+        super(Command, self).add_arguments(parser)
 
     def handle(self, *args, **options):
         migrate_real_time_strategy()
@@ -120,11 +122,11 @@ def migrate_real_time_strategy():
         algorithm_query = AlgorithmModel.objects.filter(strategy_id__in=strategy_ids)
         item_query = ItemModel.objects.filter(strategy_id__in=strategy_ids)
 
-    algorithms_mapping: dict[int, list[AlgorithmModel]] = defaultdict(list)
+    algorithms_mapping: Dict[int, List[AlgorithmModel]] = defaultdict(list)
     for algorithm in algorithm_query:
         algorithms_mapping[algorithm.strategy_id].append(algorithm)
 
-    items_mapping: dict[int, list[ItemModel]] = defaultdict(list)
+    items_mapping: Dict[int, List[ItemModel]] = defaultdict(list)
     for item in item_query:
         items_mapping[item.strategy_id].append(item)
 

@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
+from typing import Dict, List, Optional
 
 from apm_web.trace.diagram.base import Group, SpanNode, TraceTree, TreeBuildingConfig
 
@@ -28,7 +28,7 @@ class TraceDiffer:
 
     build_config: "TreeBuildingConfig"
 
-    policies: list[DiffPolicy] = field(default_factory=lambda: [DiffPolicy.strict_time_order])
+    policies: List[DiffPolicy] = field(default_factory=lambda: [DiffPolicy.strict_time_order])
 
     @classmethod
     def from_raw(
@@ -36,7 +36,7 @@ class TraceDiffer:
         baseline: list,
         comparison: list,
         config: TreeBuildingConfig = TreeBuildingConfig.default(),
-        policies: list[DiffPolicy] | None = None,
+        policies: Optional[List[DiffPolicy]] = None,
     ) -> "TraceDiffer":
         baseline_tree = TraceTree.from_raw(baseline, config)
         comparison_tree = TraceTree.from_raw(comparison, config)
@@ -120,12 +120,12 @@ class DiffMark(Enum):
 
 @dataclass
 class DiffNode:
-    baseline: SpanNode | None
-    comparison: SpanNode | None
+    baseline: Optional[SpanNode]
+    comparison: Optional[SpanNode]
     mark: DiffMark
 
     parent: Optional["DiffNode"] = None
-    children: list["DiffNode"] = field(default_factory=list)
+    children: List["DiffNode"] = field(default_factory=list)
 
     def __post_init__(self):
         if self.baseline is not None:
@@ -152,7 +152,7 @@ class DiffNode:
         return ret
 
     @property
-    def delta(self) -> float | None:
+    def delta(self) -> Optional[float]:
         """Node delta as percentage."""
         if self.mark == DiffMark.CHANGED:
             return (self.comparison.value - self.baseline.value) / self.baseline.value * 100
@@ -208,8 +208,8 @@ class DiffGroup(Group):
 
         equality = super().should_add_to_group(adding)
 
-        adding_diff_node: DiffNode | None = adding.extra_info.get("diff_node")
-        last_candidate_diff_node: DiffNode | None = self.candidates[-1].extra_info.get("diff_node")
+        adding_diff_node: Optional[DiffNode] = adding.extra_info.get("diff_node")
+        last_candidate_diff_node: Optional[DiffNode] = self.candidates[-1].extra_info.get("diff_node")
         if None in [adding_diff_node, last_candidate_diff_node]:
             return equality
 
@@ -232,7 +232,7 @@ class DiffGroup(Group):
 
 @dataclass
 class SimilarityMap:
-    _map: dict[DiffMark, int] = field(default_factory=lambda: defaultdict(int))
+    _map: Dict[DiffMark, int] = field(default_factory=lambda: defaultdict(int))
 
     def __str__(self):
         return str(self.percentage)
@@ -269,12 +269,12 @@ class SimilarityMap:
 
 @dataclass
 class DiffTree:
-    roots: list[DiffNode] = field(default_factory=list)
+    roots: List[DiffNode] = field(default_factory=list)
     config: TreeBuildingConfig = field(default_factory=TreeBuildingConfig.default)
-    level_similarity_map: dict[int, SimilarityMap] = field(default_factory=lambda: defaultdict(SimilarityMap))
+    level_similarity_map: Dict[int, SimilarityMap] = field(default_factory=lambda: defaultdict(SimilarityMap))
 
     # id -> DiffNode, quick access for DiffNode
-    _children_map: dict[str, DiffNode] = field(default_factory=dict)
+    _children_map: Dict[str, DiffNode] = field(default_factory=dict)
 
     def calculate_level_similarity(
         self, similarity_decrease_percentage: float = 30, max_missed_threshold: int = 3
@@ -309,7 +309,7 @@ class DiffTree:
         self.level_similarity_map[node.default.level].add(node.mark)
 
     # TODO: make a general tree & node for deduplicating
-    def get_node_by_id(self, node_id: str) -> DiffNode | None:
+    def get_node_by_id(self, node_id: str) -> Optional[DiffNode]:
         return self._children_map.get(node_id)
 
     def build_extras(self):

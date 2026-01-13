@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 
 from django.db import migrations
@@ -21,7 +22,7 @@ def convert_actions(apps, *args, **kwargs):
     converter = ActionConverter(**models)
     result = converter.migrate()
     if any(result.values()):
-        print(f"[ActionConverter] migrate result: {result}")
+        print("[ActionConverter] migrate result: %s" % result)
 
 
 class Migration(migrations.Migration):

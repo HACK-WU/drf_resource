@@ -154,7 +154,7 @@ def mocked__get_field_default_gen(cls, field: dataclasses.Field) -> Any:
 
 def mocked_to_json(
     self,
-    indent: None | int | str = None,
+    indent: Union[None, int, str] = None,
     include_default_values: bool = False,
     casing: Casing = Casing.CAMEL,
 ) -> str:

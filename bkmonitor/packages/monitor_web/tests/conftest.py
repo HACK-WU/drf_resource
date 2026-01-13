@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -26,6 +27,7 @@ from api.kubernetes.default import (
     FetchK8sBkmMetricbeatEndpointUpResource,
     FetchK8sEventListResource,
     FetchK8sEventLogResource,
+    FetchK8sMonitorEndpointListResource,
     FetchK8sNodePerformanceResource,
     FetchK8sPodListByClusterResource,
     FetchK8sWorkloadListByClusterResource,

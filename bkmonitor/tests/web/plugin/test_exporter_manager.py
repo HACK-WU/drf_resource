@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -52,7 +53,7 @@ def update_plugin_manager(mocker):
     return plugin_manager
 
 
-class TestExporterPlugin:
+class TestExporterPlugin(object):
     def test_fetch_collector_file(self, mocker, update_plugin_manager):
         upload_info_obj = UploadedFileInfo(
             actual_filename="", original_filename="", relative_path="", file_data="", file_md5=""

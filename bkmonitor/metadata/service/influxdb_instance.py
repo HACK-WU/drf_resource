@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
+from typing import Dict, List, Optional
 
 from metadata import models
 
@@ -15,7 +17,7 @@ logger = logging.getLogger("metadata")
 
 
 class InfluxDBInstanceCluster:
-    def __init__(self, cluster_name: str, hosts: list[dict], is_readable: bool | None = True):
+    def __init__(self, cluster_name: str, hosts: List[Dict], is_readable: Optional[bool] = True):
         self.cluster_name = cluster_name
         self.hosts = hosts
         self.is_readable = is_readable

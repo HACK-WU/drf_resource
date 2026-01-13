@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -26,7 +27,7 @@ class GSEBaseAlarmEventRecord(GseCustomStrEventRecord):
     TITLE = ""
 
     def __init__(self, raw_data, strategies):
-        super().__init__(raw_data=raw_data, strategies=strategies)
+        super(GSEBaseAlarmEventRecord, self).__init__(raw_data=raw_data, strategies=strategies)
         self.strategies = strategies
 
     @property
@@ -39,10 +40,10 @@ class GSEBaseAlarmEventRecord(GseCustomStrEventRecord):
 
     def check(self):
         if len(self.raw_data["value"]) == 1:
-            logger.debug(f"GSE alarm value: {self.raw_data}")
+            logger.debug("GSE alarm value: %s" % self.raw_data)
             return True
         else:
-            logger.warning(f"GSE alarm value check fail: {self.raw_data}")
+            logger.warning("GSE alarm value check fail: %s" % self.raw_data)
             return False
 
     def get_plat_info(self, alarm):

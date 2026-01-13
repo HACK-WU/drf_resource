@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 import time
+from typing import List
 
 from alarm_backends.core.alert import Alert
 from alarm_backends.service.alert.manager.checker.base import BaseChecker
@@ -52,7 +54,7 @@ class ShieldStatusChecker(BaseChecker):
     屏蔽状态检测
     """
 
-    def __init__(self, alerts: list[Alert]):
+    def __init__(self, alerts: List[Alert]):
         super().__init__(alerts)  # 初始化父类
         self.unshielded_actions = []  # 存储未屏蔽的动作
         self.need_notify_alerts = []  # 存储需要通知的告警ID

@@ -28,22 +28,22 @@ def create_and_delete_record():
     for i in range(RECORDS):
         event_groups.append(
             EventGroup(
-                event_group_name=f"eg_{i}", bk_data_id=2000000 + i, bk_biz_id=1, table_id=f"tb_{i}"
+                event_group_name="eg_{}".format(i), bk_data_id=2000000 + i, bk_biz_id=1, table_id="tb_{}".format(i)
             )
         )
         time_series_groups.append(
             TimeSeriesGroup(
                 bk_data_id=3000000 + i,
                 bk_biz_id=1,
-                table_id=f"tb_{i}",
-                time_series_group_name=f"test_group_name_{i}",
+                table_id="tb_{}".format(i),
+                time_series_group_name="test_group_name_{}".format(i),
                 label="applications",
                 creator="admin",
             )
         )
         space_data_sources.append(
             SpaceDataSource(
-                space_type_id=f"space_type_{i}", space_id=f"space_id_{i}", bk_data_id=3000000 + i
+                space_type_id="space_type_{}".format(i), space_id="space_id_{}".format(i), bk_data_id=3000000 + i
             )
         )
 

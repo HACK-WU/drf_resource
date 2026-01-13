@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,6 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import Dict, List
 
 from django.utils.functional import cached_property
 
@@ -33,9 +35,9 @@ class MultiInstanceDisplay:
             if value is None:
                 continue
 
-            if isinstance(value, str | float | int):
+            if isinstance(value, (str, float, int)):
                 values.append(str(value))
-            elif isinstance(value, list) and value and isinstance(value[0], str | float | int):
+            elif isinstance(value, list) and value and isinstance(value[0], (str, float, int)):
                 values.extend([str(v) for v in value])
         return ",".join(values)
 
@@ -116,7 +118,7 @@ class Target(BaseContextObject):
         return {process["bk_func_name"]: process for process in self.processes}
 
     @cached_property
-    def processes(self) -> list[dict]:
+    def processes(self) -> List[Dict]:
         """
         进程列表
         """

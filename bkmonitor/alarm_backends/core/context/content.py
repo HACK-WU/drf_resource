@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -74,17 +75,17 @@ class DefaultContent(BaseContextObject):
             if self.parent.notice_way in settings.MD_SUPPORTED_NOTICE_WAYS:
                 # 所有支持markdown语法的通知方式，默认用markdown格式
                 content_type = "markdown"
-            if hasattr(self, f"{item}_{content_type}"):
-                value = object.__getattribute__(self, f"{item}_{content_type}")
+            if hasattr(self, "{}_{}".format(item, content_type)):
+                value = object.__getattribute__(self, "{}_{}".format(item, content_type))
             else:
-                value = super().__getattribute__(item)
+                value = super(DefaultContent, self).__getattribute__(item)
 
             if value is None:
                 return ""
             else:
                 return NoticeRowRenderer.format(content_type, self.Labels[item][content_type], value)
 
-        return super().__getattribute__(item)
+        return super(DefaultContent, self).__getattribute__(item)
 
     # 告警级别
     @cached_property
@@ -276,7 +277,7 @@ class DefaultContent(BaseContextObject):
                     link = ""
                     if key in ["ip", "bk_target_ip"]:
                         route_path = base64.b64encode(
-                            f"#/performance/detail/{value}-{bk_cloud_id}".encode()
+                            f"#/performance/detail/{value}-{bk_cloud_id}".encode("utf8")
                         ).decode("utf8")
                         link = urllib.parse.urljoin(
                             monitor_host, f"route/?bizId={self.parent.business.bk_biz_id}&route_path={route_path}"
@@ -395,7 +396,7 @@ class DimensionCollectContent(DefaultContent):
     def sms_forced_related_info_sms(self):
         if len(self.parent.alarm.related_info) > 300:
             # 默认不能大于300个字符，当大于300的时候，仅保留300字符
-            return f"{self.parent.alarm.related_info[:297]}..."
+            return "{}...".format(self.parent.alarm.related_info[:297])
         return self.parent.alarm.related_info
 
     # 邮件
@@ -438,7 +439,7 @@ class DimensionCollectContent(DefaultContent):
         try:
             unit = load_unit(self.parent.strategy.items[0].unit)
             value, suffix = unit.fn.auto_convert(self.parent.alarm.current_value, decimal=settings.POINT_PRECISION)
-            return f"{value}{suffix}"
+            return "{}{}".format(value, suffix)
         except BaseException as error:
             # 出现异常的时候，直接返回当前值
             logger.info("get alarm current value of email error %s", str(error))
@@ -467,7 +468,7 @@ class DimensionCollectContent(DefaultContent):
             log_related_info = json.loads(topo_related_info)
             bklog_link = log_related_info.pop("bklog_link", "")
             log_related_info = json.dumps(log_related_info)
-            log_related_info += f"[日志详情]({bklog_link})"
+            log_related_info += "[日志详情]({})".format(bklog_link)
         except JSONDecodeError as error:
             # 如果json loads不成功， 忽略
             logger.debug("json loads alarm log_related_info failed %s", str(error))
@@ -574,7 +575,10 @@ class MultiStrategyCollectContent(DefaultContent):
         max_time = time_tools.localtime(max(source_times))
         min_time = time_tools.localtime(min(source_times))
 
-        time_range = f"{min_time.strftime(settings.DATETIME_FORMAT)} ~ {max_time.strftime(settings.DATETIME_FORMAT)}"
+        time_range = "{min_time} ~ {max_time}".format(
+            min_time=min_time.strftime(settings.DATETIME_FORMAT),
+            max_time=max_time.strftime(settings.DATETIME_FORMAT),
+        )
         return time_range
 
     @cached_property

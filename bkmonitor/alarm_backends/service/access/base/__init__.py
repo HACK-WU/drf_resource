@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,7 +21,7 @@ logger = logging.getLogger("access")
 ####################################
 #           Base Filter            #
 ####################################
-class Filter:
+class Filter(object):
     def filter(self, record):
         """
         Determine if the specified record is to be handled.
@@ -28,13 +29,13 @@ class Filter:
         return False
 
 
-class Filterer:
+class Filterer(object):
     def __init__(self):
-        super().__init__()
+        super(Filterer, self).__init__()
         self.filters = []
 
     def add_filter(self, f):
-        if f not in self.filters:
+        if not (f in self.filters):
             self.filters.append(f)
 
     def remove_filter(self, f):
@@ -51,7 +52,7 @@ class Filterer:
 ####################################
 #           Base Fuller            #
 ####################################
-class Fuller:
+class Fuller(object):
     def full(self, record):
         """
         Supplement some dimension information.
@@ -59,13 +60,13 @@ class Fuller:
         pass
 
 
-class Fullerer:
+class Fullerer(object):
     def __init__(self):
-        super().__init__()
+        super(Fullerer, self).__init__()
         self.fullers = []
 
     def add_fuller(self, f):
-        if f not in self.fullers:
+        if not (f in self.fullers):
             self.fullers.append(f)
 
     def remove_fuller(self, f):
@@ -85,8 +86,8 @@ class BaseRecord(Filterer):
     A Record instance represents an data record being handled.
     """
 
-    def __init__(self, raw_data: dict):
-        super().__init__()
+    def __init__(self, raw_data: Dict):
+        super(BaseRecord, self).__init__()
         self.raw_data = raw_data
         self.data = {}
 
@@ -121,7 +122,7 @@ class BaseAccessProcess(Filterer, Fullerer):
     """
 
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super(BaseAccessProcess, self).__init__()
 
         self.record_list = []
         self.pull_duration = 0

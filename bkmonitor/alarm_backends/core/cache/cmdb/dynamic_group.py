@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,8 +10,11 @@ specific language governing permissions and limitations under the License.
 """
 import json
 
+from django.conf import settings
 
-from alarm_backends.core.cache.cmdb.base import CMDBCacheManager
+from alarm_backends.core.cache.cmdb.base import CMDBCacheManager, RefreshByBizMixin
+from api.cmdb.define import Module
+from drf_resource import api
 
 
 class DynamicGroupManager(CMDBCacheManager):
@@ -19,7 +23,7 @@ class DynamicGroupManager(CMDBCacheManager):
     """
 
     type = "dynamic_group"
-    CACHE_KEY = f"{CMDBCacheManager.CACHE_KEY_PREFIX}.cmdb.dynamic_group"
+    CACHE_KEY = "{prefix}.cmdb.dynamic_group".format(prefix=CMDBCacheManager.CACHE_KEY_PREFIX)
 
     @classmethod
     def key_to_internal_value(cls, dynamic_group_id: str):

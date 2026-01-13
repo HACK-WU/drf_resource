@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -52,7 +53,7 @@ def get_bk_user(request):
         try:
             user_property = UserProperty.objects.get(key="wx_userid", value=request.weixin_user.userid)
         except UserProperty.DoesNotExist:
-            logger.warning(f"user[wx_userid={request.weixin_user.userid}] not in UserProperty")
+            logger.warning("user[wx_userid=%s] not in UserProperty" % request.weixin_user.userid)
         else:
             bkuser = user_model.objects.get(username=user_property.user.username)
     return bkuser or AnonymousUser()

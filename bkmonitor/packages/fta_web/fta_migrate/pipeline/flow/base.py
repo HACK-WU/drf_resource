@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云PaaS平台社区版 (BlueKing PaaS Community
 Edition) available.
@@ -16,7 +17,7 @@ from fta_web.fta_migrate.pipeline.tree_components import node_uniqid
 __all__ = ["Element", "PE"]
 
 
-class Element:
+class Element(object):
     def __init__(self, id=None, name=None, outgoing=None):
         self.id = id or node_uniqid()
         self.name = name
@@ -75,4 +76,4 @@ class Element:
         return self.id == other.id
 
     def __repr__(self):
-        return f"<{type(self).__name__} {self.name}:{self.id}>"
+        return "<{cls} {name}:{id}>".format(cls=type(self).__name__, name=self.name, id=self.id)

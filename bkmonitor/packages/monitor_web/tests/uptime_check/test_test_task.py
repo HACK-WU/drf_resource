@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -14,7 +15,7 @@ from os import path
 
 import pytest
 from django.conf import settings
-from unittest.mock import Mock
+from mock import Mock
 from monitor_web.models.uptime_check import UptimeCheckNode
 from monitor_web.uptime_check.constants import RESULT_MSG
 
@@ -67,6 +68,7 @@ def mock_uptimecheck_collector_test(mocker):
         path.join(
             settings.BASE_DIR, "packages", "monitor_web", "tests", "uptime_check", "test_file", "success_content"
         ),
+        "r",
         encoding="utf-8",
     )
     content = f.read()
@@ -103,6 +105,7 @@ def mock_uptimecheck_collector_test_collect_fail(mocker):
         path.join(
             settings.BASE_DIR, "packages", "monitor_web", "tests", "uptime_check", "test_file", "collect_fail_content"
         ),
+        "r",
         encoding="utf-8",
     )
     content = f.read()
@@ -118,7 +121,7 @@ def mock_uptimecheck_collector_test_collect_fail(mocker):
 
 # test_task接口主要负责处理
 @pytest.mark.django_db
-class TestTestTask:
+class TestTestTask(object):
     # 测试基本流程的执行情况
     def test_perform_request(self, mocker):
         filter_func = mock_node_model(mocker)

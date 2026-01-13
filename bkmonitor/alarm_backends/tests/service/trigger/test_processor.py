@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,8 +14,9 @@ import json
 from datetime import datetime
 from uuid import uuid4
 
-from unittest import mock
+import mock
 from django.test import TestCase
+from six.moves import range
 
 from alarm_backends.core.cache.key import (
     ANOMALY_LIST_KEY,

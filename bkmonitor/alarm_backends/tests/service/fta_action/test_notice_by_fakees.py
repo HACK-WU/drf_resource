@@ -1,12 +1,12 @@
 import time
 from datetime import datetime, timedelta
 
-from unittest import mock as _mock
+import mock as _mock
 import pytz
 from django.conf import settings
 from django.test import TestCase
 from elasticsearch_dsl import AttrDict
-from unittest.mock import MagicMock, patch
+from mock import MagicMock, patch
 
 from alarm_backends.core.cache.key import ALERT_SNAPSHOT_KEY
 from alarm_backends.service.converge.shield.shield_obj import ShieldObj

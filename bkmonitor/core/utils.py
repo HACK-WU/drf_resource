@@ -1,3 +1,4 @@
+# coding=utf-8
 # Time: 2025/7/29 22:52
 # name: utils
 # author: HACK-WU
@@ -21,7 +22,7 @@ def get_bk_login_ticket(request):
         if request.is_wechat():
             form_cls = "WeixinAuthenticationForm"
 
-        AuthenticationForm = load_backend(f"{ConfFixture.BACKEND_TYPE}.forms.{form_cls}")
+        AuthenticationForm = load_backend("{}.forms.{}".format(ConfFixture.BACKEND_TYPE, form_cls))
 
     for form in (AuthenticationForm(c) for c in context):
         if form.is_valid():

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -103,7 +104,7 @@ def load_condition_instance(conditions_config, default_value_if_not_exists=True)
     :return: condition object: 返回构建的OrCondition对象
     """
     # 检查conditions_config是否为列表或元组，如果不是则抛出异常
-    if not isinstance(conditions_config, list | tuple):
+    if not isinstance(conditions_config, (list, tuple)):
         raise Exception("Config Incorrect, Check your settings.")
 
     # 创建一个OrCondition对象，用于最终返回

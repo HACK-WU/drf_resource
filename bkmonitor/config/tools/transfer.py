@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,9 +10,10 @@ specific language governing permissions and limitations under the License.
 """
 
 import os
+from typing import Tuple
 
 
-def get_transfer_settings() -> tuple[str, int]:
+def get_transfer_settings() -> Tuple[str, int]:
     host = os.environ.get("BK_TRANSFER_HOST", "transfer.bkmonitorv3.service.consul")
     port = int(os.environ.get("BK_TRANSFER_HTTP_PORT", 10202))
     return host, port

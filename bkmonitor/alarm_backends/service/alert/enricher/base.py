@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import abc
 import logging
+from typing import List
 
 from alarm_backends.core.alert import Alert, Event
 
@@ -16,10 +18,10 @@ logger = logging.getLogger("alert.enricher")
 
 
 class BaseEventEnricher(metaclass=abc.ABCMeta):
-    def __init__(self, events: list[Event]):
+    def __init__(self, events: List[Event]):
         self.events = events
 
-    def enrich(self) -> list[Event]:
+    def enrich(self) -> List[Event]:
         events = []
         for event in self.events:
             try:
@@ -47,10 +49,10 @@ class BaseEventEnricher(metaclass=abc.ABCMeta):
 
 
 class BaseAlertEnricher(metaclass=abc.ABCMeta):
-    def __init__(self, alerts: list[Alert]):
+    def __init__(self, alerts: List[Alert]):
         self.alerts = alerts
 
-    def enrich(self) -> list[Alert]:
+    def enrich(self) -> List[Alert]:
         alerts = []
         for alert in self.alerts:
             try:

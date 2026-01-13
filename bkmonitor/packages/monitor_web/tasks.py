@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +17,7 @@ import shutil
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any
+from typing import Any, Dict
 
 import arrow
 from arrow.parser import ParserError
@@ -86,7 +87,7 @@ logger = logging.getLogger("monitor_web")
 
 
 @shared_task(ignore_result=True)
-def record_login_user(username: str, source: str, last_login: float, space_info: dict[str, Any]):
+def record_login_user(username: str, source: str, last_login: float, space_info: Dict[str, Any]):
     logger.info(
         "[record_login_user] task start: username -> %s, source -> %s, last_login -> %s, space_info -> %s",
         username,
@@ -112,7 +113,7 @@ def record_login_user(username: str, source: str, last_login: float, space_info:
 
 
 @shared_task(ignore_result=True)
-def active_business(username: str, space_info: dict[str, Any]):
+def active_business(username: str, space_info: Dict[str, Any]):
     logger.info("[active_business] task start: username -> %s, space_info -> %s", username, space_info)
     try:
         business.activate(int(space_info["bk_biz_id"]), username)
@@ -241,7 +242,7 @@ def update_metric_list():
     biz_count = 0
 
     start = time.time()
-    logger.info(f"^update metric list(round {offset})")
+    logger.info("^update metric list(round %s)" % offset)
 
     # 最后一轮进行全业务和0业务更新
     if offset == 0:
@@ -279,7 +280,7 @@ def update_metric_list():
     for k8s_biz_id in k8s_biz_set:
         update_metric("BKMONITORK8S", k8s_biz_id)
 
-    logger.info(f"$update metric list(round {offset}), biz count: {biz_count}, cost: {time.time() - start}")
+    logger.info("$update metric list(round {}), biz count: {}, cost: {}".format(offset, biz_count, time.time() - start))
 
 
 @shared_task(queue="celery_resource")
@@ -309,9 +310,9 @@ def update_metric_list_by_biz(bk_biz_id):
                 if source_type in source_type_gt_0 and bk_biz_id <= 0:
                     continue
                 start = time.time()
-                logger.info(f"update metric list({source_type}) by biz({bk_biz_id})")
+                logger.info("update metric list({}) by biz({})".format(source_type, bk_biz_id))
                 source(bk_biz_id).run(delay=False)
-                logger.info(f"update metric list({source_type}) succeed in {time.time() - start}")
+                logger.info("update metric list({}) succeed in {}".format(source_type, time.time() - start))
 
         except BaseException as e:
             logger.exception("Failed to update metric list(%s) for (%s)", source_type, e)
@@ -527,7 +528,7 @@ def append_custom_ts_metric_list_cache(time_series_group_id):
                     defaults=metric_msg,
                 )
     except BaseException as err:
-        logger.error(f"[update_custom_ts_metric] failed, msg is {err}")
+        logger.error("[update_custom_ts_metric] failed, msg is {}".format(err))
 
 
 def get_aiops_access_func(algorithm: AlgorithmModel.AlgorithmChoices) -> callable:
@@ -539,7 +540,7 @@ def get_aiops_access_func(algorithm: AlgorithmModel.AlgorithmChoices) -> callabl
 
 
 @shared_task(ignore_result=True, queue="celery_resource")
-def polling_aiops_strategy_status(flow_id: int, task_id: int, base_labels: dict, query_config: QueryConfig):
+def polling_aiops_strategy_status(flow_id: int, task_id: int, base_labels: Dict, query_config: QueryConfig):
     deploy_data = api.bkdata.get_dataflow_deploy_data(flow_id=flow_id)
     deploy_task_data = {item["id"]: item for item in deploy_data}
     current_deploy_data = deploy_task_data.get(task_id, deploy_data[0])
@@ -588,7 +589,7 @@ def polling_aiops_strategy_status(flow_id: int, task_id: int, base_labels: dict,
         )
 
 
-def report_aiops_access_metrics(base_labels: dict, result: str, exception: str = "", exc_type: str = ""):
+def report_aiops_access_metrics(base_labels: Dict, result: str, exception: str = "", exc_type: str = ""):
     labels = copy.deepcopy(base_labels)
     labels.update({"result": result, "exception": exception, "exc_type": exc_type})
     metrics.AIOPS_ACCESS_TASK_COUNT.labels(**labels).inc()
@@ -654,14 +655,16 @@ def access_aiops_by_strategy_id(strategy_id):
             api.metadata.access_bk_data_by_result_table(table_id=rt_query_config.result_table_id, is_access_now=True)
         except Exception as e:  # noqa
             # 4.1.2 接入失败，抛出异常，记录错误信息，并更新算法接入状态为"失败"
-            err_msg = f"access to bkdata failed: result_table_id: {rt_query_config.result_table_id} err_msg: {e}"
+            err_msg = "access to bkdata failed: result_table_id: {} err_msg: {}".format(
+                rt_query_config.result_table_id, e
+            )
             rt_query_config.intelligent_detect["status"] = AccessStatus.FAILED
             rt_query_config.intelligent_detect["message"] = err_msg
             rt_query_config.save()
             report_aiops_access_metrics(base_labels, AccessStatus.FAILED, err_msg, AccessErrorType.ACCESS_DATAID)
             raise Exception(err_msg)
         else:
-            logger.info(f"access({rt_query_config.result_table_id}) to bkdata success.")
+            logger.info("access({}) to bkdata success.".format(rt_query_config.result_table_id))
         rt_scope = {"bk_biz_id": str(strategy.bk_biz_id)}
         bk_data_result_table_id = to_bk_data_rt_id(rt_query_config.result_table_id, settings.BK_DATA_RAW_TABLE_SUFFIX)
     elif rt_query_config.data_source_label == DataSourceLabel.BK_DATA:
@@ -687,7 +690,7 @@ def access_aiops_by_strategy_id(strategy_id):
     # 6. 构建和启动智能检测数据流
     # 6.1 构建实时计算节点的sql，用于构建数据流
     metric_field = rt_query_config.metric_field
-    value_fields = [f"`{f}`" for f in rt_query_config.agg_dimension[:]]
+    value_fields = ["`{}`".format(f) for f in rt_query_config.agg_dimension[:]]
     group_by_fields = []
     for field in rt_query_config.agg_dimension:
         if field.upper() in FLINK_KEY_WORDS:
@@ -695,7 +698,7 @@ def access_aiops_by_strategy_id(strategy_id):
             continue
         group_by_fields.append(field)
     value_fields.append(
-        "{method}(`{field}`) as `{field}`".format(**dict(field=metric_field, method=rt_query_config.agg_method))
+        "%(method)s(`%(field)s`) as `%(field)s`" % dict(field=metric_field, method=rt_query_config.agg_method)
     )
     sql, params = (
         DataQueryHandler(rt_query_config.data_source_label, rt_query_config.data_type_label)
@@ -753,7 +756,12 @@ def access_aiops_by_strategy_id(strategy_id):
             # 6.5.1 重试次数小于最大重试次数，则继续尝试接入智能检测算法，
             # 并更新算法接入状态为"运行中"，且记录重试次数和错误信息
             retries += 1
-            err_msg = f"create intelligent detect by strategy_id({strategy.id}) failed: {e}, retrying: {retries}/{AIOPS_ACCESS_MAX_RETRIES}"
+            err_msg = "create intelligent detect by strategy_id({}) failed: {}, retrying: {}/{}".format(
+                strategy.id,
+                e,
+                retries,
+                AIOPS_ACCESS_MAX_RETRIES,
+            )
             logger.exception(err_msg)
             access_aiops_by_strategy_id.apply_async(args=(strategy_id,), countdown=AIOPS_ACCESS_RETRY_INTERVAL)
             rt_query_config.intelligent_detect["status"] = AccessStatus.RUNNING
@@ -763,7 +771,7 @@ def access_aiops_by_strategy_id(strategy_id):
             report_aiops_access_metrics(base_labels, AccessStatus.FAILED, err_msg, AccessErrorType.CREATE_FLOW)
         else:
             # 6.5.2 超过最大重试次数后直接失败，更新算法接入状态为"失败"并记录错误信息，且发邮件通知相关人员
-            err_msg = f"create intelligent detect by strategy_id({strategy.id}) failed: {e}"
+            err_msg = "create intelligent detect by strategy_id({}) failed: {}".format(strategy.id, e)
             logger.exception(err_msg)
             rt_query_config.intelligent_detect["status"] = AccessStatus.FAILED
             rt_query_config.intelligent_detect["message"] = err_msg
@@ -1088,7 +1096,7 @@ def access_aiops_multivariate_anomaly_detection_by_bk_biz_id(bk_biz_id, need_acc
             scene_config.intelligent_detect = intelligent_detect
             ai_setting.save(multivariate_anomaly_detection=multivariate_anomaly_detection.to_dict())
         except BaseException as e:  # noqa
-            err_msg = f"create intelligent detect by bk_biz_id({bk_biz_id}), scene({scene}) failed: {e}"
+            err_msg = "create intelligent detect by bk_biz_id({}), scene({}) failed: {}".format(bk_biz_id, scene, e)
             intelligent_detect["status"] = AccessStatus.FAILED
             intelligent_detect["message"] = err_msg
             ai_setting.save(multivariate_anomaly_detection=multivariate_anomaly_detection.to_dict())
@@ -1103,7 +1111,7 @@ def access_aiops_multivariate_anomaly_detection_by_bk_biz_id(bk_biz_id, need_acc
                 api.cmsi.send_mail(**params)
             except BaseException:  # noqa
                 logger.exception(
-                    f"send.mail({settings.BK_DATA_PROJECT_MAINTAINER}) failed, content:({params})"
+                    "send.mail({}) failed, content:({})".format(settings.BK_DATA_PROJECT_MAINTAINER, params)
                 )
             return
 
@@ -1126,7 +1134,7 @@ def stop_aiops_multivariate_anomaly_detection_flow(access_bk_biz_id, need_stop_s
                 data_flow.stop()
         except DataFlowNotExists:
             logger.exception(
-                f"biz({access_bk_biz_id}) need close scene({need_stop_scene}) flow {flow_name} not exists"
+                "biz({}) need close scene({}) flow {} not exists".format(access_bk_biz_id, need_stop_scene, flow_name)
             )
             continue
 
@@ -1158,7 +1166,7 @@ def access_biz_metric_recommend_flow(access_bk_biz_id):
         ai_setting.save()
         # 此处记得从继续启动
     except Exception as e:  # noqa
-        err_msg = f"create metric recommend by bk_biz_id({access_bk_biz_id}) failed: {e}"
+        err_msg = "create metric recommend by bk_biz_id({}) failed: {}".format(access_bk_biz_id, e)
         logger.exception(err_msg)
 
 
@@ -1265,7 +1273,12 @@ def access_host_anomaly_detect_by_strategy_id(strategy_id):
             # 3.5.1 重试次数小于最大重试次数，则继续尝试接入主机异常检测算法，
             # 并更新算法接入状态为"运行中"，且记录重试次数和错误信息
             retries += 1
-            err_msg = f"create intelligent detect by strategy_id({strategy.id}) failed: {e}, retrying: {retries}/{AIOPS_ACCESS_MAX_RETRIES}"
+            err_msg = "create intelligent detect by strategy_id({}) failed: {}, retrying: {}/{}".format(
+                strategy.id,
+                e,
+                retries,
+                AIOPS_ACCESS_MAX_RETRIES,
+            )
             logger.exception(err_msg)
             access_host_anomaly_detect_by_strategy_id.apply_async(
                 args=(strategy_id,), countdown=AIOPS_ACCESS_RETRY_INTERVAL
@@ -1277,7 +1290,7 @@ def access_host_anomaly_detect_by_strategy_id(strategy_id):
             report_aiops_access_metrics(base_labels, AccessStatus.FAILED, err_msg, AccessErrorType.CREATE_FLOW)
         else:
             # 3.5.2 超过最大重试次数后直接失败，更新算法接入状态为"失败"并记录错误信息，且发邮件通知相关人员
-            err_msg = f"create intelligent detect by strategy_id({strategy.id}) failed: {e}"
+            err_msg = "create intelligent detect by strategy_id({}) failed: {}".format(strategy.id, e)
             logger.exception(err_msg)
             rt_query_config.intelligent_detect["status"] = AccessStatus.FAILED
             rt_query_config.intelligent_detect["message"] = err_msg
@@ -1336,7 +1349,7 @@ def clean_bkrepo_temp_file():
     clean_paths = ["as_code/export/", "as_code/", "render/image/dashboard/"]
     for clean_path in clean_paths:
         filenames = set(client.list_dir(clean_path)[1])
-        logger.info(f"cleaning bkrepo temp files, path: {clean_path}, file count: {len(filenames)}")
+        logger.info("cleaning bkrepo temp files, path: {}, file count: {}".format(clean_path, len(filenames)))
         for filename in filenames:
             filepath = f"{clean_path}{filename}"
             last_modified = None

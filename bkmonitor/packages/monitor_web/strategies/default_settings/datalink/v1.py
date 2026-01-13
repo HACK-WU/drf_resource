@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import enum
+from typing import Dict, List
 
 from django.utils.translation import gettext_lazy as _
 
@@ -43,7 +45,7 @@ class DatalinkStrategy(enum.Enum):
         return self.value
 
     def render_escaped_label(self, **context):
-        return f"/{self.render_label(**context)}/"
+        return "/{}/".format(self.render_label(**context))
 
 
 COLLECTING_SYS_ALARM_DESC = _("数据采集遇到系统异常情况，导致无法上报数据，会发送告警。")
@@ -74,7 +76,7 @@ class DataLinkStage(enum.Enum):
     STORAGE = "storage"
 
 
-STAGE_STRATEGY_MAPPING: dict[DataLinkStage, list[DatalinkStrategy]] = {
+STAGE_STRATEGY_MAPPING: Dict[DataLinkStage, List[DatalinkStrategy]] = {
     DataLinkStage.COLLECTING: [DatalinkStrategy.COLLECTING_SYS_ALARM, DatalinkStrategy.COLLECTING_USER_ALARM],
     DataLinkStage.TRANSFER: [],
     DataLinkStage.STORAGE: [],

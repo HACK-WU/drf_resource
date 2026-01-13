@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,7 +16,7 @@ import operator
 import re
 from collections import defaultdict
 from dataclasses import asdict
-from typing import Any
+from typing import Any, Dict, List, Optional, Set, Union
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -1359,7 +1360,7 @@ class MetaInstrumentGuides(Resource):
         OTLP_EXPORTER_GRPC_PORT = 4317
         OTLP_EXPORTER_HTTP_PORT = 4318
 
-        def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
             app = Application.objects.filter(bk_biz_id=attrs["bk_biz_id"], app_name=attrs["app_name"]).first()
             if app is None:
                 raise ValueError(_(f'应用({attrs["app_name"]})不存在'))
@@ -1392,7 +1393,7 @@ class MetaInstrumentGuides(Resource):
             access_config["otlp"][field] = str(access_config["otlp"][field]).lower()
         access_config["profiling"]["enabled"] = str(access_config["profiling"]["enabled"]).lower()
 
-        context: dict[str, str] = {
+        context: Dict[str, str] = {
             "ECOSYSTEM_REPOSITORY_URL": settings.ECOSYSTEM_REPOSITORY_URL,
             "ECOSYSTEM_CODE_ROOT_URL": settings.ECOSYSTEM_CODE_ROOT_URL,
             "APM_ACCESS_URL": settings.APM_ACCESS_URL,
@@ -1402,7 +1403,7 @@ class MetaInstrumentGuides(Resource):
 
         helper: Help = Help(context)
 
-        guides: list[dict[str, Any]] = []
+        guides: List[Dict[str, Any]] = []
         for language, deployment, plugin in itertools.product(
             validated_request_data["languages"],
             validated_request_data["deployments"],
@@ -1568,7 +1569,7 @@ class PushUrlResource(Resource):
         return proxy_host_infos
 
     @classmethod
-    def generate_endpoint(cls, ip: str, port: int | str | None = None, path: str | None = None) -> str:
+    def generate_endpoint(cls, ip: str, port: Optional[Union[int, str]] = None, path: Optional[str] = None) -> str:
         if is_v6(ip):
             ip = f"[{ip}]"
 
@@ -1583,8 +1584,8 @@ class PushUrlResource(Resource):
 
         return base_endpoint
 
-    def _get_default_endpoints(self, proxy_infos: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        endpoints: list[dict[str, Any]] = []
+    def _get_default_endpoints(self, proxy_infos: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        endpoints: List[Dict[str, Any]] = []
         for proxy_info, config in itertools.product(proxy_infos, self.PUSH_URL_CONFIGS):
             endpoints.append(
                 {
@@ -1595,9 +1596,9 @@ class PushUrlResource(Resource):
             )
         return endpoints
 
-    def _get_simple_endpoints(self, proxy_infos: list[dict[str, Any]]):
-        deplicate_keys: set[str] = set()
-        endpoints: list[dict[str, Any]] = []
+    def _get_simple_endpoints(self, proxy_infos: List[Dict[str, Any]]):
+        deplicate_keys: Set[str] = set()
+        endpoints: List[Dict[str, Any]] = []
         for proxy_info in proxy_infos:
             deplicate_key: str = f"{proxy_info['bk_cloud_id']}-{proxy_info['ip']}"
             if deplicate_key in deplicate_keys:
@@ -1614,7 +1615,7 @@ class PushUrlResource(Resource):
         return endpoints
 
     def perform_request(self, validated_request_data):
-        proxy_infos: list[dict[str, Any]] = self.get_proxy_infos(validated_request_data["bk_biz_id"])
+        proxy_infos: List[Dict[str, Any]] = self.get_proxy_infos(validated_request_data["bk_biz_id"])
         return {FormatType.DEFAULT: self._get_default_endpoints, FormatType.SIMPLE: self._get_simple_endpoints}[
             validated_request_data["format_type"]
         ](proxy_infos)
@@ -2051,8 +2052,8 @@ class ApplyStrategiesToServicesResource(Resource):
         options = serializers.DictField(label="配置", required=False)
 
         def validate(self, attrs):
-            bk_biz_id: int | None = attrs.get("bk_biz_id")
-            space_uid: str | None = attrs.get("space_uid")
+            bk_biz_id: Optional[int] = attrs.get("bk_biz_id")
+            space_uid: Optional[str] = attrs.get("space_uid")
             if not (bk_biz_id or space_uid):
                 raise ValueError(_("bk_biz_id、space_uid 至少需要传其中一个"))
 
@@ -2289,7 +2290,7 @@ class QueryEndpointStatisticsResource(PageListResource):
         }
 
     def get_pagination_data(self, data, params, column_type=None, skip_sorted=False):
-        items = super().get_pagination_data(data, params, column_type)
+        items = super(QueryEndpointStatisticsResource, self).get_pagination_data(data, params, column_type)
 
         # url 拼接
         for item in items["data"]:

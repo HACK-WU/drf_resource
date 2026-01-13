@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -34,7 +35,7 @@ def auto_inspect_bk_data_kafka_storage():
     # 1. 根据插件type查找出对应的result_table
     for plugin_type in NEED_CHECK_PLUGIN_TYPE:
         result_table_queryset = models.ResultTable.objects.filter(
-            table_id__startswith=f"{plugin_type}", is_deleted=False
+            table_id__startswith="%s" % plugin_type, is_deleted=False
         )
         table_ids.extend(result_table_queryset.values_list("table_id", flat=True))
 
@@ -43,12 +44,12 @@ def auto_inspect_bk_data_kafka_storage():
         logger.info("start check kafka storage")
         CheckOrCreateKafkaStorageResource().perform_request(validated_request_data={"table_ids": table_ids})
         for table_id in table_ids:
-            logger.info(f"start create bk_data storage: table_id({table_id})")
+            logger.info("start create bk_data storage: table_id({})".format(table_id))
             try:
                 models.storage.BkDataStorage.create_table(table_id, is_sync_db=True, is_access_now=True)
                 models.ResultTable.objects.get(table_id=table_id).refresh_etl_config()
             except Exception as e:
-                msg = f"create bk_data storage error:{e}"
+                msg = "create bk_data storage error:%s" % e
                 logger.exception(msg)
     logger.info("end inspection")
 
@@ -61,11 +62,11 @@ def access_with_tables(tables):
     logger.info("start check kafka storage")
     CheckOrCreateKafkaStorageResource().perform_request(validated_request_data={"table_ids": tables})
     for table_id in tables:
-        logger.info(f"start create bk_data storage: table_id({table_id})")
+        logger.info("start create bk_data storage: table_id({})".format(table_id))
         try:
             models.storage.BkDataStorage.create_table(table_id, is_sync_db=True, is_access_now=True)
             models.ResultTable.objects.get(table_id=table_id).refresh_etl_config()
         except Exception as e:
-            msg = f"create bk_data storage error:{e}"
+            msg = "create bk_data storage error:%s" % e
             logger.exception(msg)
     logger.info("end inspection")

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +25,7 @@ class Command(BaseCommand):
     _HANDLER_TYPE_ = ""  # process/celery
 
     def add_arguments(self, parser):
-        super().add_arguments(parser)
+        super(Command, self).add_arguments(parser)
         parser.add_argument(
             "-s",
             "--service-type",
@@ -45,8 +46,8 @@ class Command(BaseCommand):
             handler_cls = load_handler_cls(self._SERVICE_TYPE_, self._HANDLER_TYPE_)
         except Exception:  # noqa
             logger.exception(
-                f"Error loading Handler, service_type({self._SERVICE_TYPE_}),"
-                f" handler_type({self._HANDLER_TYPE_})"
+                "Error loading Handler, service_type({}),"
+                " handler_type({})".format(self._SERVICE_TYPE_, self._HANDLER_TYPE_)
             )
             raise
         else:
@@ -58,8 +59,8 @@ class Command(BaseCommand):
                 if always_raise:
                     raise exc
                 logger.exception(
-                    f"Error executing Handler, service_type({self._SERVICE_TYPE_}), "
-                    f"handler_type({self._HANDLER_TYPE_})"
+                    "Error executing Handler, service_type({}), "
+                    "handler_type({})".format(self._SERVICE_TYPE_, self._HANDLER_TYPE_)
                 )
             finally:
                 signals.request_finished.send(sender=self.__class__)

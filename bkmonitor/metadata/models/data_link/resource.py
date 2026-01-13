@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import json
 import logging
+from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.db import models
@@ -49,7 +51,7 @@ class DataLinkResourceConfig(BaseModelWithTime):
         verbose_name_plural = "数据源资源配置表"
 
     @classmethod
-    def compose_data_id_config(cls, name: str) -> dict:
+    def compose_data_id_config(cls, name: str) -> Dict:
         """数据源下发计算平台的资源配置"""
         tpl = """
         {
@@ -79,7 +81,7 @@ class DataLinkResourceConfig(BaseModelWithTime):
         )
 
     @classmethod
-    def compose_vm_table_id_config(cls, name: str, data_type: str | None = "metric") -> dict:
+    def compose_vm_table_id_config(cls, name: str, data_type: Optional[str] = "metric") -> Dict:
         """组装数据源结果表配置"""
         tpl = """
         {
@@ -115,10 +117,10 @@ class DataLinkResourceConfig(BaseModelWithTime):
         cls,
         name: str,
         rt_name: str,
-        vm_name: str | None = None,
-        space_type: str | None = None,
-        space_id: str | None = None,
-    ) -> dict:
+        vm_name: Optional[str] = None,
+        space_type: Optional[str] = None,
+        space_id: Optional[str] = None,
+    ) -> Dict:
         """组装数据源原始数据配置"""
         tpl = """
         {
@@ -161,7 +163,7 @@ class DataLinkResourceConfig(BaseModelWithTime):
         )
 
     @classmethod
-    def compose_conditional_sink_config(cls, name: str, conditions: list) -> dict:
+    def compose_conditional_sink_config(cls, name: str, conditions: List) -> Dict:
         """组装条件处理配置"""
         tpl = """
         {
@@ -191,11 +193,11 @@ class DataLinkResourceConfig(BaseModelWithTime):
         name: str,
         sink_name: str,
         data_id_name: str,
-        sinks: list,
-        transform_kind: str | None = constants.DEFAULT_METRIC_TRANSFORMER_KIND,
-        transform_name: str | None = constants.DEFAULT_METRIC_TRANSFORMER,
-        transform_format: str | None = constants.DEFAULT_METRIC_TRANSFORMER_FORMAT,
-    ) -> dict:
+        sinks: List,
+        transform_kind: Optional[str] = constants.DEFAULT_METRIC_TRANSFORMER_KIND,
+        transform_name: Optional[str] = constants.DEFAULT_METRIC_TRANSFORMER,
+        transform_format: Optional[str] = constants.DEFAULT_METRIC_TRANSFORMER_FORMAT,
+    ) -> Dict:
         """通过data_id获取资源配置"""
         tpl = """
         {

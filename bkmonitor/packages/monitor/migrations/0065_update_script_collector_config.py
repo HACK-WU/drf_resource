@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -169,7 +170,7 @@ def update_script_collector_config(apps, schema_editor):
                     script_content = shell_pro_metric.replace("{script_content}", decode_result)
                     new_config["script_content_base64"] = base64.b64encode(script_content.encode("utf-8"))
 
-            except Exception:
+            except Exception as e:
                 continue
 
         for new_field_name in new_config_field_list:
@@ -190,7 +191,9 @@ def update_script_collector_config(apps, schema_editor):
         if old_config.shell_content:
             # 获取旧数据下发脚本文件名
             hash_val = hashlib.md5(old_config.shell_content).hexdigest()
-            shell_name = f"{old_config.biz_id}_{old_config.table_name}_{hash_val}"
+            shell_name = "{biz_id}_{table_name}_{hash_val}".format(
+                biz_id=old_config.biz_id, table_name=old_config.table_name, hash_val=hash_val
+            )
             old_script_filename[config.id] = shell_name
 
         if not old_config.ip_list:

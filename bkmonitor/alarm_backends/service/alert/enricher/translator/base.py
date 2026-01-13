@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +13,7 @@ specific language governing permissions and limitations under the License.
 import abc
 
 
-class TranslationField:
+class TranslationField(object):
     def __init__(self, name, value, display_name=None, display_value=None):
         self.name = name
         self.value = value
@@ -27,10 +28,15 @@ class TranslationField:
         }
 
     def __repr__(self):
-        return f"<TranslationField {self.name}({self.display_name}): {self.value}({self.display_value})>"
+        return "<TranslationField {name}({display_name}): {value}({display_value})>".format(
+            name=self.name,
+            value=self.value,
+            display_name=self.display_name,
+            display_value=self.display_value,
+        )
 
 
-class BaseTranslator:
+class BaseTranslator(object):
     """
     字段翻译类
     """
@@ -60,4 +66,9 @@ class BaseTranslator:
         raise NotImplementedError
 
     def __repr__(self):
-        return f"<{self.__class__.__name__}: {self.data_source_label} - {self.data_type_label} - {self.result_table_id}>"
+        return "<{cls_name}: {data_source_label} - {data_type_label} - {result_table_id}>".format(
+            cls_name=self.__class__.__name__,
+            data_source_label=self.data_source_label,
+            data_type_label=self.data_type_label,
+            result_table_id=self.result_table_id,
+        )

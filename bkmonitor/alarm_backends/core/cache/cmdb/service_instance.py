@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +17,7 @@ from django.conf import settings
 
 from alarm_backends.core.cache.cmdb import HostManager
 from alarm_backends.core.cache.cmdb.base import CMDBCacheManager, RefreshByBizMixin
-from api.cmdb.define import ServiceInstance
+from api.cmdb.define import ServiceInstance, TopoTree
 from drf_resource import api
 
 
@@ -26,8 +27,10 @@ class ServiceInstanceManager(RefreshByBizMixin, CMDBCacheManager):
     """
 
     type = "service_instance"
-    CACHE_KEY = f"{CMDBCacheManager.CACHE_KEY_PREFIX}.cmdb.service_instance"
-    HOST_TO_SERVICE_INSTANCE_ID_CACHE_KEY = f"{CMDBCacheManager.CACHE_KEY_PREFIX}.cmdb.host_to_service_instance_id"
+    CACHE_KEY = "{prefix}.cmdb.service_instance".format(prefix=CMDBCacheManager.CACHE_KEY_PREFIX)
+    HOST_TO_SERVICE_INSTANCE_ID_CACHE_KEY = "{prefix}.cmdb.host_to_service_instance_id".format(
+        prefix=CMDBCacheManager.CACHE_KEY_PREFIX
+    )
     ObjectClass = ServiceInstance
 
     @classmethod
@@ -44,7 +47,7 @@ class ServiceInstanceManager(RefreshByBizMixin, CMDBCacheManager):
         :param service_instance_id: 服务实例ID
         :rtype: ServiceInstance
         """
-        return super().get(service_instance_id)
+        return super(ServiceInstanceManager, cls).get(service_instance_id)
 
     @classmethod
     def refresh_by_biz(cls, bk_biz_id):
@@ -58,7 +61,7 @@ class ServiceInstanceManager(RefreshByBizMixin, CMDBCacheManager):
         host_to_service_instance = defaultdict(list)
 
         for instance in instances:
-            key = f"module|{instance.bk_module_id}"
+            key = "module|{}".format(instance.bk_module_id)
             instance.topo_link = {key: topo_link_dict.get(key, [])}
 
             # 从缓存中补全主机IP信息

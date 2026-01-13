@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ specific language governing permissions and limitations under the License.
 
 import logging
 from itertools import chain
+from typing import Dict
 
 import arrow
 from django.utils.module_loading import import_string
@@ -30,13 +32,13 @@ from drf_resource.utils.common import count_md5
 logger = logging.getLogger("core.control")
 
 
-class CheckMixin:
+class CheckMixin(object):
     @property
     def no_data_level(self):
         no_data_config = getattr(self, "no_data_config", {})
         return int(no_data_config.get("level", NO_DATA_LEVEL))
 
-    def _is_host_dimension_in_business(self, dimensions: dict[str, str]) -> bool:
+    def _is_host_dimension_in_business(self, dimensions: Dict[str, str]) -> bool:
         """
         判断主机维度是否在业务中
         """
@@ -74,7 +76,9 @@ class CheckMixin:
         total_no_data_md5 = [count_md5(total_no_data_dimensions[0])]
         if not (target_instance_dimensions or data_dimensions):
             logger.warning(
-                f"[nodata] strategy({self.strategy.id}) item({self.id}) target_instance_dimensions is empty"
+                "[nodata] strategy({strategy_id}) item({item_id}) target_instance_dimensions is empty".format(
+                    strategy_id=self.strategy.id, item_id=self.id
+                )
             )
             target_instance_dimensions = total_no_data_dimensions
             target_dimensions_md5 = total_no_data_md5
@@ -82,11 +86,18 @@ class CheckMixin:
                 self._produce_anomaly_info(check_timestamp, target_instance_dimensions[0], target_dimensions_md5[0])
             ]
             logger.warning(
-                
-                    f"[nodata] strategy({self.strategy.id}) item({self.id}) produce anomaly info, "
-                    f"target_inst_dms({target_instance_dimensions[0]}), target_dms_md5({target_dimensions_md5[0]}), "
-                    f"check_timestamp({check_timestamp}), last_point({None})"
-                
+                (
+                    "[nodata] strategy({strategy_id}) item({item_id}) produce anomaly info, "
+                    "target_inst_dms({target_inst_dms}), target_dms_md5({target_dms_md5}), "
+                    "check_timestamp({check_timestamp}), last_point({last_point})"
+                ).format(
+                    strategy_id=self.strategy.id,
+                    item_id=self.id,
+                    target_inst_dms=target_instance_dimensions[0],
+                    target_dms_md5=target_dimensions_md5[0],
+                    check_timestamp=check_timestamp,
+                    last_point=None,
+                )
             )
 
         else:
@@ -118,11 +129,18 @@ class CheckMixin:
 
                     anomaly_data.append(self._produce_anomaly_info(check_timestamp, target_inst_dms, target_dms_md5))
                     logger.warning(
-                        
-                            f"[nodata] strategy({self.strategy.id}) item({self.id}) produce anomaly info, "
-                            f"target_inst_dms({target_inst_dms}), target_dms_md5({target_dms_md5}), "
-                            f"check_timestamp({check_timestamp}), last_point({last_point})"
-                        
+                        (
+                            "[nodata] strategy({strategy_id}) item({item_id}) produce anomaly info, "
+                            "target_inst_dms({target_inst_dms}), target_dms_md5({target_dms_md5}), "
+                            "check_timestamp({check_timestamp}), last_point({last_point})"
+                        ).format(
+                            strategy_id=self.strategy.id,
+                            item_id=self.id,
+                            target_inst_dms=target_inst_dms,
+                            target_dms_md5=target_dms_md5,
+                            check_timestamp=check_timestamp,
+                            last_point=last_point,
+                        )
                     )
                 else:
                     # recovery 历史告警事件
@@ -135,11 +153,17 @@ class CheckMixin:
                     self._produce_anomaly_info(check_timestamp, missing_target_inst, missing_target_md5)
                 )
                 logger.warning(
-                    
-                        f"[nodata] strategy({self.strategy.id}) item({self.id}) produce anomaly info, "
-                        f"missing_target_inst({missing_target_inst}), missing_target_md5({missing_target_md5}), "
-                        f"check_timestamp({check_timestamp})"
-                    
+                    (
+                        "[nodata] strategy({strategy_id}) item({item_id}) produce anomaly info, "
+                        "missing_target_inst({missing_target_inst}), missing_target_md5({missing_target_md5}), "
+                        "check_timestamp({check_timestamp})"
+                    ).format(
+                        strategy_id=self.strategy.id,
+                        item_id=self.id,
+                        missing_target_inst=missing_target_inst,
+                        missing_target_md5=missing_target_md5,
+                        check_timestamp=check_timestamp,
+                    )
                 )
         # 7. 将当前维度数据和历史维度数据的并集缓存
         self._update_dimensions_checkpoint(
@@ -183,10 +207,10 @@ class CheckMixin:
 
         if invalid_data:
             logger.warning(
-                
-                    f"[nodata] checker got invalid data_points[{invalid_data}] "
-                    f"where no_data_dimensions is [{no_data_dimensions}]"
-                
+                (
+                    "[nodata] checker got invalid data_points[{invalid_data}] "
+                    "where no_data_dimensions is [{no_data_dimensions}]"
+                ).format(invalid_data=invalid_data, no_data_dimensions=no_data_dimensions)
             )
 
         return {
@@ -196,7 +220,13 @@ class CheckMixin:
         }
 
     def _produce_anomaly_id(self, check_timestamp, dimensions_md5):
-        return f"{dimensions_md5}.{check_timestamp}.{self.strategy.id}.{self.id}.{self.no_data_level}"
+        return "{dimensions_md5}.{timestamp}.{strategy_id}.{item_id}.{level}".format(
+            dimensions_md5=dimensions_md5,
+            timestamp=check_timestamp,
+            strategy_id=self.strategy.id,
+            item_id=self.id,
+            level=self.no_data_level,
+        )
 
     def _count_anomaly_period(self, check_timestamp, dimensions_md5):
         """
@@ -252,7 +282,9 @@ class CheckMixin:
             anomaly_message = _("当前指标({})已经有{}个周期无数据上报").format(self.name, anomaly_period)
         anomaly_info = {
             "data": {
-                "record_id": f"{target_dms_md5}.{check_timestamp}",
+                "record_id": "{dimensions_md5}.{timestamp}".format(
+                    dimensions_md5=target_dms_md5, timestamp=check_timestamp
+                ),
                 "value": NO_DATA_VALUE,
                 "values": {"timestamp": check_timestamp, "loads": NO_DATA_VALUE},
                 "dimensions": target_dimension,
@@ -310,9 +342,9 @@ class CheckMixin:
             if redis_pipeline is None:
                 redis_pipeline = check_result.CHECK_RESULT
             if dimensions_md5 not in data_dimensions_md5:
-                name = f"{check_timestamp}|{ANOMALY_LABEL}"
+                name = "{}|{}".format(check_timestamp, ANOMALY_LABEL)
             else:
-                name = f"{check_timestamp}|{str(NO_DATA_VALUE)}"
+                name = "{}|{}".format(check_timestamp, str(NO_DATA_VALUE))
 
             try:
                 # 1. 缓存数据(检测结果缓存) type:SortedSet
@@ -324,7 +356,7 @@ class CheckMixin:
                     check_result.update_key_to_dimension(_dms)
 
             except Exception as e:
-                msg = f"set nodata check result cache error:{e}"
+                msg = "set nodata check result cache error:%s" % e
                 logger.exception(msg)
 
         if redis_pipeline:
@@ -342,7 +374,7 @@ class CheckMixin:
                     self.no_data_level,
                 )
             except Exception as e:
-                msg = f"set nodata check result cache last_check_point error:{e}"
+                msg = "set nodata check result cache last_check_point error:%s" % e
                 logger.exception(msg)
         # 记录每个策略监控项的最后无数据检测时间，避免同一时刻的数据被多次检测，否则会导致除了第一次能取到数据，其他检测都报无数据
         CheckResult.update_last_checkpoint_by_d_md5(

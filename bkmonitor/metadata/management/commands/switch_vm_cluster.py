@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
+from typing import List, Optional
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
@@ -58,8 +60,8 @@ class Command(BaseCommand):
         }
 
     def filter_vm_records(
-        self, src_vm_names: str | None = None, src_vm_ids: str | None = None, data_ids: str | None = None
-    ) -> list:
+        self, src_vm_names: Optional[str] = None, src_vm_ids: Optional[str] = None, data_ids: Optional[str] = None
+    ) -> List:
         """过滤集群或者数据源对应的结果表记录"""
         # 按照参数场景进行操作，返回创建的vm记录
         if data_ids:
@@ -79,7 +81,7 @@ class Command(BaseCommand):
         )
         return models.AccessVMRecord.objects.filter(vm_cluster_id__in=cluster_id_list)
 
-    def get_dst_vm_cluster_id(self, dst_vm_id: str | None = None, dst_vm_name: str | None = None) -> int:
+    def get_dst_vm_cluster_id(self, dst_vm_id: Optional[str] = None, dst_vm_name: Optional[str] = None) -> int:
         """过滤要切换的vm集群ID"""
         filter_params = Q()
         if dst_vm_id:

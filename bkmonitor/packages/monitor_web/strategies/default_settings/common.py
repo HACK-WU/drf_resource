@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 from functools import partial
+from typing import List
 
 from constants.alert import EventSeverity
 
@@ -27,7 +29,7 @@ NO_DATA_CONFIG = {"agg_dimension": [], "continuous": 10, "is_enabled": False, "l
 
 def detects_config(
     recovery_check_window: int, trigger_check_window: int, trigger_count: int, level: int, status_setter="recovery"
-) -> list:
+) -> List:
     return [
         {
             "connector": "and",
@@ -49,7 +51,7 @@ remind_detects_config = partial(detects_config, level=EventSeverity.REMIND)
 nodata_recover_detects_config = partial(detects_config, status_setter="recovery-nodata")
 
 
-def algorithms_config(method: str, threshold: int, level: int) -> list:
+def algorithms_config(method: str, threshold: int, level: int) -> List:
     return [
         {
             "config": [[{"method": method, "threshold": threshold}]],

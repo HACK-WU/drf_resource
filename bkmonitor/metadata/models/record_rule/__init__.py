@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from .rules import RecordRule, ResultTableFlow  # noqa
 

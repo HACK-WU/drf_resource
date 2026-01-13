@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ specific language governing permissions and limitations under the License.
 
 import copy
 import logging
+from typing import Dict
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -92,7 +94,7 @@ class DiskReadonlyEvent(GSEBaseAlarmEventRecord):
     TITLE = _("磁盘只读-GSE")
 
     def __init__(self, raw_data, strategies):
-        super().__init__(raw_data, strategies)
+        super(DiskReadonlyEvent, self).__init__(raw_data, strategies)
         self.filters.append(DiskReadonlyFilter())
 
     def clean_anomaly_message(self):
@@ -108,7 +110,7 @@ class DiskReadonlyEvent(GSEBaseAlarmEventRecord):
         return _("磁盘({})只读告警").format(", ".join(desc))
 
     @property
-    def filter_dimensions(self) -> dict:
+    def filter_dimensions(self) -> Dict:
         ro_list = self.raw_data["_extra_"].get("ro", [])
 
         return {

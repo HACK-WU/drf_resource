@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,14 +30,14 @@ DEFAULT_TASK_INTERVAL = 120  # 两次任务之间的间隔(即缓存有效期), 
 DEFAULT_TASK_EXPIRES = 30  # 任务执行过期时间
 
 
-class task_decorator:
+class task_decorator(object):
     def __init__(self, random_range=DEFAULT_RANDOM_RANGE, task_interval=DEFAULT_TASK_INTERVAL):
         self.random_range = random_range if random_range > 0 else DEFAULT_RANDOM_RANGE
         self.task_interval = task_interval if task_interval > 0 else DEFAULT_TASK_INTERVAL
 
     def lock_key(self, task_name, args, kwargs):
         # 注意, 参数过多会导致这个key很长, 可以转成MD5
-        return f"__lock__{task_name}_cache_{(args, kwargs)}__"
+        return "__lock__{}_cache_{}__".format(task_name, (args, kwargs))
 
     def __call__(self, task_func):
         @functools.wraps(task_func)
@@ -46,7 +47,7 @@ class task_decorator:
             try:
                 # 如果key存在, 则说明前面的任务还没有运行结束
                 if cache.get(lock_key):
-                    return f"the prev task is running, task:({lock_key})"
+                    return "the prev task is running, task:(%s)" % (lock_key)
                 cache.set(lock_key, time.time(), self.task_interval)
 
                 # 打散任务,避免同时并发
@@ -54,10 +55,10 @@ class task_decorator:
 
                 task_func(*args, **kwargs)
             except Exception as e:
-                logger.error(f"call {lock_key} error:{e}")
+                logger.error("call {} error:{}".format(lock_key, e))
             finally:
                 local.clear()
                 # redis_cli.delete(lock_key)
-            return f"call {lock_key} success"
+            return "call %s success" % (lock_key)
 
         return wrapper

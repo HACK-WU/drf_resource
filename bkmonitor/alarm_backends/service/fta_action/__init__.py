@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -70,7 +71,7 @@ class ActionAlreadyFinishedError(BaseException):
         pass
 
 
-class BaseActionProcessor:
+class BaseActionProcessor(object):
     """
     Action 处理器
     {
@@ -304,7 +305,7 @@ class BaseActionProcessor:
             description=description,
             time=int(time.time()),
             create_time=int(time.time()),
-            event_id=f"{int(self.action.create_time.timestamp())}{self.action.id}",
+            event_id="{}{}".format(int(self.action.create_time.timestamp()), self.action.id),
         )
         AlertLog.bulk_create([AlertLog(**action_log)])
 
@@ -481,7 +482,7 @@ class BaseActionProcessor:
         # 更新任务数据(插入日志)
         level = ActionLogLevel.ERROR if to_status == ActionStatus.FAILURE else ActionLogLevel.INFO
         self.insert_action_log(
-            step_name=_("第{}次任务执行结束".format(self.retry_times)),
+            step_name=_("第%s次任务执行结束" % self.retry_times),
             action_log=_("执行{}: {}").format(ACTION_STATUS_DICT.get(to_status), message),
             level=level,
         )
@@ -566,7 +567,7 @@ class BaseActionProcessor:
                 # 如果解析不出来的，表示是以前的通知方式，可以直接忽略
                 channel = ""
                 notice_way = notice_way
-            title_template_path = f"notice/fta_action/{notice_way}_title.jinja"
+            title_template_path = "notice/fta_action/{notice_way}_title.jinja".format(notice_way=notice_way)
             content_template_path = "notice/fta_action/{notice_way}_content.jinja".format(
                 notice_way="markdown" if notice_way in settings.MD_SUPPORTED_NOTICE_WAYS else notice_way
             )

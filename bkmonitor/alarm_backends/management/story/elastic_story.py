@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -59,10 +60,10 @@ class IndexRed(Problem):
         yellow = self.context.get("yellow_indices", [])
         msg = ""
         if red:
-            suffix = "" if len(red) <= 10 else f"等{len(red)}"
+            suffix = "" if len(red) <= 10 else "等{}".format(len(red))
             msg += f"red: {red[:10]}{suffix}"
         if yellow:
-            suffix = "" if len(yellow) <= 10 else f"等{len(yellow)}"
+            suffix = "" if len(yellow) <= 10 else "等{}".format(len(yellow))
             msg += f"yellow: {yellow[:10]}{suffix}"
         self.story.warning(msg)
 
@@ -70,7 +71,7 @@ class IndexRed(Problem):
 class InvalidIndexWithNoAlias(Problem):
     def position(self):
         no_alias_index_list = self.context.get("no_alias_index_list")
-        self.story.warning(f"同步索引失败结果表: {no_alias_index_list}, 需要排查监控后台日志[kernel_metadata.log]确认同步失败原因")
+        self.story.warning("同步索引失败结果表: {}, 需要排查监控后台日志[kernel_metadata.log]确认同步失败原因".format(no_alias_index_list))
 
 
 class TodayAliasNotFound(Problem):
@@ -111,7 +112,7 @@ class ElasticSearchStatusCheck(CheckStep):
             cluster_info = ClusterInfo.objects.get(cluster_id=cluster_id)
 
         connection_info = {
-            "hosts": [f"{cluster_info.domain_name}:{cluster_info.port}"],
+            "hosts": ["{}:{}".format(cluster_info.domain_name, cluster_info.port)],
             "verify_certs": cluster_info.is_ssl_verify,
             "use_ssl": cluster_info.is_ssl_verify,
         }
@@ -133,7 +134,9 @@ class ElasticSearchStatusCheck(CheckStep):
                 es_client = self.es_client(cluster_info)
                 healthz = es_client.cluster.health()
             except Exception as e:
-                info = f"集群: {cluster_info.cluster_name} 连接失败: {cluster_info.domain_name}:{cluster_info.port}: {e}"
+                info = "集群: {} 连接失败: {}:{}: {}".format(
+                    cluster_info.cluster_name, cluster_info.domain_name, cluster_info.port, e
+                )
                 p_list.append(ESStatusDown(info, self.story, api_url=api_url, ex=e))
                 continue
             else:
@@ -162,7 +165,7 @@ class IndexStatus(ElasticSearchStatusCheck):
     name = "check index status"
 
     def check(self):
-        super().check()
+        super(IndexStatus, self).check()
         p_list = []
         for cluster_id, healthz in self.iter_cluster_healthz():
             cluster_name = healthz["cluster_name"]
@@ -186,7 +189,7 @@ class IndexStatus(ElasticSearchStatusCheck):
             ]
             p_list.append(
                 IndexRed(
-                    f"集群: {cluster_name} 索引状态异常: red: 共{len(red_indices)}; yellow: 共{len(yellow_indices)}",
+                    "集群: {} 索引状态异常: red: 共{}; yellow: 共{}".format(cluster_name, len(red_indices), len(yellow_indices)),
                     self.story,
                     red_indices=red_indices,
                     yellow_indices=yellow_indices,
@@ -222,7 +225,7 @@ class AliasCheck(ElasticSearchStatusCheck):
             ]
             if no_alias_index_list:
                 p = InvalidIndexWithNoAlias(
-                    f"集群: {cluster_name} 索引同步异常: 共{len(no_alias_index_list)}个结果表",
+                    "集群: {} 索引同步异常: 共{}个结果表".format(cluster_name, len(no_alias_index_list)),
                     self.story,
                     no_alias_index_list=no_alias_index_list,
                 )
@@ -260,7 +263,7 @@ class FtaIndicesCheck(CheckStep):
                 self.story.info(f"[{doc_name}] check today alias [passed]: write{write_indices}, read{read_indices}")
             else:
                 self.story.warning(f"[{doc_name}] check today alias [failed]: write{write_indices}, read{read_indices}")
-                p = TodayAliasNotFound(f"[{doc_name}]无法根据当前别名获取正确的物理索引", self.story)
+                p = TodayAliasNotFound("[{}]无法根据当前别名获取正确的物理索引".format(doc_name), self.story)
                 p_list.append(p)
                 continue
 
@@ -295,13 +298,13 @@ class FtaIndicesCheck(CheckStep):
 
             if invalid_write_indices:
                 p_list.append(
-                    InvalidWriteIndex(f"[{doc_name}]发现不合法的写入索引: {invalid_write_indices}", self.story)
+                    InvalidWriteIndex("[{}]发现不合法的写入索引: {}".format(doc_name, invalid_write_indices), self.story)
                 )
                 self.story.warning(all_indices_message)
             elif yellow_indices or red_indices:
                 p_list.append(
                     ClusterRed(
-                        f"[{doc_name}]整体索引状态异常: yellow: 共{len(yellow_indices)}; red: 共{len(red_indices)}",
+                        "[{}]整体索引状态异常: yellow: 共{}; red: 共{}".format(doc_name, len(yellow_indices), len(red_indices)),
                         self.story,
                     )
                 )

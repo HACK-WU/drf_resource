@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -40,7 +41,7 @@ class UploadedFileInfo(OperateRecordModelBase):
         try:
             stdout, stderr = subprocess.Popen(file_command, stdout=subprocess.PIPE).communicate()
         except Exception as e:
-            logger.exception(f"不存在的文件，获取文件类型失败：{e}")
+            logger.exception("不存在的文件，获取文件类型失败：%s" % e)
             return ""
         return stdout
 
@@ -48,4 +49,4 @@ class UploadedFileInfo(OperateRecordModelBase):
         if not self.file_md5:
             self.file_md5 = self.generate_file_md5()
 
-        return super().save(*args, **kwargs)
+        return super(UploadedFileInfo, self).save(*args, **kwargs)

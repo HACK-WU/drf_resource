@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -14,7 +15,7 @@ import tarfile
 import tempfile
 import time
 from collections import defaultdict
-from typing import IO
+from typing import IO, Dict, List, Union
 
 import MySQLdb
 import requests
@@ -42,7 +43,7 @@ class ConfigMigrator:
 
     BK_ENVS = ["o.bk.tencent.com", "bk.iegcom.com"]
 
-    def __init__(self, bk_env: str, old_bk_biz_id: int, new_bk_biz_id: int, mysql_config: dict):
+    def __init__(self, bk_env: str, old_bk_biz_id: int, new_bk_biz_id: int, mysql_config: Dict):
         self.bk_env = bk_env
         self.bk_biz_id = new_bk_biz_id
         self.old_bk_biz_id = old_bk_biz_id
@@ -58,15 +59,15 @@ class ConfigMigrator:
 
         # cmdb id偏移及日志索引集映射
         self.cmdb_id_offset: int = 0
-        self.index_set_mapping: dict[int, int] = {}
+        self.index_set_mapping: Dict[int, int] = {}
         self.get_third_party_mapping()
 
         # 配置
-        self.strategies: dict[int, dict] = {}
-        self.notice_groups: dict[int, dict] = {}
-        self.dashboards: dict[str, dict] = {}
-        self.actions: dict[str, dict] = {}
-        self.code_configs: dict[str, str] = {}
+        self.strategies: Dict[int, Dict] = {}
+        self.notice_groups: Dict[int, Dict] = {}
+        self.dashboards: Dict[str, Dict] = {}
+        self.actions: Dict[str, Dict] = {}
+        self.code_configs: Dict[str, str] = {}
 
         # 自定义上报/采集配置
         self.plugins = []
@@ -75,13 +76,13 @@ class ConfigMigrator:
         self.collects = []
 
         # 自定义上报/采集配置映射
-        self.custom_metric_table_mapping: dict[str, str] = {}
-        self.custom_event_table_mapping: dict[str, str] = {}
-        self.collect_id_mapping: dict[int, int] = {}
+        self.custom_metric_table_mapping: Dict[str, str] = {}
+        self.custom_event_table_mapping: Dict[str, str] = {}
+        self.collect_id_mapping: Dict[int, int] = {}
 
         # yaml mapping
-        self.notice_group_name_to_id: dict[str, int] = {}
-        self.actions_name_to_id: dict[str, int] = {}
+        self.notice_group_name_to_id: Dict[str, int] = {}
+        self.actions_name_to_id: Dict[str, int] = {}
 
         self.config_types = {
             "strategy": self.strategies,
@@ -125,7 +126,7 @@ class ConfigMigrator:
         )
         cur.close()
 
-    def read_from_config_and_save_to_db(self, path_or_file: str | IO[bytes]):
+    def read_from_config_and_save_to_db(self, path_or_file: Union[str, IO[bytes]]):
         """
         从配置中读取策略配置集
         """
@@ -147,7 +148,7 @@ class ConfigMigrator:
             for filename in os.listdir(os.path.join(tempdir.name, config_type)):
                 if not filename.endswith(".json"):
                     continue
-                with open(os.path.join(tempdir.name, config_type, filename)) as f:
+                with open(os.path.join(tempdir.name, config_type, filename), "r") as f:
                     config = f.read()
                     print(f"reading {config_type}/{filename}, length: {len(config)}")
                     sql = (
@@ -322,7 +323,7 @@ class ConfigMigrator:
                 "children"
             ]
         }
-        dynamic_groups: dict[str, dict] = {
+        dynamic_groups: Dict[str, Dict] = {
             dynamic_group["name"]: {"dynamic_group_id": dynamic_group["id"]}
             for dynamic_group in api.cmdb.search_dynamic_group(bk_biz_id=self.bk_biz_id, bk_obj_id="host")
         }
@@ -383,7 +384,7 @@ class ConfigMigrator:
                 else:
                     json.dump(config, f, indent=2, ensure_ascii=False)
 
-    def replace_strategy_config(self, strategies: dict):
+    def replace_strategy_config(self, strategies: Dict):
         """
         1. 替换策略监控目标
         2. 替换策略表名，日志索引集ID，数据平台表名，自定义上报表名
@@ -419,7 +420,7 @@ class ConfigMigrator:
                             query_config["result_table_id"], query_config["result_table_id"]
                         )
 
-    def replace_dashboard_config(self, old_dashboards: dict):
+    def replace_dashboard_config(self, old_dashboards: Dict):
         """
         替换仪表盘配置
         """
@@ -433,7 +434,7 @@ class ConfigMigrator:
             dashboard = re.sub(rf'(bk_data\.|"){self.old_bk_biz_id}_', rf"\g<1>{self.bk_biz_id}_", dashboard)
             self.dashboards[name] = json.loads(dashboard)
 
-    def import_plugins(self, plugins: list[dict]):
+    def import_plugins(self, plugins: List[Dict]):
         """
         导入插件
         """
@@ -493,7 +494,7 @@ class ConfigMigrator:
                         }
                     )
 
-    def import_collect_config(self, collect_configs: list[dict]):
+    def import_collect_config(self, collect_configs: List[Dict]):
         """
         导入采集配置
         如果拓扑不存在怎么办(跳过/报错)
@@ -530,7 +531,7 @@ class ConfigMigrator:
 
         cur.close()
 
-    def import_custom_report(self, custom_metrics: list[dict], custom_events: list[dict]):
+    def import_custom_report(self, custom_metrics: List[Dict], custom_events: List[Dict]):
         """
         导入自定义上报
         @param custom_metrics: 自定义指标
@@ -607,7 +608,7 @@ class ConfigMigrator:
 
         cur.close()
 
-    def normalize_strategy(self, strategies: dict[int, dict]):
+    def normalize_strategy(self, strategies: Dict[int, Dict]):
         """
         配置标准化
         """
@@ -684,7 +685,7 @@ class ConfigMigrator:
                     if "bk_cloud_id" in node and node["bk_cloud_id"] < self.cmdb_id_offset:
                         node["bk_cloud_id"] += self.cmdb_id_offset
 
-    def upload_config(self, path_or_file: str | IO[bytes]):
+    def upload_config(self, path_or_file: Union[str, IO[bytes]]):
         """
         上传旧版配置
         """

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -23,14 +24,14 @@ from monitor_web.models import CollectConfigMeta, CollectorPluginMeta, Signature
 from monitor_web.plugin.manager import PluginManagerFactory
 
 
-class BaseParse:
+class BaseParse(object):
     def __init__(self, file_path):
         self.file_path = file_path
         self.file_content = {}
         self.plugin_path = None
 
     def read_file(self):
-        with open(self.file_path) as fs:
+        with open(self.file_path, "r") as fs:
             self.file_content = json.loads(fs.read())
 
     @abc.abstractmethod
@@ -175,7 +176,7 @@ class StrategyConfigParse(BaseParse):
                     if isinstance(v, dict):
                         error_msg(v)
                     elif isinstance(v, list) and isinstance(v[0], ErrorDetail):
-                        error_list.append(f"{k}{v[0][:-1]}")
+                        error_list.append("{}{}".format(k, v[0][:-1]))
                     else:
                         for v_msg in v:
                             error_msg(v_msg)

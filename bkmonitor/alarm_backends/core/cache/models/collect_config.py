@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -54,7 +55,7 @@ class CollectConfigCacheManager(CacheManager):
             pipeline.set(cls.format_key(config["id"]), json.dumps(config), cls.CACHE_TIMEOUT)
         pipeline.execute()
 
-        cls.logger.info(f"refresh collect config data finished, amount:{len(configs)}")
+        cls.logger.info("refresh collect config data finished, amount:{}".format(len(configs)))
 
 
 def main():

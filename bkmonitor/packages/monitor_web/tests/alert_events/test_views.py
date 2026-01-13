@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +12,7 @@ specific language governing permissions and limitations under the License.
 
 import datetime
 
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 
 from monitor_web.tests.mock import *  # noqa
 from monitor_web.tests.mock_settings import *  # noqa

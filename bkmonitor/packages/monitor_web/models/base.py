@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -17,7 +18,7 @@ from bkmonitor.utils.user import get_global_user
 
 class OperateManagerBase(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(is_deleted=False)
+        return super(OperateManagerBase, self).get_queryset().filter(is_deleted=False)
 
 
 class OperateRecordModelBase(models.Model):
@@ -41,12 +42,12 @@ class OperateRecordModelBase(models.Model):
         :return:
         """
         if not_update_user:
-            return super().save(*args, **kwargs)
+            return super(OperateRecordModelBase, self).save(*args, **kwargs)
         username = get_global_user() or "unknown"
         self.update_user = username
         if not self.create_user:
             self.create_user = username
-        return super().save(*args, **kwargs)
+        return super(OperateRecordModelBase, self).save(*args, **kwargs)
 
     def delete(self, hard=False, *args, **kwargs):
         """
@@ -56,7 +57,7 @@ class OperateRecordModelBase(models.Model):
         update 方法不触发 save 或者 delete 方法，因此也不会发出任何信号，所以手动将 pre_delete 和 post_delete 信号发出去
         """
         if hard:
-            return super().delete(*args, **kwargs)
+            return super(OperateRecordModelBase, self).delete(*args, **kwargs)
 
         signals.pre_delete.send(sender=self.__class__, instance=self)
         username = get_global_user() or "unknown"

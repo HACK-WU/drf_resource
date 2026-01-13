@@ -2,6 +2,7 @@ import copy
 import logging
 import math
 import time
+from typing import List
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -50,7 +51,7 @@ def create_actions(
     strategy_id,
     signal,
     alert_ids=None,
-    alerts: list[AlertDocument] = None,
+    alerts: List[AlertDocument] = None,
     severity=None,
     dimensions=None,
     dimension_hash="",
@@ -127,7 +128,7 @@ def create_interval_actions(
     strategy_id,
     signal,
     alert_ids=None,
-    alerts: list[AlertDocument] = None,
+    alerts: List[AlertDocument] = None,
     severity=None,
     dimensions=None,
     dimension_hash="",
@@ -194,7 +195,7 @@ def check_create_poll_action_10_secs():
         logger.info("[get service lock fail] check_create_poll_action. will process later")
         return
     except BaseException as e:  # NOCC:broad-except(设计如此:)
-        logger.exception(f"[process error] check_create_poll_action, reason：{str(e)}")
+        logger.exception("[process error] check_create_poll_action, reason：{msg}".format(msg=str(e)))
         return
 
 
@@ -212,7 +213,9 @@ class CreateIntervalActionProcessor:
         self.create_interval_action()
 
         logger.info(
-            f"check_create_poll_action need_polled_actions({len(self.need_polled_actions.keys())}), polled_actions({len(self.polled_actions)}) finished_actions({len(self.finished_actions)})"
+            "check_create_poll_action need_polled_actions({}), polled_actions({}) finished_actions({})".format(
+                len(self.need_polled_actions.keys()), len(self.polled_actions), len(self.finished_actions)
+            )
         )
 
     def check_polled_actions(self):
@@ -282,7 +285,7 @@ class CreateIntervalActionProcessor:
         ActionInstance.objects.filter(id__in=self.finished_actions).update(need_poll=False)
 
     def check_finished_actions(self, checked_alerts: list, action_instance):
-        check_key = f"{action_instance.alerts[0]}_{action_instance.action_config_id}"
+        check_key = "{}_{}".format(action_instance.alerts[0], action_instance.action_config_id)
         if check_key in checked_alerts:
             # 增加检测机制，每个alert对应的action类型仅保留一个同类型的周期任务
             self.finished_actions.append(action_instance.id)
@@ -344,7 +347,7 @@ class CreateActionProcessor:
         strategy_id,  # 策略ID
         signal,  # 信号
         alert_ids=None,  # 警报ID列表
-        alerts: list[AlertDocument] = None,  # 警报文档列表
+        alerts: List[AlertDocument] = None,  # 警报文档列表
         severity=None,  # 严重性
         dimensions=None,  # 维度
         dimension_hash="",  # 维度哈希

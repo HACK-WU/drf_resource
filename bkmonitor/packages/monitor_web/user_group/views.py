@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -44,7 +45,7 @@ class UserGroupViewSet(PermissionMixin, viewsets.ModelViewSet):
         """
         增加对轮值规则的过滤
         """
-        queryset = super().get_queryset()
+        queryset = super(UserGroupViewSet, self).get_queryset()
         if self.request.query_params.get("duty_rules"):
             queryset = queryset.filter(duty_rules__contains=self.request.query_params["duty_rules"])
         return queryset
@@ -85,7 +86,7 @@ class DutyRuleViewSet(PermissionMixin, viewsets.ModelViewSet):
         """
         增加对轮值标签的过滤
         """
-        queryset = super().get_queryset()
+        queryset = super(DutyRuleViewSet, self).get_queryset()
         if self.request.query_params.get("labels"):
             queryset = queryset.filter(labels__contains=self.request.query_params["labels"])
         return queryset

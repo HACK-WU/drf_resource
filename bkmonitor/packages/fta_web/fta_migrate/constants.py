@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 
 from django.utils.translation import gettext as _

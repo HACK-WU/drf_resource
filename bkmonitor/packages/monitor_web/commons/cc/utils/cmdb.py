@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -21,7 +22,7 @@ from utils import business
 from utils.time_status import TimeStats
 
 
-class CmdbUtil:
+class CmdbUtil(object):
     """
     用于获取节点的CMDB的通用类，提供服务分类搜索查询，主机数/实例数搜索查询，拓扑数/模块/节点查询等多种功能
     """
@@ -49,7 +50,7 @@ class CmdbUtil:
 
     @classmethod
     def get_cache_key(cls, bk_biz_id):
-        return f"web_cache:cc:bkmonitor:cc_util:biz:{bk_biz_id}"
+        return "web_cache:cc:bkmonitor:cc_util:biz:{}".format(bk_biz_id)
 
     @classmethod
     def get_cache_data(cls, bk_biz_id):
@@ -58,7 +59,7 @@ class CmdbUtil:
 
     @classmethod
     def refresh_biz_data(cls, bk_biz_id):
-        logger.info(f"update cmdb util cache in biz {bk_biz_id}")
+        logger.info("update cmdb util cache in biz {}".format(bk_biz_id))
 
         topo_tree = resource.cc.topo_tree(bk_biz_id)
 

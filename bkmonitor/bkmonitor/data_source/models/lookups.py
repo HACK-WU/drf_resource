@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +13,7 @@ import re
 from django.db.models.sql import AND, OR
 
 
-class Lookup:
+class Lookup(object):
     lookup_name = None
 
     def __init__(self, lhs, rhs):
@@ -32,11 +33,11 @@ class Lookup:
         rhs_sql, rhs_params = self.process_rhs(compiler, connection)
         params.extend(rhs_params)
         rhs_sql = self.get_rhs_op(connection, rhs_sql)
-        return f"{lhs_sql} {rhs_sql}", params
+        return "{} {}".format(lhs_sql, rhs_sql), params
 
 
 def is_list_type(value):
-    return isinstance(value, list | tuple)
+    return isinstance(value, (list, tuple))
 
 
 class Exact(Lookup):
@@ -45,7 +46,7 @@ class Exact(Lookup):
 
 class Equal(Lookup):
     lookup_name = "eq"
-    list_connector = f" {OR} "
+    list_connector = " {} ".format(OR)
 
     def as_sql(self, compiler, connection):
         lhs_sql, params = self.process_lhs(compiler, connection, self.lhs)
@@ -54,27 +55,27 @@ class Equal(Lookup):
         if rhs_params and is_list_type(rhs_params[0]):
             params.extend(rhs_params[0])
             result = [
-                f"{lhs_sql} {rhs_sql}",
+                "{} {}".format(lhs_sql, rhs_sql),
             ] * len(rhs_params[0])
             sql_string = self.list_connector.join(result)
             if len(result) > 1:
-                sql_string = f"({sql_string})"
+                sql_string = "(%s)" % sql_string
         else:
             params.extend(rhs_params)
-            sql_string = f"{lhs_sql} {rhs_sql}"
+            sql_string = "{} {}".format(lhs_sql, rhs_sql)
         return sql_string, params
 
 
 class NotEqual(Equal):
     lookup_name = "neq"
-    list_connector = f" {AND} "
+    list_connector = " {} ".format(AND)
 
 
 class GreaterThan(Lookup):
     lookup_name = "gt"
 
     def process_rhs(self, compiler, connection):
-        rhs, params = super().process_rhs(compiler, connection)
+        rhs, params = super(GreaterThan, self).process_rhs(compiler, connection)
         if params and is_list_type(params[0]):
             params[0] = max(params[0])
         return rhs, params
@@ -88,7 +89,7 @@ class LessThan(Lookup):
     lookup_name = "lt"
 
     def process_rhs(self, compiler, connection):
-        rhs, params = super().process_rhs(compiler, connection)
+        rhs, params = super(LessThan, self).process_rhs(compiler, connection)
         if params and is_list_type(params[0]):
             params[0] = min(params[0])
         return rhs, params
@@ -102,18 +103,18 @@ class Contains(Lookup):
     lookup_name = "contains"
 
     def process_rhs(self, qn, connection):
-        rhs, params = super().process_rhs(qn, connection)
+        rhs, params = super(Contains, self).process_rhs(qn, connection)
         if params:
-            params[0] = f"%{connection.ops.prep_for_like_query(params[0])}%"
+            params[0] = "%%%s%%" % connection.ops.prep_for_like_query(params[0])
         return rhs, params
 
 
 class Regex(Equal):
     lookup_name = "reg"
-    list_connector = f" {OR} "
+    list_connector = " {} ".format(OR)
 
     def process_rhs(self, qn, connection):
-        rhs, params = super().process_rhs(qn, connection)
+        rhs, params = super(Regex, self).process_rhs(qn, connection)
         if params[0]:
             params[0] = list(map(getattr(self, "escape", lambda x: x), params[0]))
             params[0] = list(map(connection.ops.prep_regex_query, params[0]))
@@ -122,10 +123,10 @@ class Regex(Equal):
 
 class NeRegex(Regex):
     lookup_name = "nreg"
-    list_connector = f" {AND} "
+    list_connector = " {} ".format(AND)
 
 
-class StrEscapeMixin:
+class StrEscapeMixin(object):
     @staticmethod
     def escape(v):
         v = re.escape(v)
@@ -159,5 +160,5 @@ default_lookups["exclude"] = Exclude
 def get_lookup_class(lookup_name):
     lookup_class = default_lookups.get(lookup_name)
     if lookup_class is None:
-        raise Exception(f"Unsupported lookup '{lookup_name}'")
+        raise Exception("Unsupported lookup '%s'" % lookup_name)
     return lookup_class

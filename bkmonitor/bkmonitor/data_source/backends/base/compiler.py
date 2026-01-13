@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +13,7 @@ specific language governing permissions and limitations under the License.
 from django.core.exceptions import EmptyResultSet
 
 
-class SQLCompiler:
+class SQLCompiler(object):
     def __init__(self, query, connection, using):
         self.query = query
         self.connection = connection
@@ -52,7 +53,7 @@ class SQLInsertCompiler(SQLCompiler):
 
     def __init__(self, *args, **kwargs):
         self.return_id = False
-        super().__init__(*args, **kwargs)
+        super(SQLInsertCompiler, self).__init__(*args, **kwargs)
 
     def as_sql(self):
         raise NotImplementedError

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 from dataclasses import dataclass, field
+from typing import Dict, List
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -17,7 +19,7 @@ from constants.data_source import DataSourceLabel, DataTypeLabel
 
 
 def enum(**enums):
-    return type("Enum", (), enums)
+    return type(str("Enum"), (), enums)
 
 
 # Agent状态
@@ -26,7 +28,7 @@ AGENT_STATUS = enum(UNKNOWN=-1, ON=0, OFF=1, NOT_EXIST=2, NO_DATA=3)
 UPTIME_CHECK_DB = "uptimecheck"
 
 
-class AlgorithmType:
+class AlgorithmType(object):
     Threshold = "Threshold"
     SimpleRingRatio = "SimpleRingRatio"
     AdvancedRingRatio = "AdvancedRingRatio"
@@ -35,7 +37,7 @@ class AlgorithmType:
     PartialNodes = "PartialNodes"
 
 
-class EventLevel:
+class EventLevel(object):
     EVENT_LEVEL = (
         (1, _("致命")),
         (2, _("预警")),
@@ -96,15 +98,15 @@ MULTIVARIATE_ANOMALY_DETECTION_SCENE_HOST_FILTER_FIELDS = [
 
 @dataclass
 class MultivariateAnomalyDetectionSceneParams:
-    agg_dimensions: list
-    sql_build_params: dict
-    intelligent_detect_config: dict
+    agg_dimensions: List
+    sql_build_params: Dict
+    intelligent_detect_config: Dict
 
 
 @dataclass
 class HostSceneParams(MultivariateAnomalyDetectionSceneParams):
-    agg_dimensions: list = field(default_factory=lambda: MULTIVARIATE_ANOMALY_DETECTION_SCENE_HOST_FILTER_FIELDS)
-    sql_build_params: dict = field(
+    agg_dimensions: List = field(default_factory=lambda: MULTIVARIATE_ANOMALY_DETECTION_SCENE_HOST_FILTER_FIELDS)
+    sql_build_params: Dict = field(
         default_factory=lambda: {
             "data_source_label": DataSourceLabel.BK_DATA,
             "data_type_label": DataTypeLabel.TIME_SERIES,
@@ -115,7 +117,7 @@ class HostSceneParams(MultivariateAnomalyDetectionSceneParams):
             + [MULTIVARIATE_ANOMALY_DETECTION_SCENE_INPUT_FIELD],
         }
     )
-    intelligent_detect_config: dict = field(
+    intelligent_detect_config: Dict = field(
         default_factory=lambda: {
             "scene_id": settings.BK_DATA_SCENE_ID_MULTIVARIATE_ANOMALY_DETECTION,
             "plan_id": settings.BK_DATA_PLAN_ID_MULTIVARIATE_ANOMALY_DETECTION,

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,10 +21,10 @@ DATA_PATH = "bkmonitor/as_code/tests/data/"
 
 
 def test_action_parse():
-    with open(f"{DATA_PATH}action/snippets/base.yaml") as f:
+    with open(f"{DATA_PATH}action/snippets/base.yaml", "r") as f:
         snippet = yaml.safe_load(f.read())
 
-    with open(f"{DATA_PATH}action/job.yaml") as f:
+    with open(f"{DATA_PATH}action/job.yaml", "r") as f:
         code_config = yaml.safe_load(f.read())
         result, message, code_config = SnippetRenderer.render(code_config, {"base.yaml": snippet})
 
@@ -33,7 +34,7 @@ def test_action_parse():
     config = p.parse(code_config)
     assert config
 
-    with open(f"{DATA_PATH}action/webhook.yaml") as f:
+    with open(f"{DATA_PATH}action/webhook.yaml", "r") as f:
         code_config = yaml.safe_load(f.read())
         result, message, code_config = SnippetRenderer.render(code_config, {"base.yaml": snippet})
 
@@ -48,13 +49,13 @@ def test_action_parse():
 
 def test_notice_import():
     configs = {}
-    with open(f"{DATA_PATH}action/job.yaml") as f:
+    with open(f"{DATA_PATH}action/job.yaml", "r") as f:
         configs["job.yaml"] = yaml.safe_load(f.read())
 
-    with open(f"{DATA_PATH}action/webhook.yaml") as f:
+    with open(f"{DATA_PATH}action/webhook.yaml", "r") as f:
         configs["webhook.yaml"] = yaml.safe_load(f.read())
 
-    with open(f"{DATA_PATH}action/snippets/base.yaml") as f:
+    with open(f"{DATA_PATH}action/snippets/base.yaml", "r") as f:
         snippet = yaml.safe_load(f.read())
 
     action_ids = import_action(

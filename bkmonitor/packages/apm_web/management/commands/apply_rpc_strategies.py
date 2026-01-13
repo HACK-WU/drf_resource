@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import json
 import logging
-from typing import Any
+from typing import Any, Dict, List
 
 from django.core.management import BaseCommand
 from django.utils.translation import gettext_lazy as _
@@ -54,10 +55,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         bk_biz_id: int = options["bk_biz_id"]
         app_name: str = options["app_name"]
-        apply_types: list[str] = list(options.get("apply_types") or [])
-        apply_services: list[str] = list(options.get("apply_services") or [])
-        notice_group_ids: list[int] = list(options.get("notice_group_ids") or [])
-        options_config: dict[str, Any] = json.loads(options.get("config") or "{}")
+        apply_types: List[str] = list(options.get("apply_types") or [])
+        apply_services: List[str] = list(options.get("apply_services") or [])
+        notice_group_ids: List[int] = list(options.get("notice_group_ids") or [])
+        options_config: Dict[str, Any] = json.loads(options.get("config") or "{}")
 
         logger.info(
             "[apply_rpc_strategies] received params: \n"

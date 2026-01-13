@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -30,7 +31,7 @@ platform_abbreviation = {"enterprise": "ee", "community": "ce"}
 
 
 def get_cache_key_prefix():
-    env = f"[{settings.ENVIRONMENT}]"
+    env = "[{}]".format(settings.ENVIRONMENT)
     if settings.ENVIRONMENT == "production":
         env = ""
 
@@ -42,12 +43,12 @@ def get_cache_key_prefix():
 PUBLIC_KEY_PREFIX = get_cache_key_prefix()
 
 if not get_cluster().is_default():
-    KEY_PREFIX = f"{PUBLIC_KEY_PREFIX}.{get_cluster().name}"
+    KEY_PREFIX = "{}.{}".format(PUBLIC_KEY_PREFIX, get_cluster().name)
 else:
     KEY_PREFIX = PUBLIC_KEY_PREFIX
 
 
-class RedisDataKey:
+class RedisDataKey(object):
     """
     redis 的Key对象
     """
@@ -122,7 +123,7 @@ class HashKey(RedisDataKey):
     """
 
     def __init__(self, key_tpl=None, ttl=None, backend=None, **extra_config):
-        super().__init__(key_tpl, ttl, backend, **extra_config)
+        super(HashKey, self).__init__(key_tpl, ttl, backend, **extra_config)
         if "field_tpl" not in extra_config:
             raise ValueError("keyword argument 'field_tpl' is required")
 
@@ -156,9 +157,9 @@ def register_key_with_config(config):
     """
     key_type = config["key_type"]
     # 获取key_type对应的类，比如StringKey,ListKey等等
-    key_cls = globals().get(f"{underscore_to_camel(key_type)}Key")
+    key_cls = globals().get("{}Key".format(underscore_to_camel(key_type)))
     if not key_cls:
-        raise TypeError(f"unsupported key type: {key_type}")
+        raise TypeError("unsupported key type: {}".format(key_type))
     return key_cls(**config)
 
 
@@ -377,8 +378,8 @@ CHECK_RESULT_CACHE_KEY = register_key_with_config(
         "(score: 数据时间戳(int), name：正常->'timestamp|value' 异常: 'timestamp|{ANOMALY_LABEL}')",
         "key_type": "sorted_set",
         # 这里的key_tpl修改后，需要同步修改LAST_CHECKPOINTS_CACHE_KEY的field_tpl
-        "key_tpl": f"{KEY_PREFIX}.detect.result.{{strategy_id}}.{{item_id}}."
-        "{dimensions_md5}.{level}",
+        "key_tpl": "{prefix}.detect.result.{{strategy_id}}.{{item_id}}."
+        "{{dimensions_md5}}.{{level}}".format(prefix=KEY_PREFIX),
         "ttl": int(settings.CHECK_RESULT_TTL_HOURS) * CONST_ONE_HOUR,
         "backend": "service",
     }

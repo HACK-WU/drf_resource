@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -83,7 +84,7 @@ class GetAllConfigListResource(Resource):
     """
 
     def __init__(self):
-        super().__init__()
+        super(GetAllConfigListResource, self).__init__()
         self.node_manager = None
         self.collect_config_list = None
         self.strategy_config_list = None
@@ -270,7 +271,7 @@ class ExportPackageResource(Resource):
     """
 
     def __init__(self):
-        super().__init__()
+        super(ExportPackageResource, self).__init__()
         self.collect_config_ids = []
         self.strategy_config_ids = []
         self.view_config_ids = []
@@ -395,7 +396,7 @@ class ExportPackageResource(Resource):
                 os.path.join(
                     self.package_path,
                     "collect_config_directory",
-                    f"{convert_filename(collect_config_file_name)}_{collect_config_id}.json",
+                    "{}_{}.json".format(convert_filename(collect_config_file_name), collect_config_id),
                 ),
                 "w",
             ) as fs:
@@ -409,7 +410,7 @@ class ExportPackageResource(Resource):
             os.path.join(
                 self.package_path,
                 "csv_files",
-                f"{uuid.uuid4()}.csv",
+                "{}.csv".format(uuid.uuid4()),
             ),
             "w",
             encoding="utf-8-sig",
@@ -453,7 +454,7 @@ class ExportPackageResource(Resource):
                 os.path.join(
                     self.package_path,
                     "view_config_directory",
-                    f"{convert_filename(view_config_file_name)}_{view_config_id}.json",
+                    "{}_{}.json".format(convert_filename(view_config_file_name), view_config_id),
                 ),
                 "w",
             ) as fs:
@@ -514,7 +515,7 @@ class ExportPackageResource(Resource):
                 os.path.join(
                     self.package_path,
                     "strategy_config_directory",
-                    f"{convert_filename(strategy_config_file_name)}_{strategy_id}.json",
+                    "{}_{}.json".format(convert_filename(strategy_config_file_name), strategy_id),
                 ),
                 "w",
             ) as fs:
@@ -701,7 +702,7 @@ class UploadPackageResource(Resource):
     """
 
     def __init__(self):
-        super().__init__()
+        super(UploadPackageResource, self).__init__()
         self.file_manager = None
         self.file_id = None
         uuid_str = str(uuid4())
@@ -728,7 +729,7 @@ class UploadPackageResource(Resource):
             t = tarfile.open(fileobj=file_instance.file_data.file)
             t.extractall(path=self.parse_path)
         except Exception as e:
-            logger.exception(f"压缩包解压失败: {e}")
+            logger.exception("压缩包解压失败: {}".format(e))
             raise UploadPackageError({"msg": _("导入文件格式不正确，需要是.tar.gz/.tgz/.tar.bz2/.tbz2等后缀(gzip或bzip2压缩)")})
         finally:
             if t is not None:
@@ -928,7 +929,7 @@ class ImportConfigResource(Resource):
     """
 
     def __init__(self):
-        super().__init__()
+        super(ImportConfigResource, self).__init__()
         self.uuid_list = []
         self.import_history_instance = None
 

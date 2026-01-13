@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,7 +23,7 @@ from monitor_web.models.file import UploadedFileInfo
 from monitor_web.models.plugin import CollectorPluginMeta
 
 
-class BaseFileManager:
+class BaseFileManager(object):
     TYPE = ""
 
     def __init__(self, file):
@@ -162,13 +163,13 @@ class PluginFileManager(BaseFileManager):
         if plugin_id:
             try:
                 plugin_meta = CollectorPluginMeta.objects.get(plugin_id=plugin_id)
-                return super().save_file(
+                return super(PluginFileManager, cls).save_file(
                     file_data=file_data, file_name=file_name, is_dir=False, plugin_id=plugin_meta.plugin_id
                 )
             except CollectorPluginMeta.DoesNotExist:
                 raise FileManagerException(_("非法的plugin_id"))
 
-        return super().save_file(file_data, file_name, False)
+        return super(PluginFileManager, cls).save_file(file_data, file_name, False)
 
     @classmethod
     def save_plugin(cls, file_data, file_path):
@@ -200,7 +201,7 @@ class FileManagerException(Exception):
     def __init__(self, error=None):
         if error is None:
             error = _("文件操作异常")
-        super().__init__(error)
+        super(FileManagerException, self).__init__(error)
 
 
 def walk(storage, top="/", topdown=False, onerror=None):
@@ -208,7 +209,7 @@ def walk(storage, top="/", topdown=False, onerror=None):
     listing directories."""
     try:
         dirs, nondirs = storage.listdir(top)
-    except OSError as err:
+    except os.error as err:
         if onerror is not None:
             onerror(err)
         return
@@ -217,6 +218,7 @@ def walk(storage, top="/", topdown=False, onerror=None):
         yield top, dirs, nondirs
     for name in dirs:
         new_path = os.path.join(top, name)
-        yield from walk(storage, new_path)
+        for x in walk(storage, new_path):
+            yield x
     if not topdown:
         yield top, dirs, nondirs

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from .action import ActionSearchHandler
 from .alert import AlertSearchHandler

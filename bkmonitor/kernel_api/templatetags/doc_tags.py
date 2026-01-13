@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -81,7 +82,7 @@ def field_type(field):
     return "any"
 
 
-class Faker:
+class Faker(object):
     def __init__(self):
         from faker import Faker as F
 
@@ -97,7 +98,7 @@ class Faker:
         return random.randint(0, 100)
 
     def string(self, name=None):
-        return f"<{name.upper()}>" if name else ""
+        return "<%s>" % name.upper() if name else ""
 
     def float(self, name=None):
         return random.random()
@@ -164,12 +165,12 @@ def fake_json(slz, required_only=True):
 @register.filter("fake_request")
 def fake_request(api):
     method = api.action.lower()
-    action = f"{method.upper()} {api.url}"
+    action = "{} {}".format(method.upper(), api.url)
     params = fake_json(api.request_serializer, True)
     if method == "get":
-        example = f"{action}?{urllib.parse.urlencode(params)}" if params else action
+        example = "{}?{}".format(action, urllib.parse.urlencode(params)) if params else action
     else:
-        example = f"{action}\n{json.dumps(params, indent=4)}"
+        example = "{}\n{}".format(action, json.dumps(params, indent=4))
     return example
 
 

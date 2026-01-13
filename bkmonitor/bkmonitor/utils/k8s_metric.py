@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -28,7 +29,7 @@ def get_built_in_k8s_metrics():
     for path, _, file_list in g:
         file_list = [file for file in file_list if file.split(".")[-1] == "yaml"]
         for file_name in file_list:
-            with open(os.path.join(path, file_name)) as f:
+            with open(os.path.join(path, file_name), "r") as f:
                 metrics.extend(yaml.safe_load(f.read()))
     K8S_METRICS = metrics
     return metrics
@@ -44,7 +45,7 @@ def get_built_in_k8s_events():
     events = []
     BASE_DIR = os.path.abspath(os.getcwd())
     file_name = os.path.join(BASE_DIR, "metadata/data/k8s_events.json")
-    with open(file_name) as f:
+    with open(file_name, "r") as f:
         events.extend(json.loads(f.read()))
 
     # 返回数据

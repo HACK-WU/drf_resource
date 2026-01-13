@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -441,18 +442,18 @@ class PlatformConfig(BkCollectorConfig):
                 if old_subscription_params_md5 != new_subscription_params_md5:
                     logger.info("apm platform config subscription task config has changed, update it.")
                     result = api.node_man.update_subscription(subscription_params)
-                    logger.info(f"update apm platform config subscription successful, result:{result}")
+                    logger.info("update apm platform config subscription successful, result:{}".format(result))
                     platform_subscription.update(config=subscription_params)
                 return sub_config_obj.subscription_id
             except Exception as e:  # noqa
                 logger.exception(
-                    f"update apm platform config subscription error:{e}, params:{subscription_params}"
+                    "update apm platform config subscription error:{}, params:{}".format(e, subscription_params)
                 )
         else:
             try:
                 logger.info("apm platform config subscription task not exists, create it.")
                 result = api.node_man.create_subscription(subscription_params)
-                logger.info(f"create apm platform config subscription successful, result:{result}")
+                logger.info("create apm platform config subscription successful, result:{}".format(result))
 
                 # 创建订阅成功后，优先存储下来，不然因为其他报错会导致订阅ID丢失
                 subscription_id = result["subscription_id"]
@@ -466,10 +467,10 @@ class PlatformConfig(BkCollectorConfig):
                 result = api.node_man.run_subscription(
                     subscription_id=subscription_id, actions={cls.PLUGIN_NAME: "INSTALL"}
                 )
-                logger.info(f"run apm platform config subscription result:{result}")
+                logger.info("run apm platform config subscription result:{}".format(result))
             except Exception as e:  # noqa
                 logger.exception(
-                    f"create apm platform config subscription error{e}, params:{subscription_params}"
+                    "create apm platform config subscription error{}, params:{}".format(e, subscription_params)
                 )
 
     @classmethod
@@ -482,7 +483,10 @@ class PlatformConfig(BkCollectorConfig):
         secrets = bcs_client.client_request(
             bcs_client.core_api.list_namespaced_secret,
             namespace=namespace,
-            label_selector=f"component={BkCollectorComp.LABEL_COMPONENT_VALUE},template=false,type={BkCollectorComp.LABEL_TYPE_PLATFORM_CONFIG}",
+            label_selector="component={},template=false,type={}".format(
+                BkCollectorComp.LABEL_COMPONENT_VALUE,
+                BkCollectorComp.LABEL_TYPE_PLATFORM_CONFIG,
+            ),
         )
         if len(secrets.items) > 0:
             # 存在，且与已有的数据不一致，则更新

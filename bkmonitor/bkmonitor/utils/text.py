@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,6 +13,7 @@ import io
 import os
 
 import six
+from six.moves import map, range
 
 
 def path_to_dotted(path):
@@ -76,7 +78,7 @@ def convert_filename(to_filename_string):
     :return:
     """
     for index, c in enumerate(invalid_filename_char):
-        target_string = "-{}-".format(chr(ord("a") + index))
+        target_string = "-%s-" % (chr(ord("a") + index))
         to_filename_string = to_filename_string.replace(c, target_string)
 
     return to_filename_string
@@ -137,7 +139,7 @@ def cut_line_str_by_max_bytes(s: str, max_bytes: int, encoding: str = None):
             # 如果当前这一行相加超过了最大长度，则表示上一段已满足条件
             if not current_line:
                 # 如果一行就已经超过了一段的长度，则进行单行裁剪
-                line_blocks.append(f"{cut_str_by_max_bytes(line, max_bytes - 2, encoding=encoding)}\n")
+                line_blocks.append("{}\n".format(cut_str_by_max_bytes(line, max_bytes - 2, encoding=encoding)))
                 continue
             line_blocks.append(current_line)
             current_line = ""

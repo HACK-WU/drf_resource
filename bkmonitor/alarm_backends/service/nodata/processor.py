@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -64,7 +65,9 @@ class CheckProcessor(BaseAbnormalPushProcessor):
         total_points = client.llen(data_channel)
         if total_points == 0:
             logger.info(
-                f"[nodata] strategy({self.strategy_id}) item({item.id}) check_timestamp({check_timestamp}) 无待检测数据，可能触发无数据告警"
+                "[nodata] strategy({}) item({}) check_timestamp({}) 无待检测数据，可能触发无数据告警".format(
+                    self.strategy_id, item.id, check_timestamp
+                )
             )
             return
 
@@ -76,7 +79,9 @@ class CheckProcessor(BaseAbnormalPushProcessor):
         if records:
             client.ltrim(data_channel, 0, -total_points - 1)
             logger.info(
-                f"[nodata] strategy({self.strategy_id}) item({item.id}) check_timestamp({check_timestamp}) pull records({total_points})"
+                "[nodata] strategy({}) item({}) check_timestamp({}) pull records({})".format(
+                    self.strategy_id, item.id, check_timestamp, total_points
+                )
             )
             future_records = []
             for record in records:
@@ -114,8 +119,15 @@ class CheckProcessor(BaseAbnormalPushProcessor):
                     record for index, record in enumerate(future_records) if index not in earliest_future_records_idx
                 ]
                 logger.info(
-                    f"[nodata] strategy({self.strategy_id}) item({item.id}) check_timestamp({check_timestamp}) get future_timestamp({earliest_future_timestamp}) {len(earliest_future_records_idx)} records,"
-                    f"其中之一: {data_point._raw_input}"
+                    "[nodata] strategy({}) item({}) check_timestamp({}) get future_timestamp({}) {} records,"
+                    "其中之一: {}".format(
+                        self.strategy_id,
+                        item.id,
+                        check_timestamp,
+                        earliest_future_timestamp,
+                        len(earliest_future_records_idx),
+                        data_point._raw_input,
+                    )
                 )
 
             # 当前检测周期之后的数据或者未来周期非最早时间的数据，重新放入队列等待后续检测
@@ -123,12 +135,16 @@ class CheckProcessor(BaseAbnormalPushProcessor):
                 client.rpush(data_channel, *future_records)
             if unexpected_record_count > 0:
                 logger.error(
-                    f"[nodata] strategy({self.strategy_id}) item({item.id}) check_timestamp({check_timestamp}) 发现非期望格式的待检测数据{unexpected_record_count}条,"
-                    f"其中之一: {last_unexpected_record}"
+                    "[nodata] strategy({}) item({}) check_timestamp({}) 发现非期望格式的待检测数据{}条,"
+                    "其中之一: {}".format(
+                        self.strategy_id, item.id, check_timestamp, unexpected_record_count, last_unexpected_record
+                    )
                 )
 
             logger.info(
-                f"[nodata] strategy({self.strategy_id}) item({item.id}) check_timestamp({check_timestamp}) 拉取数据({len(self.inputs[item.id])})条"
+                "[nodata] strategy({}) item({}) check_timestamp({}) 拉取数据({})条".format(
+                    self.strategy_id, item.id, check_timestamp, len(self.inputs[item.id])
+                )
             )
 
     def handle_data(self, item, check_timestamp):
@@ -145,7 +161,7 @@ class CheckProcessor(BaseAbnormalPushProcessor):
         anomaly_count = self.push_abnormal_data(self.outputs, self.strategy_id, anomaly_signal_list)
         metrics.NODATA_PROCESS_PUSH_DATA_COUNT.labels(strategy_id=metrics.TOTAL_TAG).inc(len(anomaly_signal_list))
         if any(self.inputs.values()):
-            logger.info(f"[nodata] strategy({self.strategy_id}) 无数据检测完成: 无数据异常记录数({anomaly_count})")
+            logger.info("[nodata] strategy({}) 无数据检测完成: 无数据异常记录数({})".format(self.strategy_id, anomaly_count))
 
     def process(self, now_timestamp):
         with service_lock(key.SERVICE_LOCK_NODATA, strategy_id=self.strategy_id):
@@ -160,7 +176,9 @@ class CheckProcessor(BaseAbnormalPushProcessor):
                 # 处于流控的策略不进行无数据告警检测。
                 if group_key and not TokenBucket(group_key).acquire():
                     logger.info(
-                        f"[nodata] strategy({self.strategy_id}) item({item.id}) skipped, because {group_key} token is not available"
+                        "[nodata] strategy({}) item({}) skipped, because {} token is not available".format(
+                            self.strategy_id, item.id, group_key
+                        )
                     )
                     continue
 
@@ -170,7 +188,9 @@ class CheckProcessor(BaseAbnormalPushProcessor):
                     agg_interval = int(item.query_configs[0]["agg_interval"])
                     check_timestamp = (now_timestamp // agg_interval) * agg_interval - agg_interval
                     logger.info(
-                        f"[nodata] strategy({self.strategy_id}) item({item.id}) checkpoint({check_timestamp}) processing start"
+                        "[nodata] strategy({}) item({}) checkpoint({}) processing start".format(
+                            self.strategy_id, item.id, check_timestamp
+                        )
                     )
 
                     # 检测时间点已经检测过，直接跳过
@@ -186,10 +206,14 @@ class CheckProcessor(BaseAbnormalPushProcessor):
                         self.pull_data(item, check_timestamp)
                         self.handle_data(item, check_timestamp)
                         logger.info(
-                            f"[nodata] strategy({self.strategy_id}) item({item.id}) checkpoint({check_timestamp}) processing end at time({arrow.utcnow()})"
+                            "[nodata] strategy({}) item({}) checkpoint({}) processing end at time({})".format(
+                                self.strategy_id, item.id, check_timestamp, arrow.utcnow()
+                            )
                         )
                     else:
                         logger.info(
-                            f"[nodata] strategy({self.strategy_id}) item({item.id}) checkpoint({check_timestamp}) processing skip at time({arrow.utcnow()})"
+                            "[nodata] strategy({}) item({}) checkpoint({}) processing skip at time({})".format(
+                                self.strategy_id, item.id, check_timestamp, arrow.utcnow()
+                            )
                         )
             self.push_data()

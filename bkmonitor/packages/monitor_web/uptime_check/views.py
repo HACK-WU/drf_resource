@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -39,7 +40,7 @@ from utils.business import get_business_id_list
 logger = logging.getLogger(__name__)
 
 
-class CountModelMixin:
+class CountModelMixin(object):
     """
     Count a queryset.
     """
@@ -119,7 +120,7 @@ class UptimeCheckNodeViewSet(PermissionMixin, viewsets.ModelViewSet, CountModelM
     serializer_class = UptimeCheckNodeSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        data = super().retrieve(request, *args, **kwargs).data
+        data = super(UptimeCheckNodeViewSet, self).retrieve(request, *args, **kwargs).data
         node_instance = self.get_object()
         bk_host_id = node_instance.set_host_id()
         data["bk_host_id"] = bk_host_id
@@ -212,7 +213,7 @@ class UptimeCheckNodeViewSet(PermissionMixin, viewsets.ModelViewSet, CountModelM
                 else resource.uptime_check.uptime_check_beat.return_with_dict(hosts=hosts)
             )
         except Exception as e:
-            logger.exception(f"Failed to get uptime check node status: {e}")
+            logger.exception("Failed to get uptime check node status: {}".format(e))
 
         node_task_counts = {node.id: node.tasks.count() for node in queryset}
         for node in serializer.data:
@@ -299,7 +300,7 @@ class UptimeCheckTaskViewSet(PermissionMixin, viewsets.ModelViewSet, CountModelM
         """
         旧版动态下发配置转换
         """
-        data = super().retrieve(request, *args, **kwargs).data
+        data = super(UptimeCheckTaskViewSet, self).retrieve(request, *args, **kwargs).data
         config = data["config"]
         protocol = data["protocol"]
         if config.get("urls") and protocol == UptimeCheckTask.Protocol.HTTP:
@@ -322,7 +323,7 @@ class UptimeCheckTaskViewSet(PermissionMixin, viewsets.ModelViewSet, CountModelM
     def get_permissions(self):
         if self.action == "list":
             return [BusinessActionPermission([ActionEnum.VIEW_BUSINESS, ActionEnum.VIEW_SYNTHETIC])]
-        return super().get_permissions()
+        return super(UptimeCheckTaskViewSet, self).get_permissions()
 
     def get_queryset(self):
         """
@@ -476,7 +477,7 @@ class UptimeCheckGroupViewSet(PermissionMixin, viewsets.ModelViewSet):
         """
         简化返回数据
         """
-        data = super().retrieve(request, *args, **kwargs).data
+        data = super(UptimeCheckGroupViewSet, self).retrieve(request, *args, **kwargs).data
         result = {
             "id": data["id"],
             "name": data["name"],

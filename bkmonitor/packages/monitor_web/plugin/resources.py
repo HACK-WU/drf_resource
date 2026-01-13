@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -134,7 +135,7 @@ class DataDogPluginUploadResource(Resource):
             result = dict(parser_content, **file_info)
             return result
         except Exception as err:
-            logger.error(f"[plugin] Upload plugin failed, msg is {str(err)}")
+            logger.error("[plugin] Upload plugin failed, msg is %s" % str(err))
             raise err
         finally:
             PluginFileManager.clean_dir(base_path)
@@ -224,7 +225,7 @@ class CreatePluginResource(Resource):
             self.RequestSerializer = self.SERIALIZERS[request_data.get("plugin_type")]
         else:
             raise UnsupportedPluginTypeError({"plugin_type", request_data.get("plugin_type")})
-        return super().validate_request_data(request_data)
+        return super(CreatePluginResource, self).validate_request_data(request_data)
 
     def perform_request(self, params):
         # 新建插件默认开启自动发现
@@ -262,7 +263,7 @@ class CreatePluginResource(Resource):
 
 class PluginRegisterResource(Resource):
     def __init__(self):
-        super().__init__()
+        super(PluginRegisterResource, self).__init__()
         self.plugin_manager = None
         self.RequestSerializer = PluginRegisterRequestSerializer
         self.plugin_id = None
@@ -340,7 +341,7 @@ class PluginRegisterResource(Resource):
             with open(file_name, "rb") as f:
                 for chunk in iter(lambda: f.read(4096), b""):
                     hash.update(chunk)
-        except OSError:
+        except IOError:
             return "-1"
 
         return hash.hexdigest()
@@ -388,7 +389,7 @@ class PluginRegisterResource(Resource):
                 raise RegisterPackageError({"msg": result["message"]})
 
             if result["is_finish"]:
-                logger.info(f"register package task({job_id}) result: {result}")
+                logger.info("register package task({}) result: {}".format(job_id, result))
                 break
             time.sleep(1)
             to_be_continue -= 1
@@ -414,7 +415,7 @@ class PluginRegisterResource(Resource):
             for filename in filenames:
                 if not filename.endswith(".tpl"):
                     # 不以 .tpl 结尾的，不注册为模板
-                    logger.info(f"template name ({filename}) not endswith .tpl, skip")
+                    logger.info("template name ({}) not endswith .tpl, skip".format(filename))
                     continue
                 with open(os.path.join(root, filename), "rb") as f:
                     content = f.read()
@@ -430,7 +431,7 @@ class PluginImportResource(Resource):
     CollectorFile = namedtuple("CollectorFile", ["name", "data"])
 
     def __init__(self):
-        super().__init__()
+        super(PluginImportResource, self).__init__()
         self.tmp_path = os.path.join(settings.MEDIA_ROOT, "plugin", str(uuid4()))
         self.plugin_id = None
         self.filename_list = []
@@ -476,7 +477,7 @@ class PluginImportResource(Resource):
         try:
             with open(meta_yaml_path) as f:
                 meta_content = f.read()
-        except OSError:
+        except IOError:
             raise PluginParseError({"msg": _("meta.yaml不存在，无法解析")})
 
         meta_dict = yaml.load(meta_content, Loader=yaml.FullLoader)
@@ -492,23 +493,31 @@ class PluginImportResource(Resource):
     def check_conflict_mes(self):
         self.create_params["conflict_ids"] = []
         if not self.current_version:
-            self.create_params["conflict_detail"] = f"""已经存在重名的插件, 上传的插件版本为: {self.tmp_version.version}"""
+            self.create_params["conflict_detail"] = """已经存在重名的插件, 上传的插件版本为: {}""".format(self.tmp_version.version)
             return
         if self.current_version.is_official:
             if self.tmp_version.is_official:
-                self.create_params["conflict_detail"] = f"""导入插件包版本为：{self.tmp_version.version}；已有插件版本为：{self.current_version.version}"""
+                self.create_params["conflict_detail"] = """导入插件包版本为：{}；已有插件版本为：{}""".format(
+                    self.tmp_version.version, self.current_version.version
+                )
                 self.check_conflict_title()
                 if not self.create_params["conflict_title"]:
                     self.create_params["conflict_detail"] = ""
                     self.create_params["duplicate_type"] = None
             else:
-                self.create_params["conflict_detail"] = f"""导入插件包为非官方插件, 版本为: {self.tmp_version.version}；当前插件为官方插件，版本为：{self.current_version.version}"""
+                self.create_params["conflict_detail"] = """导入插件包为非官方插件, 版本为: {}；当前插件为官方插件，版本为：{}""".format(
+                    self.tmp_version.version, self.current_version.version
+                )
                 self.check_conflict_title()
         else:
             if self.tmp_version.is_official:
-                self.create_params["conflict_detail"] = f"""导入插件包为官方插件，版本为：{self.tmp_version.version}；当前插件为非官方插件，版本为：{self.current_version.version}"""
+                self.create_params["conflict_detail"] = """导入插件包为官方插件，版本为：{}；当前插件为非官方插件，版本为：{}""".format(
+                    self.tmp_version.version, self.current_version.version
+                )
             else:
-                self.create_params["conflict_detail"] = f"""导入插件包版本为: {self.tmp_version.version}；当前插件版本为: {self.current_version.version}"""
+                self.create_params["conflict_detail"] = """导入插件包版本为: {}；当前插件版本为: {}""".format(
+                    self.tmp_version.version, self.current_version.version
+                )
                 self.check_conflict_title()
 
     def check_conflict_title(self):
@@ -661,7 +670,7 @@ class SaveAndReleasePluginResource(Resource):
             self.RequestSerializer = self.SERIALIZERS[request_data.get("plugin_type")]
         else:
             raise UnsupportedPluginTypeError({"plugin_type", request_data.get("plugin_type")})
-        return super().validate_request_data(request_data)
+        return super(SaveAndReleasePluginResource, self).validate_request_data(request_data)
 
     def perform_request(self, validated_request_data):
         with transaction.atomic():

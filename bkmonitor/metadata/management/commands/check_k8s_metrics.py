@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -41,13 +42,13 @@ class Command(BaseCommand):
             cluster = models.BCSClusterInfo.objects.get(cluster_id=cluster_id)
             ts_group_id = cluster.K8sMetricDataID
         except models.BCSClusterInfo.DoesNotExist:
-            raise Exception(f"cluster {cluster_id} doesn't exist!")
+            raise Exception("cluster {} doesn't exist!".format(cluster_id))
 
         try:
             ts_group = models.TimeSeriesGroup.objects.get(bk_data_id=ts_group_id)
             k8s_metrics = ts_group.get_metric_info_list_with_label("", "")
         except models.TimeSeriesGroup.DoesNotExist:
-            raise Exception(f"cluster {cluster_id} related ts group {ts_group_id} doesn't exist!")
+            raise Exception("cluster {} related ts group {} doesn't exist!".format(cluster_id, ts_group_id))
         # 读取配置文件中的内置k8s指标
         origin_k8s_metrics = get_built_in_k8s_metrics()
         metrics_map = {metric["field_name"]: metric for metric in origin_k8s_metrics}

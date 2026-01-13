@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +17,7 @@ from metadata.models.constants import IGNORED_CONSUL_SYNC_DATA_IDS
 from metadata.models.influxdb_cluster import InfluxDBClusterInfo
 
 
-class MockHashConsul:
+class MockHashConsul(object):
     result_list = []
 
     def put(self, key, value):
@@ -28,7 +29,7 @@ class MockClusterList(UserList):
         return len(self.data)
 
 
-class TestConsulCluster:
+class TestConsulCluster(object):
     def test_refresh_consul_cluster_config(self, mocker, patch_redis_tools):
         cluster_host_list = MockClusterList()
         cluster_host_list.append(InfluxDBClusterInfo(host_name="host1", cluster_name="cluster1", host_readable=True))

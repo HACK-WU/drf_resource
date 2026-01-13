@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -300,7 +301,7 @@ class UptimeCheckTaskSerializer(UptimeCheckTaskBaseSerializer):
                 task_data = resource.uptime_check.get_recent_task_data({"task_id": obj.id, "type": "available"})
                 return task_data["available"] * 100
             except Exception as e:
-                logger.exception(f"get available failed: {str(e)}")
+                logger.exception("get available failed: %s" % str(e))
                 return 0
         else:
             return None
@@ -317,7 +318,7 @@ class UptimeCheckTaskSerializer(UptimeCheckTaskBaseSerializer):
                 task_data = resource.uptime_check.get_recent_task_data({"task_id": obj.id, "type": "task_duration"})
                 return task_data["task_duration"]
             except Exception as e:
-                logger.exception(f"get task duration failed:{str(e)}")
+                logger.exception("get task duration failed:%s" % str(e))
                 return None
         else:
             return None

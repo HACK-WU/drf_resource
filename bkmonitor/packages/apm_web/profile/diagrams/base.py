@@ -10,6 +10,7 @@ specific language governing permissions and limitations under the License.
 import logging
 import re
 from dataclasses import dataclass, field
+from typing import Dict, List
 
 logger = logging.getLogger("apm")
 
@@ -31,9 +32,9 @@ class FunctionNode:
 
     is_root: bool = False
     has_parent: bool = False
-    children: dict[str, "FunctionNode"] = field(default_factory=dict)
+    children: Dict[str, "FunctionNode"] = field(default_factory=dict)
     value: int = 0
-    values: list[int] = field(default=list)
+    values: List[int] = field(default=list)
 
     def __eq__(self, other):
         return self.id == other.id
@@ -113,7 +114,7 @@ class FunctionTree:
     root: FunctionNode
 
     map_root: FunctionNode
-    function_node_map: dict[str, FunctionNode] = field(default_factory=dict)
+    function_node_map: Dict[str, FunctionNode] = field(default_factory=dict)
 
 
 class ValueCalculator:

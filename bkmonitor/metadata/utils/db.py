@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
+from typing import Dict, List, Optional, Set, Union
 
 from django.db.models.base import ModelBase
 from django.db.models.query import QuerySet
@@ -57,9 +59,9 @@ def array_chunk(data, size=100):
 
 def _filter_value(
     objs: QuerySet,
-    value_func: str | None = None,
-    value_field_list: list | None = None,
-) -> QuerySet | None:
+    value_func: Optional[str] = None,
+    value_field_list: Optional[List] = None,
+) -> Optional[QuerySet]:
     if value_func == "values":
         # 过滤返回数据
         if value_field_list:
@@ -80,12 +82,12 @@ def _filter_value(
 def filter_model_by_in_page(
     model: ModelBase,
     field_op: str,
-    filter_data: list | set,
-    page_size: int | None = DEFAULT_FILTER_PAGE_SIZE,
-    value_func: str | None = None,
-    value_field_list: list | None = None,
-    other_filter: dict | None = None,
-) -> list[QuerySet] | None:
+    filter_data: Union[List, Set],
+    page_size: Optional[int] = DEFAULT_FILTER_PAGE_SIZE,
+    value_func: Optional[str] = None,
+    value_field_list: Optional[List] = None,
+    other_filter: Optional[Dict] = None,
+) -> Optional[List[QuerySet]]:
     """分页查询，避免使用 in 查询，导致数据量太大，导致 db 锁"""
     # 如果为空，则直接返回
     if not filter_data:
@@ -120,12 +122,12 @@ def filter_model_by_in_page(
 def filter_query_set_by_in_page(
     query_set: QuerySet,
     field_op: str,
-    filter_data: list | set,
-    page_size: int | None = DEFAULT_FILTER_PAGE_SIZE,
-    value_func: str | None = None,
-    value_field_list: list | None = None,
-    other_filter: dict | None = None,
-) -> list[QuerySet] | None:
+    filter_data: Union[List, Set],
+    page_size: Optional[int] = DEFAULT_FILTER_PAGE_SIZE,
+    value_func: Optional[str] = None,
+    value_field_list: Optional[List] = None,
+    other_filter: Optional[Dict] = None,
+) -> Optional[List[QuerySet]]:
     """过滤 queryset 获取到的数据"""
     # 如果为空，则直接返回
     if not filter_data:

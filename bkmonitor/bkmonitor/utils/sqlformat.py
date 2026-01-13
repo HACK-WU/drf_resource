@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import six
+from six.moves import range
 
 _escape_table = [six.chr(x) for x in range(128)]
 _escape_table[0] = "\\0"
@@ -34,7 +36,7 @@ def escape_string(value, mapping=None):
     """
     if isinstance(value, six.string_types):
         return _escape_unicode(value)
-    assert isinstance(value, bytes | bytearray)
+    assert isinstance(value, (bytes, bytearray))
     value = value.replace("\\", "\\\\")
     value = value.replace("\0", "\\0")
     value = value.replace("\n", "\\n")
@@ -46,10 +48,10 @@ def escape_string(value, mapping=None):
 
 
 def escape_bytes_prefixed(value, mapping=None):
-    assert isinstance(value, bytes | bytearray)
+    assert isinstance(value, (bytes, bytearray))
     return b"_binary'%s'" % escape_string(value)
 
 
 def escape_bytes(value, mapping=None):
-    assert isinstance(value, bytes | bytearray)
+    assert isinstance(value, (bytes, bytearray))
     return b"'%s'" % escape_string(value)

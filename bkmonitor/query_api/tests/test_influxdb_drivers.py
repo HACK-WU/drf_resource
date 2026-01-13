@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 
-from unittest import mock
+import mock
 import pytest
 from influxdb.resultset import ResultSet
 
@@ -38,12 +39,12 @@ def gen_mocked_cluster_info(db, table):
 
 
 @mock.patch("time.time", return_value=timestamp_mock_now)
-class TestInfluxdbDriver:
+class TestInfluxdbDriver(object):
     def test_load_driver(self, mocker):
         table = "heartbeat"
         database = "uptimecheck"
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
         )
         mocked_cluster_info = gen_mocked_cluster_info(database, table)
         with mock.patch("metadata.models.ResultTable.get_result_table", return_value=mocked_rt):
@@ -62,7 +63,7 @@ class TestInfluxdbDriver:
         table = "heartbeat"
         database = "uptimecheck"
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
         )
         mocked_cluster_info = gen_mocked_cluster_info(database, table)
         with mock.patch("metadata.models.ResultTable.get_result_table", return_value=mocked_rt):
@@ -120,7 +121,7 @@ class TestInfluxdbDriver:
         database = "system"
         # mock requirements
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
         )
         mocked_cluster_info = gen_mocked_cluster_info(database, table)
 
@@ -142,7 +143,7 @@ class TestInfluxdbDriver:
         database = "uptimecheck"
         # mock requirements
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
         )
         mocked_cluster_info = gen_mocked_cluster_info(database, table)
         # begin
@@ -169,7 +170,7 @@ class TestInfluxdbDriver:
         database = "system"
         # mock requirements
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
         )
         mocked_cluster_info = gen_mocked_cluster_info(database, table)
         # begin
@@ -190,7 +191,7 @@ class TestInfluxdbDriver:
         database = "system"
         # mock requirements
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
         )
         mocked_cluster_info = gen_mocked_cluster_info(database, table)
         # begin
@@ -215,7 +216,7 @@ class TestInfluxdbDriver:
         database = "exporter_consul"
         # mock requirements
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="free", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="free", default_storage="influxdb"
         )
         mocked_cluster_info = gen_mocked_cluster_info(database, table)
         # begin
@@ -234,14 +235,14 @@ class TestInfluxdbDriver:
         # test time field: today
         sql_tuple = (
             "select count(*) from 2_system_cpu_summary where time='today'" " group by ip,plat_id  slimit 50000",
-            "select count(*) from cpu_summary where time={}"
-            "  and bk_biz_id='2' group by ip,bk_cloud_id  slimit 50000".format(timestamp_mock_dict["today"]),
+            "select count(*) from cpu_summary where time=%s"
+            "  and bk_biz_id='2' group by ip,bk_cloud_id  slimit 50000" % timestamp_mock_dict["today"],
         )
         table = "cpu_summary"
         database = "system"
         # mock requirements
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
         )
         mocked_cluster_info = gen_mocked_cluster_info(database, table)
         self.do_test_parse(sql_tuple, mocked_rt, mocked_cluster_info)
@@ -253,14 +254,14 @@ class TestInfluxdbDriver:
             "where (time>='1h' and ip='10.0.0.1' and display_name='es-java' and bk_cloud_id='0') and (app_id='test') "
             "group by pid  slimit 50000",
             'select max("cpu_usage_pct") from "bkmonitor_rp_system.proc".proc '
-            "where (time>={} and ip='10.0.0.1' and display_name='es-java' and bk_cloud_id='0') and "
-            "(bk_app_code='test') group by pid  slimit 50000".format(timestamp_mock_dict["1h"]),
+            "where (time>=%s and ip='10.0.0.1' and display_name='es-java' and bk_cloud_id='0') and "
+            "(bk_app_code='test') group by pid  slimit 50000" % timestamp_mock_dict["1h"],
         )
         table = "proc"
         database = "system"
         # mock requirements
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
         )
         mocked_cluster_info = gen_mocked_cluster_info(database, table)
         mocked_cluster_info["storage_config"]["retention_policy_name"] = "bkmonitor_rp_system.proc"
@@ -278,7 +279,7 @@ class TestInfluxdbDriver:
         database = "exporter"
         # mock requirements
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
         )
         mocked_cluster_info = gen_mocked_cluster_info(database, table)
         self.do_test_parse(sql_tuple, mocked_rt, mocked_cluster_info)
@@ -291,7 +292,7 @@ class TestInfluxdbDriver:
         )
         table = "base"
         database = "2_bkmonitor_time_series_500000"
-        table_id = f"{database}.{table}"
+        table_id = "{}.{}".format(database, table)
         influxdb.CUSTOM_RT_MAP[table_id] = True
         # mock requirements
         mocked_rt = influxdb.ResultTable(table_id=table_id, schema_type="fixed", default_storage="influxdb")
@@ -307,7 +308,7 @@ class TestInfluxdbDriver:
         )
         table = "__default__"
         database = "2_bkmonitor_time_series_500000"
-        table_id = f"{database}.{table}"
+        table_id = "{}.{}".format(database, table)
         influxdb.CUSTOM_RT_MAP[table_id] = True
         # mock requirements
         mocked_rt = influxdb.ResultTable(table_id=table_id, schema_type="fixed", default_storage="influxdb")
@@ -324,7 +325,7 @@ class TestInfluxdbDriver:
         database = "system"
         # mock requirements
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
         )
         with pytest.raises(SQLSyntaxError):
             mocked_cluster_info = gen_mocked_cluster_info(database, table)
@@ -366,7 +367,7 @@ class TestInfluxdbDriver:
         database = "exporter_consul"
         # mock requirements
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="free", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="free", default_storage="influxdb"
         )
         with pytest.raises(SQLSyntaxError):
             mocked_cluster_info = gen_mocked_cluster_info(database, table)
@@ -483,7 +484,7 @@ class TestInfluxdbDriver:
         database = "system"
         # mock requirements
         mocked_rt = influxdb.ResultTable(
-            table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+            table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
         )
 
         # begin

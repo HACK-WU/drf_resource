@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -148,7 +149,7 @@ def get_module(bk_obj_id, bk_inst_id, topo):
     def _find_module(node, node_link, module_id_list):
         if node["bk_obj_id"] != "set":
             return False
-        inst_key = f"{bk_obj_id}|{bk_inst_id}"
+        inst_key = "{}|{}".format(bk_obj_id, bk_inst_id)
         children = node.get("child")
         if children:
             for item in children:

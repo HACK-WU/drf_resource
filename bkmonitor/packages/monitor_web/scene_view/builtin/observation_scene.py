@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,6 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import Dict, List, Tuple, Type
 
 from monitor_web.models.scene_view import SceneViewModel
 
@@ -21,7 +23,7 @@ class ObservationSceneBuiltinProcessor(CollectBuiltinProcessor):
     """
 
     @classmethod
-    def get_processor(cls, scene_id: str) -> tuple[str, type[CollectBuiltinProcessor]]:
+    def get_processor(cls, scene_id: str) -> Tuple[str, Type[CollectBuiltinProcessor]]:
         """
         按场景ID获取对应类型处理器
         """
@@ -38,12 +40,12 @@ class ObservationSceneBuiltinProcessor(CollectBuiltinProcessor):
         return processor.get_default_view_config(bk_biz_id, scene_id)
 
     @classmethod
-    def get_view_config(cls, view: SceneViewModel, *args, **kwargs) -> dict:
+    def get_view_config(cls, view: SceneViewModel, *args, **kwargs) -> Dict:
         view.scene_id, processor = cls.get_processor(view.scene_id)
         return processor.get_view_config(view)
 
     @classmethod
-    def get_auto_view_panels(cls, view: SceneViewModel) -> tuple[list[dict], list[dict]]:
+    def get_auto_view_panels(cls, view: SceneViewModel) -> Tuple[List[Dict], List[Dict]]:
         """
         获取平铺视图配置
         """

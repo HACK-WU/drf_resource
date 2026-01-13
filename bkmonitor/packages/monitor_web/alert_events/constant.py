@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 
-class EventOperate:
+class EventOperate(object):
     """事件操作类型"""
 
     ACK = "ACK"
@@ -21,7 +22,7 @@ class EventOperate:
     CREATE_ORDER = "CREATE_ORDER"
 
 
-class EventStatus:
+class EventStatus(object):
     """
     事件状态
     """
@@ -32,7 +33,7 @@ class EventStatus:
     ABNORMAL_ACK = "ABNORMAL_ACK"  # 未恢复已确认，对应(status=EventStatus.ABNORMAL, is_ack=True)
 
 
-class AlertStatus:
+class AlertStatus(object):
     """
     通知状态
     """
@@ -42,7 +43,7 @@ class AlertStatus:
     SHIELDED = "SHIELDED"
 
 
-class ConfigChangedStatus:
+class ConfigChangedStatus(object):
     """
     策略配置变更状态
     """
@@ -52,7 +53,7 @@ class ConfigChangedStatus:
     DELETED = "DELETED"
 
 
-class EventActionStatus:
+class EventActionStatus(object):
     RUNNING = "RUNNING"
     SUCCESS = "SUCCESS"
     PARTIAL_SUCCESS = "PARTIAL_SUCCESS"

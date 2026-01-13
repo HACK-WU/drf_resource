@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -42,7 +43,7 @@ class MonitorConfig(AppConfig):
             try:
                 if hasattr(cache, "delete_pattern"):
                     # 只删除using_cache相关的web缓存
-                    cache.delete_pattern(f"{UsingCache.key_prefix}*")
+                    cache.delete_pattern("%s*" % UsingCache.key_prefix)
                 else:
                     cache.clear()
             except Exception:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,7 +23,7 @@ HANDLER_ROOT_MODULE = "alarm_backends.service"
 def autodiscover_handlers():
     service_handlers = {}
     for service_type in package_contents(HANDLER_ROOT_MODULE):
-        pkg = f"{HANDLER_ROOT_MODULE}.{service_type}"
+        pkg = "{}.{}".format(HANDLER_ROOT_MODULE, service_type)
         handler_module = find_related_module(pkg, "handler")
         if handler_module is None:
             continue
@@ -42,9 +43,9 @@ SERVICE_HANDLERS = autodiscover_handlers()
 def load_handler_cls(service_type, handler_type):
     handlers = SERVICE_HANDLERS.get(service_type)
     if not handlers:
-        raise Exception(f"Unknown Service Type({str(service_type)}).")
+        raise Exception("Unknown Service Type(%s)." % str(service_type))
 
     if handler_type not in handlers:
-        raise Exception(f"Handler Type({str(handler_type)}) is not supported.")
+        raise Exception("Handler Type(%s) is not supported." % str(handler_type))
 
     return handlers.get(handler_type)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -31,7 +32,7 @@ class IPSerializer(serializers.Serializer):
 
 
 class JobBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
-    base_url = f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/job/"
+    base_url = "%s/api/c/compapi/v2/job/" % settings.BK_COMPONENT_API_URL
     module_name = "job"
 
     def perform_request(self, params):
@@ -53,7 +54,7 @@ class JobBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
         for index, username in enumerate(assignee):
             self.bk_username = username
             try:
-                return super().perform_request(params)
+                return super(JobBaseResource, self).perform_request(params)
             except APIPermissionDeniedError as error:
                 self.report_api_failure_metric(
                     error_code=getattr(error, 'code', 0), exception_type=APIPermissionDeniedError.__name__
@@ -64,7 +65,7 @@ class JobBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
                 raise error
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(JobBaseResource, self).full_request_data(validated_request_data)
         # 业务id判定
         if "bk_biz_id" not in validated_request_data:
             return validated_request_data
@@ -79,7 +80,7 @@ class JobV3BaseResource(JobBaseResource):
     作业平台V3
     """
 
-    base_url = f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/jobv3/"
+    base_url = "%s/api/c/compapi/v2/jobv3/" % settings.BK_COMPONENT_API_URL
     module_name = "jobv3"
 
 

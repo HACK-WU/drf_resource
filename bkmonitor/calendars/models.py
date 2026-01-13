@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -50,7 +51,7 @@ class AbstractModel(models.Model):
         if self.pk is None:
             self.create_user = username
             self.create_time = now
-        return super().save(*args, **kwargs)
+        return super(AbstractModel, self).save(*args, **kwargs)
 
 
 class CalendarModel(AbstractModel):
@@ -161,4 +162,4 @@ class CalendarItemModel(AbstractModel):
             # 对every进行排序
             self.repeat["every"].sort()
 
-        return super().save(*args, **kwargs)
+        return super(CalendarItemModel, self).save(*args, **kwargs)

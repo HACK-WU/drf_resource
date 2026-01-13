@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -31,10 +32,10 @@ class MonitorAPIConfig(AppConfig):
             hack_settings(GlobalConfig, settings)
             call_command("migrate", "--noinput")
         except MigrateError as err:
-            print(f"Migrate Error:{err}")
+            print("Migrate Error:{}".format(err))
             raise err
         except Exception as e:
-            print(f"Migrate Error:{e}")
+            print("Migrate Error:{}".format(e))
         # api migration end
 
     def check_external_db(self):
@@ -48,7 +49,7 @@ class MonitorAPIConfig(AppConfig):
                 with connections[alias].cursor() as cursor:
                     cursor.execute("SELECT 1;")
             except Exception as e:
-                print(f"db[{alias}] query error: {e}")
+                print("db[{}] query error: {}".format(alias, e))
                 # 如果操作失败，说明 DB 不存在，直接从 settings 中去掉
                 settings.DATABASES.pop(alias, None)
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -31,7 +32,7 @@ from api.cmdb.define import Host
 from .config import RAW_DATA, STRATEGY_CONFIG
 
 
-class TestExpireFilter:
+class TestExpireFilter(object):
     def test_filter(self, mocker):
         get_strategy_by_id = mocker.patch.object(StrategyCacheManager, "get_strategy_by_id")
         get_strategy_by_id.return_value = STRATEGY_CONFIG
@@ -66,7 +67,7 @@ class TestExpireFilter:
         assert f.filter(record) is True
 
 
-class TestRangeFilter:
+class TestRangeFilter(object):
     def test_ip_filter(self, mocker):
         get_strategy_by_id = mocker.patch.object(StrategyCacheManager, "get_strategy_by_id")
         get_strategy_by_id.return_value = copy.deepcopy(STRATEGY_CONFIG)
@@ -177,7 +178,7 @@ class TestRangeFilter:
         assert record.is_retains[STRATEGY_CONFIG["items"][0]["id"]] is True
 
 
-class TestHostStatusFilter:
+class TestHostStatusFilter(object):
     def test_filter(self, mocker):
         get_host = mocker.patch.object(HostManager, "get")
         get_host.return_value = Host(

@@ -1,4 +1,4 @@
-from unittest import mock
+import mock
 
 from api.cmsi.default import SendMail
 

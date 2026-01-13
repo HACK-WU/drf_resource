@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -45,9 +46,9 @@ class CMDBBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
     # 因为python3.6 + gevent模式下，ssl库会出现如下异常
     # RecursionError: maximum recursion depth exceeded
     if gevent_active:
-        base_url = "{}/api/c/compapi/v2/cc/".format(settings.BK_COMPONENT_API_URL.replace("https://", "http://"))
+        base_url = "%s/api/c/compapi/v2/cc/" % settings.BK_COMPONENT_API_URL.replace("https://", "http://")
     else:
-        base_url = f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/cc/"
+        base_url = "%s/api/c/compapi/v2/cc/" % settings.BK_COMPONENT_API_URL
 
     module_name = "cmdb"
 
@@ -55,7 +56,7 @@ class CMDBBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
 
     def full_request_data(self, validated_request_data):
         setattr(self, "bk_username", get_backend_username())
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(CMDBBaseResource, self).full_request_data(validated_request_data)
         validated_request_data.update(bk_supplier_account=settings.BK_SUPPLIER_ACCOUNT)
         # 业务id判定
         if "bk_biz_id" not in validated_request_data:
@@ -68,7 +69,7 @@ class CMDBBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
     def perform_request(self, validated_request_data):
         # 非cmdb空间兼容，无关联资源捕获异常返回空数据
         try:
-            return super().perform_request(validated_request_data)
+            return super(CMDBBaseResource, self).perform_request(validated_request_data)
         except NoRelatedResourceError as err:
             self.report_api_failure_metric(
                 error_code=getattr(err, 'code', 0), exception_type=NoRelatedResourceError.__name__

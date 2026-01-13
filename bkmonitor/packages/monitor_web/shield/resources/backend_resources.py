@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +13,7 @@ import operator
 import time
 from collections import defaultdict
 from functools import reduce
-from collections import OrderedDict
+from typing import Dict, List, OrderedDict
 
 from django.db.models import Q
 from django.utils.translation import gettext as _
@@ -45,7 +46,7 @@ from monitor_web.shield.serializers import SHIELD_SERIALIZER
 from monitor_web.shield.utils import ShieldDetectManager
 
 # 告警屏蔽维度配置类型
-DimensionConfig = dict
+DimensionConfig = Dict
 
 # 屏蔽配置类型
 ShieldConfig = OrderedDict
@@ -77,7 +78,7 @@ class ShieldListResource(Resource):
     """
 
     def __init__(self):
-        super().__init__()
+        super(ShieldListResource, self).__init__()
 
     RequestSerializer = ShieldListSerializer
 
@@ -90,7 +91,7 @@ class ShieldListResource(Resource):
         time_range = data.get("time_range")
         page = data.get("page", 0)
         page_size = data.get("page_size", 0)
-        conditions: list[dict] = data.get("conditions", [])
+        conditions: List[Dict] = data.get("conditions", [])
 
         # 初始化查询条件列表
         q_list = []
@@ -474,13 +475,13 @@ class AddShieldResource(Resource, EventDimensionMixin):
         dimension_string_list = []
 
         for key, value in display_dimensions.items():
-            dimension_string_list.append(f"{key}={value}")
+            dimension_string_list.append("{}={}".format(key, value))
 
         dimension_string = ",".join(dimension_string_list)
 
         return dimension_string
 
-    def perform_request(self, data: ShieldConfig) -> dict:
+    def perform_request(self, data: ShieldConfig) -> Dict:
         # 兼容event和alert的屏蔽类型，如果是event也当做alert告警事件屏蔽，进行处理
         # 快捷屏蔽，屏蔽类型就是alert
         data["category"] = ShieldCategory.ALERT if data["category"] == ShieldCategory.EVENT else data["category"]
@@ -720,7 +721,7 @@ class DisableShieldResource(Resource):
         missing_ids = set(data["id"]) - existing_ids
 
         if missing_ids:
-            logger.warning(f"Alarm shield ids does not exist: {list(missing_ids)}")
+            logger.warning("Alarm shield ids does not exist: {}".format(list(missing_ids)))
         return "success"
 
 

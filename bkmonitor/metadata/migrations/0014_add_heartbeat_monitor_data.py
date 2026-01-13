@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -40,7 +41,7 @@ def init_data(apps, schema_editor):
 
     # 读取初始化配置信息
     init_data_path = os.path.join(settings.BASE_DIR, "metadata/data/heartbeat_data.json")
-    with open(init_data_path, encoding="utf-8") as init_file:
+    with open(init_data_path, "r", encoding="utf-8") as init_file:
         init_data = json.load(init_file)
 
     # 写入到数据库
@@ -58,7 +59,7 @@ def init_data(apps, schema_editor):
             creator="system",
             mq_cluster_id=kafka_cluster.cluster_id,
             is_custom_source=False,
-            data_description="init data_source for {}".format(data_source["data_id"]),
+            data_description="init data_source for %s" % data_source["data_id"],
             # 由于mq_config和data_source两者相互指向对方，所以只能先提供占位符，先创建data_source
             mq_config_id=0,
             last_modify_user="system",
@@ -67,7 +68,7 @@ def init_data(apps, schema_editor):
         # 获取这个数据源对应的配置记录model，并创建一个新的配置记录
         mq_config = models["KafkaTopicInfo"].objects.create(
             bk_data_id=data_object.bk_data_id,
-            topic=f"{config.KAFKA_TOPIC_PREFIX}{data_object.bk_data_id}0",
+            topic="{}{}0".format(config.KAFKA_TOPIC_PREFIX, data_object.bk_data_id),
             partition=1,
         )
         data_object.mq_config_id = mq_config.id

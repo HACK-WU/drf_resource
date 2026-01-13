@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -247,7 +248,7 @@ class DeepflowHandler:
     def _get_cluster_access_ip(self, cluster_id):
         access_ip = None
         # 当使用 BCS Client 获取不到集群节点 IP 时，使用监控自身 API 进行兜底
-        get_cluster_access_ip_funcs: list[typing.Callable[[str], str | None]] = [
+        get_cluster_access_ip_funcs: typing.List[typing.Callable[[str], typing.Optional[str]]] = [
             self._get_cluster_access_ip_by_client,
             self._get_cluster_access_ip_by_api,
         ]

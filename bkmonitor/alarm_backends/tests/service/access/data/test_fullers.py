@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,25 +21,25 @@ from alarm_backends.service.access.data.records import DataRecord
 from .config import RAW_DATA, STRATEGY_CONFIG
 
 
-class MockTopoNode:
+class MockTopoNode(object):
     def __init__(self, id_value):
         self.id = id_value
 
 
-class MockHost:
+class MockHost(object):
     def __init__(self, topo_link_value=None):
         self.topo_link = topo_link_value
         self.bk_host_id = 0
 
 
-class MockServiceInstance:
+class MockServiceInstance(object):
     def __init__(self, topo_link_value=None):
         self.ip = "127.0.0.1"
         self.bk_cloud_id = 0
         self.topo_link = topo_link_value
 
 
-class TestTopoNodeFuller:
+class TestTopoNodeFuller(object):
     def test_full(self, mocker):
         mocker.patch.object(StrategyCacheManager, "get_strategy_by_id", return_value=copy.deepcopy(STRATEGY_CONFIG))
         mocker.patch.object(

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import base64
 import datetime
 import hashlib
@@ -126,9 +127,9 @@ class MigrateDiySolution:
                 import traceback
 
                 failed_solutions[solution_id] = str(error)
-                print(f"error : {repr(error)}")
+                print("error : %s" % repr(error))
                 traceback.print_exc()
-                logger.exception(f"error : {str(error)}")
+                logger.exception("error : %s" % str(error))
 
         # 计算 digest
         data_string = (ujson.dumps(template_data, sort_keys=True) + SALT).encode("utf-8")
@@ -210,7 +211,7 @@ class MigrateDiySolution:
         try:
             api.sops.import_project_template(template_data=template_dat_file_content, project_id=self.bk_biz_id)
         except BaseException as error:
-            logger.exception(f"import_project_template error : {str(error)}")
+            logger.exception("import_project_template error : %s" % str(error))
             raise
         solution_ids = [str(solution.id) for solution in solutions]
         solution_template_relates = {}

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from typing import List
 
 from django.utils.translation import gettext as _
 
@@ -13,7 +15,7 @@ from monitor_web.search.handlers.base import (
 class StrategySearchHandler(BaseSearchHandler):
     SCENE = "strategy"
 
-    def search(self, query: str, limit: int = 10) -> list[SearchResultItem]:
+    def search(self, query: str, limit: int = 10) -> List[SearchResultItem]:
         strategies = StrategyModel.objects.filter(name__icontains=query).values("id", "bk_biz_id", "name")
 
         if self.scope == SearchScope.BIZ:

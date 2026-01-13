@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,6 +14,7 @@ import time
 
 from django.conf import settings
 from django.utils.translation import ngettext as _
+from six.moves import range
 
 from bkmonitor.views import serializers
 from drf_resource import api, resource
@@ -32,7 +34,7 @@ class IPListResponseSerializer(serializers.Serializer):
     bk_cloud_id = serializers.IntegerField(required=False, label="云区域ID", allow_null=True)
 
 
-class TaskResultMixin:
+class TaskResultMixin(object):
     # 重试次数
     RETRY_TIMES = 600
 
@@ -67,7 +69,7 @@ class GetInstanceLogResource(TaskResultMixin, Resource):
     根据作业实例ID查询作业执行状态
     """
 
-    class IpStatus:
+    class IpStatus(object):
         """
         IP状态对应的状态码
         """

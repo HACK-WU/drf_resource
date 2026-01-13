@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -39,10 +40,10 @@ class TriggerHandler(base.BaseHandler):
         try:
             strategy_id, item_id = anomaly_key.split(".")
         except Exception as e:
-            logger.error(f"ANOMALY_SIGNAL_KEY({anomaly_key}) parse error：{e}")
+            logger.error("ANOMALY_SIGNAL_KEY({}) parse error：{}".format(anomaly_key, e))
             return
 
-        logger.info(f"[start][latency] strategy({strategy_id}), item({item_id})")
+        logger.info("[start][latency] strategy({}), item({})".format(strategy_id, item_id))
 
         exc = None
         try:
@@ -52,7 +53,7 @@ class TriggerHandler(base.BaseHandler):
                     processor.process()
         except LockError:
             logger.info(
-                f"[get service lock fail] strategy({strategy_id}), item({item_id}). will process later"
+                "[get service lock fail] strategy({}), item({}). will process later".format(strategy_id, item_id)
             )
             ANOMALY_SIGNAL_KEY.client.delay("rpush", ANOMALY_SIGNAL_KEY.get_key(), anomaly_key, delay=1)
             # 如果是获取锁失败，不需要上报指标，直接可以返回
@@ -60,10 +61,12 @@ class TriggerHandler(base.BaseHandler):
         except Exception as e:
             exc = e
             logger.exception(
-                f"[process error] strategy({strategy_id}), item({item_id}) reason：{e}"
+                "[process error] strategy({strategy_id}), item({item_id}) reason：{msg}".format(
+                    strategy_id=strategy_id, item_id=item_id, msg=e
+                )
             )
 
-        logger.info(f"[end][latency] strategy({strategy_id}), item({item_id})")
+        logger.info("[end][latency] strategy({}), item({})".format(strategy_id, item_id))
 
         metrics.TRIGGER_PROCESS_COUNT.labels(
             strategy_id=metrics.TOTAL_TAG, status=metrics.StatusEnum.from_exc(exc), exception=exc

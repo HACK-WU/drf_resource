@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -30,7 +31,7 @@ def clean_datasource(sender, instance, using, **kwargs):
     :return:
     """
     instance.delete_consul_config()
-    logger.info(f"datasource->[{instance.bk_data_id}] now is deleted its consul path.")
+    logger.info("datasource->[%s] now is deleted its consul path." % instance.bk_data_id)
 
     return True
 
@@ -49,12 +50,13 @@ def clean_influxdb_router(sender, instance, using, **kwargs):
 
     if type(instance) != InfluxDBStorage:
         logger.error(
-            f"clean_influxdb_router got info with instance is not InfluxDBStorage but->[{type(instance)}], nothing will do"
+            "clean_influxdb_router got info with instance is not InfluxDBStorage but->[%s], nothing will do"
+            % type(instance)
         )
         return False
 
     consul_client.kv.delete(instance.CONSUL_CONFIG_CLUSTER_PATH)
-    logger.info(f"influxdb storage->[{instance.table_id}] now is deleted its consul path.")
+    logger.info("influxdb storage->[%s] now is deleted its consul path." % instance.table_id)
 
     return True
 

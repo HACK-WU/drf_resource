@@ -1,3 +1,4 @@
+from typing import Dict, List, Optional, Tuple
 
 from monitor_web.commons.data_access import PluginDataAccessor
 from monitor_web.models.plugin import PluginVersionHistory
@@ -11,7 +12,7 @@ class K8sPluginManager(BasePluginManager):
     """
 
     def release(
-        self, config_version: int, info_version: int, token: list[str] = None, debug: bool = True
+        self, config_version: int, info_version: int, token: List[str] = None, debug: bool = True
     ) -> PluginVersionHistory:
         """
         插件发布
@@ -48,10 +49,10 @@ class K8sPluginManager(BasePluginManager):
 
     def make_package(
         self,
-        add_files: dict[str, list[dict[str, str]]] = None,
-        add_dirs: dict[str, list[dict[str, str]]] = None,
+        add_files: Dict[str, List[Dict[str, str]]] = None,
+        add_dirs: Dict[str, List[Dict[str, str]]] = None,
         need_tar: bool = True,
-    ) -> str | None:
+    ) -> Optional[str]:
         """
         todo: 目前暂时不需要实现
         """
@@ -62,7 +63,7 @@ class K8sPluginManager(BasePluginManager):
         """
         return ""
 
-    def create_version(self, data) -> tuple[PluginVersionHistory, bool]:
+    def create_version(self, data) -> Tuple[PluginVersionHistory, bool]:
         version, _ = super().create_version(data)
         # 创建版本后直接发布
         self._release(version, data_label=data.get("data_label"))

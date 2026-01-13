@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
+from typing import Dict, List
 
 from django.conf import settings
 from django.db import models
@@ -96,7 +98,7 @@ class NoticeGroupDetailResource(Resource):
         id = serializers.IntegerField(required=True, label="通知組ID")
 
     @staticmethod
-    def get_users_info(usernames: list) -> dict[str, dict]:
+    def get_users_info(usernames: List) -> Dict[str, Dict]:
         """
         补充通知对象信息
         """
@@ -160,7 +162,7 @@ class NoticeGroupListResource(NoticeGroupDetailResource):
         if bk_biz_id:
             bk_biz_ids = [0, bk_biz_id]
         else:
-            bk_biz_ids: list[int] = resource.space.get_bk_biz_ids_by_user(get_request().user)
+            bk_biz_ids: List[int] = resource.space.get_bk_biz_ids_by_user(get_request().user)
 
         notice_groups = resource.notice_group.backend_search_notice_group(bk_biz_ids=bk_biz_ids)
         strategy_ids = StrategyModel.objects.filter(bk_biz_id__in=bk_biz_ids).values_list("id", flat=True)

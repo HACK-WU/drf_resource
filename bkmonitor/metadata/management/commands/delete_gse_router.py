@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 import json
+from typing import List
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -38,7 +40,7 @@ class Command(BaseCommand):
             return
         self._delete_gse_router(data_id_list)
 
-    def _can_delete_gse_router(self, data_id_list: list, is_force: bool) -> bool:
+    def _can_delete_gse_router(self, data_id_list: List, is_force: bool) -> bool:
         """检查数据源可以删除路由
 
         - 是否强制删除，如果强制返回，则直接返回，否则检查下面两个
@@ -64,7 +66,7 @@ class Command(BaseCommand):
 
         return True
 
-    def _delete_gse_router(self, data_id_list: list) -> bool:
+    def _delete_gse_router(self, data_id_list: List) -> bool:
         """删除数据源的路由"""
         is_successful, successful_data_ids_list, failed_data_ids_list = True, [], []
         for data_id in data_id_list:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import threading
 from queue import Full, Queue
+from typing import Dict, List, Set, Tuple
 
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
@@ -100,7 +102,7 @@ class Command(BaseCommand):
         except Exception as e:
             self.stderr.write(f"failed to put data into queue, err: {e}")
 
-    def _get_biz_id_by_space(self, space_type_and_id: list) -> dict:
+    def _get_biz_id_by_space(self, space_type_and_id: List) -> Dict:
         space_and_biz = {}
         for space in set(space_type_and_id):
             biz_id = models.Space.objects.get_biz_id_by_space(space_type=space[0], space_id=space[1])
@@ -108,7 +110,7 @@ class Command(BaseCommand):
             space_and_biz[f"{space[0]}__{space[1]}"] = biz_id or 0
         return space_and_biz
 
-    def _update_or_create_es_data(self, es_router_list: list) -> tuple:
+    def _update_or_create_es_data(self, es_router_list: List) -> Tuple:
         tid_info, tid_list, space_type_and_id = {}, [], []
         for router in es_router_list:
             _table_id = router.get("table_id")
@@ -210,7 +212,7 @@ class Command(BaseCommand):
 
         return update_space_set, update_rt_set, update_data_label_set
 
-    def _push_and_publish(self, update_space_set: set, update_rt_set: set, update_data_label_set: set):
+    def _push_and_publish(self, update_space_set: Set, update_rt_set: Set, update_data_label_set: Set):
         """推送并发布"""
         client = SpaceTableIDRedis()
         # 如果为空时，则不需要进行路由更新
@@ -225,7 +227,7 @@ class Command(BaseCommand):
         if update_rt_set:
             client.push_table_id_detail(is_publish=True, include_es_table_ids=True)
 
-    def _compose_create_or_update_option_objs(self, table_id: str, options: list[dict]) -> tuple[list, list]:
+    def _compose_create_or_update_option_objs(self, table_id: str, options: List[Dict]) -> Tuple[List, List]:
         """创建或者更新结果表 option"""
         # 查询结果表下的option
         exist_objs = {obj.name: obj for obj in models.ResultTableOption.objects.filter(table_id=table_id)}

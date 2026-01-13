@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 
 
 import logging
+from typing import Optional
 
 from django.conf import settings
 from django.db import models
@@ -121,11 +123,11 @@ class EventGroup(CustomGroupBase):
     def make_table_id(bk_biz_id, bk_data_id, table_name=None):
         bk_biz_id_str = str(bk_biz_id)
         if bk_biz_id_str > "0":
-            return f"{bk_biz_id}_bkmonitor_event_{bk_data_id}"
+            return "{}_bkmonitor_event_{}".format(bk_biz_id, bk_data_id)
         elif bk_biz_id_str < "0":
             return f"bkmonitor_{bk_biz_id_str.split('-')[-1]}_bkmonitor_event_{bk_data_id}"
 
-        return f"bkmonitor_event_{bk_data_id}"
+        return "bkmonitor_event_{}".format(bk_data_id)
 
     def update_metrics(self, metric_info):
         return Event.modify_event_list(self.event_group_id, metric_info)
@@ -145,9 +147,9 @@ class EventGroup(CustomGroupBase):
     def consul_path(self):
         """返回consul路径配置"""
 
-        return f"{config.CONSUL_PATH}/data_id/{self.bk_data_id}/event"
+        return "{}/data_id/{}/event".format(config.CONSUL_PATH, self.bk_data_id)
 
-    def update_event_dimensions_from_es(self, client: Elasticsearch | None = None):
+    def update_event_dimensions_from_es(self, client: Optional[Elasticsearch] = None):
         """
         从ES更新事件及维度信息等内容
         对于一个过久未有上报的事件，那么其将会一直被保留在元数据当中
@@ -175,21 +177,21 @@ class EventGroup(CustomGroupBase):
         #     }
         # ]
         result = client.search(
-            index=f"{self.table_id}*",
+            index="{}*".format(self.table_id),
             body={
                 "aggs": {"find_event_name": {"terms": {"field": "event_name", "size": 10000}}},
                 # 降低返回的内容条数，我们只关注聚合后的内容
                 "size": 0,
             },
         )["aggregations"]["find_event_name"]["buckets"]
-        logger.info(f"event->[{self.event_group_id}] found total event->[{len(result)}]")
+        logger.info("event->[{}] found total event->[{}]".format(self.event_group_id, len(result)))
 
         # 逐个获取信息
         event_dimension_list = []
         for event_info in result:
             try:
                 result = client.search(
-                    index=f"{self.table_id}*",
+                    index="{}*".format(self.table_id),
                     body={
                         "query": {"bool": {"must": {"term": {"event_name": event_info["key"]}}}},
                         "size": 1,
@@ -206,12 +208,12 @@ class EventGroup(CustomGroupBase):
                 {"event_name": event_info["key"], "dimension_list": list(result["_source"]["dimensions"].keys())}
             )
             logger.info(
-                f"event->[{self.event_group_id}] added new event_dimension->[{event_dimension_list[0]}]"
+                "event->[{}] added new event_dimension->[{}]".format(self.event_group_id, event_dimension_list[0])
             )
 
         # 更新所有的相关事件
         Event.modify_event_list(self.event_group_id, event_dimension_list)
-        logger.info(f"event->[{self.event_group_id}] update all dimension success.")
+        logger.info("event->[{}] update all dimension success.".format(self.event_group_id))
 
         return True
 
@@ -219,12 +221,14 @@ class EventGroup(CustomGroupBase):
         # 删除所有的事件以及事件维度
         custom_events = Event.objects.filter(event_group_id=self.event_group_id)
         logger.debug(
-            f"going to delete all dimension and custom_event->[{custom_events.count()}] for EventGroup->[{self.event_group_id}] deletion."
+            "going to delete all dimension and custom_event->[{}] for EventGroup->[{}] deletion.".format(
+                custom_events.count(), self.event_group_id
+            )
         )
         custom_events.delete()
-        logger.info(f"all metrics about EventGroup->[{self.event_group_id}] is deleted.")
+        logger.info("all metrics about EventGroup->[{}] is deleted.".format(self.event_group_id))
 
-    def get_event_info_list(self, limit: int | None = None):
+    def get_event_info_list(self, limit: Optional[int] = None):
         query = Event.objects.filter(event_group_id=self.event_group_id).only(
             "event_id", "event_name", "dimension_list"
         )
@@ -236,7 +240,7 @@ class EventGroup(CustomGroupBase):
         # 将查询结果转化为JSON格式
         return [event_info.to_json() for event_info in query]
 
-    def to_json(self, event_infos_limit: int | None = None):
+    def to_json(self, event_infos_limit: Optional[int] = None):
         return {
             "event_group_id": self.event_group_id,
             "bk_data_id": self.bk_data_id,
@@ -265,7 +269,7 @@ class EventGroup(CustomGroupBase):
         operator,
         event_info_list=None,
         table_id=None,
-        data_label: str | None = None,
+        data_label: Optional[str] = None,
     ):
         """
         创建一个新的自定义分组记录
@@ -313,7 +317,7 @@ class EventGroup(CustomGroupBase):
         label=None,
         is_enable=None,
         event_info_list=None,
-        data_label: str | None = None,
+        data_label: Optional[str] = None,
     ):
         """
         修改一个事件组
@@ -379,7 +383,7 @@ class Event(models.Model):
         """
         # 0. 判断是否真的存在某个group_id
         if not EventGroup.objects.filter(event_group_id=event_group_id).exists():
-            logger.info(f"event_group_id->[{event_group_id}] not exists, nothing will do.")
+            logger.info("event_group_id->[{}] not exists, nothing will do.".format(event_group_id))
             raise ValueError(_("事件组ID[{}]不存在，请确认后重试").format(event_group_id))
 
         # 1. 遍历所有的事件进行处理，判断是否存在custom_event_id
@@ -389,7 +393,7 @@ class Event(models.Model):
                 event_name = event_info["event_name"]
                 dimension_list = event_info["dimension_list"]
             except KeyError as key:
-                logger.error(f"event_info_list got bad event_info->[{event_info}] which has no key->[{key}]")
+                logger.error("event_info_list got bad event_info->[{}] which has no key->[{}]".format(event_info, key))
                 raise ValueError(_("事件列表配置有误，请确认后重试"))
 
             # NOTE: 维度 [target] 必须存在; 如果不存在时，则需要添加 [target] 维度
@@ -402,7 +406,7 @@ class Event(models.Model):
             except cls.DoesNotExist:
                 # 如果不存在事件，创建一个新的时间
                 custom_event = cls.objects.create(event_name=event_name, event_group_id=event_group_id)
-                logger.info(f"new custom_event->[{custom_event}] is create for group_id->[{event_group_id}].")
+                logger.info("new custom_event->[{}] is create for group_id->[{}].".format(custom_event, event_group_id))
 
             # 修改已有的事件配置, 但是考虑需要保持已有的维度，需要将新旧两个维度merge
             old_dimension_set = set(custom_event.dimension_list)
@@ -414,7 +418,9 @@ class Event(models.Model):
 
             # 后续可以在此处追加其他修改内容
             logger.info(
-                f"event_group_id->[{event_group_id}] has update event_id->[{custom_event.event_name}] all dimension->[{len(dimension_list)}]"
+                "event_group_id->[{}] has update event_id->[{}] all dimension->[{}]".format(
+                    event_group_id, custom_event.event_name, len(dimension_list)
+                )
             )
 
         return True

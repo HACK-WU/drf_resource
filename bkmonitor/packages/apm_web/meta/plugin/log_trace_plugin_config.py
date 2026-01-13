@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -17,7 +18,7 @@ DATA_TYPE = "log_v2"
 OUTPUT_TYPE = "otlp_trace"
 
 
-class LogPluginInfo:
+class LogPluginInfo(object):
     """
     采集插件信息
     """
@@ -26,7 +27,7 @@ class LogPluginInfo:
     VERSION = "latest"
 
 
-class LogTracePluginConfig:
+class LogTracePluginConfig(object):
     """
     行日志采集
     """
@@ -105,7 +106,7 @@ class LogTracePluginConfig:
         return api.node_man.run_subscription(params)
 
 
-class EncodingsEnum:
+class EncodingsEnum(object):
     """
     字符编码枚举
     """

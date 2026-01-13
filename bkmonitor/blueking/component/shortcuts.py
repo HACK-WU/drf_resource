@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 
 from . import conf
@@ -49,7 +50,7 @@ def get_client_by_user(user, **kwargs):
         else:
             username = user
     except Exception:
-        logger.exception(f"Failed to get user according to user ({user})")
+        logger.exception("Failed to get user according to user (%s)" % user)
 
     common_args = {"bk_username": username}
     common_args.update(kwargs)

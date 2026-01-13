@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -14,6 +15,7 @@ import time
 
 from django.conf import settings
 from django.utils.translation import gettext as _
+from six.moves import range
 
 from alarm_backends.constants import CONST_MINUTES
 from alarm_backends.core.alert import Alert
@@ -232,7 +234,7 @@ class RecoverStatusChecker(BaseChecker):
             )
             return True
 
-        logger.info(f"[no_recover] alert({alert.id}), strategy({alert.strategy_id}) 在恢复检测周期内仍满足触发条件，不进行恢复")
+        logger.info("[no_recover] alert({}), strategy({}) 在恢复检测周期内仍满足触发条件，不进行恢复".format(alert.id, alert.strategy_id))
         return False
 
     def check_custom_event_recovery(self, alert: Alert, strategy):
@@ -326,8 +328,10 @@ class RecoverStatusChecker(BaseChecker):
         anomaly_timestamps.sort()
 
         logger.debug(
-            f"[check_result_cache] alert({alert.id}), strategy({alert.strategy_id}), start_time({min_check_timestamp}), end_time({last_check_timestamp}) "
-            f"anomaly_timestamps({anomaly_timestamps})"
+            "[check_result_cache] alert({}), strategy({}), start_time({}), end_time({}) "
+            "anomaly_timestamps({})".format(
+                alert.id, alert.strategy_id, min_check_timestamp, last_check_timestamp, anomaly_timestamps
+            )
         )
 
         # 按照监控周期移动触发判断窗口
@@ -408,7 +412,7 @@ class RecoverStatusChecker(BaseChecker):
         try:
             unit = load_unit(strategy.items[0].unit)
             value, suffix = unit.fn.auto_convert(value, decimal=settings.POINT_PRECISION)
-            return f"{value}{suffix}"
+            return "{}{}".format(value, suffix)
         except Exception:
             return value
 

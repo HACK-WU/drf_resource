@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ specific language governing permissions and limitations under the License.
 import copy
 import json
 import time
+from typing import Dict, List, Optional, Tuple
 
 import humanize
 from django.utils.translation import gettext_lazy as _
@@ -26,7 +28,7 @@ def get_storager(table_id):
     """构建函数，返回结果表对应的存储对象"""
     details = api.metadata.query_result_table_storage_detail(table_id=table_id)
     if len(details) == 0:
-        raise ResultTableMetaError(f"No table({table_id}) metadata")
+        raise ResultTableMetaError("No table({}) metadata".format(table_id))
 
     detail = details[0]
     # 自动判定主入库存储信息
@@ -37,35 +39,25 @@ def get_storager(table_id):
     elif "elasticsearch" in detail and detail["elasticsearch"]:
         return EsStorage(detail=detail)
 
-    raise ResultTableMetaError(f"No valid storage in table: {table_id}")
+    raise ResultTableMetaError("No valid storage in table: {}".format(table_id))
 
 
-class InfoElement(TypedDict):
-    key: str
-    name: str
-    value: str
+InfoElement = TypedDict("InfoElement", {"key": str, "name": str, "value": str})
 
-class StatusContentKey(TypedDict):
-    key: str
-    name: str
-StatusContentVal = dict[str, str]
-class StatusContent(TypedDict):
-    keys: list
-    values: list
-class StatusElement(TypedDict):
-    key: str
-    name: str
-    content: StatusContent
+StatusContentKey = TypedDict("StatusContentKey", {"key": str, "name": str})
+StatusContentVal = Dict[str, str]
+StatusContent = TypedDict("StatusContent", {"keys": List, "values": List})
+StatusElement = TypedDict("StatusElement", {"key": str, "name": str, "content": StatusContent})
 
 
 class Storager:
-    INFO_TMP: list[InfoElement] = []
-    STATUS_TMP: list[StatusElement] = []
+    INFO_TMP: List[InfoElement] = []
+    STATUS_TMP: List[StatusElement] = []
 
-    def __init__(self, detail: dict):
+    def __init__(self, detail: Dict):
         self.detail = detail
 
-    def get_info(self) -> list[InfoElement]:
+    def get_info(self) -> List[InfoElement]:
         """读取存储基本元信息"""
         info = copy.deepcopy(self.INFO_TMP)
         for item in info:
@@ -75,7 +67,7 @@ class Storager:
             item["value"] = getattr(self, custom_handler)()
         return info
 
-    def get_status(self) -> list[StatusContent]:
+    def get_status(self) -> List[StatusContent]:
         """读取存储状态"""
         status = copy.deepcopy(self.STATUS_TMP)
         for s in status:
@@ -87,14 +79,14 @@ class Storager:
 
 
 class InfluxdbStorager(Storager):
-    INFO_TMP: list[InfoElement] = [
+    INFO_TMP: List[InfoElement] = [
         {"key": "storage_type", "name": _("存储类型"), "value": "InfluxDB"},
         {"key": "cluster_name", "name": _("Proxy集群"), "value": ""},
         {"key": "instance_cluster_name", "name": _("实例集群"), "value": ""},
         {"key": "cluster_instance_num", "name": _("存储实例数"), "value": ""},
     ]
 
-    STATUS_TMP: list[StatusElement] = [
+    STATUS_TMP: List[StatusElement] = [
         {
             "key": "instance",
             "name": _("存储实例"),
@@ -124,7 +116,7 @@ class InfluxdbStorager(Storager):
         },
     ]
 
-    def __init__(self, detail: dict):
+    def __init__(self, detail: Dict):
         super().__init__(detail=detail)
 
     def handle_info_cluster_name(self) -> str:
@@ -142,7 +134,7 @@ class InfluxdbStorager(Storager):
     def handle_status_instance(self, content: StatusContent) -> StatusContent:
         keys = content["keys"]
         hosts = self.detail["influxdb_instance_cluster"]
-        values: list[StatusContentVal] = []
+        values: List[StatusContentVal] = []
         for host in hosts:
             host_name = host["host_name"]
             val: StatusContentVal = {}
@@ -221,7 +213,7 @@ class InfluxdbStorager(Storager):
         )
         return humanize.intcomma(ret[1]) if ret is not None else "-"
 
-    def _query_cluster_metric(self, metric_name: str, **conditions) -> tuple[int, int] | None:
+    def _query_cluster_metric(self, metric_name: str, **conditions) -> Optional[Tuple[int, int]]:
         """查询集群指标"""
         body = {
             "query_list": [
@@ -270,10 +262,10 @@ class InfluxdbStorager(Storager):
         body["query_list"][0]["conditions"]["field_list"] = field_list
         body["query_list"][0]["conditions"]["condition_list"] = condition_list
         try:
-            logger.info(f"Query cluster metrics, body = {json.dumps(body)}")
+            logger.info("Query cluster metrics, body = {}".format(json.dumps(body)))
             ret = api.unify_query.query_cluster_metrics_data(**body)
         except BKAPIError as err:
-            logger.exception(f"Fail to query cluster metrics, body={body}, err={err}")
+            logger.exception("Fail to query cluster metrics, body={}, err={}".format(body, err))
             return None
         if len(ret["series"]) > 0:
             return ret["series"][0]["values"][0]
@@ -281,7 +273,7 @@ class InfluxdbStorager(Storager):
 
 
 class VictoriaMetricsStorage(Storager):
-    INFO_TMP: list[InfoElement] = [
+    INFO_TMP: List[InfoElement] = [
         {"key": "storage_type", "name": _("存储类型"), "value": "VictoriaMetrics"},
         {"key": "vm_result_table_id", "name": _("计算平台结果表"), "value": ""},
     ]
@@ -291,7 +283,7 @@ class VictoriaMetricsStorage(Storager):
 
 
 class EsStorage(Storager):
-    INFO_TMP: list[InfoElement] = [
+    INFO_TMP: List[InfoElement] = [
         {"key": "storage_type", "name": _("存储类型"), "value": "ElasticSearch"},
         {"key": "cluster_name", "name": _("集群名"), "value": ""},
         {"key": "result_table", "name": _("结果表"), "value": ""},

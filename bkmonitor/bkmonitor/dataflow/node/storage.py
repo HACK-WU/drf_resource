@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -17,7 +18,7 @@ from bkmonitor.dataflow.node.base import Node
 
 class StorageNode(Node, ABC):
     def __init__(self, source_rt_id, storage_expires, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(StorageNode, self).__init__(*args, **kwargs)
         self.source_rt_id = source_rt_id
         self.bk_biz_id, _, self.process_rt_id = source_rt_id.partition("_")
         self.bk_biz_id = int(self.bk_biz_id)
@@ -43,7 +44,7 @@ class StorageNode(Node, ABC):
 
     @property
     def name(self):
-        return f"{self.get_node_type()}({self.source_rt_id})"
+        return "{}({})".format(self.get_node_type(), self.source_rt_id)
 
     @property
     def output_table_name(self):
@@ -99,7 +100,7 @@ class HDFSStorageNode(StorageNode):
     NODE_TYPE = "hdfs_storage"
 
     def __init__(self, source_rt_id, storage_expires, *args, **kwargs):
-        super().__init__(source_rt_id, storage_expires, *args, **kwargs)
+        super(HDFSStorageNode, self).__init__(source_rt_id, storage_expires, *args, **kwargs)
         self.storage_expires = storage_expires
 
     @property
@@ -122,7 +123,7 @@ class DorisStorageNode(StorageNode):
     NODE_TYPE = "doris"
 
     def __init__(self, cluster, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(DorisStorageNode, self).__init__(*args, **kwargs)
         self.cluster = cluster
 
     @property
@@ -169,7 +170,7 @@ class ElasticsearchStorageNode(StorageNode):
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super(ElasticsearchStorageNode, self).__init__(*args, **kwargs)
         self.has_replica = has_replica
         self.storage_keys = storage_keys or []
         self.analyzed_fields = analyzed_fields or []

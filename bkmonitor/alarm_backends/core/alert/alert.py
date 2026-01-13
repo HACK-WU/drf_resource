@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ import copy
 import json
 import logging
 import time
+from typing import List
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -84,7 +86,7 @@ class Alert:
         self._status_changed = False
 
         # 流水日志
-        self.logs: list[dict] = []
+        self.logs: List[dict] = []
 
         # 最新事件
         self.last_event = None
@@ -475,7 +477,7 @@ class Alert:
         return self.severity
 
     @property
-    def dimensions(self) -> list:
+    def dimensions(self) -> List:
         return self.data.get("dimensions", [])
 
     @property
@@ -533,7 +535,7 @@ class Alert:
         # 如果没有这个key则追加
         self.data["dimensions"].append(data)
 
-    def update_key_value_field(self, field_name, new_value: list):
+    def update_key_value_field(self, field_name, new_value: List):
         self.data.setdefault(field_name, [])
         field_value_dict = {item["key"]: item for item in self.data[field_name]}
         new_value_dict = {item["key"]: item for item in new_value}
@@ -615,7 +617,7 @@ class Alert:
     def update_labels(self, value):
         self.data["labels"] = value
 
-    def update_assign_tags(self, value: list):
+    def update_assign_tags(self, value: List):
         """
         更新分派的tags信息
         """
@@ -627,7 +629,7 @@ class Alert:
         self.data["assign_tags"] = list(all_tags.values())
         self.update_top_event_tags(value)
 
-    def update_top_event_tags(self, value: list):
+    def update_top_event_tags(self, value: List):
         if not self.top_event:
             return
         event_tags = {item["key"]: item for item in self.data["event"]["tags"]}
@@ -802,7 +804,7 @@ class Alert:
         return alert
 
     @classmethod
-    def mget(cls, alert_keys: list[AlertKey]) -> list["Alert"]:
+    def mget(cls, alert_keys: List[AlertKey]) -> List["Alert"]:
         """
         批量获取告警，优先从Redis快照获取，没有则从ES获取
         :param alert_keys: 告警标识列表
@@ -979,7 +981,7 @@ class Alert:
         return current_count > threshold["threshold"], current_count
 
     @staticmethod
-    def create_qos_log(alerts: list[str], total_count, qos_actions):
+    def create_qos_log(alerts: List[str], total_count, qos_actions):
         return AlertLog(
             op_type=AlertLog.OpType.ACTION,
             alert_id=alerts,
@@ -1071,7 +1073,7 @@ class AlertUIDManager:
 class AlertCache:
     # todo 下面两个可以合并
     @staticmethod
-    def save_alert_to_cache(alerts: list[Alert]):
+    def save_alert_to_cache(alerts: List[Alert]):
         alerts_to_saved = {}
         for alert in alerts:
             current_alert = alerts_to_saved.get(alert.dedupe_md5)
@@ -1100,7 +1102,7 @@ class AlertCache:
         return update_count, finished_count
 
     @staticmethod
-    def save_alert_snapshot(alerts: list[Alert]):
+    def save_alert_snapshot(alerts: List[Alert]):
         if not alerts:
             return 0
 

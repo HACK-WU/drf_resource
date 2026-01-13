@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import copy
-from typing import Any
+from typing import Any, Dict, List
 
 from constants.data_source import ApplicationsResultTableLabel
 from monitor_web.strategies.default_settings.common import (
@@ -24,10 +25,10 @@ from .typing import StrategyT
 
 class StrategyBuilder:
     @classmethod
-    def _prepare_detects(cls, detects: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        prepared_detects: list[dict[str, Any]] = []
+    def _prepare_detects(cls, detects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        prepared_detects: List[Dict[str, Any]] = []
         # 确保每个 level 只存在一个 detect config
-        level_detect_config_map: dict[str, dict[str, Any]] = {detect["level"]: detect for detect in detects}
+        level_detect_config_map: Dict[str, Dict[str, Any]] = {detect["level"]: detect for detect in detects}
         for level, detect_config in level_detect_config_map.items():
             prepared_detects.extend(
                 detects_config(
@@ -40,7 +41,7 @@ class StrategyBuilder:
         return prepared_detects
 
     @classmethod
-    def _year_round_algorithm_config(cls, level: str, ceil: float, floor: float) -> list[dict[str, Any]]:
+    def _year_round_algorithm_config(cls, level: str, ceil: float, floor: float) -> List[Dict[str, Any]]:
         return [
             {
                 "config": {"floor": floor, "ceil": ceil, "ceil_interval": 7, "floor_interval": 7, "fetch_type": "avg"},
@@ -51,8 +52,8 @@ class StrategyBuilder:
         ]
 
     @classmethod
-    def _prepare_algorithms(cls, algorithms: list[dict[str, Any]]):
-        prepared_algorithms: list[dict[str, Any]] = []
+    def _prepare_algorithms(cls, algorithms: List[Dict[str, Any]]):
+        prepared_algorithms: List[Dict[str, Any]] = []
         for algorithm in algorithms:
             if algorithm["type"] == define.AlgorithmType.THRESHOLD.value:
                 prepared_algorithms.extend(
@@ -73,25 +74,25 @@ class StrategyBuilder:
         bk_biz_id: int,
         name: str,
         query_name: str,
-        query_config: dict[str, Any],
-        detects: list[dict[str, Any]],
-        algorithms: list[dict[str, Any]],
-        labels: list[str],
-        notice_group_ids: list[int],
-        message_templates: list[dict[str, str]],
+        query_config: Dict[str, Any],
+        detects: List[Dict[str, Any]],
+        algorithms: List[Dict[str, Any]],
+        labels: List[str],
+        notice_group_ids: List[int],
+        message_templates: List[Dict[str, str]],
     ):
         self.bk_biz_id: int = bk_biz_id
         self.name: str = name
         self.query_name: str = query_name
-        self.query_config: dict[str, Any] = query_config
-        self.detects: list[dict[str, Any]] = self._prepare_detects(detects)
-        self.algorithms: list[dict[str, Any]] = self._prepare_algorithms(algorithms)
-        self.labels: list[str] = labels[:]
-        self.notice_group_ids: list[int] = notice_group_ids[:]
-        self.message_templates: list[dict[str, str]] = copy.deepcopy(message_templates)
+        self.query_config: Dict[str, Any] = query_config
+        self.detects: List[Dict[str, Any]] = self._prepare_detects(detects)
+        self.algorithms: List[Dict[str, Any]] = self._prepare_algorithms(algorithms)
+        self.labels: List[str] = labels[:]
+        self.notice_group_ids: List[int] = notice_group_ids[:]
+        self.message_templates: List[Dict[str, str]] = copy.deepcopy(message_templates)
 
     def build(self) -> StrategyT:
-        notice: dict[str, Any] = copy.deepcopy(DEFAULT_NOTICE)
+        notice: Dict[str, Any] = copy.deepcopy(DEFAULT_NOTICE)
         notice["user_groups"] = self.notice_group_ids
         notice["config"]["template"] = self.message_templates
 

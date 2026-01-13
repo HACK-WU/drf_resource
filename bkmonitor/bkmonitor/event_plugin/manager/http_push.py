@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,6 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import Type
 
 from bkmonitor.event_plugin.manager.base import BaseEventPluginManager
 from bkmonitor.event_plugin.serializers import EventPluginBaseSerializer, HttpPushPluginInstSerializer
@@ -14,5 +16,5 @@ from bkmonitor.event_plugin.serializers import EventPluginBaseSerializer, HttpPu
 
 class HttpPushManager(BaseEventPluginManager):
     @classmethod
-    def get_serializer_class(cls) -> type[EventPluginBaseSerializer]:
+    def get_serializer_class(cls) -> Type[EventPluginBaseSerializer]:
         return HttpPushPluginInstSerializer

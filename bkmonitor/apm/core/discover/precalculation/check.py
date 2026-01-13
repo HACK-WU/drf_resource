@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -155,7 +156,7 @@ class PreCalculateCheck:
         """使用模拟退火策略，计算未分派应用到合适队列，避免产生总是分配到固定队列的问题"""
         all_queues = settings.APM_BMW_TASK_QUEUES
         if not all_queues:
-            logger.info("[PreCalculateCheck] empty bmw task queues, return")
+            logger.info(f"[PreCalculateCheck] empty bmw task queues, return")
             return {}
 
         if not unopened_mapping:
@@ -220,11 +221,11 @@ class PreCalculateCheck:
         for app_id, queue in distribute_mapping.items():
             DaemonTaskHandler.execute(app_id, queue)
 
-        logger.info("[PreCalculateCheck] distribute finished")
+        logger.info(f"[PreCalculateCheck] distribute finished")
 
     @classmethod
     def batch_remove(cls, task_uni_ids):
         logger.info(f"[PreCalculateCheck] remove tasks: \n{json.dumps(task_uni_ids)}")
         for i in task_uni_ids:
             DaemonTaskHandler.remove(i)
-        logger.info("[PreCalculateCheck] remove finished")
+        logger.info(f"[PreCalculateCheck] remove finished")

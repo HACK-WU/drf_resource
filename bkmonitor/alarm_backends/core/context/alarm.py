@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +12,7 @@ import base64
 import copy
 import json
 import logging
-from typing import Any
+from typing import Any, Dict, Optional
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -141,7 +142,7 @@ class Alarm(BaseContextObject):
 
         for target_display, count in targets_dict.items():
             if count > 1:
-                targets.append(f"{target_display}({count})")
+                targets.append("{}({})".format(target_display, count))
                 continue
             targets.append(target_display)
         return targets
@@ -157,7 +158,7 @@ class Alarm(BaseContextObject):
         target_string = ",".join(self.display_targets)
 
         if self.parent.limit:
-            limit_target_string = f"{self.display_targets[0]}...({len(self.display_targets)})"
+            limit_target_string = "{}...({})".format(self.display_targets[0], len(self.display_targets))
             if len(limit_target_string.encode("utf-8")) < len(target_string.encode("utf-8")):
                 target_string = limit_target_string
 
@@ -213,7 +214,7 @@ class Alarm(BaseContextObject):
         dimension_string = ",".join(self.dimension_string_list)
 
         if self.parent.limit:
-            limit_dimension_string = f"{self.display_dimensions[0]}..."
+            limit_dimension_string = "{}...".format(self.display_dimensions[0])
             if len(limit_dimension_string.encode("utf-8")) < len(dimension_string.encode("utf-8")):
                 dimension_string = [limit_dimension_string]
 
@@ -327,10 +328,10 @@ class Alarm(BaseContextObject):
                 title,
             )
         except Exception as e:
-            logger.exception(f"action({action_id}) of alert({self.id}) create alarm chart error, {e}")
+            logger.exception("action({}) of alert({}) create alarm chart error, {}".format(action_id, self.id, e))
 
         if chart:
-            logger.info(f"action({action_id}) of alert({self.id}) create alarm chart success")
+            logger.info("action({}) of alert({}) create alarm chart success".format(action_id, self.id))
 
         return chart
 
@@ -347,7 +348,7 @@ class Alarm(BaseContextObject):
         图片名
         """
         if self.chart_image:
-            return f"alarm_chart_{self.parent.action.id}.png"
+            return "alarm_chart_%s.png" % self.parent.action.id
         return ""
 
     @cached_property
@@ -508,7 +509,7 @@ class Alarm(BaseContextObject):
             if category["data_source_label"] == data_source_label and category["data_type_label"] == data_type_label:
                 return category["name"]
 
-        return f"{data_source_label}_{data_type_label}"
+        return "{}_{}".format(data_source_label, data_type_label)
 
     @cached_property
     def target_type(self):
@@ -730,7 +731,11 @@ class Alarm(BaseContextObject):
         if not self.parent.strategy.id:
             return ""
 
-        return f"{settings.BK_MONITOR_HOST}?bizId={self.parent.alert.event.bk_biz_id}#/strategy-config/detail/{self.parent.strategy.id}"
+        return "{monitor_host}?bizId={bk_biz_id}#/strategy-config/detail/{strategy_id}".format(
+            monitor_host=settings.BK_MONITOR_HOST,
+            bk_biz_id=self.parent.alert.event.bk_biz_id,
+            strategy_id=self.parent.strategy.id,
+        )
 
     @cached_property
     def assignees(self):
@@ -808,12 +813,14 @@ class Alarm(BaseContextObject):
         if not self.latest_assign_group:
             # 最近一次没有的话，表示没有命中分派
             return None
-        route_path = base64.b64encode(f"#/alarm-dispatch?group_id={self.latest_assign_group}".encode()).decode(
+        route_path = base64.b64encode(f"#/alarm-dispatch?group_id={self.latest_assign_group}".encode("utf8")).decode(
             "utf8"
         )
         return urljoin(
             settings.BK_MONITOR_HOST,
-            f"route/?bizId={self.parent.business.bk_biz_id}&route_path={route_path}",
+            "route/?bizId={bk_biz_id}&route_path={route_path}".format(
+                bk_biz_id=self.parent.business.bk_biz_id, route_path=route_path
+            ),
         )
 
     @cached_property
@@ -823,7 +830,7 @@ class Alarm(BaseContextObject):
         return False
 
     @cached_property
-    def ai_setting_config(self) -> dict[str, dict[str, Any]] | None:
+    def ai_setting_config(self) -> Optional[Dict[str, Dict[str, Any]]]:
         try:
             return AIFeatureSettings.objects.get(bk_biz_id=self.parent.alert.event["bk_biz_id"]).config
         except AIFeatureSettings.DoesNotExist:

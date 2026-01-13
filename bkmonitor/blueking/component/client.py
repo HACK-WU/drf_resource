@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Component API Client
 """
 import json
@@ -21,7 +22,7 @@ except Exception:
 logger = logging.getLogger("component")
 
 
-class BaseComponentClient:
+class BaseComponentClient(object):
     """Base client class for component"""
 
     @classmethod
@@ -130,7 +131,7 @@ class BaseComponentClient:
 
     def __getattr__(self, key):
         if key not in self.available_collections:
-            return getattr(super(), key)
+            return getattr(super(BaseComponentClient, self), key)
 
         if key not in self._cached_collections:
             collection = self.available_collections[key]

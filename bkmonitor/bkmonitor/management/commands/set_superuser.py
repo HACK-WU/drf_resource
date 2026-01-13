@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -35,6 +36,6 @@ class Command(BaseCommand):
                 },
             )
             if is_created:
-                print(f"User({user.username}) is created as superuser.")
+                print("User({}) is created as superuser.".format(user.username))
             else:
-                print(f"User({user.username}) is updated as superuser.")
+                print("User({}) is updated as superuser.".format(user.username))

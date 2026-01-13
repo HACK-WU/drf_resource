@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -47,12 +48,12 @@ def get_local_ip():
         (addr, port) = csock.getsockname()
         csock.close()
         return addr
-    except OSError:
+    except socket.error:
         return "127.0.0.1"
 
 
 def split_list(raw_string):
-    if isinstance(raw_string, list | set):
+    if isinstance(raw_string, (list, set)):
         return raw_string
     re_obj = re.compile(r"\s*[;,]\s*")
     return [x for x in re_obj.split(raw_string) if x]
@@ -63,7 +64,7 @@ def expand_list(obj_list):
 
 
 def remove_blank(objs):
-    if isinstance(objs, list | set):
+    if isinstance(objs, (list, set)):
         return [str(obj) for obj in objs if obj]
     return objs
 
@@ -75,7 +76,7 @@ def remove_tag(text):
 
 
 def get_random_id():
-    return f"{arrow.now().timestamp}{random.randint(1000, 9999)}"
+    return "{}{}".format(arrow.now().timestamp, random.randint(1000, 9999))
 
 
 def _count_md5(content):
@@ -93,7 +94,7 @@ def count_md5(content, dict_sort=True):
     if dict_sort and isinstance(content, dict):
         # dict的顺序受到hash的影响，所以这里先排序再计算MD5
         return count_md5([(str(k), count_md5(content[k])) for k in sorted(content.keys())])
-    elif isinstance(content, list | tuple):
+    elif isinstance(content, (list, tuple)):
         content = sorted([count_md5(k) for k in content])
     elif isinstance(content, bytes):
         return _count_md5(content)

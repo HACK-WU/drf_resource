@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +17,7 @@ from urllib.parse import urlparse
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.translation import gettext as _
-from six.moves import urllib
+from six.moves import range, urllib
 
 from common.log import logger
 
@@ -25,7 +26,7 @@ from .api import QyWeiXinApi, WeiXinApi
 from .models import BkWeixinUser
 
 
-class WeixinAccountSingleton:
+class WeixinAccountSingleton(object):
     """
     单例基类
     """
@@ -96,7 +97,7 @@ class WeixinAccount(WeixinAccountSingleton):
             "agentid": weixin_settings.WEIXIN_AGENT_ID,
         }
         params = urllib.parse.urlencode(params)
-        redirect_uri = f"{self.WEIXIN_OAUTH_URL}?{params}#wechat_redirect"
+        redirect_uri = "{}?{}#wechat_redirect".format(self.WEIXIN_OAUTH_URL, params)
         return redirect_uri
 
     def redirect_weixin_login(self, request):
@@ -135,7 +136,7 @@ class WeixinAccount(WeixinAccountSingleton):
             request.session["WEIXIN_OAUTH_STATE_TIMESTAMP"] = None
             return True
         except Exception as e:
-            logger.exception(f"验证请求weixin code的 state参数出错： {e}")
+            logger.exception("验证请求weixin code的 state参数出错： %s" % e)
             return False
 
     def verfiy_weixin_oauth_code(self, request):

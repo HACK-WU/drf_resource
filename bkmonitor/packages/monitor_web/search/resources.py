@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 
 from monitor_web.search.handlers import INSTALLED_HANDLERS

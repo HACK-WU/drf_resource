@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,6 +13,7 @@ bcs 集群缓存管理器
 """
 
 import json
+from typing import Dict
 
 from alarm_backends.core.cache.base import CacheManager
 from drf_resource import api
@@ -49,7 +51,7 @@ class BcsClusterCacheManager(CacheManager):
         pipeline.execute()
 
     @classmethod
-    def get(cls, bcs_cluster_id: str) -> dict:
+    def get(cls, bcs_cluster_id: str) -> Dict:
         """
         获取集群信息
         """

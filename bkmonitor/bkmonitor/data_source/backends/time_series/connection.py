@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -49,7 +50,7 @@ class DatabaseConnection(BaseDatabaseConnection):
     def execute(self, sql, params):
         params = tuple(self.escape(arg) for arg in params)
         sql_str = sql % params
-        logger.info(f"BKSQL QUERY: {sql_str}")
+        logger.info("BKSQL QUERY: %s" % sql_str)
         with tracer.start_as_current_span("bksql") as span:
             span.set_attribute("bk.system", "bksql")
             span.set_attribute("bk.bksql.statement", sql_str)

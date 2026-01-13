@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +25,7 @@ class UpdateFailureShieldContentResource(Resource):
     """
 
     def __init__(self):
-        super().__init__()
+        super(UpdateFailureShieldContentResource, self).__init__()
 
     def perform_request(self, data):
         logger.info("start celery period task: update failure shield content")

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import json
 import logging
+from typing import Dict, Optional
 
 from django.conf import settings
 
@@ -27,10 +29,10 @@ class BkDataAccessor:
         self,
         bk_table_id: str,
         data_hub_name: str,
-        bk_biz_id: int | None = settings.DEFAULT_BKDATA_BIZ_ID,
-        vm_cluster: str | None = "",
-        vm_retention_time: str | None = VM_RETENTION_TIME,
-        desc: str | None = "",
+        bk_biz_id: Optional[int] = settings.DEFAULT_BKDATA_BIZ_ID,
+        vm_cluster: Optional[str] = "",
+        vm_retention_time: Optional[str] = VM_RETENTION_TIME,
+        desc: Optional[str] = "",
         timestamp_len: int = None,
     ):
         """
@@ -124,10 +126,10 @@ def _access(
     bk_table_id: str,
     data_hub_name: str,
     desc: str,
-    vm_cluster: str | None = "",
-    vm_retention_time: str | None = VM_RETENTION_TIME,
+    vm_cluster: Optional[str] = "",
+    vm_retention_time: Optional[str] = VM_RETENTION_TIME,
     timestamp_len: int = None,
-) -> dict:
+) -> Dict:
     """接入计算平台"""
     accessor = BkDataAccessor(
         bk_table_id=bk_table_id,
@@ -151,10 +153,10 @@ def _access(
 
 def access_vm(
     raw_data_name: str,
-    vm_cluster: str | None = "",
-    vm_retention_time: str | None = VM_RETENTION_TIME,
+    vm_cluster: Optional[str] = "",
+    vm_retention_time: Optional[str] = VM_RETENTION_TIME,
     timestamp_len: int = None,
-) -> dict:
+) -> Dict:
     """接入 vm 流程"""
     return _access(
         bk_table_id=raw_data_name,

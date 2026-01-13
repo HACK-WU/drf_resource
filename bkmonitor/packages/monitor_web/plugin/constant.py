@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -50,7 +51,7 @@ PLUGIN_TEMPLATES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 
 
 # config_json 字段类型选项
-class ParamMode:
+class ParamMode(object):
     # 采集器参数
     COLLECTOR = "collector"
     # 命令行选项参数
@@ -87,20 +88,20 @@ PROCESS_MATCH_TYPE_CHOICES = (
 )
 
 
-class NodemanRegisterStatus:
+class NodemanRegisterStatus(object):
     FAILED = "FAILED"
     RUNNING = "RUNNING"
     SUCCESS = "SUCCESS"
 
 
-class DebugStatus:
+class DebugStatus(object):
     INSTALL = "INSTALL"
     FETCH_DATA = "FETCH_DATA"
     FAILED = "FAILED"
     SUCCESS = "SUCCESS"
 
 
-class PluginType:
+class PluginType(object):
     EXPORTER = "Exporter"
     SCRIPT = "Script"
     JMX = "JMX"
@@ -114,26 +115,26 @@ class PluginType:
     K8S = "K8S"
 
 
-class ConflictMap:
+class ConflictMap(object):
     """用于插件导入的冲突提示，此处国际化在调用方进行"""
 
-    class VersionBelow:
+    class VersionBelow(object):
         id = 1
         info = _("导入版本不大于当前版本")
 
-    class PluginType:
+    class PluginType(object):
         id = 2
         info = _("插件类型冲突")
 
-    class RemoteCollectorConfig:
+    class RemoteCollectorConfig(object):
         id = 3
         info = _("远程采集配置项冲突")
 
-    class RelatedCollectorConfig:
+    class RelatedCollectorConfig(object):
         id = 4
         info = _("插件已关联%s个采集配置")
 
-    class DuplicatedPlugin:
+    class DuplicatedPlugin(object):
         id = 5
         info = _("导入插件与当前插件内容完全一致")
 

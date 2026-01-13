@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -437,7 +438,7 @@ class StrategyConfigListResource(Resource):
     """
 
     def __init__(self):
-        super().__init__()
+        super(StrategyConfigListResource, self).__init__()
         self.node_manager = None
         self.label_map = None
         self.shield_manager = None
@@ -464,7 +465,7 @@ class StrategyConfigListResource(Resource):
             try:
                 return json.loads(value)
             except Exception as e:
-                logger.exception(f"data_source_list参数错误, {e}")
+                logger.exception("data_source_list参数错误, %s" % e)
                 return []
 
     def get_label_msg(self, scenario):
@@ -1593,7 +1594,7 @@ class StrategyConfigResource(Resource):
                 raise ValidationError({self.get_resource_name(): {"request_data_invalid": request_serializer.errors}})
             return request_serializer.validated_data
 
-        return super().validate_request_data(request_data)
+        return super(StrategyConfigResource, self).validate_request_data(request_data)
 
     def handle_strategy_dict(self, strategy_dict):
         no_data_config = strategy_dict.pop("no_data_config", None)
@@ -1941,7 +1942,7 @@ class GetDimensionListResource(Resource):
             data_target = DataTargetMapping().get_data_target(table_msg["label"], data_source_label, data_type_label)
 
             if not result_table_id.startswith("system.") and not result_table_id.startswith(
-                f"{Scenario.UPTIME_CHECK}."
+                "{}.".format(Scenario.UPTIME_CHECK)
             ):
                 dimensions.append({"id": "bk_collect_config_id", "name": _("采集配置")})
 
@@ -1949,7 +1950,7 @@ class GetDimensionListResource(Resource):
                 dimensions.extend(DEFAULT_DIMENSIONS_MAP[data_target])
 
             # 编辑时HTTP/UDP/TCP仅允许对指定维度配置策略,ICMP开放所有维度,与metadata保持一致
-            if result_table_id.startswith(f"{Scenario.UPTIME_CHECK}."):
+            if result_table_id.startswith("{}.".format(Scenario.UPTIME_CHECK)):
                 if result_table_id.split(".")[1] != "icmp":
                     dimensions = DefaultDimensions.uptime_check
 

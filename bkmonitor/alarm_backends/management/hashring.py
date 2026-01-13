@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,9 +14,10 @@ from bisect import bisect_left
 from hashlib import md5
 
 import six
+from six.moves import range
 
 
-class HashRing:
+class HashRing(object):
     def __init__(self, nodes, num_vnodes=2 ** 16):
         self.nodes = nodes
 

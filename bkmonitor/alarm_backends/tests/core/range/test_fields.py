@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -14,7 +15,7 @@ import math
 from bkmonitor.utils.range.fields import DimensionField, IpDimensionField
 
 
-class TestDimensionField:
+class TestDimensionField(object):
     def test_get_value_from_data(self):
         dimension_field = DimensionField("key", "value")
 
@@ -71,7 +72,7 @@ class TestDimensionField:
         assert result[0] == 100
 
 
-class TestIpDimensionField:
+class TestIpDimensionField(object):
     def test_get_value_from_data(self):
         data = {
             "key": "1.1.1.1",

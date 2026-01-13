@@ -11,7 +11,7 @@ from metadata.tests.test_models import TestDataSource
 pytestmark = pytest.mark.django_db
 
 
-class TestBlackList:
+class TestBlackList(object):
     data_name = "exporter_redis"
     etl_config = "bk_exporter"
     operator = "operator"

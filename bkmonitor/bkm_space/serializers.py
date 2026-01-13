@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from django.utils.translation import gettext as _
 from rest_framework import serializers
@@ -8,7 +9,7 @@ from bkm_space.utils import parse_space_uid
 
 class SpaceUIDField(serializers.CharField):
     def run_validation(self, *args, **kwargs):
-        value = super().run_validation(*args, **kwargs)
+        value = super(SpaceUIDField, self).run_validation(*args, **kwargs)
         try:
             parse_space_uid(value)
         except ValueError:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 
-from unittest import mock
+import mock
 import pytest
 
 from alarm_backends.core.storage.redis_cluster import get_node_by_strategy_id
@@ -35,7 +36,7 @@ datapoint1 = DataPoint(1, 100000000, "percent", "item")
 datapoint0 = DataPoint(0, 100000000, "percent", "item")
 
 
-class TestAdvancedRingRatio:
+class TestAdvancedRingRatio(object):
     def test_detect_floor(self):
         with mock.patch(
             "alarm_backends.service.detect.strategy." "advanced_ring_ratio.AdvancedRingRatio.history_point_fetcher",

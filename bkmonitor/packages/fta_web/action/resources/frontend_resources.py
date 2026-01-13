@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -348,7 +349,7 @@ class RenderNoticeTemplate(Resource):
                 context["content"] = single_content[notice_way["type"]]
                 single = single.render(context)
             except Exception as e:
-                logger.info(f"template render error, {e}")
+                logger.info("template render error, {}".format(e))
                 single = custom_template
                 single_error = str(e)
 
@@ -359,7 +360,7 @@ class RenderNoticeTemplate(Resource):
                 context["content"] = multi_content[notice_way["type"]]
                 multi = multi.render(context)
             except Exception as e:
-                logger.info(f"template render error, {e}")
+                logger.info("template render error, {}".format(e))
                 multi = custom_template
                 multi_error = str(e)
 
@@ -786,7 +787,7 @@ class RegisterBkPlugin(Resource):
         # 2.解析蓝鲸插件部署信息
         deployed, plugin_code, plugin_info = parse_bk_plugin_deployed_info(response_data)
         if not deployed:
-            return f"failed: bk_plugin: [{plugin_code}] does not deployed"
+            return "failed: bk_plugin: [{}] does not deployed".format(plugin_code)
 
         # 3.根据 plugin_code update_or_create
         instance, created = ActionPlugin.origin_objects.update_or_create(plugin_key=plugin_code, defaults=plugin_info)

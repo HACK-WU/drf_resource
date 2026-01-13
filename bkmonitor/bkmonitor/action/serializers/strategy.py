@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 from collections import defaultdict
 from datetime import datetime
+from typing import Dict
 
 import arrow
 import pytz
@@ -57,7 +59,7 @@ from core.errors.user_group import DutyRuleNameExist, UserGroupNameExist
 
 class DateTimeField(serializers.CharField):
     def run_validators(self, value):
-        super().run_validators(value)
+        super(DateTimeField, self).run_validators(value)
         if value:
             try:
                 datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
@@ -72,7 +74,7 @@ class HandOffSettingsSerializer(serializers.Serializer):
 
     def to_internal_value(self, data):
         self.initial_data = data
-        return super().to_internal_value(data)
+        return super(HandOffSettingsSerializer, self).to_internal_value(data)
 
     def validate_date(self, value):
         if self.initial_data.get("rotation_type") == RotationType.WEEKLY and value not in set(
@@ -95,7 +97,7 @@ class HandOffSettingsSerializer(serializers.Serializer):
 
 class HandOffField(serializers.JSONField):
     def run_validators(self, value):
-        super().run_validators(value)
+        super(HandOffField, self).run_validators(value)
         if value:
             handoff_slz = HandOffSettingsSerializer(data=value)
             handoff_slz.is_valid(raise_exception=True)
@@ -136,7 +138,7 @@ class DutyTimeSerializer(serializers.Serializer):
 
     def to_internal_value(self, data):
         self.initial_data = data
-        return super().to_internal_value(data)
+        return super(DutyTimeSerializer, self).to_internal_value(data)
 
     def validate_work_days(self, value):
         value_set = set(value)
@@ -179,16 +181,16 @@ class BackupSerializer(serializers.Serializer):
 class DutyBaseInfoSlz(serializers.ModelSerializer):
     def __init__(self, instance=None, data=empty, **kwargs):
         self.user_list = kwargs.pop("user_list", {})
-        super().__init__(instance, data, **kwargs)
+        super(DutyBaseInfoSlz, self).__init__(instance, data, **kwargs)
 
     def __new__(cls, *args, **kwargs):
         duty_instances = args[0] if args else kwargs.get("instance", [])
         duty_instances = duty_instances or []
-        if isinstance(duty_instances, DutyPlan | DutyArrange):
+        if isinstance(duty_instances, (DutyPlan, DutyArrange)):
             duty_instances = [duty_instances]
         all_members = cls.get_all_members(duty_instances)
         if not all_members:
-            return super().__new__(cls, *args, **kwargs)
+            return super(DutyBaseInfoSlz, cls).__new__(cls, *args, **kwargs)
 
         # 新增 notice_user_detail 标记，获取用户中文名
         request = get_request(peaceful=True)
@@ -200,19 +202,19 @@ class DutyBaseInfoSlz(serializers.ModelSerializer):
                 )["results"]
                 kwargs["user_list"] = {user["username"]: user["display_name"] for user in user_list}
             except BaseException as error:
-                logger.info(f"query list users error {str(error)}")
-        return super().__new__(cls, *args, **kwargs)
+                logger.info("query list users error %s" % str(error))
+        return super(DutyBaseInfoSlz, cls).__new__(cls, *args, **kwargs)
 
     @classmethod
     def get_all_members(cls, instances):
         raise NotImplementedError("position NotImplementedError")
 
     @staticmethod
-    def get_all_recievers() -> dict[str, dict[str, dict]]:
+    def get_all_recievers() -> Dict[str, Dict[str, Dict]]:
         """
         获取用户组具体的用户
         """
-        receivers: dict[str, dict[str, dict]] = defaultdict(dict)
+        receivers: Dict[str, Dict[str, Dict]] = defaultdict(dict)
         try:
             for item in resource.notice_group.get_receiver():
                 receiver_type = item["id"]
@@ -249,7 +251,7 @@ class DutyBaseInfoSlz(serializers.ModelSerializer):
         return return_users
 
     @cached_property
-    def all_users(self) -> dict[str, dict[str, dict]]:
+    def all_users(self) -> Dict[str, Dict[str, Dict]]:
         """
         接收人信息
         """
@@ -315,7 +317,7 @@ class DutyArrangeSlz(DutyBaseInfoSlz):
         return all_members
 
     def to_representation(self, instance):
-        data = super().to_representation(instance)
+        data = super(DutyArrangeSlz, self).to_representation(instance)
         # 添加直接通知的用户
         data["users"] = self.users_representation(data["users"])
         # 添加轮值用户
@@ -328,7 +330,7 @@ class DutyArrangeSlz(DutyBaseInfoSlz):
 
     def to_internal_value(self, data):
         self.initial_data = data
-        ret = super().to_internal_value(data)
+        ret = super(DutyArrangeSlz, self).to_internal_value(data)
         # 添加hash字段
         ret = self.calc_hash(ret)
         return ret
@@ -384,7 +386,7 @@ class DutyPlanSlz(DutyBaseInfoSlz):
         return all_members
 
     def to_representation(self, instance):
-        data = super().to_representation(instance)
+        data = super(DutyPlanSlz, self).to_representation(instance)
         data["is_active"] = instance.is_active_plan()
         data["users"] = self.users_representation(data["users"])
         return data
@@ -431,7 +433,7 @@ class DutyRuleSlz(serializers.ModelSerializer):
 
     def __init__(self, instance=None, data=empty, **kwargs):
         self.rule_group_dict = kwargs.pop("rule_group_dict", {})
-        super().__init__(instance, data, **kwargs)
+        super(DutyRuleSlz, self).__init__(instance, data, **kwargs)
 
     def __new__(cls, *args, **kwargs):
         if kwargs.get("many", False):
@@ -441,7 +443,7 @@ class DutyRuleSlz(serializers.ModelSerializer):
         return super().__new__(cls, *args, **kwargs)
 
     def to_representation(self, instance):
-        data = super().to_representation(instance)
+        data = super(DutyRuleSlz, self).to_representation(instance)
         # 获取到user_groups
         data["user_groups"] = list(set(self.rule_group_dict.get(instance.id, [])))
         data["user_groups_count"] = len(data["user_groups"])
@@ -493,7 +495,7 @@ class DutyRuleDetailSlz(DutyRuleSlz):
         duty_arranges = self.validated_data.pop("duty_arranges", [])
         # DutyRule Model保存的仅仅是元数据信息，轮值安排需要单独保存
         # 这一步就是保存元数据信息
-        super().save(**kwargs)
+        super(DutyRuleDetailSlz, self).save(**kwargs)
 
         # 批量创建轮值安排
         DutyArrange.bulk_create(duty_arranges, self.instance)
@@ -520,7 +522,7 @@ class DutyRuleDetailSlz(DutyRuleSlz):
         return self.instance
 
     def to_internal_value(self, data):
-        ret = super().to_internal_value(data)
+        ret = super(DutyRuleDetailSlz, self).to_internal_value(data)
         # 生成hash字段，
         ret = self.calc_hash(ret)
         return ret
@@ -540,7 +542,7 @@ class DutyRuleDetailSlz(DutyRuleSlz):
         return internal_data
 
     def to_representation(self, instance):
-        data = super().to_representation(instance)
+        data = super(DutyRuleDetailSlz, self).to_representation(instance)
         # 获取到关联的告警组ID
         data["user_groups"] = list(
             set(DutyRuleRelation.objects.filter(duty_rule_id=instance.id).values_list("user_group_id", flat=True))
@@ -581,7 +583,7 @@ class PreviewSerializer(serializers.Serializer):
         参数转换
         """
         self.initial_data = data
-        internal_data = super().to_internal_value(data)
+        internal_data = super(PreviewSerializer, self).to_internal_value(data)
         # 数据返回增加对应的存储记录
         internal_data["instance"] = self.get_instance(internal_data) if internal_data.get("id") else None
         # 如果是预览的话，可以随便设置一个名字
@@ -660,7 +662,7 @@ class UserGroupSlz(serializers.ModelSerializer):
         self.strategy_count_of_given_type = kwargs.pop("strategy_count_of_given_type", {})
         self.strategy_count_of_all = kwargs.pop("strategy_count_of_all", {})
         self.rule_count = kwargs.pop("rule_count", {})
-        super().__init__(instance=instance, data=data, **kwargs)
+        super(UserGroupSlz, self).__init__(instance=instance, data=data, **kwargs)
 
     def __new__(cls, *args, **kwargs):
         request = kwargs.get("context", {}).get("request")
@@ -677,7 +679,7 @@ class UserGroupSlz(serializers.ModelSerializer):
                 kwargs["rule_count"] = get_user_group_assign_rules(user_group_ids)
                 kwargs["strategy_count_of_given_type"] = kwargs["strategy_count_of_all"]
 
-        return super().__new__(cls, *args, **kwargs)
+        return super(UserGroupSlz, cls).__new__(cls, *args, **kwargs)
 
     @staticmethod
     def get_group_users_without_duty(groups, group_user_mappings):
@@ -739,7 +741,7 @@ class UserGroupSlz(serializers.ModelSerializer):
                     break
 
     def to_representation(self, instance):
-        data = super().to_representation(instance)
+        data = super(UserGroupSlz, self).to_representation(instance)
         data["users"] = self.group_user_mappings.get(instance.id, [])
         data["channels"] = data.get("channels") or NoticeChannel.DEFAULT_CHANNELS
         data["strategy_count"] = len(set(self.strategy_count_of_given_type.get(instance.id, [])))
@@ -865,7 +867,7 @@ class UserGroupDetailSlz(UserGroupSlz):
     def __init__(self, instance=None, data=empty, **kwargs):
         self.duty_arranges_mapping = kwargs.pop("duty_arranges_mapping", {})
         self.duty_rules_mapping = kwargs.pop("duty_rules", {})
-        super().__init__(instance=instance, data=data, **kwargs)
+        super(UserGroupDetailSlz, self).__init__(instance=instance, data=data, **kwargs)
 
     def __new__(cls, *args, **kwargs):
         if kwargs.get("many", False):
@@ -891,10 +893,10 @@ class UserGroupDetailSlz(UserGroupSlz):
             for item in duty_arranges:
                 duty_arranges_mapping[item["user_group_id"]].append(item)
             kwargs["duty_arranges_mapping"] = duty_arranges_mapping
-        return super().__new__(cls, *args, **kwargs)
+        return super(UserGroupDetailSlz, cls).__new__(cls, *args, **kwargs)
 
     def to_representation(self, instance: UserGroup):
-        data = super().to_representation(instance)
+        data = super(UserGroupDetailSlz, self).to_representation(instance)
         if self.duty_arranges_mapping:
             data["duty_arranges"] = self.duty_arranges_mapping.get(instance.id, [])
         else:
@@ -936,7 +938,7 @@ class UserGroupDetailSlz(UserGroupSlz):
             user_list = {user["username"]: user["display_name"] for user in user_list}
         except Exception as error:
             # 有异常打印日志，默认为空，不做翻译
-            logger.exception(f"query list users error {str(error)}")
+            logger.exception("query list users error %s" % str(error))
             user_list = {}
         all_users = DutyBaseInfoSlz.get_all_recievers()
         return DutyBaseInfoSlz.translate_user_display(users, all_users, user_list)
@@ -945,7 +947,7 @@ class UserGroupDetailSlz(UserGroupSlz):
         validated_data["hash"] = ""
         validated_data["snippet"] = ""
         validated_data["mention_type"] = 1
-        return super().update(instance, validated_data)
+        return super(UserGroupDetailSlz, self).update(instance, validated_data)
 
     def save(self, **kwargs):
         """
@@ -962,7 +964,7 @@ class UserGroupDetailSlz(UserGroupSlz):
         self.validated_data["mention_type"] = 1
 
         # step 1: 调用父类的save方法保存用户组信息
-        super().save(**kwargs)
+        super(UserGroupDetailSlz, self).save(**kwargs)
 
         # step 3: 如果'duty_arranges'字段有内容（即直接通知），则创建并更新轮值记录
         # 注意：如果是轮值，传的直接是duty_id,轮值规则ID

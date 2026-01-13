@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,4 +23,4 @@ class Command(BaseCommand):
     def handle(self, *strategy_ids, **kwargs):
         strategy_ids = [int(s_id) for s_id in strategy_ids[0].split(",") if s_id] if strategy_ids else None
         result = ActionConverter().migrate(strategy_ids)
-        print(f"[ActionConverter] migrate result: {result}")
+        print("[ActionConverter] migrate result: %s" % result)

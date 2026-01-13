@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +13,7 @@ from alarm_backends.core.storage.redis import CACHE_BACKEND_CONF_MAP, Cache
 from bkmonitor.models import CacheNode, CacheRouter
 
 
-class RedisNode:
+class RedisNode(object):
     redis_type = "RedisCache"
 
     def __init__(self, host, port, password=None):
@@ -58,7 +59,7 @@ class SentinelRedisNode(RedisNode):
         return f"{self.redis_type}-{self.host}:{self.port} {self.master_name}"
 
     def gen_connection_conf(self, cache_backend):
-        conf = super().gen_connection_conf(cache_backend)
+        conf = super(SentinelRedisNode, self).gen_connection_conf(cache_backend)
         if self.sentinel_password:
             conf["sentinel_password"] = self.sentinel_password
         return conf
@@ -89,7 +90,7 @@ def setup_sentinel_client(node, backend):
     return sentinel_node.instance(backend)
 
 
-class KeyRouterMixin:
+class KeyRouterMixin(object):
     def strategy_id_from_command(self, *args, **kwargs):
         key = self.key_from_command(*args, **kwargs)
         return self.strategy_id_from_key(key)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,13 +8,14 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import List
 
 from bkmonitor.models import ActionInstance
 from bkmonitor.documents import AlertDocument
 from .shielder import AlertShieldConfigShielder, AlarmTimeShielder, GlobalShielder
 
 
-class ShieldManager:
+class ShieldManager(object):
     """
     屏蔽管理
     """
@@ -21,7 +23,7 @@ class ShieldManager:
     Shielders = (AlertShieldConfigShielder, AlarmTimeShielder)
 
     @classmethod
-    def shield(cls, action_instance: ActionInstance, alerts: list[dict] = None):
+    def shield(cls, action_instance: ActionInstance, alerts: List[dict] = None):
         """
         屏蔽
         :param alerts: 告警的快照

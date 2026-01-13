@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +13,7 @@ specific language governing permissions and limitations under the License.
 BIZ_ID_FIELD_NAMES = ["bk_biz_id", "biz_id", "cc_biz_id", "app_id", "bizId"]
 
 
-class TargetObjectType:
+class TargetObjectType(object):
     """
     目标对象类型
     """
@@ -22,7 +23,7 @@ class TargetObjectType:
     CLUSTER = "CLUSTER"
 
 
-class TargetNodeType:
+class TargetNodeType(object):
     """
     目标节点类型
     """

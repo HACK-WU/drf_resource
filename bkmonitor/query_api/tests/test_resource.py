@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 
-from unittest import mock
+import mock
 import pytest
 from influxdb.resultset import ResultSet
 
@@ -39,14 +40,14 @@ def test_get_ts_data_resource():
         with mock.patch(
             "metadata.models.ResultTable.get_result_table",
             return_value=influxdb.ResultTable(
-                table_id=f"{database}.{table}", schema_type="fixed", default_storage="mysql"
+                table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="mysql"
             ),
         ):
             get_ts_data(sql="select count(*) from 2_system_cpu_summary where time>'today'")
 
     # mock requirements
     mocked_rt = influxdb.ResultTable(
-        table_id=f"{database}.{table}", schema_type="fixed", default_storage="influxdb"
+        table_id="{}.{}".format(database, table), schema_type="fixed", default_storage="influxdb"
     )
     mocked_cluster_info = gen_mocked_cluster_info(database, table)
 

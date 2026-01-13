@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ import itertools
 import logging
 import operator
 from functools import reduce
+from typing import Dict
 
 from django.core.exceptions import EmptyResultSet
 from django.db import models
@@ -32,7 +34,7 @@ logger = logging.getLogger("kubernetes")
 class BCSNodeManager(BCSBaseManager):
     def get_queryset(self):
         # 忽略 eks节点
-        return super().get_queryset().exclude(name__startswith="eklet-")
+        return super(BCSNodeManager, self).get_queryset().exclude(name__startswith="eklet-")
 
     def filter_by_biz_id(
         self,
@@ -364,7 +366,7 @@ class BCSNode(BCSBase, BCSBaseUsageResources):
         return []
 
     @staticmethod
-    def get_monitor_status_by_usage(bk_biz_id: int, bcs_cluster_id: str) -> dict:
+    def get_monitor_status_by_usage(bk_biz_id: int, bcs_cluster_id: str) -> Dict:
         """根据cpu资源获取数据状态 ."""
         params = {
             "bk_biz_id": bk_biz_id,

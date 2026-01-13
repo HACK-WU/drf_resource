@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,7 +30,7 @@ from monitor_api import filtersets, models, serializers
 from utils.host_index_backend import host_index_backend
 
 
-class NestedRouterMixin:
+class NestedRouterMixin(object):
     def _nested_router_patch(self, **kwargs):
         queryset = self.get_queryset()
         for k, v in six.iteritems(kwargs):
@@ -46,11 +47,11 @@ class NestedRouterMixin:
 
     def list(self, request, *args, **kwargs):
         self._nested_router_patch(**kwargs)
-        return super().list(request, *args, **kwargs)
+        return super(NestedRouterMixin, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
         self._nested_router_patch(**kwargs)
-        return super().retrieve(request, *args, **kwargs)
+        return super(NestedRouterMixin, self).retrieve(request, *args, **kwargs)
 
 
 def get_viewset(model, read_only=True):
@@ -60,9 +61,9 @@ def get_viewset(model, read_only=True):
     class ModelViewSet(NestedRouterMixin, viewsets.ModelViewSet):
         ordering_fields = "__all__"
 
-    cls_name = f"{model.__name__}ViewSet"
-    filterset_name = f"{model.__name__}FilterSet"
-    serializer_name = f"{model.__name__}Serializer"
+    cls_name = "%sViewSet" % model.__name__
+    filterset_name = "%sFilterSet" % model.__name__
+    serializer_name = "%sSerializer" % model.__name__
     if read_only:
         base = ReadOnlyModelViewSet
     else:
@@ -99,10 +100,10 @@ class UserConfigViewSet(NestedRouterMixin, viewsets.ModelViewSet):
         username = self.request.user.username
         request.data.update({"username": username})
         request.POST._mutable = mutable
-        return super().create(request, *args, **kwargs)
+        return super(UserConfigViewSet, self).create(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super(UserConfigViewSet, self).get_queryset()
         return queryset.filter(username=self.request.user.username)
 
 
@@ -115,7 +116,7 @@ class AlarmTypeViewSet(ListModelMixin, GenericViewSet):
     @classonlymethod
     def as_view(cls, actions=None, **initkwargs):
         # 登录豁免
-        view = super().as_view(actions=actions, **initkwargs)
+        view = super(AlarmTypeViewSet, cls).as_view(actions=actions, **initkwargs)
         return login_exempt(view)
 
     def list(self, request, *args, **kwargs):
@@ -195,8 +196,8 @@ class AlarmTypeViewSet(ListModelMixin, GenericViewSet):
         info_list += [
             dict(
                 monitor_target="",
-                description=_("物理机") + f"-{fields.get(_t, _t)}",
-                monitor_type=f"{_t}",
+                description=_("物理机") + "-%s" % fields.get(_t, _t),
+                monitor_type="%s" % _t,
                 scenario=_("组件"),
             )
             for _t in ["cpu", "disk", "net", "mem", "system_env", "process"]

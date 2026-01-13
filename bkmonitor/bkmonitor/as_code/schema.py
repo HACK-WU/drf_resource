@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,6 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import Dict
 
 from schema import And, Optional, Or, Regex, Schema, SchemaError, Use
 
@@ -75,7 +77,7 @@ BkMonitorQuerySchema = Schema(
 
 class QuerySchema(Schema):
     allowed_type = ["bk_monitor"]
-    schemas: dict[str, Schema] = {"bk_monitor": BkMonitorQuerySchema}
+    schemas: Dict[str, Schema] = {"bk_monitor": BkMonitorQuerySchema}
 
     def validate(self, data, **kwargs):
         query_type = data.get("type", "bk_monitor")
@@ -93,7 +95,7 @@ StrategySchema = Schema(
         Optional(
             "version",
             default=MinVersion.STRATEGY,
-            description=f"策略支持版本号范围：{MinVersion.STRATEGY}-{MaxVersion.STRATEGY}",
+            description="策略支持版本号范围：{}-{}".format(MinVersion.STRATEGY, MaxVersion.STRATEGY),
         ): And(Use(str), lambda s: MinVersion.STRATEGY <= s <= MaxVersion.STRATEGY),
         Optional("labels", default=lambda: []): [str],
         Optional("enabled", default=True): bool,
@@ -207,7 +209,7 @@ UserGroupSchema = Schema(
         Optional(
             "version",
             default=MinVersion.USER_GROUP,
-            description=f"通知组支持版本号范围：{MinVersion.USER_GROUP}-{MaxVersion.USER_GROUP}",
+            description="通知组支持版本号范围：{}-{}".format(MinVersion.USER_GROUP, MaxVersion.USER_GROUP),
         ): And(Use(str), lambda s: MinVersion.USER_GROUP <= s <= MaxVersion.USER_GROUP),
         Optional("users", default=lambda: []): [str],
         Optional("channels", default=lambda: []): [str],
@@ -282,7 +284,7 @@ ActionSchema = Schema(
         Optional(
             "version",
             default=MinVersion.ACTION,
-            description=f"处理套餐支持版本号范围：{MinVersion.ACTION}-{MaxVersion.ACTION}",
+            description="处理套餐支持版本号范围：{}-{}".format(MinVersion.ACTION, MaxVersion.ACTION),
         ): And(Use(str), lambda s: MinVersion.ACTION <= s <= MaxVersion.ACTION),
         "name": str,
         Optional("description", default=""): str,

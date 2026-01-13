@@ -99,7 +99,7 @@ _lr_action_items = {
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
     for _x, _y in zip(_v[0], _v[1]):
-        if _x not in _lr_action:
+        if not _x in _lr_action:
             _lr_action[_x] = {}
         _lr_action[_x][_k] = _y
 del _lr_action_items
@@ -122,7 +122,7 @@ _lr_goto_items = {
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
     for _x, _y in zip(_v[0], _v[1]):
-        if _x not in _lr_goto:
+        if not _x in _lr_goto:
             _lr_goto[_x] = {}
         _lr_goto[_x][_k] = _y
 del _lr_goto_items

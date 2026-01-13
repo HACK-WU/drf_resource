@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -243,7 +244,7 @@ class HostIntelligenAnomalyBaseResource(Resource):
         biz_ai_setting = AiSetting(bk_biz_id=bk_biz_id)
 
         if not biz_ai_setting.multivariate_anomaly_detection.host.is_access_aiops():
-            logger.error(f"bk_biz_id({bk_biz_id}) host scene not access aiops")
+            logger.error("bk_biz_id({}) host scene not access aiops".format(bk_biz_id))
             return []
 
         # 如果有配置的策略ID，则从策略中获取需要查询的结果表ID

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -41,7 +42,7 @@ def p_expression(p):
     elif len(p) == 4:
         expression = []
         for token in p[1:]:
-            if isinstance(token, tuple | list):
+            if isinstance(token, (tuple, list)):
                 expression.extend(token)
             else:
                 expression.append(token)

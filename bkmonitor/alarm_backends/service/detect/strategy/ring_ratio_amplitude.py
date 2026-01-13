@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -41,7 +42,7 @@ class RingRatioAmplitude(SimpleRingRatio):
         )
 
     def gen_anomaly_point(self, data_point, detect_result, level, auto_format=True):
-        ap = super().gen_anomaly_point(data_point, detect_result, level)
+        ap = super(RingRatioAmplitude, self).gen_anomaly_point(data_point, detect_result, level)
         if auto_format:
             anomaly_message_prefix, anomaly_message_suffix = self.anomaly_message_template_tuple(data_point)
             ap.anomaly_message = anomaly_message_prefix + self._format_message(data_point) + anomaly_message_suffix

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -32,7 +33,7 @@ class BaseAbnormalPushProcessor(six.with_metaclass(ABCMeta, object)):
             if outputs:
                 outputs_data = [json.dumps(i) for i in outputs]
                 anomaly_count += len(outputs_data)
-                anomaly_signal_list.append(f"{strategy_id}.{item_id}")
+                anomaly_signal_list.append("{strategy_id}.{item_id}".format(strategy_id=strategy_id, item_id=item_id))
 
                 anomaly_queue_key = key.ANOMALY_LIST_KEY.get_key(strategy_id=strategy_id, item_id=item_id)
                 pipeline.lpush(anomaly_queue_key, *outputs_data)

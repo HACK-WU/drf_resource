@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -38,7 +39,7 @@ class TailSamplingFlow(ApmFlow):
     _STORAGE_REGISTRY_AREA_CODE = settings.APM_APP_BKDATA_STORAGE_REGISTRY_AREA_CODE
 
     def __init__(self, trace_datasource, config):
-        super().__init__(
+        super(TailSamplingFlow, self).__init__(
             trace_datasource.bk_biz_id, trace_datasource.app_name, trace_datasource.bk_data_id, config
         )
 
@@ -60,7 +61,7 @@ class TailSamplingFlow(ApmFlow):
 
     @property
     def cleans_names(self):
-        return "bkapm_tail"
+        return f"bkapm_tail"
 
     @property
     def cleans_fields(self):
@@ -247,7 +248,7 @@ class TailSamplingFlow(ApmFlow):
                 "geog_area_code": self._STORAGE_REGISTRY_AREA_CODE,
                 "category": "es",
                 "provider": "user",
-                "purpose": "此集群由APM创建",
+                "purpose": f"此集群由APM创建",
                 "share": False,
                 "admin": [settings.APM_APP_BKDATA_OPERATOR],
                 "tag": [],
@@ -304,7 +305,7 @@ class TailSamplingFlow(ApmFlow):
         self.logger.info(f"es_extra_data collect, cluster_name: {es_extra_data['cluster_name']}")
 
         # Step2: 获取计算节点代码
-        with open(self._FLINK_CODE_FILENAME, encoding="utf-8") as f:
+        with open(self._FLINK_CODE_FILENAME, "r", encoding="utf-8") as f:
             content = f.read()
 
-        return super().flow_instance(es_extra_data=es_extra_data, flink_code=content)
+        return super(TailSamplingFlow, self).flow_instance(es_extra_data=es_extra_data, flink_code=content)

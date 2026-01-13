@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,6 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+import typing
 from dataclasses import asdict, dataclass, field
 
 from dacite import from_dict
@@ -37,7 +39,7 @@ class DeploymentContent(_BaseContent):
     replicas: int = None
     image: str = None
     image_name: str = None
-    ports: list[_DeploymentSpecPort] = field(default_factory=list)
+    ports: typing.List[_DeploymentSpecPort] = field(default_factory=list)
 
     workload_type: str = WorkloadType.DEPLOYMENT.value
 
@@ -47,13 +49,13 @@ class _ServicePort:
     name: str
     port: int
     target_port: int
-    protocol: str | None
-    node_port: int | None
+    protocol: typing.Union[str, None]
+    node_port: typing.Union[int, None]
 
 
 @dataclass
 class ServiceContent(_BaseContent):
-    ports: list[_ServicePort] = field(default_factory=list)
+    ports: typing.List[_ServicePort] = field(default_factory=list)
     type: str = None
     workload_type: str = WorkloadType.SERVICE.value
 

@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 from dataclasses import asdict, dataclass, fields
 from enum import Enum
+from typing import Union
 
 from django.conf import settings
 
@@ -44,9 +46,9 @@ class Space:
     space_id: str
     space_name: str
     status: str
-    space_code: None | str
+    space_code: Union[None, str]
     space_uid: str
-    type_name: None | str
+    type_name: Union[None, str]
     bk_biz_id: int
     is_demo: bool = False
     time_zone: str = "Asia/Shanghai"

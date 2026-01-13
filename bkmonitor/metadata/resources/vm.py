@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 from collections import OrderedDict
+from typing import Dict
 
 from django.conf import settings
 from django.db.transaction import atomic
@@ -34,7 +36,7 @@ class CreateVmCluster(Resource):
         description = serializers.CharField(required=False, label="集群描述", default="vm 集群")
         is_default_cluster = serializers.BooleanField(required=False, label="是否设置为默认集群", default=False)
 
-    def perform_request(self, data: OrderedDict) -> dict:
+    def perform_request(self, data: OrderedDict) -> Dict:
         # 如果不设置为默认集群，则直接创建记录即可
         data["cluster_type"] = models.ClusterInfo.TYPE_VM
         if not data["is_default_cluster"]:
@@ -60,7 +62,7 @@ class QueryVmDatalink(Resource):
     class RequestSerializer(serializers.Serializer):
         bk_data_id = serializers.IntegerField(required=True, label="数据源 ID")
 
-    def perform_request(self, data: OrderedDict) -> dict:
+    def perform_request(self, data: OrderedDict) -> Dict:
         return query_vm_datalink(data["bk_data_id"])
 
 
@@ -69,7 +71,7 @@ class QueryVmRtBySpace(Resource):
         space_type = serializers.CharField(required=True, label="空间类型")
         space_id = serializers.CharField(required=True, label="空间 ID")
 
-    def perform_request(self, data: OrderedDict) -> dict:
+    def perform_request(self, data: OrderedDict) -> Dict:
         # 通过空间转换业务ID
         biz_id = models.Space.objects.get_biz_id_by_space(space_type=data["space_type"], space_id=data["space_id"])
         if not biz_id:
@@ -106,7 +108,7 @@ class QueryBcsClusterVmTableIds(Resource):
     class RequestSerializer(serializers.Serializer):
         bcs_cluster_id = serializers.CharField(required=True, label="BCS 集群ID")
 
-    def perform_request(self, data: OrderedDict) -> dict:
+    def perform_request(self, data: OrderedDict) -> Dict:
         return query_bcs_cluster_vm_rts(data["bcs_cluster_id"])
 
 
@@ -117,7 +119,7 @@ class SwitchKafkaCluster(Resource):
         vm_table_id = serializers.CharField(required=False, allow_blank=True, label="VM结果表ID")
         kafka_cluster_id = serializers.IntegerField(required=True, label="要切换的kafka集群ID")
 
-        def validate(self, attrs: OrderedDict) -> dict:
+        def validate(self, attrs: OrderedDict) -> Dict:
             # 三个字段不能全为空， table_id 优先级最高，bk_base_data_id次之，最后是 vm 的结果表 id
             if not (attrs.get("table_id") or attrs.get("bk_base_data_id") or attrs.get("vm_table_id")):
                 raise ValidationError("params [table_id], [bk_base_data_id]及[vm_table_id] is null")

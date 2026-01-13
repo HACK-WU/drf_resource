@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +11,7 @@ specific language governing permissions and limitations under the License.
 
 
 from django.db.models.query import QuerySet
-from unittest.mock import PropertyMock
+from mock import PropertyMock
 
 from bkmonitor.models import Item, NoticeGroup, Strategy
 from drf_resource import resource
@@ -18,7 +19,7 @@ from bkmonitor.strategy.strategy import StrategyConfig
 from monitor_web.models.uptime_check import UptimeCheckTask
 
 
-class TestStrategyConfigDetailResource:
+class TestStrategyConfigDetailResource(object):
     def test_get_strategy_detail(self, mocker):
         item_instance = Item()
         item_instance.data_type_label = "time_series"

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ specific language governing permissions and limitations under the License.
 import json
 import logging
 import time
+from typing import List
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -44,7 +46,7 @@ workon bkmonitorv3-monitor
 """
 
 
-def record_event(action: str, item_list: list, item_func=lambda item: item):
+def record_event(action: str, item_list: List, item_func=lambda item: item):
     def dumy_item_func(x):
         return ""
 
@@ -84,7 +86,7 @@ class DebugAccessDataProcess(AccessDataProcess):
     debug_points_num = 10
 
     def __init__(self, strategy_group_key, *args, **kwargs):
-        super().__init__(strategy_group_key, *args, **kwargs)
+        super(DebugAccessDataProcess, self).__init__(strategy_group_key, *args, **kwargs)
         self.strategy_id = int(kwargs.pop("strategy_id"))
 
     def __call__(self, from_timestamp, until_timestamp, **filters):
@@ -138,7 +140,7 @@ class DebugAccessDataProcess(AccessDataProcess):
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        super().add_arguments(parser)
+        super(Command, self).add_arguments(parser)
         parser.add_argument("-s", dest="strategy_id", help="strategy id", required=True)
         parser.add_argument("--from", type=int)
         parser.add_argument("--until", type=int)
@@ -175,7 +177,7 @@ class Command(BaseCommand):
         print(f"---------strategy({strategy_id}) to group_key----------")
         strategy = StrategyCacheManager.get_strategy_by_id(strategy_id)
         if not strategy:
-            print(f"strategy({strategy_id}) no config, please confirm that the strategy_id is correct.")
+            print("strategy({}) no config, please confirm that the strategy_id is correct.".format(strategy_id))
             return
 
         for item in strategy["items"]:

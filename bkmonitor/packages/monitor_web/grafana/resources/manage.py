@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +11,7 @@ specific language governing permissions and limitations under the License.
 import json
 from collections import defaultdict
 from copy import deepcopy
-from typing import Any
+from typing import Any, Dict
 
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
@@ -97,7 +98,7 @@ class GetDirectoryTree(Resource):
             request, None, params["bk_biz_id"], force_check=True
         )
 
-        folders: dict[int, dict] = defaultdict(lambda: {"dashboards": []})
+        folders: Dict[int, Dict] = defaultdict(lambda: {"dashboards": []})
 
         # 补充默认目录
         folders[0].update(
@@ -424,7 +425,7 @@ class MigrateOldPanels(Resource):
         dashboard_uid = serializers.CharField(label="仪表盘UID", required=True)
 
     @staticmethod
-    def graph_to_timeseries(panel: dict):
+    def graph_to_timeseries(panel: Dict):
         """
         将旧版 graph 面板 迁移到新版本的 timeseries 面板
         """
@@ -539,7 +540,7 @@ class MigrateOldPanels(Resource):
             panel["fieldConfig"]["overrides"] = overrides
 
     @staticmethod
-    def oldtable_to_newtable(panel: dict):
+    def oldtable_to_newtable(panel: Dict):
         """
         将旧版 table 面板 迁移到新版本的 table 面板
         """
@@ -596,7 +597,7 @@ class MigrateOldPanels(Resource):
 
             panel["fieldConfig"]["overrides"].append(override)
 
-    def migrate_panel(self, panel: dict, is_migrate: bool):
+    def migrate_panel(self, panel: Dict, is_migrate: bool):
         """
         将旧版 panels 迁移到新版本
         """
@@ -665,7 +666,7 @@ class GetRelatedStrategy(Resource):
         dashboard_uid = serializers.CharField(label="仪表盘UID")
         panel_id = serializers.IntegerField(label="图表ID", required=False)
 
-    def perform_request(self, params: dict[str, Any]):
+    def perform_request(self, params: Dict[str, Any]):
         strategies = StrategyModel.objects.filter(
             bk_biz_id=params["bk_biz_id"],
             type=StrategyModel.StrategyType.Dashboard,

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +13,7 @@ specific language governing permissions and limitations under the License.
 import re
 
 
-class GroupId:
+class GroupId(object):
     """
     CMDB 组名称
     """
@@ -25,7 +26,7 @@ class GroupId:
     bk_biz_notify_receiver = "bk_biz_notify_receiver"
 
 
-class StaffChoice:
+class StaffChoice(object):
     """
     人员选择
     """
@@ -34,7 +35,7 @@ class StaffChoice:
     group = "group"
 
 
-class BuildInBizType:
+class BuildInBizType(object):
     ALL = "all"
     NOTIFY = "notify"
     SETTINGS = "settings"

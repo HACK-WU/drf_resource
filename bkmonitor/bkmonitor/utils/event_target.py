@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 
-class BaseKeyGenerator:
+class BaseKeyGenerator(object):
     """
     生成事件的Target Key
     """
@@ -31,7 +32,7 @@ class HostKeyGenerator(BaseKeyGenerator):
 
     @classmethod
     def get_key(cls, ip, bk_cloud_id):
-        return f"{cls.PREFIX}|{ip}|{bk_cloud_id}"
+        return "{}|{}|{}".format(cls.PREFIX, ip, bk_cloud_id)
 
     @classmethod
     def parse(cls, target_key):
@@ -49,7 +50,7 @@ class ServiceInstanceKeyGenerator(BaseKeyGenerator):
 
     @classmethod
     def get_key(cls, instance_id):
-        return f"{cls.PREFIX}|{instance_id}"
+        return "{}|{}".format(cls.PREFIX, instance_id)
 
     @classmethod
     def parse(cls, target_key):
@@ -68,7 +69,7 @@ class TopoKeyGenerator(BaseKeyGenerator):
 
     @classmethod
     def get_key(cls, bk_obj_id, bk_inst_id):
-        return f"{cls.PREFIX}|{bk_obj_id}|{bk_inst_id}"
+        return "{}|{}|{}".format(cls.PREFIX, bk_obj_id, bk_inst_id)
 
     @classmethod
     def parse(cls, target_key):

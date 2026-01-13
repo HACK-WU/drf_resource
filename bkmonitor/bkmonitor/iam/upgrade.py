@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ specific language governing permissions and limitations under the License.
 权限升级
 """
 import logging
+from typing import List
 
 from django.conf import settings
 
@@ -102,7 +104,7 @@ class UpgradeManager:
             self.upgrade_by_business(bk_biz_id)
 
     def grant_instance_permission(
-        self, user: str, actions: list[ActionMeta], resource_meta: ResourceMeta, instances: list
+        self, user: str, actions: List[ActionMeta], resource_meta: ResourceMeta, instances: List
     ):
         """
         资源实例授权

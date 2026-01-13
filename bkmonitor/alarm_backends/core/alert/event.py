@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -119,8 +120,8 @@ class Event:
         for tag in tags:
             if isinstance(tag["value"], dict):
                 value = json.dumps(tag["value"])
-            elif isinstance(tag["value"], list | tuple):
-                value = [json.dumps(v) if isinstance(v, dict | list) else v for v in tag["value"]]
+            elif isinstance(tag["value"], (list, tuple)):
+                value = [json.dumps(v) if isinstance(v, (dict, list)) else v for v in tag["value"]]
             else:
                 value = tag["value"]
             cleaned_tag = {

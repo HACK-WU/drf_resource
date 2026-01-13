@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 from enum import Enum
+from typing import List
 
 from django.db import models
 from django.db.transaction import atomic
@@ -74,7 +76,7 @@ class SceneViewModel(models.Model):
         record, _ = SceneViewOrderModel.objects.select_for_update().get_or_create(
             bk_biz_id=self.bk_biz_id, scene_id=self.scene_id, type=self.type
         )
-        order_config: list = record.config
+        order_config: List = record.config
 
         # 取出view_id
         try:

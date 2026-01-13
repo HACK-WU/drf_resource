@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +14,7 @@ import logging
 import re
 import time
 from itertools import chain
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import arrow
 from django.conf import settings
@@ -45,10 +46,10 @@ class UnifyQuery:
 
     def __init__(
         self,
-        bk_biz_id: int | None,
-        data_sources: list[DataSource],
+        bk_biz_id: Optional[int],
+        data_sources: List[DataSource],
         expression: str,
-        functions: list = None,
+        functions: List = None,
     ):
         self.functions = [] if functions is None else functions
         # 不传业务指标时传 0，为 None 时查询所有业务
@@ -64,7 +65,7 @@ class UnifyQuery:
         return bk_biz_id_to_space_uid(self.bk_biz_id)
 
     @property
-    def metrics(self) -> list[dict]:
+    def metrics(self) -> List[Dict]:
         """
         指标列表
         """
@@ -91,7 +92,7 @@ class UnifyQuery:
         return ",".join(data_source.metric_display for data_source in self.data_sources)
 
     @property
-    def dimensions(self) -> list[str] | None:
+    def dimensions(self) -> Optional[List[str]]:
         if not hasattr(self.data_sources[0], "group_by"):
             return None
 
@@ -101,14 +102,14 @@ class UnifyQuery:
         return list(dimensions)
 
     @classmethod
-    def process_time_range(cls, start_time: int | None, end_time: int | None) -> tuple[int, int]:
+    def process_time_range(cls, start_time: Optional[int], end_time: Optional[int]) -> Tuple[int, int]:
         if not start_time or not end_time:
             end_time = int(time.time()) * 1000
             start_time = end_time - 60 * 60 * 1000
         return start_time, end_time
 
     @classmethod
-    def process_data_sources(cls, data_sources: list[DataSource]):
+    def process_data_sources(cls, data_sources: List[DataSource]):
         # 补充特殊网络和磁盘维度过滤
         for data_source in data_sources:
             if data_source._is_system_disk():
@@ -120,7 +121,7 @@ class UnifyQuery:
                 data_source.filter_dict[f"{settings.SYSTEM_NET_GROUP_FIELD_NAME}__neq"] = value
 
     @classmethod
-    def process_unify_query_data(cls, params: dict, data: dict, end_time: int = None):
+    def process_unify_query_data(cls, params: Dict, data: Dict, end_time: int = None):
         """
         处理统一查询模块返回值
         """
@@ -165,9 +166,9 @@ class UnifyQuery:
                 records.append(record)
         return records
 
-    def get_observe_labels(self) -> dict[str, str]:
+    def get_observe_labels(self) -> Dict[str, str]:
 
-        result_tables: list[str] = []
+        result_tables: List[str] = []
         for data_source in self.data_sources:
             result_table = str(
                 getattr(data_source, "table", "")
@@ -181,7 +182,7 @@ class UnifyQuery:
 
         # 上报数据源查询时间指标
         result_tables.sort()
-        labels: dict[str, str] = {
+        labels: Dict[str, str] = {
             "data_source_label": self.data_sources[0].data_source_label,
             "data_type_label": self.data_sources[0].data_type_label,
             "role": settings.ROLE,
@@ -244,10 +245,10 @@ class UnifyQuery:
         """
         生成查询参数
         """
-        self.data_sources: list[TimeSeriesDataSource]
+        self.data_sources: List[TimeSeriesDataSource]
 
         # 子查询配置
-        query_list: list[dict] = list(
+        query_list: List[Dict] = list(
             chain(*[data_source.to_unify_query_config() for data_source in self.data_sources])
         )
 
@@ -289,13 +290,13 @@ class UnifyQuery:
         self,
         start_time: int,
         end_time: int,
-        limit: int | None = None,
-        slimit: int | None = None,
-        offset: int | None = None,
-        down_sample_range: int | None = "",
+        limit: Optional[int] = None,
+        slimit: Optional[int] = None,
+        offset: Optional[int] = None,
+        down_sample_range: Optional[int] = "",
         time_alignment: bool = True,
         instant: bool = None,
-    ) -> list[dict]:
+    ) -> List[Dict]:
         """
         使用统一查询模块进行查询
         """
@@ -323,11 +324,11 @@ class UnifyQuery:
         self,
         start_time: int,
         end_time: int,
-        limit: int | None = None,
-        slimit: int | None = None,
-        offset: int | None = None,
+        limit: Optional[int] = None,
+        slimit: Optional[int] = None,
+        offset: Optional[int] = None,
         **kwargs,
-    ) -> list[dict]:
+    ) -> List[Dict]:
         """
         使用原始数据源进行查询
         """
@@ -352,11 +353,11 @@ class UnifyQuery:
         self,
         start_time: int,
         end_time: int,
-        limit: int | None = settings.SQL_MAX_LIMIT,
-        offset: int | None = None,
-        search_after_key: dict[str, Any] | None = None,
-    ) -> tuple[list[dict[str, Any]], int]:
-        def _query_log(_datasource) -> tuple[list[dict[str, Any]], int]:
+        limit: Optional[int] = settings.SQL_MAX_LIMIT,
+        offset: Optional[int] = None,
+        search_after_key: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[List[Dict[str, Any]], int]:
+        def _query_log(_datasource) -> Tuple[List[Dict[str, Any]], int]:
             return _datasource.query_log(
                 start_time=start_time, end_time=end_time, limit=limit, offset=offset, search_after_key=search_after_key
             )
@@ -365,8 +366,8 @@ class UnifyQuery:
             return _query_log(self.data_sources[0])
 
         total: int = 0
-        data: list[dict[str, Any]] = []
-        params_list: list[tuple] = [(datasource,) for datasource in self.data_sources]
+        data: List[Dict[str, Any]] = []
+        params_list: List[Tuple] = [(datasource,) for datasource in self.data_sources]
         for partial_data, partial_total in ThreadPool().map_ignore_exception(_query_log, params_list):
             total += partial_total
             data.extend(partial_data)
@@ -377,20 +378,20 @@ class UnifyQuery:
         self,
         start_time: int = None,
         end_time: int = None,
-        limit: int | None = settings.SQL_MAX_LIMIT,
-        slimit: int | None = settings.SQL_MAX_LIMIT,
-        offset: int | None = None,
-        down_sample_range: str | None = "",
+        limit: Optional[int] = settings.SQL_MAX_LIMIT,
+        slimit: Optional[int] = settings.SQL_MAX_LIMIT,
+        offset: Optional[int] = None,
+        down_sample_range: Optional[str] = "",
         *args,
         **kwargs,
-    ) -> list[dict]:
+    ) -> List[Dict]:
         if not self.data_sources:
             return []
 
         self.process_data_sources(self.data_sources)
 
         exc = None
-        labels: dict[str, str] = self.get_observe_labels()
+        labels: Dict[str, str] = self.get_observe_labels()
         start_time, end_time = self.process_time_range(start_time, end_time)
 
         # 使用统一查询模块或原始数据源进行查询
@@ -429,12 +430,12 @@ class UnifyQuery:
 
     def query_log(
         self, start_time: int = None, end_time: int = None, limit: int = None, offset: int = None, *args, **kwargs
-    ) -> tuple[list[dict[str, Any]], int]:
+    ) -> Tuple[List[Dict[str, Any]], int]:
         if not self.data_sources:
             return [], 0
 
         exc = None
-        labels: dict[str, str] = self.get_observe_labels()
+        labels: Dict[str, str] = self.get_observe_labels()
         start_time, end_time = self.process_time_range(start_time, end_time)
 
         if self.use_unify_query():
@@ -471,7 +472,7 @@ class UnifyQuery:
 
         return data, total
 
-    def query_dimensions(self, dimension_field: list | str, limit, start_time, end_time, *args, **kwargs):
+    def query_dimensions(self, dimension_field: Union[List, str], limit, start_time, end_time, *args, **kwargs):
         """
         查询维度
         """

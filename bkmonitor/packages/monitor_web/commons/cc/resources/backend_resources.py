@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 import copy
 import logging
 from collections import defaultdict
+from typing import Dict, List
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -82,7 +84,7 @@ class HostRegionISPInfoResource(Resource):
         isp_name = params.get("bk_isp_name", "")
 
         # 按业务模块过滤
-        hosts: list[Host] = api.cmdb.get_host_by_topo_node(bk_biz_id=bk_biz_id)
+        hosts: List[Host] = api.cmdb.get_host_by_topo_node(bk_biz_id=bk_biz_id)
 
         # 如果省份提供了，则优先使用省份查询
         region_key = province_name or state_name
@@ -97,7 +99,7 @@ class HostRegionISPInfoResource(Resource):
             filtered_hosts.append(host)
 
         # 获取主机的Agent状态
-        agent_status: dict[int, int] = resource.cc.get_agent_status(bk_biz_id, filtered_hosts)
+        agent_status: Dict[int, int] = resource.cc.get_agent_status(bk_biz_id, filtered_hosts)
 
         return [
             {
@@ -296,7 +298,7 @@ class GetHostInstanceByNodeResource(CacheResource):
     cache_type = CacheType.HOST
 
     def __init__(self):
-        super().__init__()
+        super(GetHostInstanceByNodeResource, self).__init__()
         self.node_list = []
         self.bk_biz_id = None
         # 用于查询模块和服务分类之间的关系

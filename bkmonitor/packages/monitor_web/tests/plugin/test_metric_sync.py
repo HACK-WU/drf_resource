@@ -73,7 +73,7 @@ group_data = [
 ]
 
 
-class TestMetricSync:
+class TestMetricSync(object):
     """
     测试指标回写功能
     """

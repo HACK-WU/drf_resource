@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -216,7 +217,7 @@ class CacheCronJobCheck(CheckStep):
                 p = StrategyCacheCronError("策略相关缓存任务未正常运行", self.story)
                 p_list.append(p)
         else:
-            self.story.info(f"strategy cron job executed {StrategyCacheManager.CACHE_TIMEOUT - ttl}s ago!")
+            self.story.info("strategy cron job executed {}s ago!".format(StrategyCacheManager.CACHE_TIMEOUT - ttl))
 
         return p_list
 
@@ -245,12 +246,12 @@ class DurationSpace(CheckStep):
                 start_time=now_ts.replace(minutes=-1).timestamp * 1000, end_time=now_ts.timestamp * 1000
             )
         except Exception as e:
-            return APIERROR(f"UnifyQuery.query_data Error: {e}", self.story)
+            return APIERROR("UnifyQuery.query_data Error: %s" % e, self.story)
 
         duration = time.time() - start
         if duration > self.warning_duration:
-            return APIPending(f"api worker duration cost {duration}", self.story)
-        self.story.info(f"api worker duration cost {duration}")
+            return APIPending("api worker duration cost %s" % duration, self.story)
+        self.story.info("api worker duration cost %s" % duration)
 
         if records[0]["_result_"] == 0:
             # 尝试从kafka拉取最新的一条数据。
@@ -270,7 +271,7 @@ class DurationSpace(CheckStep):
         }
         kafka_queue = KafkaQueue(kfk_conf=kfk_conf)
         try:
-            kafka_queue.set_topic(topic, group_prefix=f"{get_local_ip()}.healthz.0")
+            kafka_queue.set_topic(topic, group_prefix="%s.healthz.0" % get_local_ip())
             kafka_queue.reset_offset()
             result = kafka_queue.take(count=1, timeout=5)
             if not result:
@@ -286,7 +287,7 @@ class DurationSpace(CheckStep):
         message = result[0]
         raw_data = json.loads(message[:-1] if message[-1] == "\x00" or message[-1] == "\n" else message)
         report_time = raw_data["data"]["utctime"]
-        d = datetime.datetime.strptime(f"{report_time}+0000", "%Y-%m-%d %H:%M:%S%z")
+        d = datetime.datetime.strptime("%s+0000" % report_time, "%Y-%m-%d %H:%M:%S%z")
         offset = time.time() - d.timestamp()
         if offset > 10 * 60:
             return KafkaDataDelay(

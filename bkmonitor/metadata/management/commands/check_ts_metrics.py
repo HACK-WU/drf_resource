@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import json
 from datetime import datetime
+from typing import Dict, List
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -39,14 +41,14 @@ class Command(BaseCommand):
             "--metrics", type=str, default=None, help="metric list, example: 'test1,test2,test3' separated by comma"
         )
 
-    def _validate(self, options: dict):
+    def _validate(self, options: Dict):
         """校验必须参数"""
         if options.get("action") not in self.ACTION_LIST:
             raise CommandError(f"action must be one of [{','.join(self.ACTION_LIST)}]")
         if not options.get("data_id"):
             raise CommandError("data_id is required")
 
-    def _query(self, options: dict):
+    def _query(self, options: Dict):
         """查询现有的指标，确认到重复
 
         NOTE: 现阶段时间窗口为 30d，来源于 `TIME_SERIES_METRIC_EXPIRED_SECONDS`
@@ -95,14 +97,14 @@ class Command(BaseCommand):
         # 输出
         self.stdout.write(json.dumps(repeated_metric_dimension_list))
 
-    def _get_metric_dimensions(self, table_id: str, field_name_list: list, tag: str) -> list:
+    def _get_metric_dimensions(self, table_id: str, field_name_list: List, tag: str) -> List:
         """通过 table id、指标或维度信息，返回已经存在的维度或指标"""
         field_list = models.ResultTableField.objects.filter(
             table_id=table_id, field_name__in=field_name_list, tag=tag
         ).values_list("field_name", flat=True)
         return field_list
 
-    def _delete(self, options: dict):
+    def _delete(self, options: Dict):
         """删除指定的指标"""
         metrics = options.get("metrics")
         if not metrics:

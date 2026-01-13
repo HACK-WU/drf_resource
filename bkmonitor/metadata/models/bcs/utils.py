@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import logging
 
@@ -70,7 +71,7 @@ def ensure_data_id_resource(api_client: k8s_client.ApiClient, resource_name: str
         return False
     except Exception as e:
         # 异常捕获
-        logger.error(f"unexpected error in ensure dataid:{e}")
+        logger.error("unexpected error in ensure dataid:{}".format(e))
         return False
 
     logger.info(

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -79,7 +80,7 @@ class TailSamplingFlinkNode(FlinkStreamNode):
         *args,
         **kwargs,
     ):
-        super().__init__(source_rt_id, *args, **kwargs)
+        super(TailSamplingFlinkNode, self).__init__(source_rt_id, *args, **kwargs)
         self.flink_code = flink_code
         self.conditions = conditions or []
         self.trace_gap_min = self._TRACE_GAP_MIN if trace_gap_min is None else trace_gap_min
@@ -185,7 +186,7 @@ class TailSamplingFlinkNode(FlinkStreamNode):
 
 class APMTailSamplingTask(BaseTask):
     def __init__(self, cleans_result_table_id, bk_biz_id, app_name, config, es_extra_data, flink_code):
-        super().__init__()
+        super(APMTailSamplingTask, self).__init__()
         self.bk_biz_id = bk_biz_id
         self.app_name = app_name
         self.rt_id = cleans_result_table_id

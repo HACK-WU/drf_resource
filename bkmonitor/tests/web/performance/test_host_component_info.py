@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +14,7 @@ specific language governing permissions and limitations under the License.
 from drf_resource import resource
 
 
-class TestHostComponentInfo:
+class TestHostComponentInfo(object):
     def test_instance(self, mocker):
         get_port_info = {
             "list": [

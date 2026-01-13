@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,8 +23,8 @@ class SetTemplateManager(RefreshByBizMixin, CMDBCacheManager):
     """
 
     type = "set_template"
-    CACHE_KEY = f"{CMDBCacheManager.CACHE_KEY_PREFIX}.cmdb.set_template"
-    SET_TEMPLATE_TO_SETS = f"{CMDBCacheManager.CACHE_KEY_PREFIX}.cmdb.set_template_to_sets"
+    CACHE_KEY = "{prefix}.cmdb.set_template".format(prefix=CMDBCacheManager.CACHE_KEY_PREFIX)
+    SET_TEMPLATE_TO_SETS = "{prefix}.cmdb.set_template_to_sets".format(prefix=CMDBCacheManager.CACHE_KEY_PREFIX)
 
     @classmethod
     def key_to_internal_value(cls, set_template_id):
@@ -42,7 +43,7 @@ class SetTemplateManager(RefreshByBizMixin, CMDBCacheManager):
         """
         :param set_template_id: 集群模板ID
         """
-        return super().get(set_template_id)
+        return super(SetTemplateManager, cls).get(set_template_id)
 
     @classmethod
     def deserialize(cls, string):

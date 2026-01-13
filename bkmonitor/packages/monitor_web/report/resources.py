@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,6 +13,7 @@ import copy
 import datetime
 import logging
 from collections import defaultdict
+from typing import Dict, Tuple
 
 from django.apps import apps
 from django.conf import settings
@@ -140,7 +142,7 @@ class ReportContentResource(Resource):
         )
 
         # 补充图表名称
-        panel_names: dict[tuple[int, str], dict[str, str]] = {}
+        panel_names: Dict[Tuple[int, str], Dict[str, str]] = {}
         for content in ret_data["contents"]:
             content["graph_name"] = []
             for graph in content["graphs"]:
@@ -265,7 +267,7 @@ class GetPanelsByDashboardResource(Resource):
         bk_biz_id = serializers.IntegerField(required=True)
         uid = serializers.CharField(required=True)
 
-    def perform_request(self, params: dict):
+    def perform_request(self, params: Dict):
         return fetch_panel_title_ids(params["bk_biz_id"], params["uid"])
 
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -73,7 +74,7 @@ class TransferOffset(CheckStep):
             consumer = KafkaConsumer(
                 bootstrap_servers=self.story.bootstrap_servers,
                 auto_offset_reset=False,
-                group_id=f"{self.story.group_id}{topic}",
+                group_id="{}{}".format(self.story.group_id, topic),
                 enable_auto_commit=False,
             )
             # https://github.com/dpkp/kafka-python/issues/1860
@@ -117,7 +118,7 @@ class TransferDropData(CheckStep):
 
         # 如果未感知到transfer，在自监控会发现，所以此处默认transfer_ips中有值
         for transfer_node in transfer_ips:
-            url = f"http://{transfer_node}:{transfer_port}/metrics"
+            url = "http://{}:{}/metrics".format(transfer_node, transfer_port)
             # 自监控没问题，默认返回状态为200。resp.status_code
             resp = requests.get(url)
             drop_maps[transfer_node] = self.parse_metrics(resp.text)
@@ -126,7 +127,7 @@ class TransferDropData(CheckStep):
         self.story.info("please wait 1 min to calculate the diff...")
         time.sleep(60)
         for transfer_node in transfer_ips:
-            url = f"http://{transfer_node}:{transfer_port}/metrics"
+            url = "http://{}:{}/metrics".format(transfer_node, transfer_port)
             # 自监控没问题，默认返回状态为200。resp.status_code
             resp = requests.get(url)
             current_drop_map = self.parse_metrics(resp.text)

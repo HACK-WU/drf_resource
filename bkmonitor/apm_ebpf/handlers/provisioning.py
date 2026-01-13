@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 import fnmatch
 import logging
 import os
+import typing
 
 from django.conf import settings
 
@@ -116,7 +118,7 @@ class ApmEbpfProvisioning(SimpleProvisioning):
     @classmethod
     def _generate_default_dashboards(
         cls, datasources, org_id, json_name, template, folder_id
-    ) -> list[Dashboard]:
+    ) -> typing.List[Dashboard]:
         type_mapping = {
             # 可能会存在多个相同的DeepFlow数据源导致Key相互覆盖 但是这里我们只需要任意取其中一个即可 因为多个数据源可以共用一个仪表盘
             d["type"]: {"type": "datasource", "pluginId": d["type"], "value": d.get("uid", "")}

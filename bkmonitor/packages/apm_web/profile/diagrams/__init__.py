@@ -28,27 +28,27 @@ class Diagrammer(Protocol):
     2. Dict 适用于: 趋势图
     """
 
-    def draw(self, c: TreeConverter | dict, **options) -> Any:
+    def draw(self, c: Union[TreeConverter, dict], **options) -> Any:
         raise NotImplementedError
 
     def diff(
         self,
-        base_doris_converter: TreeConverter | dict,
-        diff_doris_converter: TreeConverter | dict,
+        base_doris_converter: Union[TreeConverter, dict],
+        diff_doris_converter: Union[TreeConverter, dict],
         **options,
     ) -> Any:
         raise NotImplementedError
 
 
-_diagrammer_cls_map: dict[str, type[Diagrammer]] = {}
+_diagrammer_cls_map: Dict[str, Type[Diagrammer]] = {}
 
 
-def get_diagrammer(diagram_type: str, extra_init_options: dict | None = None) -> Diagrammer:
+def get_diagrammer(diagram_type: str, extra_init_options: Optional[dict] = None) -> Diagrammer:
     extra_init_options = extra_init_options or {}
     return _diagrammer_cls_map[diagram_type].__call__(**extra_init_options)
 
 
-def register_diagrammer_cls(diagram_type: str, diagrammer_cls: type[Diagrammer]):
+def register_diagrammer_cls(diagram_type: str, diagrammer_cls: Type[Diagrammer]):
     _diagrammer_cls_map[diagram_type] = diagrammer_cls
 
 

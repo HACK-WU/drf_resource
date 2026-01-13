@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +14,7 @@ from drf_resource import resource
 from bkmonitor.strategy.strategy import StrategyConfig
 
 
-class TestDeleteStrategyResource:
+class TestDeleteStrategyResource(object):
     def test_delete_strategy(self, mocker):
         shield_instance = Shield()
         shield_instance.dimension_config = {"strategy_id": 1, "level": [1, 2]}

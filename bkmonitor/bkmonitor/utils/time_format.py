@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -40,7 +41,7 @@ def duration_string(i: int = 0) -> str:
     for _ in LEVELS:
         v = i % _[1]
         if v == 0:
-            result += f"{i // _[1]}{_[0]}"
+            result += "{}{}".format(i // _[1], _[0])
             break
     return result
 

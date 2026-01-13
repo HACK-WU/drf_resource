@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Dict, List, Tuple
 
 from apm_web.handlers.trace_handler.base import StatisticsHandler
 from apm_web.trace.diagram.diff import DiffMark
@@ -28,7 +29,7 @@ def make_empty_element():
     }
 
 
-def get_unique_values(element: dict, group_keys: list[str]) -> tuple:
+def get_unique_values(element: dict, group_keys: List[str]) -> tuple:
     """Get unique values"""
     values = []
     for x in group_keys:
@@ -42,8 +43,8 @@ def get_unique_values(element: dict, group_keys: list[str]) -> tuple:
 
 
 def find_similarity_from_comparison(
-    group_keys: list[str], baseline_element: dict, comparison_unique_together_mapping: dict[tuple, dict]
-) -> tuple[bool, tuple, dict]:
+    group_keys: List[str], baseline_element: dict, comparison_unique_together_mapping: Dict[tuple, dict]
+) -> Tuple[bool, tuple, dict]:
     """Find similarity from comparison"""
 
     # unique values, example: (SET, FOO_SERVICE, opentelemetry, 1)

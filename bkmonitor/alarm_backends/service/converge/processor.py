@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -51,7 +52,7 @@ class ConvergeLockError(BaseException):
         pass
 
 
-class ConvergeProcessor:
+class ConvergeProcessor(object):
     InstanceModel = {ConvergeType.CONVERGE: ConvergeInstance, ConvergeType.ACTION: ActionInstance}
 
     def __init__(self, converge_config, instance_id, instance_type, converge_context=None, alerts=None):
@@ -72,11 +73,11 @@ class ConvergeProcessor:
         try:
             self.instance = self.instance_model.objects.get(id=instance_id)
         except Exception as error:
-            print(f"pytest|get {instance_type} converge instance({instance_id})  failed {str(error)}")
+            print("pytest|get {} converge instance({})  failed {}".format(instance_type, instance_id, str(error)))
             raise
         if instance_id == 12:
             print("start to debug")
-        print(f"pytest|get {instance_type} converge instance({instance_id})  finished")
+        print("pytest|get {} converge instance({})  finished".format(instance_type, instance_id))
         self.alerts = alerts
         self.origin_converge_config = copy.deepcopy(converge_config)
         self.context = converge_context
@@ -235,7 +236,9 @@ class ConvergeProcessor:
                 # 如果没有ttl的情况，很有可能是并发抢占，需要设置一下ttl, 避免长期占用
                 client.expire(self.lock_key, ACTION_CONVERGE_KEY_PROCESS_LOCK.ttl)
             raise ConvergeLockError(
-                f"get parallel converge failed, current_parallel_converge_count is {parallel_converge_count}, converge condition is {self.dimension}"
+                "get parallel converge failed, current_parallel_converge_count is {}, converge condition is {}".format(
+                    parallel_converge_count, self.dimension
+                )
             )
         client.expire(self.lock_key, ACTION_CONVERGE_KEY_PROCESS_LOCK.ttl)
         # 当获取到锁的情况下才需要去解锁
@@ -264,7 +267,7 @@ class ConvergeProcessor:
                 is_shielded, shielder = self.shield_manager.shield(self.instance, self.alerts)
                 if is_shielded:
                     # 如果告警是处理屏蔽状态的，直接忽略
-                    logger.info(f"action({self.instance_id}) shielded")
+                    logger.info("action({}) shielded".format(self.instance_id))
                     self.converge_config["description"] = "Stop to converge because of shielded"
                     shield_detail = extended_json.loads(shielder.detail)
                     self.instance.outputs = {"shield": {"type": shielder.type, "detail": shield_detail}}
@@ -282,7 +285,7 @@ class ConvergeProcessor:
             # 如果为二级收敛并且结束，直接抛出完成的异常
             raise ActionAlreadyFinishedError(
                 {
-                    "action_id": f"{self.instance_id}-{self.instance_type}",
+                    "action_id": "{}-{}".format(self.instance_id, self.instance_type),
                     "action_status": ActionStatus.SUCCESS,
                 }
             )
@@ -377,7 +380,7 @@ class ConvergeProcessor:
         if isinstance(value, list):
             if len(value) >= 4:
                 h = hashlib.md5(value).hexdigest()[:5]
-                value = [value[0], f"{h}.{len(value) - 2}", value[-1]]
+                value = [value[0], "{}.{}".format(h, len(value) - 2), value[-1]]
             dimension_value = ",".join(map(str, value))
         else:
             dimension_value = value
@@ -387,7 +390,7 @@ class ConvergeProcessor:
         """
         通过收敛条件中配置的收敛规则获取到维度信息
         """
-        converge_dimension = ["#{}".format(self.converge_config["converge_func"])]
+        converge_dimension = ["#%s" % self.converge_config["converge_func"]]
         self.converge_config["converged_condition"] = {}
         dimension_conditions = {
             condition["dimension"]: condition for condition in self.converge_config.get("condition")
@@ -406,13 +409,13 @@ class ConvergeProcessor:
             for index, value in enumerate(values):
                 if value == "self":
                     values[index] = self.context.get(key, "")
-                converge_dimension.append(f"|{key}:{self.get_dimension_value(values[index])}")
+                converge_dimension.append("|{}:{}".format(key, self.get_dimension_value(values[index])))
             self.converge_config["converged_condition"][key] = [
                 value[0] if isinstance(value, list) else value for value in values
             ]
         dimension = "".join(converge_dimension)
         sha1 = hashlib.sha1(dimension.encode("utf-8"))
-        dimension = f"!sha1#{sha1.hexdigest()}"
+        dimension = "!sha1#%s" % sha1.hexdigest()
         return dimension[:safe_length]
 
     def push_to_queue(self):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,7 +16,7 @@ from bkmonitor.utils.i18n import TranslateDict
 
 
 def enum(**enums):
-    return type("Enum", (), enums)
+    return type(str("Enum"), (), enums)
 
 
 # 进程端口状态
@@ -60,7 +61,7 @@ STRUCTURED_LOG_DB = "slog"
 EXPORTER_LISTEN_ADDRESS_PARAM_NAME = "_exporter_url_"
 
 
-class UptimeCheckProtocol:
+class UptimeCheckProtocol(object):
     HTTP = "HTTP"
     TCP = "TCP"
     UDP = "UDP"

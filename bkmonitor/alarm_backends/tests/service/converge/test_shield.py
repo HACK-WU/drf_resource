@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,8 +10,9 @@ specific language governing permissions and limitations under the License.
 """
 import copy
 import time
+from typing import Dict
 
-from unittest import mock
+import mock
 import pytest
 from django.core.cache import caches
 
@@ -227,7 +229,7 @@ class TestKubernetesCMDBEnricher:
         self,
         init,
         init_host_cache,
-        event_data: dict,
+        event_data: Dict,
         mock_get_kubernetes_relation,
         mock_get_host_by_ip,
         mock_get_host_without_biz_v2,
@@ -261,7 +263,7 @@ class TestKubernetesCMDBEnricher:
         self,
         init,
         init_host_cache,
-        event_data: dict,
+        event_data: Dict,
         mock_get_kubernetes_relation,
         mock_get_host_by_ip,
         mock_get_host_without_biz_v2,
@@ -307,7 +309,7 @@ class TestHostShielder:
         self,
         init,
         init_host_cache,
-        event_data: dict,
+        event_data: Dict,
         mock_get_kubernetes_relation,
         mock_get_host_by_ip,
         mock_get_host_without_biz_v2,

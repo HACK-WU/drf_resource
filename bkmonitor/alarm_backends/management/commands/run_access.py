@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -34,7 +35,7 @@ class Command(ConsulDispatchCommand):
     _HASH_RING_ = 0
 
     def add_arguments(self, parser):
-        super().add_arguments(parser)
+        super(Command, self).add_arguments(parser)
         parser.add_argument(
             "--hash-ring", choices=["0", "1"], default="0", help="Whether to apply hash ring allocation"
         )
@@ -56,7 +57,7 @@ class Command(ConsulDispatchCommand):
     __COMMAND_NAME__ = __name__.split(".")[-1]
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(Command, self).__init__(*args, **kwargs)
         self.path_prefix = self._PATH_PREFIX_
 
     def on_start(self, *args, **kwargs):
@@ -65,15 +66,17 @@ class Command(ConsulDispatchCommand):
             handler_cls = load_handler_cls(self._SERVICE_TYPE_, self._HANDLER_TYPE_)
         except Exception:  # noqa
             logger.exception(
-                f"Error loading Handler, service_type({self._SERVICE_TYPE_}),"
-                f" handler_type({self._HANDLER_TYPE_})"
+                "Error loading Handler, service_type({}),"
+                " handler_type({})".format(self._SERVICE_TYPE_, self._HANDLER_TYPE_)
             )
             raise
         else:
             try:
                 logger.info(
                     "Starting..."
-                    f"service({self._SERVICE_TYPE_})-handle({self._HANDLER_TYPE_})-hash_ring({bool(int(self._HASH_RING_))})-"
+                    "service({})-handle({})-hash_ring({})-".format(
+                        self._SERVICE_TYPE_, self._HANDLER_TYPE_, bool(int(self._HASH_RING_))
+                    )
                 )
                 if int(self._HASH_RING_):
                     if settings.ENVIRONMENT == constants.CONST_DEV:
@@ -90,8 +93,8 @@ class Command(ConsulDispatchCommand):
                 handler.handle()
             except Exception:  # noqa
                 logger.exception(
-                    f"Error executing Handler, service_type({self._SERVICE_TYPE_}), "
-                    f"handler_type({self._HANDLER_TYPE_})"
+                    "Error executing Handler, service_type({}), "
+                    "handler_type({})".format(self._SERVICE_TYPE_, self._HANDLER_TYPE_)
                 )
 
     def query_instance_targets(self, host_targets):

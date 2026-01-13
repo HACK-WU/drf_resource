@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -14,7 +15,7 @@ from requests.auth import AuthBase, HTTPBasicAuth
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 
-class EncodeWebhook:
+class EncodeWebhook(object):
     def __init__(self, headers):
         self.headers = headers
 
@@ -31,7 +32,7 @@ class EncodeWebhook:
         if not body:
             return b""
         data_type = body["data_type"]
-        encode_method = getattr(self, f"encode_{data_type}_body", None)
+        encode_method = getattr(self, "encode_{}_body".format(data_type), None)
         if encode_method is None:
             return b""
 

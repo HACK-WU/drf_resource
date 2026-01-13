@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,7 +11,7 @@ specific language governing permissions and limitations under the License.
 import abc
 from abc import ABC
 from collections import defaultdict
-from typing import NamedTuple
+from typing import List, NamedTuple, Tuple
 from urllib.parse import urlparse
 
 from opentelemetry.semconv.resource import ResourceAttributes
@@ -22,7 +23,7 @@ from apm_web.trace.service_color import ServiceColorClassifier
 from constants.apm import OtlpKey, SpanKind
 
 
-def exists_field(predicate_key: tuple[str, str], item) -> bool:
+def exists_field(predicate_key: Tuple[str, str], item) -> bool:
     if item is None:
         return False
     predicate_first_key, predicate_second_key = predicate_key
@@ -31,12 +32,12 @@ def exists_field(predicate_key: tuple[str, str], item) -> bool:
     return False
 
 
-def extract_field_value(key: tuple[str, str], item):
+def extract_field_value(key: Tuple[str, str], item):
     first_key, second_key = key
     return item.get(first_key, item).get(second_key, "")
 
 
-def get_node_key(keys: list[tuple[str, str]], category: str, item: dict):
+def get_node_key(keys: List[Tuple[str, str]], category: str, item: dict):
     if item is None:
         return OtlpKey.UNKNOWN_SERVICE
 
@@ -74,8 +75,8 @@ class NodeType:
 class ServiceTopoDiscoverRuleCls(NamedTuple):
     category_id: str
     node_type: str
-    predicate_key: tuple[str, str]
-    instance_keys: list[tuple[str, str]]
+    predicate_key: Tuple[str, str]
+    instance_keys: List[Tuple[str, str]]
 
 
 # 规则实例
@@ -141,7 +142,7 @@ class DiscoverBase(ABC):
         return extract_field_value((OtlpKey.RESOURCE, ResourceAttributes.SERVICE_NAME), span)
 
     @classmethod
-    def get_match_rule(cls, span, rules: list[ServiceTopoDiscoverRuleCls]) -> ServiceTopoDiscoverRuleCls:
+    def get_match_rule(cls, span, rules: List[ServiceTopoDiscoverRuleCls]) -> ServiceTopoDiscoverRuleCls:
         res = next(
             (rule for rule in rules if exists_field(rule.predicate_key, span)),
             ServiceTopoDiscoverRuleCls(**DEFAULT_RULE_INSTANCE),
@@ -179,7 +180,7 @@ class DiscoverBase(ABC):
         return {_: i for _, i in relation_mapping.items() if i["from"]}
 
     @classmethod
-    def is_all_component_rules(cls, rules: list[ServiceTopoDiscoverRuleCls]):
+    def is_all_component_rules(cls, rules: List[ServiceTopoDiscoverRuleCls]):
         return all(value == NodeType.COMPONENT for value in [rule.node_type for rule in rules])
 
 
@@ -230,14 +231,14 @@ class NodeDiscover(DiscoverBase):
                 root_node_keys.append(root_node_key)
         return root_node_keys
 
-    def find_node_by_single_span(self, rules: list[ServiceTopoDiscoverRuleCls], span: dict):
+    def find_node_by_single_span(self, rules: List[ServiceTopoDiscoverRuleCls], span: dict):
         match_rule = self.get_match_rule(span, rules)
         service_node_key = self.get_service_name(span)
         self.add_node_relation_span(service_node_key, span, NodeType.SERVICE)
         node_key = get_node_key(match_rule.instance_keys, match_rule.category_id, span)
         self.add_node_relation_span(node_key, span, match_rule.node_type)
 
-    def find_node(self, rules: list[ServiceTopoDiscoverRuleCls], span: dict, to_spans: list):
+    def find_node(self, rules: List[ServiceTopoDiscoverRuleCls], span: dict, to_spans: list):
         match_rule = self.get_match_rule(span, rules)
         service_node_key = self.get_service_name(span)
         self.add_node_relation_span(service_node_key, span, NodeType.SERVICE)
@@ -297,7 +298,7 @@ class EdgeDiscover(DiscoverBase):
         source_target = (source, target)
         self.data_map[source_target].append(base_item)
 
-    def build_edge_by_single_span(self, rules: list[ServiceTopoDiscoverRuleCls], span: dict):
+    def build_edge_by_single_span(self, rules: List[ServiceTopoDiscoverRuleCls], span: dict):
         match_rule = self.get_match_rule(span, rules)
         source = self.get_service_name(span)
         target = get_node_key(match_rule.instance_keys, match_rule.category_id, span)
@@ -306,7 +307,7 @@ class EdgeDiscover(DiscoverBase):
         else:
             self.add_edge_relation_span(source, target, span)
 
-    def build_edge(self, rules: list[ServiceTopoDiscoverRuleCls], from_span: dict, to_spans: list):
+    def build_edge(self, rules: List[ServiceTopoDiscoverRuleCls], from_span: dict, to_spans: list):
         match_rule = self.get_match_rule(from_span, rules)
         # 服务 --> 接口 或者 服务 --> 中间键
         key = get_node_key(match_rule.instance_keys, match_rule.category_id, from_span)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,6 +13,7 @@ import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
 from itertools import chain
+from typing import Dict
 
 from rest_framework import serializers
 
@@ -114,13 +116,13 @@ class MatchDebugResource(Resource, metaclass=abc.ABCMeta):
     @staticmethod
     def get_cmdb_attributes(bk_biz_id):
         # 获取到指定业务下的主机信息
-        hosts: dict[str, Host] = {
+        hosts: Dict[str, Host] = {
             str(host.bk_host_id or host.host_id): host for host in api.cmdb.get_host_by_topo_node(bk_biz_id=bk_biz_id)
         }
         # 获取到指定业务下的集群信息
-        sets: dict[str, Set] = {str(bk_set.bk_set_id): bk_set for bk_set in api.cmdb.get_set(bk_biz_id=bk_biz_id)}
+        sets: Dict[str, Set] = {str(bk_set.bk_set_id): bk_set for bk_set in api.cmdb.get_set(bk_biz_id=bk_biz_id)}
         # 获取到指定业务下的模块信息
-        modules: dict[str, Module] = {
+        modules: Dict[str, Module] = {
             str(bk_module.bk_module_id): bk_module for bk_module in api.cmdb.get_module(bk_biz_id=bk_biz_id)
         }
 

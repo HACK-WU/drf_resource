@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +17,7 @@ try:
     _module = __import__(f"config.{NEW_ENV}", globals(), locals(), ["*"])
 except ImportError as e:
     logging.exception(e)
-    raise ImportError(f"Could not import config '{NEW_ENV}' (Is it on sys.path?): {e}")
+    raise ImportError("Could not import config '{}' (Is it on sys.path?): {}".format(NEW_ENV, e))
 
 from config.role.web import *  # noqa
 from config.role.worker import *  # noqa

@@ -2,7 +2,7 @@ import hashlib
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import ClassVar, Optional
+from typing import ClassVar, Dict, List, Optional
 
 from apm_web.trace.diagram.base import SpanNode, TraceTree, TreeBuildingConfig
 from opentelemetry.semconv.resource import ResourceAttributes
@@ -53,7 +53,7 @@ class Participant:
     name: str
     display_name: str
     component_name: str
-    span_id: str | None = None
+    span_id: Optional[str] = None
 
     FORCE_STRING_PREFIX: ClassVar[str] = "p"
 
@@ -81,7 +81,7 @@ class Participant:
             # Although sha1 is not collision-free, it is enough for our use case and faster than sha2
             return (
                 cls.FORCE_STRING_PREFIX
-                + hashlib.sha1(f"{_component_name}:{_display_name}".encode()).hexdigest()[:8]
+                + hashlib.sha1(f"{_component_name}:{_display_name}".encode("utf-8")).hexdigest()[:8]
             )
 
         span_id = None
@@ -114,16 +114,16 @@ class ParticipantSet:
     # add a virtual start span
     contain_virtual_start: bool = False
 
-    name_to_component: dict[str, Participant] = field(default_factory=dict)
-    component_name_to_endpoints: dict[str, list[Participant]] = field(default_factory=lambda: defaultdict(list))
+    name_to_component: Dict[str, Participant] = field(default_factory=dict)
+    component_name_to_endpoints: Dict[str, List[Participant]] = field(default_factory=lambda: defaultdict(list))
 
-    id_to_participant: dict[str, Participant] = field(default_factory=OrderedDict)
-    _name_to_participant: dict[str, Participant] = field(default_factory=OrderedDict)
+    id_to_participant: Dict[str, Participant] = field(default_factory=OrderedDict)
+    _name_to_participant: Dict[str, Participant] = field(default_factory=OrderedDict)
 
     def __post_init__(self):
         self._component_index = 0
 
-    def from_span_infos(self, span_infos: list[dict]):
+    def from_span_infos(self, span_infos: List[dict]):
         for span_info in span_infos:
             p = Participant.from_span_info(span_info)
             self.id_to_participant[span_info[OtlpKey.SPAN_ID]] = p
@@ -173,7 +173,7 @@ class ParticipantSet:
         return participants
 
     def __str__(self) -> str:
-        target = "\n%%participants\n"
+        target = f"\n%%participants\n"
         added = set()
         if self.contain_virtual_start:
             target += f"participant {self.START_NAME}\n"
@@ -213,8 +213,8 @@ class Connection:
     message: str
     parent_message: str = ""
     parent_merged: bool = False
-    parallel_id: str | None = None
-    parallel_path: list[str] = field(default_factory=list)
+    parallel_id: Optional[str] = None
+    parallel_path: List[str] = field(default_factory=list)
     group_info: dict = field(default_factory=dict)
     hyphen: Optional["Hyphen"] = None
     original: dict = field(default_factory=dict)
@@ -340,7 +340,7 @@ def trace_to_mermaid_sequence_data(trace_detail: list) -> dict:
     participant_set = ParticipantSet()
     participant_set.from_span_infos(trace_detail)
 
-    connections: list[Connection] = []
+    connections: List[Connection] = []
     merging_parents = {}
     merging_children = {}
     for span in trace_detail:

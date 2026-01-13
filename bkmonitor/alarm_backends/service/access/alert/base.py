@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +17,7 @@ class AccessAlertProcess(base.BaseAccessProcess):
     def __init__(self, alert_id):
         self.alert_id = alert_id
 
-        super().__init__()
+        super(AccessAlertProcess, self).__init__()
 
     def pull(self):
         pass

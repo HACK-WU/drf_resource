@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*
 import getopt
 import json
 import logging
@@ -33,7 +34,7 @@ LOG = logging.getLogger("fta")
 try:
     ssl._create_default_https_context = ssl._create_unverified_context
 except AttributeError as e:
-    LOG.info(f"ssl set _create_unverified_https_context error {e} ")
+    LOG.info("ssl set _create_unverified_https_context error %s " % e)
     pass
 
 VERSION = "v4.X"
@@ -146,7 +147,7 @@ class APIError(Exception):
     pass
 
 
-class ZabbixApi:
+class ZabbixApi(object):
     def __init__(self, parse_url, user, password):
         self.parse_url = parse_url
         self.user = user
@@ -176,7 +177,7 @@ class ZabbixApi:
         }
         resp = http_post(self.url, data=payload)
         token = resp.get("result")
-        LOG.info(f"get auth token: {token}")
+        LOG.info("get auth token: %s" % token)
         if not token:
             raise APIError("Zabbix account password is incorrect, please enter the administrator account password")
         self.auth_token = token
@@ -196,7 +197,7 @@ class ZabbixApi:
             "id": 1,
         }
         resp = http_post(self.url, data=payload)
-        LOG.info("mediatype_get success: %s", resp)
+        LOG.info(u"mediatype_get success: %s", resp)
         return [i["mediatypeid"] for i in resp["result"]]
 
     def mediatype_delete(self, media_type_ids):
@@ -211,7 +212,7 @@ class ZabbixApi:
             "id": 1,
         }
         resp = http_post(self.url, data=payload)
-        LOG.info("mediatype_delete success: %s", resp)
+        LOG.info(u"mediatype_delete success: %s", resp)
 
     def mediatype_create(self):
         """
@@ -253,7 +254,7 @@ class ZabbixApi:
             "id": 1,
         }
         resp = http_post(self.url, data=payload)
-        LOG.info("user_get success: %s", resp)
+        LOG.info(u"user_get success: %s", resp)
         return [i["userid"] for i in resp["result"]]
 
     def user_delete(self, user_ids):
@@ -262,7 +263,7 @@ class ZabbixApi:
         """
         payload = {"jsonrpc": "2.0", "method": "user.delete", "params": user_ids, "auth": self.auth_token, "id": 1}
         resp = http_post(self.url, data=payload)
-        LOG.info("user_delete success: %s", resp)
+        LOG.info(u"user_delete success: %s", resp)
 
     def user_create(self):
         """创建FTA用户"""
@@ -290,7 +291,7 @@ class ZabbixApi:
             "id": 1,
         }
         resp = http_post(self.url, data=payload)
-        LOG.info("user_create success: %s", resp)
+        LOG.info(u"user_create success: %s", resp)
         self.userid = resp["result"]["userids"][0]
 
     def action_get(self):
@@ -305,7 +306,7 @@ class ZabbixApi:
             "id": 1,
         }
         resp = http_post(self.url, data=payload)
-        LOG.info("action_get success: %s", resp)
+        LOG.info(u"action_get success: %s", resp)
         return [i["actionid"] for i in resp["result"]]
 
     def action_delete(self, action_ids):
@@ -314,7 +315,7 @@ class ZabbixApi:
         """
         payload = {"jsonrpc": "2.0", "method": "action.delete", "params": action_ids, "auth": self.auth_token, "id": 1}
         resp = http_post(self.url, data=payload)
-        LOG.info("action_delete success: %s", resp)
+        LOG.info(u"action_delete success: %s", resp)
 
     def action_create(self):
         """创建触发器"""
@@ -360,7 +361,7 @@ class ZabbixApi:
             "id": 1,
         }
         resp = http_post(self.url, data=payload)
-        LOG.info("action_create success: %s", resp)
+        LOG.info(u"action_create success: %s", resp)
 
     def clean(self):
         """清理数据"""
@@ -377,7 +378,7 @@ class ZabbixApi:
             self.mediatype_delete(media_type_ids)
 
 
-class Event:
+class Event(object):
 
     # def __init__(self, message, format="base64"):
     def __init__(self, message):
@@ -393,7 +394,7 @@ class Event:
             try:
                 key, value = line.split(":", 1)
             except Exception as error:
-                LOG.info(f"parse line {line} error: {error}, just ignore.")
+                LOG.info(u"parse line {} error: {}, just ignore.".format(line, error))
                 continue
 
             key = key.strip()
@@ -540,7 +541,7 @@ class Event:
         """消息处理函数"""
         data = self.clean_data()
         resp = http_post(FTA_URL, data=data, resp_fmt=None)
-        LOG.info("send alarm resp: %s", resp)
+        LOG.info(u"send alarm resp: %s", resp)
 
 
 def launcher(init, verbose, params):
@@ -557,7 +558,7 @@ def launcher(init, verbose, params):
         # 校验URL
         parse_url = urlparse(params[0])
         if parse_url.scheme not in ["http", "https"] or not parse_url.netloc:
-            raise APIError(f"Zabbix API（{params[0]}）not correct")
+            raise APIError("Zabbix API（{}）not correct".format(params[0]))
 
         api_client = ZabbixApi(parse_url, params[1], params[2])
         api_client.user_login()
@@ -613,7 +614,7 @@ def main():
         elif o in ("--init",):
             init = True
         else:
-            print(f"unhandled option, ({o}, {a})")
+            print(u"unhandled option, ({}, {})".format(o, a))
             sys.exit(2)
 
     if not args:
@@ -624,7 +625,7 @@ def main():
         launcher(init, verbose, args)
     except APIError as error:
         # 安装提示错误
-        LOG.error("%s", error)
+        LOG.error(u"%s", error)
     except Exception:
         LOG.exception("fta script error")
         sys.exit(1)

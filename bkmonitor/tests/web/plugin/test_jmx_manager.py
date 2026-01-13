@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -48,7 +49,7 @@ def update_plugin_manager(mocker):
     return plugin_manager
 
 
-class TestJmxPlugin:
+class TestJmxPlugin(object):
     def test_get_debug_config_context(self, mocker, update_plugin_manager):
         params = {
             "collector": {"period": "10", "port": "5987", "host": "127.0.0.1"},

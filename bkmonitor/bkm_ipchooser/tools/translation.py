@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import typing
 from contextlib import contextmanager
 
@@ -29,28 +30,28 @@ def respect_language(language):
 
 
 GetLanguageFuncT = typing.Callable[
-    [typing.Callable, typing.Any, tuple[typing.Any], dict[str, typing.Any]], str | None
+    [typing.Callable, typing.Any, typing.Tuple[typing.Any], typing.Dict[str, typing.Any]], typing.Optional[str]
 ]
 
 
 class RespectsLanguage:
-    language: str | None = None
-    get_language_func: GetLanguageFuncT | None = None
+    language: typing.Optional[str] = None
+    get_language_func: typing.Optional[GetLanguageFuncT] = None
 
     @staticmethod
     def default_get_language_func(
         wrapped: typing.Callable,
         instance: typing.Any,
-        args: tuple[typing.Any],
-        kwargs: dict[str, typing.Any],
-    ) -> str | None:
+        args: typing.Tuple[typing.Any],
+        kwargs: typing.Dict[str, typing.Any],
+    ) -> typing.Optional[str]:
         language = kwargs.pop("language", None)
         if language:
             return language
         return translation.get_language()
 
     def __init__(
-        self, get_language_func: GetLanguageFuncT | None = None, language: str | None = None
+        self, get_language_func: typing.Optional[GetLanguageFuncT] = None, language: typing.Optional[str] = None
     ):
         """
         :param get_language_func: 获取语言方法
@@ -64,8 +65,8 @@ class RespectsLanguage:
         self,
         wrapped: typing.Callable,
         instance: typing.Any,
-        args: tuple[typing.Any],
-        kwargs: dict[str, typing.Any],
+        args: typing.Tuple[typing.Any],
+        kwargs: typing.Dict[str, typing.Any],
     ) -> typing.Any:
         """
         :param wrapped: 被装饰的函数或类方法

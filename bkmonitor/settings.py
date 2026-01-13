@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -56,7 +57,7 @@ for key, value in list(os.environ.items()):
     if upper_key.startswith(SETTING_ENV_PREFIX):
         settings_key = upper_key.replace(SETTING_ENV_PREFIX, "")
         locals()[settings_key] = value
-        print(f'[Django Settings] Set config from env: {settings_key} = "{value}"')
+        print('[Django Settings] Set config from env: {} = "{}"'.format(settings_key, value))
 
 
 # 多人开发时，无法共享的本地配置可以放到新建的 local_settings.py 文件中

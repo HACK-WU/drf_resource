@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
+from typing import Dict, List
 
 from django.core.management.base import BaseCommand
 
@@ -45,7 +47,9 @@ class Command(BaseCommand):
                     proxy_storage_id = proxy_storage_map.get((influxdb_proxy_cluster_id, influxdb_cluster_name))
                     if proxy_storage_id is None:
                         self.stdout.write(
-                            f"not found proxy storage id by proxy_cluster_id: {influxdb_proxy_cluster_id}, instance_cluster: {influxdb_cluster_name}"
+                            "not found proxy storage id by proxy_cluster_id: {}, instance_cluster: {}".format(
+                                influxdb_proxy_cluster_id, influxdb_cluster_name
+                            )
                         )
                         continue
                     InfluxDBStorage.objects.update_or_create(
@@ -75,7 +79,7 @@ class Command(BaseCommand):
         # influxdb 集群名称
         parser.add_argument("--influxdb_cluster_names", type=str, help="influxdb 集群名称，多个以半角逗号分隔")
 
-    def _check_exist(self, influxdb_proxy_cluster_id: int, influxdb_cluster_name_list: list[str]) -> bool:
+    def _check_exist(self, influxdb_proxy_cluster_id: int, influxdb_cluster_name_list: List[str]) -> bool:
         """检测 influxdb 实例集群及 proxy 集群是否存在"""
         if not ClusterInfo.objects.filter(cluster_id=influxdb_proxy_cluster_id).exists():
             return False
@@ -83,19 +87,19 @@ class Command(BaseCommand):
             return False
         return True
 
-    def _get_proxy_storage_id(self, influxdb_proxy_cluster_id: int, influxdb_cluster_name_list: list) -> dict:
+    def _get_proxy_storage_id(self, influxdb_proxy_cluster_id: int, influxdb_cluster_name_list: List) -> Dict:
         qs = InfluxDBProxyStorage.objects.filter(
             proxy_cluster_id=influxdb_proxy_cluster_id, instance_cluster_name__in=influxdb_cluster_name_list
         )
         return {(obj.proxy_cluster_id, obj.instance_cluster_name): obj.id for obj in qs}
 
-    def _refine_metric_list(self, path: str) -> list[str]:
+    def _refine_metric_list(self, path: str) -> List[str]:
         with open(path) as f:
             metric_content = f.read()
         # 以`\n` 拆分为单个数据
         return metric_content.split("\n")
 
-    def _get_cluster_and_metric_list(self, influxdb_cluster_name_list: list, metric_list: list) -> dict:
+    def _get_cluster_and_metric_list(self, influxdb_cluster_name_list: List, metric_list: List) -> Dict:
         # 以指标数量除以集群的数量向上取整为步长，拆分指标数组
         cluster_num = len(influxdb_cluster_name_list)
         metric_num = len(metric_list)

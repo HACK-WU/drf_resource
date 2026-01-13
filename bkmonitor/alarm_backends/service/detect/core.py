@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +14,7 @@ import arrow
 import six
 
 
-class DataPoint:
+class DataPoint(object):
     """
     access 拉取的数据，在detect模块的一层封装
     """
@@ -45,13 +46,13 @@ class DataPoint:
         return self.time
 
     def __str__(self):
-        return f"{self.record_id}:{self.value}"
+        return "{record_id}:{value}".format(record_id=self.record_id, value=self.value)
 
     def __repr__(self):
         return str(self.as_dict())
 
 
-class AnomalyDataPoint:
+class AnomalyDataPoint(object):
     """
     被detector处理后的DataPoint，如果是异常，则会变成AnomalyDataPoint。
     """

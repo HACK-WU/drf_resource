@@ -37,7 +37,7 @@ run method or the executor's worker thread."
 
 import threading
 from concurrent import futures
-from collections.abc import Collection
+from typing import Collection
 
 from opentelemetry import context
 from opentelemetry.instrumentation.instrumentor import BaseInstrumentor

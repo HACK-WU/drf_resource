@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
+from typing import List, Optional
 
 from bkmonitor.models import StrategyLabel
 from constants.alert import DEFAULT_NOTICE_MESSAGE_TEMPLATE
@@ -50,7 +52,7 @@ class K8sDefaultAlarmStrategyLoader(DefaultAlarmStrategyLoaderBase):
         clusters = api.kubernetes.fetch_k8s_cluster_list({"bk_biz_id": self.bk_biz_id})
         return bool(clusters)
 
-    def get_notice_group(self, config_type: str | None = None) -> list:
+    def get_notice_group(self, config_type: Optional[str] = None) -> List:
         """获得告警通知组 ."""
         notice_group_ids = self.notice_group_cache.get(config_type)
         if not notice_group_ids:
@@ -59,7 +61,7 @@ class K8sDefaultAlarmStrategyLoader(DefaultAlarmStrategyLoaderBase):
             self.notice_group_cache[config_type] = notice_group_ids
         return notice_group_ids
 
-    def load_strategies(self, strategies: list) -> list:
+    def load_strategies(self, strategies: List) -> List:
         """加载k8s默认告警策略 ."""
         strategy_config_list = []
         for default_config in strategies:

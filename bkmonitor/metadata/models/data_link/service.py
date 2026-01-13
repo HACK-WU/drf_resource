@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
+from typing import Dict, Optional
 
 from django.conf import settings
 from django.db.transaction import atomic
@@ -78,7 +80,7 @@ def apply_data_id_v2(
     return True
 
 
-def get_data_id(data_name: str, namespace: str | None = settings.DEFAULT_VM_DATA_LINK_NAMESPACE) -> dict:
+def get_data_id(data_name: str, namespace: Optional[str] = settings.DEFAULT_VM_DATA_LINK_NAMESPACE) -> Dict:
     """
     获取数据源对应的 data_id
     TODO: 待改造为通用查询状态方法
@@ -105,9 +107,9 @@ def get_data_id(data_name: str, namespace: str | None = settings.DEFAULT_VM_DATA
 
 def get_data_id_v2(
     data_name: str,
-    namespace: str | None = settings.DEFAULT_VM_DATA_LINK_NAMESPACE,
+    namespace: Optional[str] = settings.DEFAULT_VM_DATA_LINK_NAMESPACE,
     bk_biz_id: int = settings.DEFAULT_BKDATA_BIZ_ID,
-) -> dict:
+) -> Dict:
     """
     获取数据源对应的 data_id
     """
@@ -137,7 +139,7 @@ def get_data_id_v2(
 def get_data_link_component_config(
     kind: str,
     component_name: str,
-    namespace: str | None = settings.DEFAULT_VM_DATA_LINK_NAMESPACE,
+    namespace: Optional[str] = settings.DEFAULT_VM_DATA_LINK_NAMESPACE,
 ):
     """
     获取数据链路组件状态
@@ -173,7 +175,7 @@ def get_data_link_component_config(
 def get_data_link_component_status(
     kind: str,
     component_name: str,
-    namespace: str | None = settings.DEFAULT_VM_DATA_LINK_NAMESPACE,
+    namespace: Optional[str] = settings.DEFAULT_VM_DATA_LINK_NAMESPACE,
 ):
     """
     获取数据链路组件状态
@@ -246,8 +248,8 @@ def create_vm_data_link(
     table_id: str,
     data_source: DataSource,
     vm_cluster_name: str,
-    vm_cluster_id: int | None = None,
-    bcs_cluster_id: str | None = None,
+    vm_cluster_id: Optional[int] = None,
+    bcs_cluster_id: Optional[str] = None,
 ):
     """
     接入计算平台VM，创建V4链路
@@ -365,8 +367,8 @@ def create_fed_vm_data_link(
     table_id: str,
     data_source: DataSource,
     vm_cluster_name: str,
-    vm_cluster_id: int | None = None,
-    bcs_cluster_id: str | None = None,
+    vm_cluster_id: Optional[int] = None,
+    bcs_cluster_id: Optional[str] = None,
 ):
     """
     针对联邦集群，创建联邦子集群->联邦代理集群的汇聚（复制）链路，只有联邦集群子集群需要创建
@@ -454,7 +456,9 @@ def create_fed_vm_data_link(
         ]
         conditions.append({"match_labels": match_labels, "relabels": relabels, "sinks": sinks})
         logger.info(
-            f"composed datalink config,name->{name},builtin_name->{builtin_name},match_labels->{match_labels},relabels->{relabels},sinks->{sinks}"
+            "composed datalink config,name->{},builtin_name->{},match_labels->{},relabels->{},sinks->{}".format(
+                name, builtin_name, match_labels, relabels, sinks
+            )
         )
         # 添加rt及和存储的关联
         rt_config = DataLinkResourceConfig.compose_vm_table_id_config(builtin_name)

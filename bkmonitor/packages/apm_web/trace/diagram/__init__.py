@@ -16,14 +16,14 @@ class Diagrammer(Protocol):
         raise NotImplementedError
 
 
-_diagrammer_cls_map: dict[str, type[Diagrammer]] = {}
+_diagrammer_cls_map: Dict[str, Type[Diagrammer]] = {}
 
 
 def get_diagrammer(diagram_type: str, extra_init_options: dict) -> Diagrammer:
     return _diagrammer_cls_map[diagram_type].__call__(**extra_init_options)
 
 
-def register_diagrammer_cls(diagram_type: str, diagrammer_cls: type[Diagrammer]):
+def register_diagrammer_cls(diagram_type: str, diagrammer_cls: Type[Diagrammer]):
     _diagrammer_cls_map[diagram_type] = diagrammer_cls
 
 

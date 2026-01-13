@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -262,7 +263,7 @@ class OptionBase(models.Model):
 
         except KeyError:
             # 如果找不到对应的配置，表示不是简单的基本功能，需要依赖函数实现
-            trans_method = getattr(self, f"_trans_{self.value_type}")
+            trans_method = getattr(self, "_trans_{}".format(self.value_type))
             real_value = trans_method()
 
         return {self.name: real_value}

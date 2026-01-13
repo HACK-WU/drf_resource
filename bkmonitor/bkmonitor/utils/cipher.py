@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -19,7 +20,7 @@ from Crypto.Random import new
 from django.conf import settings
 
 
-class RSACipher:
+class RSACipher(object):
     def __init__(self, pri_key=None):
         self.pub_key = None
         self.pri_key = None
@@ -64,7 +65,7 @@ class RSACipher:
         return decrypt_result
 
 
-class AESCipher:
+class AESCipher(object):
     def __init__(self, key, iv=None):
         self.bs = 16
         self.iv = iv

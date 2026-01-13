@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +13,7 @@ specific language governing permissions and limitations under the License.
 from drf_resource import api
 
 
-class ServiceCategorySearcher:
+class ServiceCategorySearcher(object):
     def __init__(self):
         # 用于存储服务分类数据，避免多次调用cmdb接口
         self._service_category_data = {}

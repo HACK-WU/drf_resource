@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,7 +23,7 @@ SYSTEM_PROC_PORT_DYNAMIC_DIMENSIONS = ["listen", "nonlisten", "not_accurate_list
 ORIGIN_RESULT_TABLE_ID = "origin_result_table_id"
 
 
-class DataTarget:
+class DataTarget(object):
     NONE_TARGET = "none_target"
     SERVICE_TARGET = "service_target"
     HOST_TARGET = "host_target"
@@ -145,7 +146,7 @@ DATA_TARGET_MAP = {
 }
 
 
-class TargetFieldType:
+class TargetFieldType(object):
     host_topo = "host_topo_node"  # 动态拓扑
     service_topo = "service_topo_node"
     host_ip = "ip"  # 静态拓扑
@@ -158,7 +159,7 @@ class TargetFieldType:
     dynamic_group = "dynamic_group"  # 动态分组
 
 
-class TargetMethodType:
+class TargetMethodType(object):
     eq = "eq"
     neq = "neq"
     lte = "lte"
@@ -198,7 +199,7 @@ TargetMethodList = [
 ]
 
 
-class SourceType:
+class SourceType(object):
     BKMONITOR = ("BKMONITOR", _("监控采集"))
     BASEALARM = ("BASEALARM", _("系统事件"))
     BKDATA = ("BKDATA", _("计算平台"))

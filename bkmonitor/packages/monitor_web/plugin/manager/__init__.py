@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -66,9 +67,9 @@ FILE_PLUGINS_FACTORY = {
 }
 
 
-class PluginManagerFactory:
+class PluginManagerFactory(object):
     @classmethod
-    def get_manager(cls, plugin: int | CollectorPluginMeta = None, plugin_type: str = None, operator="",
+    def get_manager(cls, plugin: Union[int, CollectorPluginMeta] = None, plugin_type: str = None, operator="",
                     tmp_path=None) -> PluginManager:
         """
         根据插件ID和插件类型获取对应的插件管理对象
@@ -80,7 +81,7 @@ class PluginManagerFactory:
         """
         # 检查临时路径是否存在，若提供且不存在则抛出异常
         if tmp_path and not os.path.exists(tmp_path):
-            raise OSError(_("文件夹不存在：%s") % tmp_path)
+            raise IOError(_("文件夹不存在：%s") % tmp_path)
 
         # 若plugin不是CollectorPluginMeta实例，则尝试通过id获取或创建新的实例
         if not isinstance(plugin, CollectorPluginMeta):
@@ -93,7 +94,7 @@ class PluginManagerFactory:
         # 确保插件类型受支持，否则抛出异常
         plugin_type = plugin.plugin_type
         if plugin_type not in SUPPORTED_PLUGINS:
-            raise KeyError(f"Unsupported plugin type: {plugin_type}")
+            raise KeyError("Unsupported plugin type: %s" % plugin_type)
 
         # 根据插件类型获取对应的插件管理器类
         plugin_manager_cls = SUPPORTED_PLUGINS[plugin_type]
@@ -106,7 +107,7 @@ class PluginManagerFactory:
         return plugin_manager_cls(plugin, operator, tmp_path)
 
 
-class PluginFileManagerFactory:
+class PluginFileManagerFactory(object):
     @classmethod
     def get_manager(cls, plugin_type=None):
         """

@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass, field
+from typing import List
 
 # use cache to avoid read file every time
 # make unittest faster
@@ -15,7 +16,7 @@ def read_trace_list(name: str = "simple", category: str = "") -> list:
     if category:
         cases_prefix += f"/{category}"
 
-    with open(f"{cases_prefix}/{name}.json") as f:
+    with open(f"{cases_prefix}/{name}.json", "r") as f:
         trace_list = json.loads(f.read())
 
     _CACHE[(name, category)] = trace_list
@@ -168,7 +169,7 @@ class FakeSpanNode:
         }
 
 
-def dynamic_make_trace_list(relations: list[tuple]) -> list:
+def dynamic_make_trace_list(relations: List[tuple]) -> list:
     """make a trace list by relations"""
     trace_list = []
 

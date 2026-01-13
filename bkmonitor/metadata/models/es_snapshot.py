@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 import datetime
 import itertools
 import logging
+from typing import Optional
 
 from curator import utils
 from django.db import models
@@ -83,7 +85,7 @@ class EsSnapshot(models.Model):
 
     @classmethod
     @atomic(config.DATABASE_CONNECTION_NAME)
-    def modify_snapshot(cls, table_id, snapshot_days, operator, status: str | None = None):
+    def modify_snapshot(cls, table_id, snapshot_days, operator, status: Optional[str] = None):
         try:
             obj = cls.objects.get(table_id=table_id)
         except cls.DoesNotExist:
@@ -99,7 +101,7 @@ class EsSnapshot(models.Model):
 
     @classmethod
     @atomic(config.DATABASE_CONNECTION_NAME)
-    def delete_snapshot(cls, table_id, is_sync: bool | None = False):
+    def delete_snapshot(cls, table_id, is_sync: Optional[bool] = False):
         """
         当快照产生当比较多当会产生很多的es调用 比较重 移到后台去执行实际的快照清理
         """
@@ -134,7 +136,9 @@ class EsSnapshot(models.Model):
                 ).get("snapshots", [])
             except Exception as e:  # noqa
                 logger.exception(
-                    f"batch get es snapshots error, target_snapshot_repository_name({es_storage.snapshot_obj.target_snapshot_repository_name}), search_snapshot({es_storage.search_snapshot})"
+                    "batch get es snapshots error, target_snapshot_repository_name({}), search_snapshot({})".format(
+                        es_storage.snapshot_obj.target_snapshot_repository_name, es_storage.search_snapshot
+                    )
                 )
 
             for snapshot in snapshots:
@@ -173,7 +177,9 @@ class EsSnapshot(models.Model):
             ).get("snapshots", [])
         except Exception as e:  # noqa
             logger.exception(
-                f"get es snapshots error, target_snapshot_repository_name({self.target_snapshot_repository_name}), search_snapshot({es_storage.search_snapshot})"
+                "get es snapshots error, target_snapshot_repository_name({}), search_snapshot({})".format(
+                    self.target_snapshot_repository_name, es_storage.search_snapshot
+                )
             )
 
         return [
@@ -359,7 +365,7 @@ class EsSnapshotRestore(models.Model):
 
     @classmethod
     @atomic(config.DATABASE_CONNECTION_NAME)
-    def create_restore(cls, table_id, start_time, end_time, expired_time, operator, is_sync: bool | None = False):
+    def create_restore(cls, table_id, start_time, end_time, expired_time, operator, is_sync: Optional[bool] = False):
         from metadata.models import ESStorage
 
         es_storage = ESStorage.objects.filter(table_id=table_id).first()
@@ -451,7 +457,7 @@ class EsSnapshotRestore(models.Model):
 
     @classmethod
     @atomic(config.DATABASE_CONNECTION_NAME)
-    def delete_restore(cls, restore_id, operator, is_sync: bool | None = False):
+    def delete_restore(cls, restore_id, operator, is_sync: Optional[bool] = False):
         try:
             restore = cls.objects.get(restore_id=restore_id)
         except cls.DoesNotExist:

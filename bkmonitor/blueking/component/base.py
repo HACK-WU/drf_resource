@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import logging
 
@@ -7,7 +8,7 @@ from .exceptions import ComponentAPIException
 logger = logging.getLogger("component")
 
 
-class ComponentAPI:
+class ComponentAPI(object):
     """Single API for Component"""
 
     HTTP_STATUS_OK = 200
@@ -24,7 +25,7 @@ class ComponentAPI:
 
     def get_url_with_api_ver(self):
         bk_api_ver = self.client.get_bk_api_ver()
-        sub_path = f"/{bk_api_ver}" if bk_api_ver else ""
+        sub_path = "/{}".format(bk_api_ver) if bk_api_ver else ""
         return self.host + self.path.format(bk_api_ver=sub_path)
 
     def __call__(self, *args, **kwargs):
@@ -36,9 +37,9 @@ class ComponentAPI:
             log_message = [
                 e.error_message,
             ]
-            log_message.append(f"url={e.api_obj.url}")
+            log_message.append("url={url}".format(url=e.api_obj.url))
             if e.resp:
-                log_message.append(f"content: {e.resp.text}")
+                log_message.append("content: %s" % e.resp.text)
 
             logger.exception("\n".join(log_message))
 
@@ -70,11 +71,11 @@ class ComponentAPI:
             resp = self.client.request(self.method, self.url, params=params, data=data)
         except Exception as e:
             logger.exception("Error occurred when requesting method=%s url=%s", self.method, self.url)
-            raise ComponentAPIException(self, f"Request component error, Exception: {str(e)}")
+            raise ComponentAPIException(self, u"Request component error, Exception: %s" % str(e))
 
         # Parse result
         if resp.status_code != self.HTTP_STATUS_OK:
-            message = f"Request component error, status_code: {resp.status_code}"
+            message = "Request component error, status_code: %s" % resp.status_code
             raise ComponentAPIException(self, message, resp=resp)
         try:
             # Parse response
@@ -82,16 +83,16 @@ class ComponentAPI:
             if not json_resp["result"]:
                 # 组件返回错误时，记录相应的 request_id
                 log_message = (
-                    "Component return error message: {message}, request_id={request_id}, "
-                    "url={url}, params={params}, data={data}, response={response}"
-                ).format(
-                    request_id=json_resp.get("request_id"),
-                    message=json_resp["message"],
-                    url=self.url,
-                    params=params,
-                    data=data,
-                    response=resp.text,
-                )
+                    u"Component return error message: %(message)s, request_id=%(request_id)s, "
+                    u"url=%(url)s, params=%(params)s, data=%(data)s, response=%(response)s"
+                ) % {
+                    "request_id": json_resp.get("request_id"),
+                    "message": json_resp["message"],
+                    "url": self.url,
+                    "params": params,
+                    "data": data,
+                    "response": resp.text,
+                }
                 logger.error(log_message)
 
             # Return default return value

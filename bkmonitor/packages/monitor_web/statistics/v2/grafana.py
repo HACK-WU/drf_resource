@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import json
 from collections import defaultdict
+from typing import Dict, List, Tuple
 
 from django.core.paginator import Paginator
 from django.utils.functional import cached_property
@@ -28,7 +30,7 @@ class GrafanaCollector(BaseCollector):
         self._dashboard_data = None
 
     @cached_property
-    def organizations(self) -> list:
+    def organizations(self) -> List:
         organizations = Org.objects.all()
         new_organizations = []
         for org in organizations:
@@ -44,14 +46,14 @@ class GrafanaCollector(BaseCollector):
         return new_organizations
 
     @cached_property
-    def org_id_mapping_biz_id(self) -> dict[int, int]:
+    def org_id_mapping_biz_id(self) -> Dict[int, int]:
         org_id_mapping_biz_id = {}
         for org in self.organizations:
             org_id_mapping_biz_id[org.id] = int(org.name)
         return org_id_mapping_biz_id
 
     @cached_property
-    def get_dashboard_data(self) -> list[dict]:
+    def get_dashboard_data(self) -> List[Dict]:
         """
         获取仪表盘数据
         """
@@ -67,7 +69,7 @@ class GrafanaCollector(BaseCollector):
         data_sources = DataSource.objects.values("org_id", "type")
         org_id_mapping_biz_id = self.org_id_mapping_biz_id
 
-        org_metrics: dict[tuple[int, str], int] = defaultdict(lambda: 0)
+        org_metrics: Dict[Tuple[int, str], int] = defaultdict(lambda: 0)
 
         for data_source in data_sources:
             org_metrics[(data_source["org_id"], data_source["type"])] += 1

@@ -8,7 +8,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import abc
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 from monitor_web.models import CollectConfigMeta, DeploymentConfigVersion
 
@@ -25,7 +25,7 @@ class BaseInstaller(abc.ABC):
         self.plugin = collect_config.plugin
 
     @abc.abstractmethod
-    def install(self, install_config: dict, operation: str | None) -> dict:
+    def install(self, install_config: Dict, operation: Optional[str]) -> Dict:
         """
         部署
         :return: dict
@@ -45,7 +45,7 @@ class BaseInstaller(abc.ABC):
         return {}
 
     @abc.abstractmethod
-    def upgrade(self, params: dict) -> dict:
+    def upgrade(self, params: Dict) -> Dict:
         """
         升级
         :return: dict
@@ -70,7 +70,7 @@ class BaseInstaller(abc.ABC):
         """
 
     @abc.abstractmethod
-    def rollback(self, deployment_config_version: int | DeploymentConfigVersion | None = None):
+    def rollback(self, deployment_config_version: Union[int, DeploymentConfigVersion, None] = None):
         """
         回滚到某个版本，默认回滚到上一个版本
         :return: dict
@@ -100,19 +100,19 @@ class BaseInstaller(abc.ABC):
         """
 
     @abc.abstractmethod
-    def run(self, action: str = None, scope: dict[str, Any] = None):
+    def run(self, action: str = None, scope: Dict[str, Any] = None):
         """
         主动执行
         """
 
     @abc.abstractmethod
-    def retry(self, instance_ids: list[str] = None):
+    def retry(self, instance_ids: List[str] = None):
         """
         重试实例
         """
 
     @abc.abstractmethod
-    def revoke(self, instance_ids: list[int] = None):
+    def revoke(self, instance_ids: List[int] = None):
         """
         终止实例
         """

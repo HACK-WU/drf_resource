@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,7 +16,7 @@ from bkmonitor.documents import AlertDocument, ActionInstanceDocument
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        super().add_arguments(parser)
+        super(Command, self).add_arguments(parser)
 
         parser.add_argument("-t", type=int, default=120, help="time window to check (in seconds)")
 
@@ -57,10 +58,10 @@ class Command(BaseCommand):
         if alert_search.hits.total.value > 0:
             print(f"[Passed] alert document has created, count: {alert_search.hits.total.value}")
         else:
-            print("[Failed] alert document not created")
+            print(f"[Failed] alert document not created")
 
         action_search = ActionInstanceDocument.search().execute()
         if alert_search.hits.total.value > 0:
             print(f"[Passed] action document has created, count: {action_search.hits.total.value}")
         else:
-            print("[Failed] action document not created")
+            print(f"[Failed] action document not created")

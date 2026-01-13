@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -25,7 +26,7 @@ class MockItem(Item):
         self.data_sources = data_sources
 
 
-class MockStrategy:
+class MockStrategy(object):
     def __init__(self, strategy_config):
         self.id = strategy_config["id"]
         self.config = strategy_config
@@ -42,14 +43,14 @@ class MockStrategy:
         return self.config.get("scenario") in ("os", "host_process")
 
 
-class MockTopoNode:
+class MockTopoNode(object):
     def __init__(self, id, **kwargs):
         self.id = id
         for key, value in list(kwargs.items()):
             setattr(self, key, value)
 
 
-class MockHost:
+class MockHost(object):
     def __init__(self, info):
         self.id = "{}|{}".format(info["bk_host_innerip"], info["bk_cloud_id"])
         for key, value in list(info.items()):
@@ -73,7 +74,7 @@ def generate_mock_hosts(host_info):
     return hosts
 
 
-class MockServiceInstance:
+class MockServiceInstance(object):
     def __init__(self, info):
         for key, value in list(info.items()):
             setattr(self, key, value)
@@ -96,7 +97,7 @@ def generate_mock_services(service_info):
     return services
 
 
-class MockCheckResult:
+class MockCheckResult(object):
     def __init__(self, dimensions):
         self.dimensions = copy.deepcopy(dimensions)
 

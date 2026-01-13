@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import logging
 import math
+from typing import List, Tuple
 
 from django.conf import settings
 
@@ -76,7 +78,7 @@ def batch_request(
     return data
 
 
-def get_host_display_fields(bk_biz_id: int) -> list[str]:
+def get_host_display_fields(bk_biz_id: int) -> List[str]:
     """
     获取主机展示字段列表
     """
@@ -90,7 +92,7 @@ def is_ipv6_biz(bk_biz_id) -> bool:
     return str(bk_biz_id) in {str(biz) for biz in settings.IPV6_SUPPORT_BIZ_LIST}
 
 
-def get_host_view_display_fields(bk_biz_id: int) -> tuple[str, str]:
+def get_host_view_display_fields(bk_biz_id: int) -> Tuple[str, str]:
     """
     获取主机树展示字段
     """

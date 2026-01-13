@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -36,7 +37,7 @@ class ProcessPort(Component):
     """
 
     def __init__(self, kwargs):
-        super().__init__(kwargs)
+        super(ProcessPort, self).__init__(kwargs)
         self.ports = ProcessPort.extract_ports(self.ports)
 
     @staticmethod
@@ -107,7 +108,7 @@ class CustomStringIndex(BaseDictObj):
                 unit="",
             )
         )
-        super().__init__(kwargs)
+        super(CustomStringIndex, self).__init__(kwargs)
 
     @staticmethod
     def get_custom_str_data_id(cc_biz_id, operator):
@@ -133,7 +134,7 @@ class ProcessPortIndex(BaseDictObj):
                 unit="",
             )
         )
-        super().__init__(kwargs)
+        super(ProcessPortIndex, self).__init__(kwargs)
 
 
 proc_port_index = ProcessPortIndex()
@@ -155,7 +156,7 @@ class OSRestartIndex(DictObj):
                 unit="",
             )
         )
-        super().__init__(kwargs)
+        super(OSRestartIndex, self).__init__(kwargs)
 
     @property
     def id(self):
@@ -443,7 +444,7 @@ class DetectAlgorithmConfig(AbstractRecordModel):
 
     def gen_strategy_desc(self, unit=""):
         try:
-            strategy_id = f"{self.algorithm_id}"
+            strategy_id = "%s" % self.algorithm_id
             strategy_option = json.loads(self.config)
 
             method_dict = {"eq": "=", "gte": "≥", "gt": ">", "lt": "<", "lte": "≤", "neq": "!="}

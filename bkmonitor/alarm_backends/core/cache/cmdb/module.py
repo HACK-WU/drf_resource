@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,7 +21,7 @@ class ModuleManager(RefreshByBizMixin, CMDBCacheManager):
     """
 
     type = "module"
-    CACHE_KEY = f"{CMDBCacheManager.CACHE_KEY_PREFIX}.cmdb.module"
+    CACHE_KEY = "{prefix}.cmdb.module".format(prefix=CMDBCacheManager.CACHE_KEY_PREFIX)
     ObjectClass = Module
 
     @classmethod
@@ -40,7 +41,7 @@ class ModuleManager(RefreshByBizMixin, CMDBCacheManager):
         :param bk_module_id: 模块ID
         :rtype: Module
         """
-        return super().get(bk_module_id)
+        return super(ModuleManager, cls).get(bk_module_id)
 
     @classmethod
     def refresh_by_biz(cls, bk_biz_id):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -19,7 +20,7 @@ from drf_resource import APIResource
 
 
 class BkLoginAPIGWResource(six.with_metaclass(abc.ABCMeta, APIResource)):
-    base_url = f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/bk_login/"
+    base_url = "%s/api/c/compapi/bk_login/" % settings.BK_COMPONENT_API_URL
 
     # 模块名
     module_name = "bk_login"
@@ -30,7 +31,7 @@ class BkLoginAPIGWResource(six.with_metaclass(abc.ABCMeta, APIResource)):
 
 
 class UserManageAPIGWResource(BkLoginAPIGWResource, metaclass=abc.ABCMeta):
-    base_url = f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/usermanage/"
+    base_url = "%s/api/c/compapi/v2/usermanage/" % settings.BK_COMPONENT_API_URL
 
 
 class GetUserResource(UserManageAPIGWResource):
@@ -42,7 +43,7 @@ class GetUserResource(UserManageAPIGWResource):
     method = "GET"
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(GetUserResource, self).full_request_data(validated_request_data)
         validated_request_data.update({"id": validated_request_data["bk_username"]})
         return validated_request_data
 

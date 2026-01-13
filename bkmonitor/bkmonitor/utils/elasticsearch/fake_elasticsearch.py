@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -19,7 +20,7 @@ from elasticmock.fake_elasticsearch import (
 )
 from elasticmock.utilities import get_random_id
 from elasticsearch.client.utils import query_params
-from unittest.mock import patch
+from mock import patch
 
 from bkmonitor.documents import (
     ActionInstanceDocument,
@@ -35,7 +36,7 @@ class FakeElasticsearchBucket(FakeElasticsearch):
     """
 
     def __init__(self, hosts=None, transport_class=None, **kwargs):
-        super().__init__(hosts, transport_class, **kwargs)
+        super(FakeElasticsearchBucket, self).__init__(hosts, transport_class, **kwargs)
         self.__documents_dict = {}
         self.scrolls = {}
         self.fake_get_document_index()
@@ -161,7 +162,7 @@ class FakeElasticsearchBucket(FakeElasticsearch):
         ],
     )
     def search(self, index=None, doc_type=None, body=None, params=None, headers=None, **kwargs):
-        result = super().search(
+        result = super(FakeElasticsearchBucket, self).search(
             index=index, doc_type=doc_type, body=body, params=params, headers=headers
         )
         if 'scroll' in params and len(result['hits']['hits']) > int(body["size"]):
@@ -303,7 +304,7 @@ class FakeElasticsearchBucket(FakeElasticsearch):
                             raw_line = json.dumps(line["doc"])
                     new_body += "\n".join([index_line, raw_line])
                     new_body += "\n"
-        return super().bulk(new_body, index, doc_type, params=params, headers=headers)
+        return super(FakeElasticsearchBucket, self).bulk(new_body, index, doc_type, params=params, headers=headers)
 
     def _get_fake_query_condition(self, query_type_str, condition):
         return LocalFakeQueryCondition(QueryType.get_query_type(query_type_str), condition)
@@ -312,7 +313,7 @@ class FakeElasticsearchBucket(FakeElasticsearch):
 class LocalFakeQueryCondition(FakeQueryCondition):
     def evaluate(self, document):
         try:
-            return super().evaluate(document)
+            return super(LocalFakeQueryCondition, self).evaluate(document)
         except NotImplementedError:
             # 不存在的内容直接返回True
             return True

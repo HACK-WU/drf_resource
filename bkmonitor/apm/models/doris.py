@@ -39,7 +39,7 @@ class DorisStorageConfig:
         return cls(storage_cluster=cls.DEFAULT_STORAGE_CLUSTER)
 
     @classmethod
-    def read(cls, forced_config: dict | None = None) -> Optional["DorisStorageConfig"]:
+    def read(cls, forced_config: Optional[dict] = None) -> Optional["DorisStorageConfig"]:
         raw_config = forced_config or settings.APM_DORIS_STORAGE_CONFIG
         if not raw_config:
             return cls.default()

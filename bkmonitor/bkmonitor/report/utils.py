@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -116,10 +117,10 @@ def get_data_range(frequency: dict, bk_biz_id: int) -> dict:
 
     interval = now_time - from_time
     if interval.days:
-        interval = f"{interval.days}天"
+        interval = "{}天".format(interval.days)
     else:
         hour = interval.seconds / 60 / 60
-        interval = f"{int(hour)}小时" if hour > 1 else f"{int(hour * 60)}分钟"
+        interval = "{}小时".format(int(hour)) if hour > 1 else "{}分钟".format(int(hour * 60))
     time_fmt = "%Y-%m-%d %H:%M:%S"
     return {"start_time": from_time.strftime(time_fmt), "end_time": now_time.strftime(time_fmt), "interval": interval}
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -19,6 +20,6 @@ def resolve_domain(domain):
     try:
         resolve_items = dns.resolver.resolve(domain)
     except Exception as e:
-        logger.warning(f"domain({domain}) dns resolve error: {e}")
+        logger.warning("domain({}) dns resolve error: {}".format(domain, e))
         resolve_items = []
     return [item.address for item in resolve_items]

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +17,7 @@ from drf_resource import resource
 from tests.web.performance import mock_request
 
 
-class TestHostIndex:
+class TestHostIndex(object):
     def test_perform_request(self, mocker):
         host_index_one = SnapshotHostIndex(
             category="cpu",

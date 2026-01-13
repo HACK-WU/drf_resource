@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,13 +23,15 @@ def rollover_indices():
         try:
             new_index_name, alias = index.rollover()
             if not new_index_name:
-                msg = f"[ES ILM] index({index.Index.name}) check rollover finished, nothing to do"
+                msg = "[ES ILM] index(%s) check rollover finished, nothing to do" % index.Index.name
             else:
-                msg = f"[ES ILM] index({index.Index.name}) check rollover finished, create index({new_index_name}), alias({alias})"
+                msg = "[ES ILM] index({}) check rollover finished, create index({}), alias({})".format(
+                    index.Index.name, new_index_name, alias
+                )
             logger.info(msg)
             print(msg)
         except Exception as e:
-            msg = f"[ES ILM] index({index.Index.name}) rollover failed: {e}"
+            msg = "[ES ILM] index({}) rollover failed: {}".format(index.Index.name, e)
             logger.exception(msg)
             print(msg)
 

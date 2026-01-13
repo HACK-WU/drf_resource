@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import abc
+from typing import List, Union
 
 from django.conf import settings
 from django.utils.module_loading import import_string
@@ -12,7 +14,7 @@ class AbstractSpaceApi(metaclass=abc.ABCMeta):
     """
 
     @classmethod
-    def get_space_detail(cls, space_uid: str = "", bk_biz_id: int = 0) -> None | Space:
+    def get_space_detail(cls, space_uid: str = "", bk_biz_id: int = 0) -> Union[None, Space]:
         """
         查看具体空间实例详情
         :param space_uid: 空间唯一标识
@@ -22,14 +24,14 @@ class AbstractSpaceApi(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @classmethod
-    def list_spaces(cls, refresh=False) -> list[Space]:
+    def list_spaces(cls, refresh=False) -> List[Space]:
         """
         查询空间列表
         """
         raise NotImplementedError
 
     @classmethod
-    def get_related_space(cls, space_uid: str, related_space_type: str) -> None | Space:
+    def get_related_space(cls, space_uid: str, related_space_type: str) -> Union[None, Space]:
         """
         查询空间关联的资源对应空间。 如果类型和关联类型一致，则返回自己。
         """
@@ -68,7 +70,7 @@ class AbstractSpaceApi(metaclass=abc.ABCMeta):
         return space_type, space_id
 
 
-class SpaceApiProxy:
+class SpaceApiProxy(object):
     def __init__(self):
         self._api = None
 

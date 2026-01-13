@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 import json
 import logging
 import traceback
+from typing import Dict, Tuple
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -59,7 +61,7 @@ class Command(BaseCommand):
     def fail(msg):
         return msg + "\nScript escape"
 
-    def judge_option_data(self, data: dict, template_data, enable_field_blacklist=False) -> tuple[str, bool]:
+    def judge_option_data(self, data: Dict, template_data, enable_field_blacklist=False) -> Tuple[str, bool]:
         correct_flag = True
         result = ""
         for option_key, option_value in template_data.items():

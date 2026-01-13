@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +25,7 @@ class Command(BaseCommand):
         try:
             bk_data_id = models.DataSourceResultTable.objects.get(table_id=table_id).bk_data_id
         except models.DataSourceResultTable.DoesNotExist:
-            raise CommandError(f"table_id: {table_id} not found from DataSourceResultTable")
+            raise CommandError("table_id: %s not found from DataSourceResultTable" % table_id)
         return bk_data_id
 
     def handle(self, *args, **options):
@@ -38,14 +39,14 @@ class Command(BaseCommand):
             data_id = self.get_data_id_by_table_id(table_id)
 
         client = SpaceTableIDRedis()
-        self.stdout.write(f"data id: {data_id} start to refresh metric router")
+        self.stdout.write("data id: %s start to refresh metric router" % data_id)
         try:
             ts_group = models.TimeSeriesGroup.objects.get(bk_data_id=data_id)
         except models.TimeSeriesGroup.DoesNotExist:
-            raise CommandError(f"data_id: {data_id} not found from TimeSeriesGroup")
+            raise CommandError("data_id: %s not found from TimeSeriesGroup" % data_id)
         ts_group.update_time_series_metrics()
-        self.stdout.write(f"data id: {data_id} start to push redis data")
+        self.stdout.write("data id: %s start to push redis data" % data_id)
         client.push_table_id_detail(table_id_list=[ts_group.table_id], is_publish=True)
-        self.stdout.write(f"data id: {data_id} refresh metric router successfully")
+        self.stdout.write("data id: %s refresh metric router successfully" % data_id)
 
         self.stdout.write("update time series metric successfully")

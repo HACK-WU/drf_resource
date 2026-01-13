@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,7 +21,7 @@ from alarm_backends.service.access.data.token import TokenBucket
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        super().add_arguments(parser)
+        super(Command, self).add_arguments(parser)
         parser.add_argument("--bk_biz_id", help="scan all strategies with token info with bk_biz_id")
         parser.add_argument(
             "--all",
@@ -72,5 +73,5 @@ class Command(BaseCommand):
                             info.append(strategy["items"][0]["query_configs"][0]["result_table_id"])
                             group_key_dict[strategy_id] = info
                         except Exception:
-                            print(f"error parse strategy: {strategy_id}")
+                            print("error parse strategy: %s" % strategy_id)
                     print("\t".join(map(str, [strategy_id, *info])))

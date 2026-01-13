@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
+from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ class BasePanel:
 
     type = ""
 
-    def __init__(self, type: str, title: str, gridPos: dict, datasource: str | None = None, id: int = 0, **kwargs):
+    def __init__(self, type: str, title: str, gridPos: Dict, datasource: Optional[str] = None, id: int = 0, **kwargs):
         self.id = id
         self.type = type
         self.title = title
@@ -44,21 +46,21 @@ class TimeSeriesPanel(BasePanel):
     def __init__(
         self,
         title: str,
-        gridPos: dict,
-        datasource: str | None = None,
+        gridPos: Dict,
+        datasource: Optional[str] = None,
         id: int = 0,
         draw_style: str = "line",
         fill_opacity: int = 0,
-        min_y: int | None = None,
+        min_y: Optional[int] = None,
         **kwargs,
     ):
         self.draw_style = draw_style
         self.fill_opacity = fill_opacity
         self.min_y = min_y
 
-        super().__init__(self.type, title, gridPos, datasource, id, **kwargs)
+        super(TimeSeriesPanel, self).__init__(self.type, title, gridPos, datasource, id, **kwargs)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict:
         return {
             "id": self.id,
             "type": self.type,

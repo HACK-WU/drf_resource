@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -77,7 +78,7 @@ class AlertRobotModule(RobotModule):
     TIME_STORAGE_KEY = "latest_alert_time"
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(AlertRobotModule, self).__init__(*args, **kwargs)
         self.alert_count = 0
         self.person_alert_count = 0
         self.latest_person_alert_search_count = 0
@@ -137,7 +138,7 @@ class HostAnomalyRobotModule(RobotModule):
     TIME_STORAGE_KEY = "latest_host_anomaly_time"
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(HostAnomalyRobotModule, self).__init__(*args, **kwargs)
         self.abnormal_count = 0
 
     def fetch_info(self):

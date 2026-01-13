@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,6 +13,7 @@ import bisect
 import datetime
 import time
 from collections import defaultdict
+from typing import Dict, List
 
 import pytz
 from django.conf import settings
@@ -23,6 +25,7 @@ from django.utils.translation import gettext as _
 from pytz import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from six.moves import range, zip
 
 from api.cmdb.define import Host, ServiceInstance
 from bkmonitor.documents import AlertDocument
@@ -85,7 +88,7 @@ from monitor_web.models.alert_events import AlertSolution
 from monitor_web.scene_view.resources import HostIndexQueryMixin
 
 
-class EventDimensionMixin:
+class EventDimensionMixin(object):
     @staticmethod
     def get_dimension_display_value(value):
         if isinstance(value, list):
@@ -221,7 +224,7 @@ class EventPermissionResource(Resource):
         return Alert.objects.filter(event_id=event.event_id, username=get_request().user.username).exists()
 
     @classmethod
-    def filter_event_ids(cls, event_ids: list[int]):
+    def filter_event_ids(cls, event_ids: List[int]):
         """
         过滤出有权限的事件ID
         """
@@ -323,7 +326,7 @@ class ListEventResource(EventPermissionResource, EventDimensionMixin):
         export = serializers.BooleanField(required=False, label="导出事件", default=None)
 
     def __init__(self):
-        super().__init__()
+        super(ListEventResource, self).__init__()
         self.event_queryset = Event.objects.filter()
         self.event_paginator = None
         self.related_data = {}
@@ -450,7 +453,7 @@ class ListEventResource(EventPermissionResource, EventDimensionMixin):
         self.event_queryset = resource.alert_events.query_events(validated_request_data)
 
         try:
-            logger.info(f"event query: {self.event_queryset.query}")
+            logger.info("event query: {}".format(self.event_queryset.query))
         except EmptyResultSet:
             logger.info("EmptyResultSet: query won’t return any results")
 
@@ -699,7 +702,7 @@ class EventGraphQueryResource(EventPermissionResource):
             index_set_id = serializers.IntegerField(required=False, label="索引集ID")
             functions = serializers.ListField(label="查询函数", default=[])
 
-            def validate(self, attrs: dict) -> dict:
+            def validate(self, attrs: Dict) -> Dict:
                 if attrs["data_source_label"] == DataSourceLabel.BK_LOG_SEARCH and not attrs.get("index_set_id"):
                     raise ValidationError("index_set_id can not be empty.")
                 return attrs
@@ -723,7 +726,7 @@ class EventGraphQueryResource(EventPermissionResource):
         (DataSourceLabel.BK_LOG_SEARCH, DataTypeLabel.LOG),
     )
 
-    def perform_request(self, params: dict):
+    def perform_request(self, params: Dict):
         try:
             event = Event.objects.get(id=params["id"])
         except Event.DoesNotExist:
@@ -890,7 +893,7 @@ class DetailEventResource(EventPermissionResource, EventDimensionMixin):
             relation_info = self.get_target_relation_info(validated_request_data["bk_biz_id"], event.target_key)
             relation_info += get_event_relation_info(event)
         except Exception as err:
-            logger.exception(f"Get anomaly content err, msg is {err}")
+            logger.exception("Get anomaly content err, msg is {}".format(err))
             relation_info = ""
 
         item = event.origin_strategy["items"][0]
@@ -1229,7 +1232,7 @@ class SaveSolutionResource(EventPermissionResource):
 
 class ListEventLogResource(EventPermissionResource):
     def __init__(self):
-        super().__init__()
+        super(ListEventLogResource, self).__init__()
         self.event = None
 
     class RequestSerializer(serializers.Serializer):
@@ -1412,7 +1415,7 @@ class ListSearchItemResource(EventPermissionResource):
                 parent_info = category_mapping.get(category["bk_parent_id"], {})
                 label_first = parent_info.get("name", "")
                 label_second = category.get("name", "")
-                category_list.add(f"{label_first}-{label_second}")
+                category_list.add("{}-{}".format(label_first, label_second))
 
         return list(category_list)
 
@@ -1605,7 +1608,7 @@ class EventRelatedInfoResource(EventPermissionResource):
         ids = serializers.ListField(child=serializers.IntegerField(), required=True, label="事件ID")
 
     @staticmethod
-    def get_cmdb_related_info(bk_biz_id, events: list[Event]) -> dict[str, dict]:
+    def get_cmdb_related_info(bk_biz_id, events: List[Event]) -> Dict[str, Dict]:
         """
         查询事件拓扑信息
 
@@ -1633,8 +1636,8 @@ class EventRelatedInfoResource(EventPermissionResource):
                 service_instance_ids[event.id] = event.target_key.split("|")[1]
 
         # 查询主机和服务实例信息
-        hosts: list[Host] = api.cmdb.get_host_by_ip(bk_biz_id=bk_biz_id, ips=list(ips.values()))
-        service_instances: list[ServiceInstance] = api.cmdb.get_service_instance_by_id(
+        hosts: List[Host] = api.cmdb.get_host_by_ip(bk_biz_id=bk_biz_id, ips=list(ips.values()))
+        service_instances: List[ServiceInstance] = api.cmdb.get_service_instance_by_id(
             bk_biz_id=bk_biz_id, service_instance_ids=list(service_instance_ids.values())
         )
 
@@ -1690,7 +1693,7 @@ class EventRelatedInfoResource(EventPermissionResource):
         return related_infos
 
     @staticmethod
-    def get_log_related_info(bk_biz_id, events: list[Event]) -> dict[str, dict]:
+    def get_log_related_info(bk_biz_id, events: List[Event]) -> Dict[str, Dict]:
         """
         日志平台关联信息
 
@@ -1723,7 +1726,7 @@ class EventRelatedInfoResource(EventPermissionResource):
         return related_infos
 
     @staticmethod
-    def get_custom_event_related_info(bk_biz_id, events: list[Event]) -> dict[str, dict]:
+    def get_custom_event_related_info(bk_biz_id, events: List[Event]) -> Dict[str, Dict]:
         """
         自定义事件关联信息
 
@@ -1753,7 +1756,7 @@ class EventRelatedInfoResource(EventPermissionResource):
         return related_infos
 
     @staticmethod
-    def get_bkdata_related_info(bk_biz_id, events: list[Event]) -> dict[str, dict]:
+    def get_bkdata_related_info(bk_biz_id, events: List[Event]) -> Dict[str, Dict]:
         """
         计算平台关联信息
         {
@@ -1942,7 +1945,7 @@ class GraphPointResource(Resource):
                 title = _("服务【{}】").format(service_str) if service_str else ""
 
             title += (
-                f"{metric_info.result_table_id}.{metric_info.metric_field}"
+                "{}.{}".format(metric_info.result_table_id, metric_info.metric_field)
                 if get_language() == "en"
                 else metric_info.metric_field_name
             )

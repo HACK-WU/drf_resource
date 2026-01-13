@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ specific language governing permissions and limitations under the License.
 import datetime
 import json
 import logging
+from typing import Dict, List, Optional, Set, Union
 
 import yaml
 from django.conf import settings
@@ -55,7 +57,7 @@ class RecordRule(BaseModelWithTime):
         verbose_name_plural = "预计算规则"
 
     @classmethod
-    def transform_bk_sql_and_metrics(cls, rule_config: str) -> dict:
+    def transform_bk_sql_and_metrics(cls, rule_config: str) -> Dict:
         """转换原始规则配置到计算平台语句"""
         rule_dict = yaml.safe_load(rule_config)
         rules = rule_dict.get("rules", [])
@@ -90,7 +92,7 @@ class RecordRule(BaseModelWithTime):
         return {"bksql": bksql_list, "metrics": metrics, "rule_metrics": rule_metrics}
 
     @classmethod
-    def get_src_table_ids(cls, space_type: str, space_id: str, metrics: list | set) -> list:
+    def get_src_table_ids(cls, space_type: str, space_id: str, metrics: Union[List, Set]) -> List:
         """获取源结果表列表"""
         # 通过指标和所属空间，查询需要预计算的结果表
         # 获取空间所在记录的ID
@@ -172,7 +174,7 @@ class ResultTableFlow(BaseModelWithTime):
         return utils.compose_rule_table_id(table_id)
 
     @classmethod
-    def compose_source_node(cls, vm_table_ids: list) -> list:
+    def compose_source_node(cls, vm_table_ids: List) -> List:
         """
         组装计算配置
         :param vm_table_ids: VM 结果表列表
@@ -197,7 +199,7 @@ class ResultTableFlow(BaseModelWithTime):
         return nodes
 
     @classmethod
-    def compose_process_node(cls, table_id: str, vm_table_ids: list, waiting_time: int = 30) -> dict:
+    def compose_process_node(cls, table_id: str, vm_table_ids: List, waiting_time: int = 30) -> Dict:
         """
         组装计算节点配置
         :param table_id: 结果表ID
@@ -236,7 +238,7 @@ class ResultTableFlow(BaseModelWithTime):
         }
 
     @classmethod
-    def compose_vm_storage(cls, table_id: str, process_id: int, expires: int = 30, schemaless: bool = True) -> dict:
+    def compose_vm_storage(cls, table_id: str, process_id: int, expires: int = 30, schemaless: bool = True) -> Dict:
         """
         组装存储配置
         :param table_id: 结果表ID
@@ -319,7 +321,7 @@ class ResultTableFlow(BaseModelWithTime):
         return True
 
     @classmethod
-    def start_flow(self, flow_id: int, consuming_mode: str | None = ConsumingMode.Current) -> bool:
+    def start_flow(self, flow_id: int, consuming_mode: Optional[str] = ConsumingMode.Current) -> bool:
         """启动 flow
 
         NOTE:

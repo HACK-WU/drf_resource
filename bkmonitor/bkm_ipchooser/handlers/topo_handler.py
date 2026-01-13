@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 import itertools
 import logging
+import typing
 from collections import defaultdict
 
 from django.core.cache import cache
@@ -26,10 +28,10 @@ class TopoHandler:
     @staticmethod
     def format_tree(topo_tree: types.TreeNode) -> types.ReadableTreeNode:
         bk_biz_id: int = topo_tree["bk_inst_id"]
-        topo_tree_stack: list[types.TreeNode] = [topo_tree]
+        topo_tree_stack: typing.List[types.TreeNode] = [topo_tree]
         # 定义一个通过校验的配置根节点及栈结构，同步 topo_tree_stack 进行遍历写入
         formatted_topo_tree: types.ReadableTreeNode = {}
-        formatted_topo_tree_stack: list[types.ReadableTreeNode] = [formatted_topo_tree]
+        formatted_topo_tree_stack: typing.List[types.ReadableTreeNode] = [formatted_topo_tree]
 
         # 空间换时间，迭代模拟递归
         while topo_tree_stack:
@@ -59,7 +61,7 @@ class TopoHandler:
     @classmethod
     def trees(
         cls, scope_list: types.ScopeList, count_instance_type: str = constants.InstanceType.HOST.value
-    ) -> list[dict]:
+    ) -> typing.List[typing.Dict]:
         if len(scope_list) == 0:
             return []
 
@@ -74,9 +76,9 @@ class TopoHandler:
     @staticmethod
     def query_path(
         scope_list: types.ScopeList,
-        node_list: list[types.TreeNode],
+        node_list: typing.List[types.TreeNode],
         count_instance_type: str = constants.InstanceType.HOST.value,
-    ) -> list[list[types.TreeNode]]:
+    ) -> typing.List[typing.List[types.TreeNode]]:
         if not node_list:
             return []
         bk_biz_id = scope_list[0]["bk_biz_id"]
@@ -86,7 +88,7 @@ class TopoHandler:
             count_instance_type=count_instance_type,
         )
 
-        inst_id__path_map: dict[str, list[types.TreeNode]] = {}
+        inst_id__path_map: typing.Dict[str, typing.List[types.TreeNode]] = {}
         for node_with_path in node_with_paths:
             inst_id__path_map[
                 topo_tool.TopoTool.build_inst_key(
@@ -94,7 +96,7 @@ class TopoHandler:
                 )
             ] = node_with_path.get("bk_path", [])
 
-        node_paths_list: list[list[types.TreeNode]] = []
+        node_paths_list: typing.List[typing.List[types.TreeNode]] = []
         for node in node_list:
             inst_key = topo_tool.TopoTool.build_inst_key(object_id=node["object_id"], instance_id=node["instance_id"])
             if not inst_id__path_map.get(inst_key):
@@ -119,12 +121,12 @@ class TopoHandler:
     def query_hosts(
         cls,
         scope_list: types.ScopeList,
-        readable_node_list: list[types.ReadableTreeNode],
-        conditions: list[types.Condition],
+        readable_node_list: typing.List[types.ReadableTreeNode],
+        conditions: typing.List[types.Condition],
         start: int,
         page_size: int,
-        fields: list[str] = constants.CommonEnum.DEFAULT_HOST_FIELDS.value,
-    ) -> dict:
+        fields: typing.List[str] = constants.CommonEnum.DEFAULT_HOST_FIELDS.value,
+    ) -> typing.Dict:
         """
         查询主机
         :param scope_list
@@ -154,11 +156,11 @@ class TopoHandler:
     def query_host_id_infos(
         cls,
         scope_list: types.ScopeList,
-        readable_node_list: list[types.ReadableTreeNode],
-        conditions: list[types.Condition],
+        readable_node_list: typing.List[types.ReadableTreeNode],
+        conditions: typing.List[types.Condition],
         start: int,
         page_size: int,
-    ) -> dict:
+    ) -> typing.Dict:
         """
         查询主机 ID 信息
         :param readable_node_list: 拓扑节点
@@ -194,7 +196,7 @@ class TopoHandler:
         fill_agent_status(cc_hosts, bk_biz_id)
 
     @classmethod
-    def count_agent_status(cls, cc_hosts) -> dict:
+    def count_agent_status(cls, cc_hosts) -> typing.Dict:
         # fill_agent_status 之后，统计主机状态
         result = {"agent_statistics": {"total_count": 0, "alive_count": 0, "not_alive_count": 0}}
         if not cc_hosts:
@@ -269,12 +271,12 @@ class TopoHandler:
     def query_service_instance(
         cls,
         scope_list: types.ScopeList,
-        readable_node_list: list[types.ReadableTreeNode] = None,
-        service_instance_ids: list[int] = None,
+        readable_node_list: typing.List[types.ReadableTreeNode] = None,
+        service_instance_ids: typing.List[int] = None,
         start: int = None,
         page_size: int = None,
         search_content: str = None,
-    ) -> dict:
+    ) -> typing.Dict:
         """
         查询服务实例
         :param scope_list: 业务范围
@@ -290,7 +292,7 @@ class TopoHandler:
         if not service_instance_ids and not search_content:
             # 查询业务下所有服务实例（缓存5分钟）
             cache_key = f"all_service_instance_detail:{bk_biz_id}"
-            service_instances: list[dict] = cache.get(cache_key)
+            service_instances: typing.List[typing.Dict] = cache.get(cache_key)
             if not service_instances:
                 service_instances = batch_request.batch_request(
                     func=BkApi.list_service_instance_detail, params={"bk_biz_id": bk_biz_id}, limit=200
@@ -350,13 +352,13 @@ class TopoHandler:
     def query_cc_hosts(
         cls,
         bk_biz_id: int,
-        readable_node_list: list[types.ReadableTreeNode],
-        conditions: list[types.Condition],
+        readable_node_list: typing.List[types.ReadableTreeNode],
+        conditions: typing.List[types.Condition],
         start: int,
         page_size: int,
-        fields: list[str] = constants.CommonEnum.DEFAULT_HOST_FIELDS.value,
+        fields: typing.List[str] = constants.CommonEnum.DEFAULT_HOST_FIELDS.value,
         return_status: bool = False,
-    ) -> dict:
+    ) -> typing.Dict:
         """
         查询主机
         :param readable_node_list: 拓扑节点
@@ -405,8 +407,8 @@ class TopoHandler:
 
     @classmethod
     def agent_statistics(
-        cls, scope_list: types.ScopeList, node_list: list[types.ReadableTreeNode]
-    ) -> list[dict]:
+        cls, scope_list: types.ScopeList, node_list: typing.List[types.ReadableTreeNode]
+    ) -> typing.List[typing.Dict]:
         """
         获取多个拓扑节点的主机 Agent 状态统计信息
         :param node_list: 节点信息列表
@@ -419,7 +421,7 @@ class TopoHandler:
         )
 
     @classmethod
-    def node_agent_statistics(cls, bk_biz_id: int, node: types.ReadableTreeNode) -> dict:
+    def node_agent_statistics(cls, bk_biz_id: int, node: types.ReadableTreeNode) -> typing.Dict:
         """
         获取单个拓扑节点的主机 Agent 状态统计信息
         :param node: 节点信息
@@ -446,7 +448,7 @@ class TopoHandler:
     @classmethod
     def node_service_instances(
         cls, scope_list: types.ScopeList, node_list: [types.ReadableTreeNode]
-    ) -> list[dict]:
+    ) -> typing.List[typing.Dict]:
         """
         获取服务实例数量
         """

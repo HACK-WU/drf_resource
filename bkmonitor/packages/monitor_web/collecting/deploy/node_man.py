@@ -10,7 +10,7 @@ specific language governing permissions and limitations under the License.
 import copy
 import itertools
 from collections import defaultdict
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
 from django.conf import settings
 from django.db import transaction
@@ -51,7 +51,7 @@ class NodeManInstaller(BaseInstaller):
         self._topo_tree = topo_tree
         self._topo_links = None
 
-    def _get_topo_links(self) -> dict[str, list[TopoNode]]:
+    def _get_topo_links(self) -> Dict[str, List[TopoNode]]:
         """
         获取拓扑链路
         """
@@ -210,7 +210,7 @@ class NodeManInstaller(BaseInstaller):
 
         return subscription_params
 
-    def _deploy(self, target_version: DeploymentConfigVersion) -> dict:
+    def _deploy(self, target_version: DeploymentConfigVersion) -> Dict:
         """
         部署插件采集
         """
@@ -308,7 +308,7 @@ class NodeManInstaller(BaseInstaller):
                 debug=False,
             )
 
-    def install(self, install_config: dict, operation: str | None) -> dict:
+    def install(self, install_config: Dict, operation: Optional[str]) -> Dict:
         """
         首次安装插件采集
         install_config: {
@@ -375,7 +375,7 @@ class NodeManInstaller(BaseInstaller):
             "deployment_id": new_version.pk,
         }
 
-    def upgrade(self, params: dict) -> dict:
+    def upgrade(self, params: Dict) -> Dict:
         """
         升级插件采集
         """
@@ -441,7 +441,7 @@ class NodeManInstaller(BaseInstaller):
         DeploymentConfigVersion.objects.filter(config_meta_id=self.collect_config.id).delete()
         self.collect_config.delete()
 
-    def rollback(self, target_version: int | DeploymentConfigVersion | None = None):
+    def rollback(self, target_version: Union[int, DeploymentConfigVersion, None] = None):
         """
         回滚插件采集
         """
@@ -537,7 +537,7 @@ class NodeManInstaller(BaseInstaller):
         self.collect_config.deployment_config.task_ids = [result["task_id"]]
         self.collect_config.deployment_config.save()
 
-    def run(self, action: str = None, scope: dict[str, Any] = None):
+    def run(self, action: str = None, scope: Dict[str, Any] = None):
         """
         执行插件采集
         :param ACTION: 操作类型 INSTALL/UNINSTALL/START/STOP
@@ -568,7 +568,7 @@ class NodeManInstaller(BaseInstaller):
 
         api.node_man.run_subscription(**params)
 
-    def retry(self, instance_ids: list[int] = None):
+    def retry(self, instance_ids: List[int] = None):
         """
         重试插件采集，如果没有指定实例，则啊重试失败的实例
         """
@@ -610,7 +610,7 @@ class NodeManInstaller(BaseInstaller):
         self.collect_config.operation_result = OperationResult.PREPARING
         self.collect_config.save()
 
-    def revoke(self, instance_ids: list[int] = None):
+    def revoke(self, instance_ids: List[int] = None):
         """
         终止采集任务
         """
@@ -625,7 +625,7 @@ class NodeManInstaller(BaseInstaller):
         api.node_man.revoke_subscription(**params)
 
     @staticmethod
-    def _get_instance_step_log(instance_result: dict[str, Any]):
+    def _get_instance_step_log(instance_result: Dict[str, Any]):
         """
         获取实例下发阶段性日志
         """
@@ -636,7 +636,7 @@ class NodeManInstaller(BaseInstaller):
                         return "{}-{}".format(step["node_name"], sub_step["node_name"])
         return ""
 
-    def _process_nodeman_task_result(self, task_result: list[dict[str, Any]]):
+    def _process_nodeman_task_result(self, task_result: List[Dict[str, Any]]):
         """
         处理节点管理任务结果
         {
@@ -752,7 +752,7 @@ class NodeManInstaller(BaseInstaller):
 
         return instances
 
-    def status(self, diff=False) -> list[dict[str, Any]]:
+    def status(self, diff=False) -> List[Dict[str, Any]]:
         """
         状态查询
         :param diff: 是否显示差异
@@ -766,7 +766,7 @@ class NodeManInstaller(BaseInstaller):
 
         # 差异比对/不比对数据结构
         current_version: DeploymentConfigVersion = self.collect_config.deployment_config
-        last_version: DeploymentConfigVersion | None = current_version.last_version
+        last_version: Optional[DeploymentConfigVersion] = current_version.last_version
 
         # 将模板转换为节点
         template_to_nodes = defaultdict(list)
@@ -921,7 +921,7 @@ class NodeManInstaller(BaseInstaller):
 
         return list(diff_mapping.values())
 
-    def instance_status(self, instance_id: str) -> dict[str, Any]:
+    def instance_status(self, instance_id: str) -> Dict[str, Any]:
         """
         获取实例状态详情
         """

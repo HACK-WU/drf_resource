@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -25,7 +26,7 @@ from core.errors.dataapi import SqlQueryException
 NO_DATA_CONCURRENT_NUMBER = os.getenv("NO_DATA_CONCURRENT_NUMBER", 20)
 
 
-class DataBase:
+class DataBase(object):
     @classmethod
     def get_plat_id(cls, point):
         raise NotImplementedError
@@ -47,7 +48,7 @@ class DataBase:
                 key = host_key(ip=point["ip"], plat_id=plat_id)
                 if dimension_field:
                     dimension = point[dimension_field]
-                    key = f"{key}::{dimension}"
+                    key = "{}::{}".format(key, dimension)
                 if key not in performance_point_info and point[item] is not None:
                     val = point[item]
                     with ignored(TypeError, log_exception=False):
@@ -173,14 +174,14 @@ class TSDBData(DataBase):
         return data
 
 
-class TSDataBase:
+class TSDataBase(object):
     def __init__(self, db_name, result_tables=None, bk_biz_id=None):
         self.bk_biz_id = bk_biz_id
         self.tables = result_tables
         self.db_name = db_name
 
     def table_id(self, table_name):
-        table_id = f"{self.db_name}.{table_name}"
+        table_id = "{db_name}.{table}".format(db_name=self.db_name, table=table_name)
         # if self.bk_biz_id:
         #     table_id = "{bk_biz_id}_{table_id}".format(bk_biz_id=self.bk_biz_id, table_id=table_id)
 

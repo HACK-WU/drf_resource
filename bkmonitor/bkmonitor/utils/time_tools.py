@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ specific language governing permissions and limitations under the License.
 import datetime
 import re
 import time
+from typing import Union
 
 import arrow
 import six
@@ -253,7 +255,7 @@ def get_datetime_range(period, distance, now=None, rounding=True):
             begin = begin.ceil("hour")
             end = end.ceil("hour")
     else:
-        raise TypeError(f"invalid period: {period!r}")
+        raise TypeError("invalid period: %r" % period)
 
     if settings.USE_TZ:
         return begin.datetime, end.datetime
@@ -267,7 +269,7 @@ def get_datetime_list(begin_time, end_time, period):
     elif period == "hour":
         timedelta = "hours"
     else:
-        raise TypeError(f"invalid period: {period!r}")
+        raise TypeError("invalid period: %r" % period)
 
     datetime_list = []
     item = begin_time
@@ -324,12 +326,12 @@ def hms_string(sec_elapsed, display_num=2, day_unit="d", hour_unit="h", minute_u
             continue
 
         index += 1
-        time_str += f"{unit[0]}{unit[1]} "
+        time_str += "{}{} ".format(unit[0], unit[1])
         if index >= display_num:
             return time_str.strip()
 
     if not time_str:
-        return f"{s}{second_unit}"
+        return "{}{}".format(s, second_unit)
 
     return time_str.strip()
 
@@ -337,13 +339,13 @@ def hms_string(sec_elapsed, display_num=2, day_unit="d", hour_unit="h", minute_u
 TIME_ABBREVIATION_MATCH = re.compile(r"^[-+]?[0-9]*\.?[0-9]+[smhdwMy]")
 
 
-def parse_time_compare_abbreviation(time_offset: int | str) -> int:
+def parse_time_compare_abbreviation(time_offset: Union[int, str]) -> int:
     """
     时间对比解析(h/d/w/M/y)
     :param time_offset: 1d / 0.5m / -5w
     :return: 返回一个整数，以秒为单位。 int (unit: s)
     """
-    if isinstance(time_offset, int | float):
+    if isinstance(time_offset, (int, float)):
         return time_offset
 
     time_offset = str(time_offset).strip()

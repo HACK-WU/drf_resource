@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -17,8 +18,7 @@ import operator
 from collections import defaultdict
 from enum import Enum
 from json import JSONDecodeError
-from typing import Any
-from collections.abc import Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from django.conf import settings
 from django.core.cache import cache
@@ -126,8 +126,8 @@ logger = logging.getLogger(__name__)
 
 
 def format_percent(
-    percent: int | float, precision: int = 2, sig_fig_cnt: int = 2, readable_precision=6
-) -> int | float:
+    percent: Union[int, float], precision: int = 2, sig_fig_cnt: int = 2, readable_precision=6
+) -> Union[int, float]:
     if isinstance(percent, int):
         return percent
 
@@ -200,11 +200,11 @@ class PreCalculateHelperMixin:
 
     @classmethod
     def get_helper_or_none(
-        cls, bk_biz_id: str, app_name: str, app_config_key: str | None = None
-    ) -> PreCalculateHelper | None:
+        cls, bk_biz_id: str, app_name: str, app_config_key: Optional[str] = None
+    ) -> Optional[PreCalculateHelper]:
         try:
-            app_config: dict[str, Any] = getattr(settings, app_config_key or cls.DEFAULT_APP_CONFIG_KEY)
-            pre_calculate_config: dict[str, Any] = app_config[f"{bk_biz_id}-{app_name}"]["pre_calculate"]
+            app_config: Dict[str, Any] = getattr(settings, app_config_key or cls.DEFAULT_APP_CONFIG_KEY)
+            pre_calculate_config: Dict[str, Any] = app_config[f"{bk_biz_id}-{app_name}"]["pre_calculate"]
         except (KeyError, AttributeError):
             return None
 
@@ -290,7 +290,7 @@ class DynamicUnifyQueryResource(Resource, PreCalculateHelperMixin):
         hook_processors = serializers.DictField(label="每个 hook 对应的处理器列表", required=False, default={})
 
         def validate(self, attrs):
-            hook_processors: dict[str, Any] = {}
+            hook_processors: Dict[str, Any] = {}
             for processor in attrs.get("processors") or []:
                 hook_processors.setdefault(processor["hook"], []).append(processor)
 
@@ -437,7 +437,7 @@ class DynamicUnifyQueryResource(Resource, PreCalculateHelperMixin):
         )
 
     @classmethod
-    def _process_map(cls) -> dict[str, Callable]:
+    def _process_map(cls) -> Dict[str, Callable]:
         return {
             "format_percent": cls.format_percent,
             "fill_empty_dimensions": cls.fill_empty_dimensions,
@@ -467,7 +467,7 @@ class DynamicUnifyQueryResource(Resource, PreCalculateHelperMixin):
         :param app_config_key:
         :return:
         """
-        helper: PreCalculateHelper | None = cls.get_helper_or_none(
+        helper: Optional[PreCalculateHelper] = cls.get_helper_or_none(
             validate_data["bk_biz_id"], validate_data["app_name"], app_config_key
         )
         if helper is None:
@@ -478,7 +478,7 @@ class DynamicUnifyQueryResource(Resource, PreCalculateHelperMixin):
         validate_data["metric_map"] = {}
         validate_data["backup_query_params"] = copy.deepcopy(query_params)
 
-        used_labels: list[str] = []
+        used_labels: List[str] = []
         for query_config in query_params["query_configs"]:
             used_labels.extend(query_config.get("group_by") or [])
             for cond in query_config.get("where") or []:
@@ -486,7 +486,7 @@ class DynamicUnifyQueryResource(Resource, PreCalculateHelperMixin):
 
             table_id: str = query_config["table"]
             metric: str = query_config["metrics"][0]["field"]
-            result: dict[str, Any] = helper.router(table_id, metric, used_labels)
+            result: Dict[str, Any] = helper.router(table_id, metric, used_labels)
 
             if not result["is_hit"]:
                 continue
@@ -505,7 +505,7 @@ class DynamicUnifyQueryResource(Resource, PreCalculateHelperMixin):
     @classmethod
     def fill_empty_dimensions(cls, query_params, response, validate_data, **kwargs):
         try:
-            dimension_fields: list[str] = validate_data["unify_query_param"]["query_configs"][0]["group_by"]
+            dimension_fields: List[str] = validate_data["unify_query_param"]["query_configs"][0]["group_by"]
         except (IndexError, KeyError):
             # 找不到 group by，就不做填充了
             return
@@ -535,17 +535,17 @@ class DynamicUnifyQueryResource(Resource, PreCalculateHelperMixin):
         """还原查询元数据信息
         预计算等逻辑对指标、结果表的路由查询不应暴露给用户，跳转数据检索/告警配置正常还是走原指标。
         """
-        backup_query_params: dict[str, Any] | None = validate_data.get("backup_query_params")
+        backup_query_params: Optional[Dict[str, Any]] = validate_data.get("backup_query_params")
         if not backup_query_params:
             return
 
         response["query_config"] = backup_query_params
 
-        table_metric_map: dict[str, str] = {**validate_data.get("table_map", {}), **validate_data.get("metric_map", {})}
+        table_metric_map: Dict[str, str] = {**validate_data.get("table_map", {}), **validate_data.get("metric_map", {})}
         if not table_metric_map:
             return
 
-        recovery_metrics: list[dict[str, Any]] = []
+        recovery_metrics: List[Dict[str, Any]] = []
         for metric in response.get("metrics") or []:
             metric_json = json.dumps(metric)
             for old, new in table_metric_map.items():
@@ -1372,7 +1372,7 @@ class ServiceListAsyncResource(AsyncColumnsListResource):
 
         res = []
         filter_fields = []
-        m: dict = self.METRIC_MAP[column]
+        m: Dict = self.METRIC_MAP[column]
         app = Application.objects.get(bk_biz_id=validated_data["bk_biz_id"], app_name=validated_data["app_name"])
         metric_params = {
             "application": app,
@@ -3325,7 +3325,7 @@ class GetFieldOptionValuesResource(Resource):
         metric_helper: metric_group.MetricHelper = metric_group.MetricHelper(
             validated_request_data["bk_biz_id"], validated_request_data["app_name"]
         )
-        option_values: list[str] = metric_helper.get_field_option_values(
+        option_values: List[str] = metric_helper.get_field_option_values(
             metric_field=validated_request_data["metric_field"],
             field=validated_request_data["field"],
             filter_dict=validated_request_data.get("filter_dict"),
@@ -3338,7 +3338,7 @@ class GetFieldOptionValuesResource(Resource):
 
 class RecordHelperMixin:
     @classmethod
-    def _process_sorted(cls, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def _process_sorted(cls, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         if not records:
             return []
         if "time" in records[0].get("dimensions") or {}:
@@ -3422,23 +3422,23 @@ class CalculateByRangeResource(Resource, RecordHelperMixin, PreCalculateHelperMi
     def _merge(
         cls,
         metric_cal_type: str,
-        group_fields: list[str],
-        alias_aggregated_records_map: dict[str, list[dict[str, Any]]],
-    ) -> list[dict[str, Any]]:
-        group_key_record_map: dict[tuple, dict[str, Any]] = {}
+        group_fields: List[str],
+        alias_aggregated_records_map: Dict[str, List[Dict[str, Any]]],
+    ) -> List[Dict[str, Any]]:
+        group_key_record_map: Dict[Tuple, Dict[str, Any]] = {}
         # 多个对比时间维度数量可能存在差异，此处合并取维度数的交集
         for alias, records in alias_aggregated_records_map.items():
             for record in records:
                 record["time"] = record["_time_"] // 1000
-                group_key: tuple = tuple((field, record.get(field) or "") for field in group_fields)
+                group_key: Tuple = tuple((field, record.get(field) or "") for field in group_fields)
                 group_key_record_map.setdefault(group_key, {})[alias] = record["_result_"]
 
-        merged_records: list[dict[str, Any]] = []
-        aliases: list[str] = list(alias_aggregated_records_map.keys())
+        merged_records: List[Dict[str, Any]] = []
+        aliases: List[str] = list(alias_aggregated_records_map.keys())
         for group_key, record in group_key_record_map.items():
             # 确保 dimensions 以 group_fields 为序
-            dimensions: dict[str, Any] = dict(group_key)
-            processed_record: dict[str, Any] = {"dimensions": {}}
+            dimensions: Dict[str, Any] = dict(group_key)
+            processed_record: Dict[str, Any] = {"dimensions": {}}
             for field in group_fields:
                 processed_record["dimensions"][field] = dimensions.get(field) or ""
 
@@ -3452,10 +3452,10 @@ class CalculateByRangeResource(Resource, RecordHelperMixin, PreCalculateHelperMi
         return merged_records
 
     @classmethod
-    def _process_growth_rates(cls, baseline: str, aliases: list[str], records: list[dict[str, Any]]):
+    def _process_growth_rates(cls, baseline: str, aliases: List[str], records: List[Dict[str, Any]]):
         for record in records:
             for alias in aliases:
-                growth_rate: float | None = None
+                growth_rate: Optional[float] = None
 
                 if record[baseline] == 0 and record[alias] == 0:
                     # 两个数据都为 0 时，设定增长率为 0%
@@ -3478,8 +3478,8 @@ class CalculateByRangeResource(Resource, RecordHelperMixin, PreCalculateHelperMi
                 record.setdefault("growth_rates", {})[alias] = growth_rate
 
     @classmethod
-    def _process_proportions(cls, aliases: list[str], records: list[dict[str, Any]]):
-        alias_total_map: dict[str, int] = defaultdict(int)
+    def _process_proportions(cls, aliases: List[str], records: List[Dict[str, Any]]):
+        alias_total_map: Dict[str, int] = defaultdict(int)
         for record in records:
             for alias in aliases:
                 alias_total_map[alias] += record[alias] or 0
@@ -3495,7 +3495,7 @@ class CalculateByRangeResource(Resource, RecordHelperMixin, PreCalculateHelperMi
                 )
 
     def perform_request(self, validated_request_data):
-        def _collect(_alias: str | None, **_kwargs):
+        def _collect(_alias: Optional[str], **_kwargs):
             _group: metric_group.BaseMetricGroup = metric_group.MetricGroupRegistry.get(
                 group_name,
                 validated_request_data["bk_biz_id"],
@@ -3510,10 +3510,10 @@ class CalculateByRangeResource(Resource, RecordHelperMixin, PreCalculateHelperMi
 
         baseline: str = validated_request_data["baseline"]
         metric_cal_type: str = validated_request_data["metric_cal_type"]
-        alias_aggregated_records_map: dict[str, list[dict[str, Any]]] = {}
+        alias_aggregated_records_map: Dict[str, List[Dict[str, Any]]] = {}
         group_name: str = validated_request_data["metric_group_name"]
-        group_fields: list[str] = validated_request_data.get("group_by") or []
-        pre_calculate_helper: PreCalculateHelper | None = self.get_helper_or_none(
+        group_fields: List[str] = validated_request_data.get("group_by") or []
+        pre_calculate_helper: Optional[PreCalculateHelper] = self.get_helper_or_none(
             validated_request_data["bk_biz_id"], validated_request_data["app_name"]
         )
 
@@ -3532,9 +3532,9 @@ class CalculateByRangeResource(Resource, RecordHelperMixin, PreCalculateHelperMi
         )
 
         # 合并数据
-        merged_records: list[dict[str, Any]] = self._merge(metric_cal_type, group_fields, alias_aggregated_records_map)
+        merged_records: List[Dict[str, Any]] = self._merge(metric_cal_type, group_fields, alias_aggregated_records_map)
 
-        aliases: list[str] = list(alias_aggregated_records_map.keys())
+        aliases: List[str] = list(alias_aggregated_records_map.keys())
         # 计算增长率
         self._process_growth_rates(baseline, aliases, merged_records)
         if validated_request_data["metric_cal_type"] == metric_group.CalculationType.REQUEST_TOTAL:
@@ -3593,8 +3593,8 @@ class QueryDimensionsByLimitResource(Resource, RecordHelperMixin, PreCalculateHe
             return attrs
 
     @classmethod
-    def _format(cls, time_shift: str, group_fields: list[str], records: list[dict[str, Any]]):
-        group_key_result_map: dict[tuple, Any] = {}
+    def _format(cls, time_shift: str, group_fields: List[str], records: List[Dict[str, Any]]):
+        group_key_result_map: Dict[Tuple, Any] = {}
         time_offset_sec: int = parse_time_compare_abbreviation(time_shift)
         for record in records:
             # 时间偏移场景，需要转为字符串时间
@@ -3602,26 +3602,26 @@ class QueryDimensionsByLimitResource(Resource, RecordHelperMixin, PreCalculateHe
                 "%Y-%m-%d %H:%M:%S"
             )
 
-            group_key: tuple = tuple((field, record.get(field)) for field in group_fields)
+            group_key: Tuple = tuple((field, record.get(field)) for field in group_fields)
             group_key_result_map[group_key] = record["_result_"]
 
-        processed_records: list[dict[str, Any]] = []
+        processed_records: List[Dict[str, Any]] = []
         for group_key, result in group_key_result_map.items():
             processed_records.append({"dimensions": dict(group_key), "result": result})
         return processed_records
 
     @classmethod
     def _display_format(
-        cls, metric_cal_type: str, group_fields: list[str], records: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+        cls, metric_cal_type: str, group_fields: List[str], records: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         total: float = 0
-        processed_records: list[dict[str, Any]] = []
+        processed_records: List[Dict[str, Any]] = []
         for record in records:
             value: float = cls.format_value(metric_cal_type, record["result"])
             total += value
 
-            group_values: list[str] = []
-            processed_record: dict[str, Any] = {"value": value, "dimensions": {}}
+            group_values: List[str] = []
+            processed_record: Dict[str, Any] = {"value": value, "dimensions": {}}
             for field in group_fields:
                 # 按 GroupBy 序处理
                 processed_record["dimensions"][field] = record["dimensions"].get(field) or ""
@@ -3643,11 +3643,11 @@ class QueryDimensionsByLimitResource(Resource, RecordHelperMixin, PreCalculateHe
         return processed_records
 
     @classmethod
-    def _get_extra_filter_dict(cls, records: list[dict[str, Any]]) -> dict[str, Any]:
+    def _get_extra_filter_dict(cls, records: List[Dict[str, Any]]) -> Dict[str, Any]:
         q: Q = Q()
         for record in records:
             # 处理维度值为 None 的情况，改写为 xx=“”，避免忽略掉这条线
-            kv: dict[str, Any] = {k: v or "" for k, v in record["dimensions"].items()}
+            kv: Dict[str, Any] = {k: v or "" for k, v in record["dimensions"].items()}
             if kv:
                 q = q | Q(**kv)
         return q_to_dict(q)
@@ -3656,8 +3656,8 @@ class QueryDimensionsByLimitResource(Resource, RecordHelperMixin, PreCalculateHe
         group_name: str = validated_request_data["metric_group_name"]
         metric_cal_type: str = validated_request_data["metric_cal_type"]
         time_shift: str = validated_request_data.get("time_shift") or "0s"
-        group_fields: list[str] = validated_request_data.get("group_by") or []
-        pre_calculate_helper: PreCalculateHelper | None = self.get_helper_or_none(
+        group_fields: List[str] = validated_request_data.get("group_by") or []
+        pre_calculate_helper: Optional[PreCalculateHelper] = self.get_helper_or_none(
             validated_request_data["bk_biz_id"], validated_request_data["app_name"]
         )
         group: metric_group.BaseMetricGroup = metric_group.MetricGroupRegistry.get(
@@ -3670,7 +3670,7 @@ class QueryDimensionsByLimitResource(Resource, RecordHelperMixin, PreCalculateHe
             pre_calculate_helper=pre_calculate_helper,
             **(validated_request_data["options"].get(group_name) or {}),
         )
-        records: list[dict[str, Any]] = group.handle(
+        records: List[Dict[str, Any]] = group.handle(
             validated_request_data["method"],
             qs_type=metric_cal_type,
             limit=validated_request_data["limit"],
@@ -3679,7 +3679,7 @@ class QueryDimensionsByLimitResource(Resource, RecordHelperMixin, PreCalculateHe
         )
         records = self._format(time_shift, group_fields, records)
 
-        result: dict[str, Any] = {"data": self._display_format(metric_cal_type, group_fields, records)}
+        result: Dict[str, Any] = {"data": self._display_format(metric_cal_type, group_fields, records)}
         if validated_request_data.get("with_filter_dict"):
             result["extra_filter_dict"] = self._get_extra_filter_dict(records)
         return result

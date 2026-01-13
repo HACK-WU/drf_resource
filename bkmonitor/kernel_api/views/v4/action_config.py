@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -147,7 +148,7 @@ class DeleteActionConfigResource(Resource):
         id = serializers.IntegerField(required=True)
 
     def validate_request_data(self, request_data):
-        validate_data = super().validate_request_data(request_data)
+        validate_data = super(DeleteActionConfigResource, self).validate_request_data(request_data)
         try:
             self.instance = action_configs.get(id=validate_data["id"])
         except ActionConfig.DoesNotExist:

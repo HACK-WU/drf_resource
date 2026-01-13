@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import itertools
 from concurrent.futures import ThreadPoolExecutor
+from typing import List, Optional, Set,Dict
 
 from rest_framework.exceptions import ValidationError
 
@@ -57,7 +59,7 @@ class FrontendShieldListResource(Resource):
         page = data.get("page", 0)
         page_size = data.get("page_size", 0)
         # 获取业务ID，允许未提供
-        bk_biz_id: int | None = data.get("bk_biz_id")
+        bk_biz_id: Optional[int] = data.get("bk_biz_id")
         # 获取激活状态，必须提供
         is_active: bool = data["is_active"]
         # 初始化搜索关键词集合
@@ -102,7 +104,7 @@ class FrontendShieldListResource(Resource):
             params.update({"page": page, "page_size": page_size})
 
         # 调用后端接口获取屏蔽列表数据
-        result: dict = resource.shield.shield_list(**params)
+        result: Dict = resource.shield.shield_list(**params)
         # 丰富屏蔽列表数据
         shields = self.enrich_shields(bk_biz_id, result["shield_list"], strategy_ids)
 
@@ -124,7 +126,7 @@ class FrontendShieldListResource(Resource):
         return {"count": total, "shield_list": shields}
 
     @staticmethod
-    def search(search_terms: set[str], shields: list, is_active: bool) -> list:
+    def search(search_terms: Set[str], shields: list, is_active: bool) -> list:
         """模糊搜索屏蔽列表。"""
         active_fields = [
             "id",
@@ -147,7 +149,7 @@ class FrontendShieldListResource(Resource):
 
         return [shield for shield in shields if match(shield)]
 
-    def enrich_shields(self, bk_biz_id: int | None, shields: list, strategy_ids: list[int]) -> list:
+    def enrich_shields(self, bk_biz_id: Optional[int], shields: List, strategy_ids: List[int]) -> List:
         """补充屏蔽记录的数据便于展示。"""
         if not shields:
             return []
@@ -201,7 +203,7 @@ class FrontendShieldDetailResource(Resource):
     """
 
     def __init__(self):
-        super().__init__()
+        super(FrontendShieldDetailResource, self).__init__()
         self.bk_biz_id = None
 
     class RequestSerializer(serializers.Serializer):
@@ -331,7 +333,7 @@ class ShieldSnapshotResource(FrontendShieldDetailResource):
     """
 
     def __init__(self):
-        super().__init__()
+        super(ShieldSnapshotResource, self).__init__()
 
     class RequestSerializer(serializers.Serializer):
         config = serializers.DictField(required=True, label="屏蔽快照")

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import json
 import logging
+from typing import Optional
 
 from django.db import models
 from django.db.transaction import atomic
@@ -105,7 +107,7 @@ class CustomGroupBase(models.Model):
 
         # 确认label是否存在
         if not Label.objects.filter(label_type=Label.LABEL_TYPE_RESULT_TABLE, label_id=label).exists():
-            logger.error(f"label->[{label}] is not exists as a rt label")
+            logger.error("label->[{}] is not exists as a rt label".format(label))
             raise ValueError(_("标签[{}]不存在，请确认后重试").format(label))
 
         # 判断同一个data_id是否已经被其他事件绑定了
@@ -119,7 +121,9 @@ class CustomGroupBase(models.Model):
         }
         if cls.objects.filter(bk_biz_id=bk_biz_id, is_delete=False, **filter_kwargs).exists():
             logger.error(
-                f"biz_id->[{bk_biz_id}] already has {cls.__name__}->[{cls.GROUP_NAME_FIELD}], should change {custom_group_name} and try again."
+                "biz_id->[{}] already has {}->[{}], should change {} and try again.".format(
+                    bk_biz_id, cls.__name__, cls.GROUP_NAME_FIELD, custom_group_name
+                )
             )
             raise ValueError(_("自定义组名称已存在，请确认后重试"))
 
@@ -160,7 +164,9 @@ class CustomGroupBase(models.Model):
             **filter_kwargs,
         )
         logger.info(
-            f"{cls.__name__}->[{custom_group.custom_group_id}] now is created from data_id->[{bk_data_id}] by operator->[{operator}]"
+            "{}->[{}] now is created from data_id->[{}] by operator->[{}]".format(
+                cls.__name__, custom_group.custom_group_id, bk_data_id, operator
+            )
         )
 
         return table_id, custom_group
@@ -178,8 +184,8 @@ class CustomGroupBase(models.Model):
         is_builtin=False,
         is_split_measurement=False,
         default_storage_config=None,
-        additional_options: dict | None = None,
-        data_label: str | None = None,
+        additional_options: Optional[dict] = None,
+        data_label: Optional[str] = None,
     ):
         """
         创建一个新的自定义分组记录
@@ -221,7 +227,9 @@ class CustomGroupBase(models.Model):
         final_metric_info_list = metric_info_list
         if metric_info_list is None:
             logger.info(
-                f"{cls.__name__}->[{custom_group.custom_group_id}] is created with none metric_info_list are set."
+                "{}->[{}] is created with none metric_info_list are set.".format(
+                    cls.__name__, custom_group.custom_group_id
+                )
             )
             final_metric_info_list = []
 
@@ -263,7 +271,7 @@ class CustomGroupBase(models.Model):
         )
 
         custom_group.update_metrics(metric_info=final_metric_info_list)
-        logger.info(f"{cls.__name__}->[{custom_group.custom_group_id}] object now has created")
+        logger.info("{}->[{}] object now has created".format(cls.__name__, custom_group.custom_group_id))
 
         # 4. 需要为datasource增加一个option，否则transfer无法得知需要拆解的字段内容
         for item in custom_group.get_datasource_options():
@@ -288,7 +296,7 @@ class CustomGroupBase(models.Model):
         field_list=None,
         max_rate=None,
         enable_field_black_list=None,
-        data_label: str | None = None,
+        data_label: Optional[str] = None,
     ):
         """
         修改一个事件组
@@ -306,7 +314,9 @@ class CustomGroupBase(models.Model):
         # 不可修改已删除的事件组
         if self.is_delete:
             logger.error(
-                f"op->[{self.__class__.__name__}] try to update the deleted {operator}->[{self.custom_group_id}], but nothing will do."
+                "op->[{}] try to update the deleted {}->[{}], but nothing will do.".format(
+                    self.__class__.__name__, operator, self.custom_group_id
+                )
             )
             raise ValueError(_("自定义组已删除，请确认后重试"))
 
@@ -317,20 +327,22 @@ class CustomGroupBase(models.Model):
             self.custom_group_name = custom_group_name
             is_change = True
             logger.info(
-                f"{self.__class__.__name__}->[{self.custom_group_id}] name is changed to->[{custom_group_name}]"
+                "{}->[{}] name is changed to->[{}]".format(
+                    self.__class__.__name__, self.custom_group_id, custom_group_name
+                )
             )
 
         # 给分组打新的标签
         if label is not None:
             # 确认label是否存在
             if not Label.objects.filter(label_type=Label.LABEL_TYPE_RESULT_TABLE, label_id=label).exists():
-                logger.error(f"label->[{label}] is not exists as a rt label")
+                logger.error("label->[{}] is not exists as a rt label".format(label))
                 raise ValueError(_("标签[{}]不存在，请确认后重试").format(label))
 
             self.label = label
             is_change = True
             logger.info(
-                f"{self.__class__.__name__}->[{self.custom_group_id}] now is change to label->[{label}]"
+                "{}->[{}] now is change to label->[{}]".format(self.__class__.__name__, self.custom_group_id, label)
             )
 
         # 判断是否有修改启用标记位，需要提供了该参数，而且该参数与现有的配置不一致方可配置
@@ -338,7 +350,7 @@ class CustomGroupBase(models.Model):
             self.is_enable = is_enable
             is_change = True
             logger.info(
-                f"{self.__class__.__name__}->[{self.custom_group_id}] has change enable->[{is_enable}]"
+                "{}->[{}] has change enable->[{}]".format(self.__class__.__name__, self.custom_group_id, is_enable)
             )
 
         # 判断是否有维度信息的创建/修改
@@ -346,7 +358,9 @@ class CustomGroupBase(models.Model):
             self.update_metrics(metric_info_list)
             is_change = True
             logger.info(
-                f"{self.__class__.__name__}->[{self.custom_group_id}] has create now metric list->[{len(metric_info_list)}]"
+                "{}->[{}] has create now metric list->[{}]".format(
+                    self.__class__.__name__, self.custom_group_id, len(metric_info_list)
+                )
             )
 
         # 判断是否修改速率
@@ -354,13 +368,13 @@ class CustomGroupBase(models.Model):
             self.max_rate = max_rate
             is_change = True
             logger.info(
-                f"{self.__class__.__name__}->[{self.custom_group_id}] has change max_rate->[{max_rate}]"
+                "{}->[{}] has change max_rate->[{}]".format(self.__class__.__name__, self.custom_group_id, max_rate)
             )
 
         if is_change:
             self.last_modify_user = operator
             self.save()
-            logger.info(f"{self.__class__.__name__}->[{self.custom_group_id}] is updated by->[{operator}]")
+            logger.info("{}->[{}] is updated by->[{}]".format(self.__class__.__name__, self.custom_group_id, operator))
 
         # 这里之前在split的情况下是不做field_list的更新的 之前的背景是会动态更新指标 而不应该用户去设置指标
         # 但是如果用户需要修改元信息的时候 会出现该接口无法更新的情况 所以这里先去掉这个限制
@@ -397,7 +411,7 @@ class CustomGroupBase(models.Model):
         if data_label:
             rt.modify(operator=operator, data_label=data_label)
 
-        logger.info(f"{self.__class__.__name__}->[{self.custom_group_id}] update success.")
+        logger.info("{}->[{}] update success.".format(self.__class__.__name__, self.custom_group_id))
         return True
 
     @property
@@ -425,7 +439,9 @@ class CustomGroupBase(models.Model):
         # 不可修改已删除的事件组
         if self.is_delete:
             logger.error(
-                f"op->[{self.__class__.__name__}] try to update the deleted {operator}->[{self.custom_group_id}], but nothing will do."
+                "op->[{}] try to update the deleted {}->[{}], but nothing will do.".format(
+                    self.__class__.__name__, operator, self.custom_group_id
+                )
             )
             raise ValueError(_("自定义组已删除，请确认后重试"))
 
@@ -439,10 +455,12 @@ class CustomGroupBase(models.Model):
         # 需要标记对应的结果表也是清除的状态
         self.set_table_id_disable()
         logger.info(
-            f"{self.__class__.__name__}->[{self.custom_group_id}] set result_table->[{self.table_id}] and mark it delete."
+            "{}->[{}] set result_table->[{}] and mark it delete.".format(
+                self.__class__.__name__, self.custom_group_id, self.table_id
+            )
         )
 
-        logger.info(f"{self.__class__.__name__}->[{self.custom_group_id}] now is delete.")
+        logger.info("{}->[{}] now is delete.".format(self.__class__.__name__, self.custom_group_id))
 
         return True
 

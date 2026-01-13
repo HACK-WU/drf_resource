@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import abc
 import logging
+from typing import Dict, List, Set, Tuple, Type
 
 from apm_web.handlers.strategy_group.typing import StrategyKeyT, StrategyT
 from apm_web.models import Application
@@ -18,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class StrategyGroupRegistry:
-    _GROUPS: dict[str, type["BaseStrategyGroup"]] = {}
+    _GROUPS: Dict[str, Type["BaseStrategyGroup"]] = {}
 
     @classmethod
     def register(cls, invocation_cls):
@@ -32,7 +34,7 @@ class StrategyGroupRegistry:
     @classmethod
     def get(cls, group_name: str, bk_biz_id: int, app_name: str, **kwargs):
         if group_name not in cls._GROUPS:
-            raise ValueError(f"{group_name} not found")
+            raise ValueError("{} not found".format(group_name))
         return cls._GROUPS[group_name](bk_biz_id, app_name, **kwargs)
 
 
@@ -63,12 +65,12 @@ class BaseStrategyGroup(metaclass=StrategyGroupMeta):
             self.application: Application = Application.objects.get(bk_biz_id=bk_biz_id, app_name=app_name)
         except Application.DoesNotExist:
             raise ValueError(
-                f"Application ({bk_biz_id}-{app_name}) not found"
+                "Application ({bk_biz_id}-{app_name}) not found".format(bk_biz_id=bk_biz_id, app_name=app_name)
             )
 
     def apply(self, *args, **kwargs):
-        def _format(_strategies: list[StrategyT]) -> tuple[set[StrategyKeyT], dict[StrategyKeyT, StrategyT]]:
-            _strategies_map: dict[StrategyKeyT, StrategyT] = {
+        def _format(_strategies: List[StrategyT]) -> Tuple[Set[StrategyKeyT], Dict[StrategyKeyT, StrategyT]]:
+            _strategies_map: Dict[StrategyKeyT, StrategyT] = {
                 self._get_key(_strategy): _strategy for _strategy in _strategies
             }
             return set(_strategies_map.keys()), _strategies_map
@@ -79,9 +81,9 @@ class BaseStrategyGroup(metaclass=StrategyGroupMeta):
         logger.info("[apply] local -> %s, remote -> %s", len(local_keys), len(remote_keys))
 
         # 调谐过程，计算变更
-        to_be_added_keys: set[str] = local_keys - remote_keys
-        to_be_update_keys: set[str] = local_keys & remote_keys
-        to_be_deleted_keys: set[str] = remote_keys - local_keys
+        to_be_added_keys: Set[str] = local_keys - remote_keys
+        to_be_update_keys: Set[str] = local_keys & remote_keys
+        to_be_deleted_keys: Set[str] = remote_keys - local_keys
         logger.info(
             "[apply] to_be_added_keys -> %s, to_be_update_keys -> %s, to_be_deleted_keys -> %s",
             to_be_added_keys,
@@ -102,23 +104,23 @@ class BaseStrategyGroup(metaclass=StrategyGroupMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _list_remote(self, *args, **kwargs) -> list[StrategyT]:
+    def _list_remote(self, *args, **kwargs) -> List[StrategyT]:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _list_local(self, *args, **kwargs) -> list[StrategyT]:
+    def _list_local(self, *args, **kwargs) -> List[StrategyT]:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _handle_add(self, strategies: list[StrategyT]):
+    def _handle_add(self, strategies: List[StrategyT]):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _handle_delete(self, strategies: list[StrategyT]):
+    def _handle_delete(self, strategies: List[StrategyT]):
         raise NotImplementedError
 
     @abc.abstractmethod
     def _handle_update(
-        self, local_strategies_map: dict[StrategyKeyT, StrategyT], remote_strategies_map: dict[StrategyKeyT, StrategyT]
+        self, local_strategies_map: Dict[StrategyKeyT, StrategyT], remote_strategies_map: Dict[StrategyKeyT, StrategyT]
     ):
         raise NotImplementedError

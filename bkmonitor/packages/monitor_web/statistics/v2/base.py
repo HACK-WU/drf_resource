@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,6 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import List
 
 from django.utils.functional import cached_property
 
@@ -18,11 +20,11 @@ from core.statistics.storage import Storage
 
 
 class MySQLStorage(Storage):
-    def get(self, metric_names: list[str]) -> list[Metric]:
+    def get(self, metric_names: List[str]) -> List[Metric]:
         metrics = StatisticsMetric.objects.filter(name__in=metric_names)
         return [Metric.loads(metric.data) for metric in metrics]
 
-    def put(self, metrics: list[Metric]):
+    def put(self, metrics: List[Metric]):
         for metric in metrics:
             StatisticsMetric.objects.update_or_create(
                 name=metric.name,

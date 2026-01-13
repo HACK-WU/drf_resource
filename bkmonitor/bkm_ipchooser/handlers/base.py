@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+import typing
 
 from django.conf import settings
 from pypinyin import lazy_pinyin
@@ -13,13 +15,13 @@ class BaseHandler:
         return {"scope_type": constants.ScopeType.BIZ.value, "scope_id": str(bk_biz_id), "bk_biz_id": bk_biz_id}
 
     @classmethod
-    def format_hosts(cls, hosts: list[types.HostInfo], bk_biz_id: int) -> list[types.FormatHostInfo]:
+    def format_hosts(cls, hosts: typing.List[types.HostInfo], bk_biz_id: int) -> typing.List[types.FormatHostInfo]:
         """
         格式化主机信息
         :param hosts: 尚未进行格式化处理的主机信息
         :return: 格式化后的主机列表
         """
-        biz_id__info_map: dict[int, dict] = {
+        biz_id__info_map: typing.Dict[int, typing.Dict] = {
             biz_info["bk_biz_id"]: biz_info for biz_info in resource.ResourceQueryHelper.fetch_biz_list()
         }
 
@@ -27,7 +29,7 @@ class BaseHandler:
         resp = BkApi.search_cloud_area({"page": {"start": 0, "limit": 1000}})
 
         if resp.get("info"):
-            cloud_id__info_map: dict[int, dict] = {
+            cloud_id__info_map: typing.Dict[int, typing.Dict] = {
                 cloud_info["bk_cloud_id"]: cloud_info["bk_cloud_name"] for cloud_info in resp["info"]
             }
         else:
@@ -39,7 +41,7 @@ class BaseHandler:
                 }
             }
 
-        formatted_hosts: list[types.HostInfo] = []
+        formatted_hosts: typing.List[types.HostInfo] = []
         for host in hosts:
             bk_cloud_id = host["bk_cloud_id"]
 
@@ -93,15 +95,15 @@ class BaseHandler:
 
     @classmethod
     def format_host_id_infos(
-        cls, hosts: list[types.HostInfo], bk_biz_id: int
-    ) -> list[types.FormatHostInfo]:
+        cls, hosts: typing.List[types.HostInfo], bk_biz_id: int
+    ) -> typing.List[types.FormatHostInfo]:
         """
         格式化主机信息
         :param hosts: 尚未进行格式化处理的主机信息
         :return: 格式化后的主机列表
         """
 
-        formatted_hosts: list[types.HostInfo] = []
+        formatted_hosts: typing.List[types.HostInfo] = []
         for host in hosts:
             formatted_hosts.append(
                 {
@@ -116,12 +118,12 @@ class BaseHandler:
         return formatted_hosts
 
     @classmethod
-    def sort_by_name(cls, datas: list[dict]):
+    def sort_by_name(cls, datas: typing.List[typing.Dict]):
         # 按照名称排序
         # 用在 动态拓扑, 服务模板, 集群模板
         datas.sort(key=lambda g: lazy_pinyin(g["name"]))
 
     @classmethod
-    def fill_meta(self, datas: list[dict], meta: dict):
+    def fill_meta(self, datas: typing.List[typing.Dict], meta: dict):
         for data in datas:
             data["meta"] = meta

@@ -5,7 +5,7 @@ from metadata.utils import go_time
 # pdb.set_trace()
 
 
-class TestUtilsGoTime:
+class TestUtilsGoTime(object):
     def test_parse_duration(self):
         value_list = [
             ("mhs", 0),

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -21,7 +22,7 @@ from drf_resource.contrib.nested_api import KernelAPIResource
 
 class MetaDataAPIGWResource(KernelAPIResource):
     base_url_statement = None
-    base_url = settings.MONITOR_API_BASE_URL or f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/monitor_v3/"
+    base_url = settings.MONITOR_API_BASE_URL or "%s/api/c/compapi/v2/monitor_v3/" % settings.BK_COMPONENT_API_URL
 
     # 模块名
     module_name = "metadata_v3"

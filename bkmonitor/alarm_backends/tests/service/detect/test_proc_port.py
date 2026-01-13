@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -99,7 +100,7 @@ port_ok_with_nulll = DataPoint(
 )
 
 
-class TestProcPort:
+class TestProcPort(object):
     def test_proc_ok(self):
         detect_engine = ProcPort(config={})
         assert len(detect_engine.detect(process_ok)) == 0

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
+from typing import Dict, List, Set
 
 from alarm_backends.core.cache.cmdb.dynamic_group import DynamicGroupManager
 
@@ -19,11 +21,11 @@ class TargetCondition:
     监控目标条件匹配
     """
 
-    def __init__(self, target: list[list[dict]]):
+    def __init__(self, target: List[List[Dict]]):
         self.conditions_list = self.load_target_condition(target)
 
     @staticmethod
-    def load_target_condition(target: list[list[dict]]):
+    def load_target_condition(target: List[List[Dict]]):
         """
         加载监控目标条件
         """
@@ -90,7 +92,7 @@ class TargetCondition:
                 conditions_list.append(conditions)
         return conditions_list
 
-    def is_match(self, data: dict):
+    def is_match(self, data: Dict):
         """
         判断数据是否匹配监控目标
         """
@@ -98,7 +100,7 @@ class TargetCondition:
             for condition in conditions:
                 field = condition["field"]
                 method = condition["method"]
-                values: set = condition["target_keys"]
+                values: Set = condition["target_keys"]
 
                 target_keys = set()
                 if field in ["ip", "bk_target_ip"]:

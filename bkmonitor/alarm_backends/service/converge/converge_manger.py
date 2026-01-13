@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -37,7 +38,7 @@ from constants.action import (
 logger = logging.getLogger("fta_action.converge")
 
 
-class ConvergeManager:
+class ConvergeManager(object):
     def __init__(
         self,
         converge_config,
@@ -219,7 +220,7 @@ class ConvergeManager:
 
     @classmethod
     def get_fixed_dimension(cls, dimension):
-        return f"{dimension} fixed at {int(datetime.now().timestamp())} {random.randint(100, 999)}"
+        return "{} fixed at {} {}".format(dimension, int(datetime.now().timestamp()), random.randint(100, 999))
 
     @classmethod
     def end_converge_by_id(cls, converge_id, conv_instance=None):
@@ -401,7 +402,7 @@ class ConvergeManager:
         ConvergeInstance.objects.filter(id__in=converge_instances).update(is_visible=is_visible)
 
 
-class ConvergeRelationManager:
+class ConvergeRelationManager(object):
     @staticmethod
     def count(converge_id):
         return ConvergeRelation.objects.filter_by(converge_id=converge_id).count()

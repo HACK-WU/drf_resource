@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -19,12 +20,12 @@ from six.moves.urllib.parse import unquote, urlparse
 logger = logging.getLogger("action")
 
 
-class BaseClient:
+class BaseClient(object):
     def send(self, message):
         raise NotImplementedError
 
 
-class KafKaClient:
+class KafKaClient(object):
     """
     KafKa客户端
     """
@@ -32,7 +33,7 @@ class KafKaClient:
     def __init__(self, uri):
         uri_obj = urlparse(uri)
         params = {
-            "bootstrap_servers": f"{uri_obj.hostname}:{uri_obj.port}",
+            "bootstrap_servers": "{}:{}".format(uri_obj.hostname, uri_obj.port),
         }
 
         if uri_obj.username:
@@ -42,7 +43,7 @@ class KafKaClient:
 
         self.topic = uri_obj.path.strip("/")
         if not self.topic:
-            raise ValueError(f"KafKa URI({uri}) has not topic")
+            raise ValueError("KafKa URI({}) has not topic".format(uri))
 
         self.client = KafkaProducer(**params)
 
@@ -60,7 +61,7 @@ class KafKaClient:
             self.client.close()
 
 
-class RedisClient:
+class RedisClient(object):
     """
     Redis客户端
     """
@@ -72,7 +73,7 @@ class RedisClient:
             db = int(db)
             assert len(key) > 0
         except Exception as e:
-            logger.error(f"Redis URI({uri}) parse error, {e}")
+            logger.error("Redis URI({}) parse error, {}".format(uri, e))
             raise e
 
         self.key = key
@@ -112,6 +113,6 @@ def get_client(uri):
 
     client_class = SchemaClientMapping.get(uri_obj.scheme)
     if not client_class:
-        raise Exception(f"message queue schema {uri_obj.scheme} is not support")
+        raise Exception("message queue schema {} is not support".format(uri_obj.scheme))
 
     return client_class(uri)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,7 +16,7 @@ import logging
 import traceback
 from abc import ABC
 from collections import defaultdict
-from typing import NamedTuple
+from typing import List, NamedTuple, Tuple, Union
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -34,7 +35,7 @@ logger = logging.getLogger("apm")
 
 
 def get_topo_instance_key(
-    keys: list[tuple[str, str]],
+    keys: List[Tuple[str, str]],
     kind: str,
     category: str,
     item,
@@ -66,7 +67,7 @@ def get_topo_instance_key(
     return ":".join(instance_keys)
 
 
-def exists_field(predicate_key: tuple[str, str] | list[tuple[str, str]], item) -> bool:
+def exists_field(predicate_key: Union[Tuple[str, str], List[Tuple[str, str]]], item) -> bool:
     if item is None:
         return False
 
@@ -82,7 +83,7 @@ def exists_field(predicate_key: tuple[str, str] | list[tuple[str, str]], item) -
     return all(all_exists)
 
 
-def extract_field_value(key: list[tuple[str, str]] | tuple[str, str], item):
+def extract_field_value(key: Union[List[Tuple[str, str]], Tuple[str, str]], item):
     if key and isinstance(key, list):
         # 忽略 predicate_key 为多个的情况 直接取第一个
         key = key[0]
@@ -92,11 +93,11 @@ def extract_field_value(key: list[tuple[str, str]] | tuple[str, str], item):
 
 
 class ApmTopoDiscoverRuleCls(NamedTuple):
-    instance_keys: list[tuple[str, str]]
+    instance_keys: List[Tuple[str, str]]
     topo_kind: str
     category_id: str
-    predicate_key: tuple[str, str] | list[tuple[str, str]]
-    endpoint_key: tuple[str, str] | None
+    predicate_key: Union[Tuple[str, str], List[Tuple[str, str]]]
+    endpoint_key: Union[Tuple[str, str], None]
     type: str
     sort: int
 

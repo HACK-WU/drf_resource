@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -151,12 +152,12 @@ class AccessHandler(base.BaseHandler):
         access_type = option.get("access_type")
         self.service = option.get("service")
         if access_type not in ACCESS_TYPE_TO_CLASS:
-            raise Exception(f"Unknown Access Type({str(access_type)}).")
+            raise Exception("Unknown Access Type(%s)." % str(access_type))
 
         self.access_type = access_type
         self.targets = targets or []
         self.option = option
-        super().__init__(*args, **option)
+        super(AccessHandler, self).__init__(*args, **option)
 
     def handle_data(self):
         assert self.service is not None, "access data handler missing required argument: 'service'"

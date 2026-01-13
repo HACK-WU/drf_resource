@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import uuid
+from typing import Optional
 
 from django.conf import settings
 from django.db import models
@@ -219,7 +221,7 @@ class ApmApplication(AbstractRecordModel):
     @classmethod
     @atomic(using=DATABASE_CONNECTION_NAME)
     def create_application(
-        cls, bk_biz_id, app_name, app_alias, description, es_storage_config, options: dict | None = None
+        cls, bk_biz_id, app_name, app_alias, description, es_storage_config, options: Optional[dict] = None
     ):
         cls.check_application(bk_biz_id, app_name)
 

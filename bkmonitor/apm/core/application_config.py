@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,6 +13,7 @@ import gzip
 import json
 import logging
 from collections import defaultdict
+from typing import List
 
 import jinja2
 from django.conf import settings
@@ -432,7 +434,7 @@ class ApplicationConfig(BkCollectorConfig):
             res.append(tem_item)
         return {"name": "probe_filter/common", "rules": res}
 
-    def deploy(self, application_config, bk_host_ids: list[int]):
+    def deploy(self, application_config, bk_host_ids: List[int]):
         """
         下发bk-collector的应用配置
         """
@@ -474,18 +476,18 @@ class ApplicationConfig(BkCollectorConfig):
                 if old_subscription_params_md5 != new_subscription_params_md5:
                     logger.info("apm application config subscription task config has changed, update it.")
                     result = api.node_man.update_subscription(subscription_params)
-                    logger.info(f"update apm application config subscription successful, result:{result}")
+                    logger.info("update apm application config subscription successful, result:{}".format(result))
                     applicaiton_subscription.update(config=subscription_params)
                 return sub_config_obj.subscription_id
             except Exception as e:  # noqa
                 logger.exception(
-                    f"update apm application config subscription error:{e}, params:{subscription_params}"
+                    "update apm application config subscription error:{}, params:{}".format(e, subscription_params)
                 )
         else:
             try:
                 logger.info("apm application config subscription task not exists, create it.")
                 result = api.node_man.create_subscription(subscription_params)
-                logger.info(f"create apm application config subscription successful, result:{result}")
+                logger.info("create apm application config subscription successful, result:{}".format(result))
 
                 # 创建订阅成功后，优先存储下来，不然因为其他报错会导致订阅ID丢失
                 subscription_id = result["subscription_id"]
@@ -499,10 +501,10 @@ class ApplicationConfig(BkCollectorConfig):
                 result = api.node_man.run_subscription(
                     subscription_id=subscription_id, actions={self.PLUGIN_NAME: "INSTALL"}
                 )
-                logger.info(f"run apm application config subscription result:{result}")
+                logger.info("run apm application config subscription result:{}".format(result))
             except Exception as e:  # noqa
                 logger.exception(
-                    f"create apm application config subscription error{e}, params:{subscription_params}"
+                    "create apm application config subscription error{}, params:{}".format(e, subscription_params)
                 )
 
     def deploy_to_k8s(self, cluster_id: str, application_config: str):
@@ -542,7 +544,11 @@ class ApplicationConfig(BkCollectorConfig):
         secrets = bcs_client.client_request(
             bcs_client.core_api.list_namespaced_secret,
             namespace=namespace,
-            label_selector=f"component={BkCollectorComp.LABEL_COMPONENT_VALUE},template=false,type={BkCollectorComp.LABEL_TYPE_SUB_CONFIG},source={BkCollectorComp.LABEL_SOURCE_APPLICATION_CONFIG}",
+            label_selector="component={},template=false,type={},source={}".format(
+                BkCollectorComp.LABEL_COMPONENT_VALUE,
+                BkCollectorComp.LABEL_TYPE_SUB_CONFIG,
+                BkCollectorComp.LABEL_SOURCE_APPLICATION_CONFIG,
+            ),
         )
         sec = find_secrets_in_boundary(secrets, self._application.id)
         if sec is None:

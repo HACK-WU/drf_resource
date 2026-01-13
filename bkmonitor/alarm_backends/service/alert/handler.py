@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,6 +14,7 @@ import signal
 import threading
 import time
 from collections import defaultdict
+from typing import Dict
 
 from django.conf import settings
 from kafka import KafkaConsumer, TopicPartition
@@ -58,13 +60,13 @@ class AlertHandler(base.BaseHandler):
     _kafka_queues = {}
 
     def __init__(self, service, *args, **kwargs):
-        super().__init__()
+        super(AlertHandler, self).__init__()
         self.service = service
         self.run_once = True
         self._stop_signal = False
         self.topic_data_id = {}
         self.max_event_number = getattr(settings, "MAX_BUILD_EVENT_NUMBER", 0) or self.MAX_EVENT_NUMBER
-        self.consumers: dict[str, KafkaConsumer] = {}
+        self.consumers: Dict[str, KafkaConsumer] = {}
         self.ip = get_host_addr()
         self.redis_client = ALERT_DATA_POLLER_LEADER_KEY.client
         self.data_id_cache_key = ALERT_HOST_DATA_ID_KEY.get_key()
@@ -429,7 +431,7 @@ class AlertHandler(base.BaseHandler):
 
 class AlertCeleryHandler(AlertHandler):
     def __init__(self, service, *args, **kwargs):
-        super().__init__(service, *args, **kwargs)
+        super(AlertCeleryHandler, self).__init__(service, *args, **kwargs)
         self.run_once = False
 
     def send_handler_task(self, event_kwargs):

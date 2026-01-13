@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
+import io
 import os
 import sys
 import time
@@ -71,14 +73,18 @@ class ProfilerMiddleware(MiddlewareMixin):
                 path = path.replace('?', '_qs_')
 
             if profile_dir:
-                filename = f'{profile_session.duration:.3f}s {path} {time.time():.0f}.html'
+                filename = '{total_time:.3f}s {path} {timestamp:.0f}.html'.format(
+                    total_time=profile_session.duration,
+                    path=path,
+                    timestamp=time.time(),
+                )
 
                 file_path = os.path.join(profile_dir, filename)
 
                 if not os.path.exists(profile_dir):
                     os.mkdir(profile_dir)
 
-                with open(file_path, 'w', encoding='utf-8') as f:
+                with io.open(file_path, 'w', encoding='utf-8') as f:
                     f.write(output_html)
 
             if self.is_profile_request(request) and request.user.is_superuser:

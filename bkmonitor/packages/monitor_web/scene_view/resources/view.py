@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,6 +13,7 @@ import json
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
+from typing import Dict, List, Optional
 
 import arrow
 from django.http import Http404
@@ -97,7 +99,7 @@ class GetSceneViewListResource(ApiAuthResource):
         """
         获取图表数量
         """
-        panels: list[dict] = view_config.get("panels", [])
+        panels: List[Dict] = view_config.get("panels", [])
         count = 0
         for panel in panels:
             if panel.get("type") == "row":
@@ -166,12 +168,12 @@ class GetSceneViewListResource(ApiAuthResource):
                 )
 
         # 按配置进行排序
-        scene: SceneViewOrderModel | None = SceneViewOrderModel.objects.filter(
+        scene: Optional[SceneViewOrderModel] = SceneViewOrderModel.objects.filter(
             bk_biz_id=bk_biz_id, scene_id=scene_id, type=scene_type
         ).first()
 
         if scene:
-            order: list = scene.config
+            order: List = scene.config
 
             generator = get_scene_processors(scene_id)
             if generator.is_custom_sort(scene_id):
@@ -239,7 +241,7 @@ class GetSceneViewResource(ApiAuthResource):
             return validate_scene_type(params)
 
     @classmethod
-    def process_split(cls, view_config: dict, split_variables: list[dict]) -> dict:
+    def process_split(cls, view_config: Dict, split_variables: List[Dict]) -> Dict:
         """
         分屏逻辑处理
         """
@@ -363,7 +365,7 @@ class UpdateSceneViewResource(Resource):
         def validate(self, params):
             return validate_scene_type(params)
 
-    def perform_request(self, params: dict):
+    def perform_request(self, params: Dict):
         # 修改视图排序
         if params["view_order"]:
             order_config, is_created = SceneViewOrderModel.objects.get_or_create(
@@ -438,7 +440,7 @@ class GetSceneViewDimensionsResource(ApiAuthResource):
         end_time = serializers.IntegerField(label="结束时间", required=False)
 
     @classmethod
-    def get_metrics(cls, params: dict):
+    def get_metrics(cls, params: Dict):
         resource_id = params["id"]
         bk_biz_id = params["bk_biz_id"]
         bcs_cluster_id = params.get("bcs_cluster_id")
@@ -629,7 +631,7 @@ class GetStrategyAndEventCountResource(Resource):
             task_id = params["target"].get("task_id")
             if task_id:
                 conditions.append({"key": "task_id", "value": task_id})
-                query_string = f'tags.task_id : "{task_id}"'
+                query_string = 'tags.task_id : "%s"' % task_id
 
         elif params["scene_id"] == "kubernetes":
             scenario = ["kubernetes"]

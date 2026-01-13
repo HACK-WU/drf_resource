@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import abc
 from datetime import datetime
+from typing import Dict, List
 
 import six
 from django.utils.translation import gettext as _
@@ -143,7 +145,7 @@ class BaseShieldDisplayManager(six.with_metaclass(abc.ABCMeta, object)):
         return []
 
     @abc.abstractmethod
-    def get_dynamic_group_name_list(self, bk_biz_id: int, dynamic_group_list: list[dict]) -> list:
+    def get_dynamic_group_name_list(self, bk_biz_id: int, dynamic_group_list: List[Dict]) -> List:
         """
         根据动态分组id列表返回动态分组名称列表，需要子类实现
         """

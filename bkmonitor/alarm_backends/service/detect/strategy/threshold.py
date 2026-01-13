@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,6 +17,7 @@ import ast
 import logging
 
 from django.utils.safestring import mark_safe
+from six.moves import zip
 
 from alarm_backends.service.detect.strategy import BasicAlgorithmsCollection, ExprDetectAlgorithms
 from bkmonitor.strategy.serializers import ThresholdSerializer, allowed_threshold_method
@@ -46,7 +48,9 @@ class AndThreshold(BasicAlgorithmsCollection):
             threshold = t_config["threshold"]
             comp = allowed_threshold_method[method]
             expr_list.append(
-                f"unit_convert_min(value, unit) {comp} unit_convert_min({threshold}, unit, algorithm_unit)"
+                "unit_convert_min(value, unit) {comp} unit_convert_min({threshold}, unit, algorithm_unit)".format(
+                    comp=comp, threshold=threshold
+                )
             )
             tpl_list.append(self.desc_tpl.format(method_desc=mark_safe(comp.replace("==", "=")), threshold=threshold))
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云PaaS平台社区版 (BlueKing PaaS Community
 Edition) available.
@@ -117,7 +118,7 @@ def _replace_front_end_data_id(pipeline_data, node_map, flow_map):
                     try:
                         replaced_constant[node_map[source_step]] = source_keys
                     except KeyError as e:
-                        message = f"replace pipeline template id error: {e}"
+                        message = "replace pipeline template id error: %s" % e
                         logger.exception(message)
                         raise Exception(message)
                     constant["source_info"] = replaced_constant
@@ -188,7 +189,7 @@ def _replace_gateway_id(flows, gateways, gateway_id, substituted_id):
         gateways.pop(gateway_id)
         gateways[substituted_id] = gateway
     except KeyError as e:
-        message = f"replace gateway id error: {e}"
+        message = "replace gateway id error: %s" % e
         logger.exception(message)
         raise Exception(message)
 
@@ -211,7 +212,7 @@ def _replace_activity_id(flows, activities, act_id, substituted_id):
         activities.pop(act_id)
         activities[substituted_id] = activity
     except KeyError as e:
-        message = f"replace activity id error: {e}"
+        message = "replace activity id error: %s" % e
         logger.exception(message)
         raise Exception(message)
 
@@ -230,7 +231,7 @@ def _replace_event_id(flows, event, substituted_id):
         else:
             flows[event[PE.outgoing]][PE.source] = substituted_id
     except KeyError as e:
-        message = f"replace event id error: {e}"
+        message = "replace event id error: %s" % e
         logger.exception(message)
         raise Exception(message)
 

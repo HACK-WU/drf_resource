@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ specific language governing permissions and limitations under the License.
 import json
 import logging
 from datetime import datetime
+from typing import Dict
 
 import arrow
 from django.utils.functional import cached_property
@@ -28,7 +30,7 @@ from core.errors.alarm_backends import StrategyItemNotFound
 logger = logging.getLogger("core.control")
 
 
-class Strategy:
+class Strategy(object):
     def __init__(self, strategy_id, default_config=None):
         self.id = self.strategy_id = strategy_id
         self._config = default_config
@@ -253,7 +255,7 @@ class Strategy:
         return min([query_config.get("agg_interval", default_check_unit) for query_config in item["query_configs"]])
 
     @staticmethod
-    def get_trigger_configs(strategy: dict) -> dict[str, dict]:
+    def get_trigger_configs(strategy: Dict) -> Dict[str, Dict]:
         """
         获取不同级别算法的触发配置
         :return {
@@ -273,7 +275,7 @@ class Strategy:
         return trigger_config
 
     @staticmethod
-    def get_recovery_configs(strategy: dict) -> dict[str, dict]:
+    def get_recovery_configs(strategy: Dict) -> Dict[str, Dict]:
         """
         获取不同级别的恢复配置
         :return {
@@ -289,7 +291,7 @@ class Strategy:
         return recovery_config
 
     @staticmethod
-    def get_no_data_configs(item: dict):
+    def get_no_data_configs(item: Dict):
         """
         获取无数据告警的触发配置
         :return: {
@@ -307,4 +309,4 @@ class Strategy:
     def __getattr__(self, item):
         if item == "snapshot_key":
             return self.gen_strategy_snapshot()
-        return super().__getattribute__(item)
+        return super(Strategy, self).__getattribute__(item)

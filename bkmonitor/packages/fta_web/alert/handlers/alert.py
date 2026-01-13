@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,6 +14,7 @@ import time
 from collections import defaultdict
 from functools import reduce
 from itertools import chain
+from typing import Dict, List, Tuple
 
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy as _lazy
@@ -218,14 +220,14 @@ class AlertQueryHandler(BaseBizQueryHandler):
 
     def __init__(
         self,
-        bk_biz_ids: list[int] = None,
+        bk_biz_ids: List[int] = None,
         username: str = "",
-        status: list[str] = None,
+        status: List[str] = None,
         is_time_partitioned: bool = False,
         is_finaly_partition: bool = False,
         **kwargs,
     ):
-        super().__init__(bk_biz_ids, username, **kwargs)
+        super(AlertQueryHandler, self).__init__(bk_biz_ids, username, **kwargs)
         self.must_exists_fields = kwargs.get("must_exists_fields", [])
         self.status = [status] if isinstance(status, str) else status
         if not self.ordering:
@@ -364,10 +366,10 @@ class AlertQueryHandler(BaseBizQueryHandler):
 
     def _get_buckets(
         self,
-        result: dict[tuple[tuple[str, any]], any],
-        dimensions: dict[str, any],
+        result: Dict[Tuple[Tuple[str, any]], any],
+        dimensions: Dict[str, any],
         aggregation: BucketData,
-        agg_fields: list[str],
+        agg_fields: List[str],
     ):
         """
         获取聚合结果
@@ -382,10 +384,10 @@ class AlertQueryHandler(BaseBizQueryHandler):
                 dimensions[field] = bucket.key
                 self._get_buckets(result, dimensions, bucket, agg_fields[1:])
         else:
-            dimension_tuple: tuple = tuple(dimensions.items())
+            dimension_tuple: Tuple = tuple(dimensions.items())
             result[dimension_tuple] = aggregation
 
-    def date_histogram(self, interval: str = "auto", group_by: list[str] = None):
+    def date_histogram(self, interval: str = "auto", group_by: List[str] = None):
         interval = self.calculate_agg_interval(self.start_time, self.end_time, interval)
 
         # 默认按status聚合
@@ -538,7 +540,7 @@ class AlertQueryHandler(BaseBizQueryHandler):
             )
         elif condition["key"] == "alert_name":
             condition["key"] = "alert_name.raw"
-        return super().parse_condition_item(condition)
+        return super(AlertQueryHandler, self).parse_condition_item(condition)
 
     def add_biz_condition(self, search_object):
         queries = []
@@ -823,7 +825,7 @@ class AlertQueryHandler(BaseBizQueryHandler):
         }
         return result
 
-    def export_with_docs(self) -> tuple[list[AlertDocument], list[dict]]:
+    def export_with_docs(self) -> Tuple[List[AlertDocument], List[dict]]:
         """导出告警数据，并附带原始文档。"""
         raw_docs = [AlertDocument(**hit.to_dict()) for hit in self.scan()]
         cleaned_docs = (self.clean_document(doc, exclude=["extra_info"]) for doc in raw_docs)
@@ -834,7 +836,7 @@ class AlertQueryHandler(BaseBizQueryHandler):
         return cls.clean_document(AlertDocument(**hit.to_dict()), exclude=["extra_info"])
 
     @classmethod
-    def clean_document(cls, doc: AlertDocument, exclude: list = None) -> dict:
+    def clean_document(cls, doc: AlertDocument, exclude: List = None) -> dict:
         """
         清洗告警数据，填充空字段
         """
@@ -885,7 +887,7 @@ class AlertQueryHandler(BaseBizQueryHandler):
             event[field] = alert.get(field)
         return event
 
-    def top_n(self, fields: list, size=10, translators: dict = None, char_add_quotes=True):
+    def top_n(self, fields: List, size=10, translators: dict = None, char_add_quotes=True):
         translators = {
             "metric": MetricTranslator(name_format="{name} ({id})", bk_biz_ids=self.bk_biz_ids),
             "bk_biz_id": BizTranslator(),
@@ -893,7 +895,7 @@ class AlertQueryHandler(BaseBizQueryHandler):
             "category": CategoryTranslator(),
             'plugin_id': PluginTranslator(),
         }
-        return super().top_n(fields, size, translators, char_add_quotes)
+        return super(AlertQueryHandler, self).top_n(fields, size, translators, char_add_quotes)
 
     def list_tags(self):
         """

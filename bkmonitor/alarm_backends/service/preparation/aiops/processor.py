@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, List, Set, Tuple
 
 from django.conf import settings
 
@@ -48,7 +50,7 @@ INIT_DEPEND_MAPPINGS = {
 
 class TsDependPreparationProcess(BasePreparationProcess):
     def __init__(self, *args, **kwargs) -> None:
-        super().__init__()
+        super(TsDependPreparationProcess, self).__init__()
         self.prepare_key = key.SERVICE_LOCK_PREPARATION
 
     def process(self, strategy_id: int, update_time: int = None, force: bool = False) -> None:
@@ -72,13 +74,13 @@ class TsDependPreparationProcess(BasePreparationProcess):
                     )
 
     def refresh_strategy_depend_data(
-        self, strategy: Strategy, processed_dimensions: set, update_time: int = None
+        self, strategy: Strategy, processed_dimensions: Set, update_time: int = None
     ) -> None:
         """根据同步信息，从Cache中获取策略的配置，并调用SDK初始化历史依赖数据.
 
         :param strategy: 策略
         """
-        logger.info(f"Start to init depend data for intelligent strategy({strategy.id})")
+        logger.info("Start to init depend data for intelligent strategy({})".format(strategy.id))
         item: Item = strategy.items[0]
 
         for algorithm in item.algorithms:
@@ -88,7 +90,7 @@ class TsDependPreparationProcess(BasePreparationProcess):
 
             init_depend_api_func = INIT_DEPEND_MAPPINGS.get(algorithm_type)
             if not init_depend_api_func:
-                logger.warning(f"Not supported init depend data for '{algorithm_type}' type algorithm")
+                logger.warning("Not supported init depend data for '{}' type algorithm".format(algorithm_type))
                 continue
 
             start_time, end_time = self.generate_depend_time_range(item)
@@ -106,7 +108,7 @@ class TsDependPreparationProcess(BasePreparationProcess):
                     strategy, init_depend_api_func, latest_end_time, end_time, processed_dimensions, update_time
                 )
 
-    def generate_depend_time_range(self, item: Item) -> tuple[int, int]:
+    def generate_depend_time_range(self, item: Item) -> Tuple[int, int]:
         """根据配置生成历史依赖的开始时间和结束时间."""
         ts_depend = item.algorithms[0].get("ts_depend", "50h")
         ts_depend_offset = parse_time_compare_abbreviation(ts_depend)
@@ -120,7 +122,7 @@ class TsDependPreparationProcess(BasePreparationProcess):
         init_depend_api_func: callable,
         start_time: int,
         end_time: int,
-        processed_dimensions: set,
+        processed_dimensions: Set,
         update_time: int = None,
     ) -> None:
         item: Item = strategy.items[0]
@@ -143,7 +145,9 @@ class TsDependPreparationProcess(BasePreparationProcess):
 
             step_start_time = max(step_end_time - minute_step * 60, start_time)
             logger.info(
-                f"Start to init depend data for intelligent strategy({strategy.id}) with time range({timestamp2datetime(step_start_time)} - {timestamp2datetime(step_end_time)})"
+                "Start to init depend data for intelligent strategy({}) with time range({} - {})".format(
+                    strategy.id, timestamp2datetime(step_start_time), timestamp2datetime(step_end_time)
+                )
             )
 
             # 如果预加载数据包含当前时间段，则直接使用预加载数据
@@ -201,8 +205,8 @@ class TsDependPreparationProcess(BasePreparationProcess):
         self,
         strategy: Strategy,
         init_depend_api_func: callable,
-        strategy_records: list[dict],
-        processed_dimensions: set,
+        strategy_records: List[Dict],
+        processed_dimensions: Set,
     ) -> None:
         item: Item = strategy.items[0]
 

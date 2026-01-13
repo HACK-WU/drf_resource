@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -35,7 +36,7 @@ class MetricListCacheManager(models.Manager):
         return metrics.first()
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super(MetricListCacheManager, self).get_queryset()
         # 过滤重名内置指标，目前仅针对容器指标处理
         # 从request中获取业务id，获取不到则返回原queryset
         request = get_request(peaceful=True)

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+import typing
 
 from django.utils.translation import gettext_lazy as _
 from drf_yasg.utils import swagger_auto_schema
@@ -64,7 +66,7 @@ class CommonViewSet(GenericViewSet):
         return dict(_serializer.data)
 
     @property
-    def validated_data(self) -> dict:
+    def validated_data(self) -> typing.Dict:
         """
         校验的数据
         """
@@ -92,7 +94,7 @@ class CommonViewSet(GenericViewSet):
 
         # 返回响应头禁用浏览器的类型猜测行为
         # response.headers["x-content-type-options"] = ("X-Content-Type-Options", "nosniff")
-        return super().finalize_response(request, response, *args, **kwargs)
+        return super(CommonViewSet, self).finalize_response(request, response, *args, **kwargs)
 
 
 class IpChooserTopoViewSet(CommonViewSet):

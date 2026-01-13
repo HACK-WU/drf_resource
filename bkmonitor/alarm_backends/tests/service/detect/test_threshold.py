@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +25,7 @@ from alarm_backends.tests.service.detect.mocked_data import (
 from core.errors.alarm_backends.detect import InvalidAlgorithmsConfig, InvalidDataPoint
 
 
-class TestThreshold:
+class TestThreshold(object):
     def test_detect_gte(self):
         algorithms_config = [[{"threshold": 50.0, "method": "gte"}]]
         detect_engine = Threshold(config=algorithms_config)

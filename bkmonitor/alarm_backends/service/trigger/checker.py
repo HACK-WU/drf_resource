@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -23,7 +24,7 @@ from bkmonitor.models import AnomalyRecord
 logger = logging.getLogger("trigger")
 
 
-class AnomalyChecker:
+class AnomalyChecker(object):
     """
     异常检测逻辑
     """
@@ -85,7 +86,7 @@ class AnomalyChecker:
             result=bool(event_record),
         )
         if event_record:
-            result_message = f"{result_message}, anomaly({self.anomaly_ids[str(anomaly_level)]})"
+            result_message = "{}, anomaly({})".format(result_message, self.anomaly_ids[str(anomaly_level)])
         logger.info(result_message)
 
         return anomaly_records, event_record
@@ -106,7 +107,13 @@ class AnomalyChecker:
             "trigger": {
                 "level": str(anomaly_level),
                 "anomaly_ids": [
-                    f"{self.dimensions_md5}.{timestamp}.{self.strategy_id}.{self.item_id}.{anomaly_level}"
+                    "{dimensions_md5}.{timestamp}.{strategy_id}.{item_id}.{level}".format(
+                        dimensions_md5=self.dimensions_md5,
+                        timestamp=timestamp,
+                        strategy_id=self.strategy_id,
+                        item_id=self.item_id,
+                        level=anomaly_level,
+                    )
                     for timestamp in anomaly_timestamps
                 ],
             },
@@ -146,8 +153,10 @@ class AnomalyChecker:
         for level in levels:
             if anomaly_level != -1:
                 logger.debug(
-                    f"anomaly record ({self.anomaly_ids[str(level)]}) skip trigger because"
-                    f"high level anomaly record (level: {anomaly_level}) has been trigger."
+                    "anomaly record ({anomaly_id}) skip trigger because"
+                    "high level anomaly record (level: {level}) has been trigger.".format(
+                        anomaly_id=self.anomaly_ids[str(level)], level=anomaly_level
+                    )
                 )
                 continue
             is_triggered, anomaly_timestamps = self._check_anomaly_by_level(str(level))
@@ -169,7 +178,9 @@ class AnomalyChecker:
             if not trigger_configs:
                 # 如果该等级没有在策略中配置，则不检测
                 logger.error(
-                    f"strategy({self.strategy_id}), item({self.item_id}) level({level}) trigger config not exists"
+                    "strategy({}), item({}) level({}) trigger config not exists".format(
+                        self.strategy_id, self.item_id, level
+                    )
                 )
                 return False, []
 

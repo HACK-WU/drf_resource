@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import re
 from collections import defaultdict
+from typing import Dict, List, Tuple
 
 from django.db import models
 from django.utils.translation import gettext as _
@@ -20,7 +22,7 @@ from monitor_web.scene_view.builtin.utils import get_variable_filter_dict, sort_
 from constants.data_source import DataSourceLabel, DataTypeLabel
 
 
-def get_order_config(view: SceneViewModel) -> list:
+def get_order_config(view: SceneViewModel) -> List:
     """
     获取排序配置
     """
@@ -76,7 +78,7 @@ def get_order_config(view: SceneViewModel) -> list:
     ]
 
 
-def get_panels(view: SceneViewModel) -> list[dict]:
+def get_panels(view: SceneViewModel) -> List[Dict]:
     """
     获取指标信息，包含指标信息及该指标需要使用的聚合方法、聚合维度、聚合周期等
     """
@@ -135,7 +137,7 @@ def get_panels(view: SceneViewModel) -> list[dict]:
 
 class CustomMetricBuiltinProcessor(CollectBuiltinProcessor):
     @classmethod
-    def get_auto_view_panels(cls, view: SceneViewModel) -> tuple[list[dict], list[dict]]:
+    def get_auto_view_panels(cls, view: SceneViewModel) -> Tuple[List[Dict], List[Dict]]:
         """
         获取平铺视图配置
         """

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 from dataclasses import dataclass
-from typing import Union
+from typing import Dict, List, Optional, Union
 
 from django.utils.translation import gettext_lazy as _lazy
 
@@ -26,7 +27,7 @@ class AggMethod:
     method: str
     name: str
     description: str
-    vargs_list: list[any] = None
+    vargs_list: List[any] = None
     position: int = 0
 
 
@@ -40,8 +41,8 @@ class Params:
     name: str
     description: str
     type: str
-    default: _ParamsValue | None
-    shortlist: list[_ParamsValue]
+    default: Optional[_ParamsValue]
+    shortlist: List[_ParamsValue]
     required: bool = True
 
 
@@ -54,7 +55,7 @@ class Function:
     id: str
     name: str
     description: str
-    params: list[Params]
+    params: List[Params]
     position: int = 0
     time_aggregation: bool = False
     with_dimensions: bool = False
@@ -74,7 +75,7 @@ class FunctionCategory:
     description: str
 
 
-CpAggMethods: dict[str, AggMethod] = dict(
+CpAggMethods: Dict[str, AggMethod] = dict(
     cp50=AggMethod(
         id="cp50",
         method="quantile",

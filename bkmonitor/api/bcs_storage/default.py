@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import abc
 import copy
 import logging
@@ -38,7 +39,7 @@ class BcsStorageBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
         return url
 
     def get_headers(self):
-        headers = super().get_headers()
+        headers = super(BcsStorageBaseResource, self).get_headers()
         headers["Authorization"] = f"Bearer {settings.BCS_API_GATEWAY_TOKEN}"
         return headers
 

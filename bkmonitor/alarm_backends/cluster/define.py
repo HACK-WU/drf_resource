@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ import enum
 import json
 import logging
 from collections import defaultdict
+from typing import Dict, List, Optional, Union
 
 from bkmonitor.utils.range import load_agg_condition_instance
 
@@ -31,15 +33,15 @@ class RoutingRule:
     target_type: TargetType
     cluster_name: str
     matcher_type: str
-    matcher_config: dict | list
+    matcher_config: Union[Dict, List]
     description: str
 
     def __init__(
         self,
-        target_type: TargetType | str,
+        target_type: Union[TargetType, str],
         cluster_name: str,
         matcher_type: str,
-        matcher_config: dict | list | None,
+        matcher_config: Optional[Union[Dict, List]],
         description: str = "",
     ):
         if isinstance(target_type, str):
@@ -55,7 +57,7 @@ class RoutingRule:
         self.matcher_config = matcher_config
         self.description = description
 
-    def match(self, target: str | int | float) -> bool:
+    def match(self, target: Union[str, int, float]) -> bool:
         """
         判断目标是否匹配当前路由规则
         """
@@ -83,9 +85,9 @@ class Cluster:
     def __init__(
         self,
         name: str,
-        code: int | str,
-        tags: dict[str, str],
-        routing_rules: list[RoutingRule],
+        code: Union[int, str],
+        tags: Dict[str, str],
+        routing_rules: List[RoutingRule],
         description: str = "",
     ):
         """
@@ -102,7 +104,7 @@ class Cluster:
         self.routing_rules = []
         self.routing_rules.extend(routing_rules or [])
 
-        self.routing_rules_by_type: dict[TargetType, list[RoutingRule]] = defaultdict(list)
+        self.routing_rules_by_type: Dict[TargetType, List[RoutingRule]] = defaultdict(list)
         for rule in self.routing_rules:
             self.routing_rules_by_type[rule.target_type].append(rule)
 
@@ -141,7 +143,7 @@ class Cluster:
         """
         return self.name == "default"
 
-    def match(self, target_type: TargetType, target: str | int | float) -> bool:
+    def match(self, target_type: TargetType, target: Union[str, int, float]) -> bool:
         """
         判断目标是否匹配当前集群
         """
@@ -163,15 +165,15 @@ class Cluster:
 
         return False
 
-    def filter(self, target_type: TargetType, targets: list[str | int | float]) -> list[str | int | float]:
+    def filter(self, target_type: TargetType, targets: List[Union[str, int, float]]) -> List[Union[str, int, float]]:
         """
         过滤出属于当前集群的目标
         """
         return [target for target in targets if self.match(target_type, target)]
 
     def get_targets_by_cluster(
-        self, target_type: TargetType, targets: list[str | int | float]
-    ) -> dict[str, list[str | int | float]]:
+        self, target_type: TargetType, targets: List[Union[str, int, float]]
+    ) -> Dict[str, List[Union[str, int, float]]]:
         """
         将目标按照集群进行分组
         """
@@ -204,10 +206,10 @@ class Matcher:
 
     type: str
 
-    def __init__(self, config: dict | list | None = None):
+    def __init__(self, config: Optional[Union[Dict, List]] = None):
         self.config = config
 
-    def match(self, target: str | int | float) -> bool:
+    def match(self, target: Union[str, int, float]) -> bool:
         """
         判断目标是否匹配当前路由规则
         """
@@ -222,7 +224,7 @@ class TrueMatcher(Matcher):
 
     type = "true"
 
-    def match(self, target: str | int | float) -> bool:
+    def match(self, target: Union[str, int, float]) -> bool:
         """
         判断目标是否匹配当前路由规则
         """
@@ -237,7 +239,7 @@ class FalseMatcher(Matcher):
 
     type = "false"
 
-    def match(self, target: str | int | float) -> bool:
+    def match(self, target: Union[str, int, float]) -> bool:
         """
         判断目标是否匹配当前路由规则
         """
@@ -252,7 +254,7 @@ class ConditionMatcher(Matcher):
 
     type = "condition"
 
-    def match(self, target: str | int | float) -> bool:
+    def match(self, target: Union[str, int, float]) -> bool:
         """
         判断目标是否匹配当前路由规则
         """

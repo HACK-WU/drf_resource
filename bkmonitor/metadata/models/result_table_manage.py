@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -14,4 +15,4 @@ from django.db import models
 
 class EnableManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(is_disable=False)
+        return super(EnableManager, self).get_queryset().filter(is_disable=False)

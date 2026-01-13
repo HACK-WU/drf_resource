@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,6 +13,7 @@ specific language governing permissions and limitations under the License.
 import json
 import logging
 from collections import defaultdict
+from typing import Dict
 
 import arrow
 from django.utils.functional import cached_property
@@ -31,7 +33,7 @@ class EventRecord(Filterer):
     """
 
     def __init__(self, raw_data):
-        super().__init__()
+        super(EventRecord, self).__init__()
         self.raw_data = raw_data
         self.data = {}
 
@@ -116,14 +118,14 @@ class EventRecord(Filterer):
             return ""
 
         for prop in constants.StandardEventFields:
-            clean_method_name = f"clean_{prop}"
+            clean_method_name = "clean_%s" % prop
             clean_value = getattr(self, clean_method_name, clean_default_method)()
             self.data[prop] = clean_value
 
     def clean_data(self):
         standard_data_field = {}
         for field in constants.StandardDataFields:
-            clean_method_name = f"clean_{field}"
+            clean_method_name = "clean_%s" % field
             clean_value = getattr(self, clean_method_name, lambda: "")()
             standard_data_field[field] = clean_value
         return standard_data_field
@@ -131,7 +133,7 @@ class EventRecord(Filterer):
     def clean_anomaly(self):
         standard_anomaly_field = {}
         for field in constants.StandardAnomalyFields:
-            clean_method_name = f"clean_{field}"
+            clean_method_name = "clean_%s" % field
             clean_value = getattr(self, clean_method_name, lambda: "")()
             standard_anomaly_field[field] = clean_value
         return {self.level: standard_anomaly_field}
@@ -140,7 +142,7 @@ class EventRecord(Filterer):
         return self.raw_data["strategy"].gen_strategy_snapshot()
 
     @property
-    def filter_dimensions(self) -> dict:
+    def filter_dimensions(self) -> Dict:
         return {}
 
     def clean_dimension_fields(self):

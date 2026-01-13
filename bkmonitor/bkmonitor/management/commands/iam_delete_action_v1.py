@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making BK-LOG 蓝鲸日志平台 available.
 Copyright (C) 2021 THL A29 Limited, a Tencent company.  All rights reserved.
@@ -64,7 +65,7 @@ class Command(BaseCommand):
     OPERATOR = "admin"
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(Command, self).__init__(*args, **kwargs)
         self.iam_client = Permission.get_iam_client()
         self.system_id = settings.BK_IAM_SYSTEM_ID
 
@@ -89,11 +90,13 @@ class Command(BaseCommand):
         注意！！！此为高危操作，请慎用！！！
         """
         result = self.delete_action_policy(system_id=self.system_id, action_id=action_id)
-        print(f"delete iam action policy [{action_id}], result: {result}")
+        print("delete iam action policy [{}], result: {}".format(action_id, result))
         result = self.iam_client._client.batch_delete_actions(system_id=self.system_id, data=[{"id": action_id}])
-        print(f"delete iam action [{action_id}], result: {result}")
+        print("delete iam action [{}], result: {}".format(action_id, result))
 
     def delete_action_policy(self, system_id, action_id):
-        path = f"/api/v1/model/systems/{system_id}/actions/{action_id}/policies"
+        path = "/api/v1/model/systems/{system_id}/actions/{action_id}/policies".format(
+            system_id=system_id, action_id=action_id
+        )
         ok, message, data = self.iam_client._client._call_iam_api(http_delete, path, data=None)
         return ok, message

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
+from typing import Dict
 
 from django.db import models
 from django.utils import timezone
@@ -268,7 +270,7 @@ class BCSContainer(BCSBase, BCSBaseResources):
 
     @classmethod
     def update_usage_resource_and_monitor_status(
-        cls, bk_biz_id: int, bcs_cluster_id: str, models: BCSBase, usages: dict, monitor_status_map: dict
+        cls, bk_biz_id: int, bcs_cluster_id: str, models: BCSBase, usages: Dict, monitor_status_map: Dict
     ) -> None:
         # 获得已存在的记录
         old_unique_hash_map = {

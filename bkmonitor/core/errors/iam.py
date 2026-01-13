@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -44,9 +45,9 @@ class APIPermissionDeniedError(PermissionDeniedError):
                     break
                 except BaseException as error:
                     logger.error("get related resource name error %s", str(error))
-            permission_actions.append(f"{action_name}-{resource_name}")
+            permission_actions.append("{}-{}".format(action_name, resource_name))
         kwargs.update(permission=",".join(permission_actions))
-        super().__init__(context, data, extra, **kwargs)
+        super(APIPermissionDeniedError, self).__init__(context, data, extra, **kwargs)
 
     message_tpl = _lazy("请求[{system_name}]系统[{url}]权限校验不通过，请前往权限中心申请对应权限[{permission}]")
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -61,7 +62,7 @@ class StrategyIntelligentModelDetectTask(BaseTask):
         :param plan_id: 方案ID
         :param plan_args:   方案参数
         """
-        super().__init__()
+        super(StrategyIntelligentModelDetectTask, self).__init__()
 
         self.strategy_id = strategy_id
         self.rt_id = rt_id
@@ -112,7 +113,7 @@ class StrategyIntelligentModelDetectTask(BaseTask):
     @property
     def flow_name(self):
         # 模型名称如果有变更，需要同步修改维护dataflow的定时任务逻辑
-        return f"{self.strategy_id} {self.FLOW_NAME_KEY} {self.rt_id}"
+        return "{} {} {}".format(self.strategy_id, self.FLOW_NAME_KEY, self.rt_id)
 
 
 class MultivariateAnomalyAggIntelligentModelDetectTask(BaseTask):
@@ -216,7 +217,7 @@ class MultivariateAnomalyIntelligentModelDetectTask(BaseTask):
         :param plan_id: 方案ID
         :param plan_args:   方案参数
         """
-        super().__init__()
+        super(MultivariateAnomalyIntelligentModelDetectTask, self).__init__()
 
         self.access_bk_biz_id = access_bk_biz_id
         self.bk_biz_id = bk_biz_id
@@ -275,7 +276,7 @@ class MultivariateAnomalyIntelligentModelDetectTask(BaseTask):
 
     @classmethod
     def build_flow_name(cls, access_bk_biz_id, scene_name):
-        return f"{access_bk_biz_id} {cls.FLOW_NAME_KEY} {scene_name}"
+        return "{} {} {}".format(access_bk_biz_id, cls.FLOW_NAME_KEY, scene_name)
 
 
 class MetricRecommendTask(BaseTask):
@@ -333,7 +334,7 @@ class MetricRecommendTask(BaseTask):
 
     @property
     def flow_name(self):
-        return f"{self.access_bk_biz_id} {self.FLOW_NAME_KEY}"
+        return "{} {}".format(self.access_bk_biz_id, self.FLOW_NAME_KEY)
 
 
 class HostAnomalyIntelligentDetectTask(BaseTask):
@@ -398,7 +399,7 @@ class HostAnomalyIntelligentDetectTask(BaseTask):
     @property
     def flow_name(self):
         # 模型名称如果有变更，需要同步修改维护dataflow的定时任务逻辑
-        return f"{self.strategy_id} {self.FLOW_NAME_KEY} {self.access_bk_biz_id}"
+        return "{} {} {}".format(self.strategy_id, self.FLOW_NAME_KEY, self.access_bk_biz_id)
 
     def get_stream_source_from_host_scene_flow(self, access_bk_biz_id):
         """从主机场景检测的FLOW中获取主机多指标异常检测策略的数据源.

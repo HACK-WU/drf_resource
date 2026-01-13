@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,6 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import Type
 
 from django.utils.translation import gettext as _
 from rest_framework import serializers
@@ -28,7 +30,7 @@ class ResourceDetail:
         self.end_time = end_time
 
     @property
-    def serializer(self) -> type[serializers.Serializer]:
+    def serializer(self) -> Type[serializers.Serializer]:
         raise NotImplementedError
 
     @property
@@ -149,7 +151,7 @@ class K8sPodDetail(ResourceDetail):
     ]
 
     @property
-    def serializer(self) -> type[serializers.Serializer]:
+    def serializer(self) -> Type[serializers.Serializer]:
         class podSerializer(serializers.Serializer):  # noqa
             bcs_cluster_id = serializers.CharField()
             namespace = serializers.CharField()
@@ -203,7 +205,7 @@ class K8sServiceDetail(ResourceDetail):
     ]
 
     @property
-    def serializer(self) -> type[serializers.Serializer]:
+    def serializer(self) -> Type[serializers.Serializer]:
         class serviceSerializer(serializers.Serializer):  # noqa
             bcs_cluster_id = serializers.CharField()
             namespace = serializers.CharField()

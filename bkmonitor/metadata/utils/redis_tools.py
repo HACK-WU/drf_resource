@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,13 +12,14 @@ specific language governing permissions and limitations under the License.
 import json
 import logging
 import os
+from typing import Dict, List, Set
 
 from utils.redis_client import RedisClient
 
 logger = logging.getLogger("metadata")
 
 
-class RedisTools:
+class RedisTools(object):
     metadata_redis_client = None
 
     @property
@@ -29,20 +31,20 @@ class RedisTools:
         return client
 
     @classmethod
-    def push_and_publish_spaces(cls, key: str, channel: str, space: list):
+    def push_and_publish_spaces(cls, key: str, channel: str, space: List):
         """推送 redis 并且发布空间变更"""
         cls.push_space_to_redis(key, space)
         cls.publish(channel, space)
 
     @classmethod
-    def push_space_to_redis(cls, key: str, space: list) -> int:
+    def push_space_to_redis(cls, key: str, space: List) -> int:
         """推送空间到 redis"""
         if not space:
             return
         return cls().client.sadd(key, *space)
 
     @classmethod
-    def publish(cls, channel: str, msg_list: list[str]):
+    def publish(cls, channel: str, msg_list: List[str]):
         """当数据变动时，发布数据"""
         logger.info("publish: channel->[%s],publish msg_list->[%s]", channel, msg_list)
         try:
@@ -59,13 +61,13 @@ class RedisTools:
         return cls().client.hset(key, field, value)
 
     @classmethod
-    def hmset_to_redis(cls, key: str, field_value: dict[str, str]) -> bool:
+    def hmset_to_redis(cls, key: str, field_value: Dict[str, str]) -> bool:
         """推送表数据到 redis"""
         logger.info("hmset_to_redis: key->[%s], field_value->[%s]", key, field_value)
         return cls().client.hmset(key, field_value)
 
     @classmethod
-    def sadd(cls, key: str, value: list) -> int:
+    def sadd(cls, key: str, value: List) -> int:
         if not value:
             return
         return cls().client.sadd(key, *value)
@@ -78,7 +80,7 @@ class RedisTools:
         return False
 
     @classmethod
-    def hdel(cls, key: str, fields: list):
+    def hdel(cls, key: str, fields: List):
         """删除指定的 field"""
         if not fields:
             return
@@ -89,28 +91,28 @@ class RedisTools:
         return cls().client.hget(key, field)
 
     @classmethod
-    def hmget(cls, key: str, fields: list) -> list:
+    def hmget(cls, key: str, fields: List) -> List:
         if not fields:
             return []
         return cls().client.hmget(key, *fields)
 
     @classmethod
-    def hgetall(cls, key: str) -> dict:
+    def hgetall(cls, key: str) -> Dict:
         """批量获取数据"""
         return cls().client.hgetall(key)
 
     @classmethod
-    def srem(cls, key: str, value: list) -> int:
+    def srem(cls, key: str, value: List) -> int:
         if not value:
             return 0
         return cls().client.srem(key, *value)
 
     @classmethod
-    def smembers(cls, key: str) -> set:
+    def smembers(cls, key: str) -> Set:
         return cls().client.smembers(key)
 
     @classmethod
-    def get_list(cls, key: str) -> list:
+    def get_list(cls, key: str) -> List:
         data = cls().client.get(key)
         if not data:
             return []

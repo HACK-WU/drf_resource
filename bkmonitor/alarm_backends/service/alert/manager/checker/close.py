@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -131,7 +132,7 @@ class CloseStatusChecker(BaseChecker):
         metric_ids = [query["metric_id"] for query in origin_item["query_configs"]]
         if origin_metric_ids != metric_ids:
             logger.info(
-                f"[close 处理结果] (closed) alert({alert.id}), strategy({alert.strategy_id}), " "策略监控项已被修改，告警关闭"
+                "[close 处理结果] (closed) alert({}), strategy({}), " "策略监控项已被修改，告警关闭".format(alert.id, alert.strategy_id)
             )
             self.close(alert, _("策略监控项已被修改，告警关闭"))
             return True
@@ -142,8 +143,11 @@ class CloseStatusChecker(BaseChecker):
             origin_dimensions = latest_query.get("agg_dimension", [])
             if set(latest_dimensions) != set(origin_dimensions):
                 logger.info(
-                    f"[close 处理结果] (closed) alert({alert.id}), strategy({alert.strategy_id}), "
-                    "策略监控维度已被修改，告警关闭"
+                    "[close 处理结果] (closed) alert({}), strategy({}), "
+                    "策略监控维度已被修改，告警关闭".format(
+                        alert.id,
+                        alert.strategy_id,
+                    )
                 )
                 self.close(alert, _("策略监控维度已被修改，告警关闭"))
                 return True
@@ -157,8 +161,11 @@ class CloseStatusChecker(BaseChecker):
                 and str(alert.severity) not in latest_levels
             ):
                 logger.info(
-                    f"[close 处理结果] (closed) alert({alert.id}), strategy({alert.strategy_id}), "
-                    "告警级别对应的检测算法已被删除，告警关闭"
+                    "[close 处理结果] (closed) alert({}), strategy({}), "
+                    "告警级别对应的检测算法已被删除，告警关闭".format(
+                        alert.id,
+                        alert.strategy_id,
+                    )
                 )
                 self.close(alert, _("告警级别对应的检测算法已被删除，告警关闭"))
                 return True
@@ -171,8 +178,11 @@ class CloseStatusChecker(BaseChecker):
                 latest_condition_md5 = get_agg_condition_md5(latest_condition)
                 if origin_condition_md5 != latest_condition_md5:
                     logger.info(
-                        f"[close 处理结果] (closed) alert({alert.id}), strategy({alert.strategy_id}), "
-                        "策略过滤条件已被修改，告警关闭"
+                        "[close 处理结果] (closed) alert({}), strategy({}), "
+                        "策略过滤条件已被修改，告警关闭".format(
+                            alert.id,
+                            alert.strategy_id,
+                        )
                     )
                     self.close(alert, _("策略过滤条件已被修改，告警关闭"))
                     return True
@@ -180,8 +190,8 @@ class CloseStatusChecker(BaseChecker):
             # 4. 当前的是无数据告警，且无数据告警配置被关闭，则直接关闭告警
             if not latest_item["no_data_config"]["is_enabled"]:
                 logger.info(
-                    f"[close 处理结果] (closed) alert({alert.id}), strategy({alert.strategy_id}), "
-                    "无数据告警设置被关闭，告警关闭"
+                    "[close 处理结果] (closed) alert({}), strategy({}), "
+                    "无数据告警设置被关闭，告警关闭".format(alert.id, alert.strategy_id)
                 )
                 self.close(alert, _("无数据告警设置被关闭，告警关闭"))
                 return True
@@ -204,7 +214,9 @@ class CloseStatusChecker(BaseChecker):
             # 如果从缓存中获取到了数据信息，并且缓存中的告警ID与当前告警ID不一致，则认为是存在更新的告警
             # 如果正在发生的事件ID与当前事件ID不一致，则说明事件已经过期，直接关闭
             logger.info(
-                f"[close 处理结果] (closed) alert({alert.id}), strategy({alert.strategy_id}) 当前维度存在更新的告警事件({current_alert.id})，告警已失效"
+                "[close 处理结果] (closed) alert({}), strategy({}) 当前维度存在更新的告警事件({})，告警已失效".format(
+                    alert.id, alert.strategy_id, current_alert.id
+                )
             )
             self.close(alert, _("当前维度存在更新的告警事件({})，告警已失效").format(current_alert.id))
             return True
@@ -266,8 +278,8 @@ class CloseStatusChecker(BaseChecker):
             # 如果最近上报时间距离当前时间超过了一个触发窗口的大小，则认为无数据上报，告警关闭
             self.close(alert, _("在恢复检测周期内无数据上报，告警已失效"))
             logger.info(
-                f"[close 处理结果] (closed) alert({alert.id}), strategy({alert.strategy_id}), last_check_timestamp({last_check_timestamp}), now_timestamp({now_timestamp}),"
-                "在恢复检测周期内无数据上报，进行事件关闭"
+                "[close 处理结果] (closed) alert({}), strategy({}), last_check_timestamp({}), now_timestamp({}),"
+                "在恢复检测周期内无数据上报，进行事件关闭".format(alert.id, alert.strategy_id, last_check_timestamp, now_timestamp)
             )
             return True
         return False
@@ -309,7 +321,9 @@ class CloseStatusChecker(BaseChecker):
                 # 如果主机在缓存中不存在，则直接恢复告警
                 # 需要考虑一个问题，如何判断缓存未刷新的情况
                 logger.info(
-                    f"[close 处理结果] (closed) alert({alert.id}), strategy({alert.strategy_id}), CMDB 未查询到告警目标主机 ({ip}|{bk_cloud_id}) 的信息，主机可能已被删除，告警关闭"
+                    "[close 处理结果] (closed) alert({}), strategy({}), CMDB 未查询到告警目标主机 ({}|{}) 的信息，主机可能已被删除，告警关闭".format(
+                        alert.id, alert.strategy_id, ip, bk_cloud_id
+                    )
                 )
                 self.close(alert, _("CMDB 未查询到告警目标主机 ({}|{}) 的信息，主机可能已被删除，告警关闭").format(ip, bk_cloud_id))
                 return True
@@ -326,8 +340,10 @@ class CloseStatusChecker(BaseChecker):
             if not service_instance:
                 # 如果服务实例在缓存中不存在，则直接恢复告警
                 logger.info(
-                    f"[close 处理结果] (closed) alert({alert.id}), strategy({alert.strategy_id}), "
-                    f"CMDB 未查询到告警目标服务实例 ({bk_service_instance_id}) 的信息，服务实例可能已被删除，告警关闭"
+                    "[close 处理结果] (closed) alert({}), strategy({}), "
+                    "CMDB 未查询到告警目标服务实例 ({}) 的信息，服务实例可能已被删除，告警关闭".format(
+                        alert.id, alert.strategy_id, bk_service_instance_id
+                    )
                 )
                 self.close(alert, _("CMDB 未查询到告警目标服务实例 ({}) 的信息，服务实例可能已被删除，告警关闭").format(bk_service_instance_id))
                 return True
@@ -346,8 +362,12 @@ class CloseStatusChecker(BaseChecker):
         for item in need_check_items:
             if not item.target_condition_obj.is_match(target_dimensions):
                 logger.info(
-                    f"[close 处理结果] (closed) alert({alert.id}), strategy({alert.strategy_id}), 告警目标实例已不在监控目标范围内，告警关闭."
-                    f"当前TOPO: {target_dimensions}"
+                    "[close 处理结果] (closed) alert({}), strategy({}), 告警目标实例已不在监控目标范围内，告警关闭."
+                    "当前TOPO: {}".format(
+                        alert.id,
+                        alert.strategy_id,
+                        target_dimensions,
+                    )
                 )
                 self.close(alert, _("告警目标实例已不在监控目标范围内，告警关闭"))
                 return True

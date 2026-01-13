@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import logging
+from typing import Dict, Optional
 
 import requests
 from django.http import Http404, HttpRequest, HttpResponse
@@ -54,8 +56,8 @@ class ProxyBaseView(View):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.user: dict | None = None
-        self.org: dict | None = None
+        self.user: Optional[dict] = None
+        self.org: Optional[dict] = None
 
     def get_username(self, request):
         if self.user:
@@ -93,7 +95,7 @@ class ProxyBaseView(View):
     def sync_permissions(self, request):
         """权限校验"""
         user_role = GrafanaRole.Anonymous
-        dashboard_permissions: dict[str, GrafanaPermission] = {}
+        dashboard_permissions: Dict[str, GrafanaPermission] = {}
 
         if not self.permission_classes:
             return

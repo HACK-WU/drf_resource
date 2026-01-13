@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ specific language governing permissions and limitations under the License.
 
 import logging
 import re
+from typing import Dict
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -91,7 +93,7 @@ class DiskFullEvent(GSEBaseAlarmEventRecord):
     TITLE = _("磁盘写满-GSE")
 
     def __init__(self, raw_data, strategies):
-        super().__init__(raw_data, strategies)
+        super(DiskFullEvent, self).__init__(raw_data, strategies)
         self.filters.append(DiskFullFilter())
 
     def clean_anomaly_message(self):
@@ -104,7 +106,7 @@ class DiskFullEvent(GSEBaseAlarmEventRecord):
         return _("磁盘({})剩余空间只有{}%").format(disk, free)
 
     @property
-    def filter_dimensions(self) -> dict:
+    def filter_dimensions(self) -> Dict:
         data = self.raw_data["_extra_"]
 
         return {

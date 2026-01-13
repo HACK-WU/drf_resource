@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -150,14 +151,14 @@ DEFAULT_TITLE_TEMPLATE: str = "{{business.bk_biz_name}} - {{alarm.name}} {{alarm
 
 
 # TODO(crayon) 灰度验证无误后再进行调整
-DEFAULT_NOTICE_MESSAGE_TEMPLATE: list[dict[str, str]] = [
+DEFAULT_NOTICE_MESSAGE_TEMPLATE: typing.List[typing.Dict[str, str]] = [
     {"signal": "abnormal", "message_tmpl": OLD_DEFAULT_TEMPLATE, "title_tmpl": DEFAULT_TITLE_TEMPLATE},
     {"signal": "recovered", "message_tmpl": OLD_DEFAULT_TEMPLATE, "title_tmpl": DEFAULT_TITLE_TEMPLATE},
     {"signal": "closed", "message_tmpl": OLD_DEFAULT_TEMPLATE, "title_tmpl": DEFAULT_TITLE_TEMPLATE},
 ]
 
 
-PUBLIC_NOTICE_CONFIG: dict[str, str | list[dict]] = {
+PUBLIC_NOTICE_CONFIG: typing.Dict[str, typing.Union[str, typing.List[typing.Dict]]] = {
     "alert_notice": [
         {
             "time_range": "00:00:00--23:59:59",
@@ -182,7 +183,7 @@ PUBLIC_NOTICE_CONFIG: dict[str, str | list[dict]] = {
 }
 
 
-DEFAULT_NOTICE_GROUPS: list[dict[str, typing.Any]] = [
+DEFAULT_NOTICE_GROUPS: typing.List[typing.Dict[str, typing.Any]] = [
     {
         "name": _("主备负责人"),
         "notice_receiver": [{"id": "operator", "type": "group"}, {"id": "bk_bak_operator", "type": "group"}],

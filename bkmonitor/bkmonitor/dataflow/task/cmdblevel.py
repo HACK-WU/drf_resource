@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -32,7 +33,7 @@ class CMDBPrepareAggregateTask(BaseTask):
     MUST_HAVE_FIELDS = {"bk_target_ip", "bk_target_cloud_id"}
 
     def __init__(self, rt_id, agg_interval, agg_method, metric_field, dimension_fields):
-        super().__init__()
+        super(CMDBPrepareAggregateTask, self).__init__()
         if self.MUST_HAVE_FIELDS - set(dimension_fields):
             raise ValueError("bk_target_ip && bk_target_cloud_id must in dimension fields.")
 

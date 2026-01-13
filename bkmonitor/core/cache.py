@@ -1,3 +1,4 @@
+# coding=utf-8
 # Time: 2025/8/10 23:03
 # name: cache
 # author: HACK-WU
@@ -86,7 +87,7 @@ class CacheType(BaseCacheType):
     SCENE_VIEW = CacheTypeItem(key="scene_view", timeout=60 * 1, label="观测场景相关", user_related=False)
 
 
-class InstanceCache:
+class InstanceCache(object):
     @classmethod
     def instance(cls, *args, **kwargs):
         if not hasattr(cls, "_instance"):

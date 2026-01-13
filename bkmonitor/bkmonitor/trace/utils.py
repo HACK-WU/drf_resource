@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,7 +21,7 @@ def jsonify(data: Any) -> str:
         return json.dumps(data)
     except (TypeError, ValueError):
         if isinstance(data, dict):
-            return json.dumps({k: v for k, v in data.items() if not v or isinstance(v, str | int | float | bool)})
+            return json.dumps({k: v for k, v in data.items() if not v or isinstance(v, (str, int, float, bool))})
         if isinstance(data, bytes):
             try:
                 return data.decode('utf-8')

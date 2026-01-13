@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,6 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import Dict, List
 
 from alarm_backends.core.cache.cmdb import (
     BusinessManager,
@@ -22,7 +24,7 @@ class DisplayManager(BaseShieldDisplayManager):
         business = BusinessManager.get(bk_biz_id)
         return business.bk_biz_name if business else str(bk_biz_id)
 
-    def get_dynamic_group_name_list(self, bk_biz_id: int, dynamic_group_list: list[dict]) -> list:
+    def get_dynamic_group_name_list(self, bk_biz_id: int, dynamic_group_list: List[Dict]) -> List:
         dynamic_group_ids = [dynamic_group["dynamic_group_id"] for dynamic_group in dynamic_group_list]
         dynamic_groups = DynamicGroupManager.multi_get(dynamic_group_ids)
         return [

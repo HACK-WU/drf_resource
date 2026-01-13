@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import time
+from typing import List
 
 from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
@@ -139,14 +141,14 @@ class AlertDocument(BaseDocument):
         try:
             ts = cls.parse_timestamp_by_id(id)
         except Exception:
-            raise ValueError(f"invalid alert_id: {id}")
+            raise ValueError("invalid alert_id: {}".format(id))
         hits = cls.search(start_time=ts, end_time=ts).filter("term", id=id).execute().hits
         if not hits:
             raise AlertNotFoundError({"alert_id": id})
         return cls(**hits[0].to_dict())
 
     @classmethod
-    def mget(cls, ids, fields: list = None) -> list["AlertDocument"]:
+    def mget(cls, ids, fields: List = None) -> List["AlertDocument"]:
         """
         获取多条告警
         """

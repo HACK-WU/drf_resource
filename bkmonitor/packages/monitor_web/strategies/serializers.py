@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -127,7 +128,7 @@ def validate_algorithm_msg(value):
         check_config = algorithm_msg["algorithm_config"]
         type_serializer = algorithm_type + "Serializer"
         try:
-            serializer_cls = import_string(f"bkmonitor.strategy.serializers.{type_serializer}")
+            serializer_cls = import_string("bkmonitor.strategy.serializers.{}".format(type_serializer))
             serializer = serializer_cls(data=check_config)
             serializer.is_valid(raise_exception=True)
             algorithm_msg["algorithm_config"] = serializer.validated_data

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -28,16 +29,16 @@ class BkPluginBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
         request_url = kwargs.pop("url", "")
         if request_url:
             self.base_url = request_url
-        super().__init__(*args, **kwargs)
+        super(BkPluginBaseResource, self).__init__(*args, **kwargs)
 
     def get_request_url(self, validated_request_data):
         return (
-            super().get_request_url(validated_request_data).format(**validated_request_data)
+            super(BkPluginBaseResource, self).get_request_url(validated_request_data).format(**validated_request_data)
         )
 
     def full_request_data(self, validated_request_data):
         # 组装通用参数：SaaS凭证
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(BkPluginBaseResource, self).full_request_data(validated_request_data)
         if settings.BK_PLUGIN_APP_INFO:
             validated_request_data.update(settings.BK_PLUGIN_APP_INFO)
         return validated_request_data
@@ -102,7 +103,7 @@ class BkPluginInvokeResource(BkPluginBaseResource):
         assignee = serializers.ListField(label="执行人", required=False)
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(BkPluginInvokeResource, self).full_request_data(validated_request_data)
         inputs = validated_request_data.pop("inputs", [])
         invoke_data = {
             "inputs": {param["key"]: param["value"] for param in inputs},
@@ -128,7 +129,7 @@ class BkPluginScheduleResource(BkPluginBaseResource):
 
 
 class BkPluginSystemResource(six.with_metaclass(abc.ABCMeta, APIResource)):
-    base_url = settings.PAASV3_APIGW_BASE_URL or f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/bk_paas/"
+    base_url = settings.PAASV3_APIGW_BASE_URL or "%s/api/c/compapi/v2/bk_paas/" % settings.BK_COMPONENT_API_URL
     module_name = "bk_plugin_system"
     IS_STANDARD_FORMAT = False
 
@@ -136,15 +137,15 @@ class BkPluginSystemResource(six.with_metaclass(abc.ABCMeta, APIResource)):
         request_url = kwargs.pop("url", "")
         if request_url:
             self.base_url = request_url
-        super().__init__(*args, **kwargs)
+        super(BkPluginSystemResource, self).__init__(*args, **kwargs)
 
     def get_request_url(self, validated_request_data):
         return (
-            super().get_request_url(validated_request_data).format(**validated_request_data)
+            super(BkPluginSystemResource, self).get_request_url(validated_request_data).format(**validated_request_data)
         )
 
     def get_headers(self):
-        headers = super().get_headers()
+        headers = super(BkPluginSystemResource, self).get_headers()
 
         # 替换掉通用参数中的bk_app_code和bk_app_secret
         if settings.BK_PLUGIN_APP_INFO:

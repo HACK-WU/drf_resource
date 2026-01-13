@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -36,7 +37,7 @@ API_FIELD_FORMATED_MAPPINGS = {
 class ApiRenderer(MonitorJSONRenderer):
     def format_field(self, result, level=0):
         if level != 0:
-            if isinstance(result, list | tuple):
+            if isinstance(result, (list, tuple)):
                 result = [self.format_field(i, level - 1) for i in result]
             elif isinstance(result, dict):
                 result = {
@@ -46,7 +47,7 @@ class ApiRenderer(MonitorJSONRenderer):
         return result
 
     def get_result(self, data, renderer_context=None):
-        result = super().get_result(data, renderer_context)
+        result = super(ApiRenderer, self).get_result(data, renderer_context)
         return self.format_field(result, -1)
 
 
@@ -59,7 +60,7 @@ class ApiModelFilterSet(django_filters.FilterSet):
         return extend_fields
 
     def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
-        super().__init__(data, queryset, prefix, strict, request)
+        super(ApiModelFilterSet, self).__init__(data, queryset, prefix, strict, request)
 
         data = self.data.copy()
         extend_fields = getattr(self.Meta, "extend_fields", None) or self.get_extend_fields()
@@ -77,7 +78,7 @@ class SerializerFieldFormatedMeta(type):
         if source_mappings:
             for attr, source in list(source_mappings.items()):
                 field = attrs.get(attr)
-                if not isinstance(field, serializers.Field | django_models.Field):
+                if not isinstance(field, (serializers.Field, django_models.Field)):
                     continue
                 if field.source != attr:
                     continue
@@ -89,4 +90,4 @@ class SerializerFieldFormatedMeta(type):
 
 class FormatedViewsetMixin:
     def finalize_response(self, request, response, *args, **kwargs):
-        return super().finalize_response(request, response, *args, **kwargs)
+        return super(FormatedViewsetMixin, self).finalize_response(request, response, *args, **kwargs)

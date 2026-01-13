@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -26,7 +27,7 @@ from bkmonitor.utils.range.conditions import (
 from bkmonitor.utils.range.fields import DimensionField
 
 
-class TestCondition:
+class TestCondition(object):
     def test_equal(self):
         field = DimensionField("key", "value")
         condition = EqualCondition(field)

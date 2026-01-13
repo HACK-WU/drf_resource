@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 import logging
 from collections import defaultdict
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 import six
 from django.utils.translation import gettext as _
@@ -247,7 +248,7 @@ class FetchItemStatus(Resource):
         target = serializers.DictField(required=False, default={}, label="当前目标")
 
     @classmethod
-    def get_alarm_event_num(cls, validated_request_data: dict) -> dict:
+    def get_alarm_event_num(cls, validated_request_data: Dict) -> Dict:
         """获得告警事件数量 ."""
         bk_biz_id = validated_request_data["bk_biz_id"]
         target = validated_request_data["target"]
@@ -292,7 +293,7 @@ class FetchItemStatus(Resource):
         return search_object
 
     @classmethod
-    def transform_target_to_dsl(cls, target: dict) -> Q | None:
+    def transform_target_to_dsl(cls, target: Dict) -> Optional[Q]:
         """将target转换为es dsl ."""
         if not target:
             return None
@@ -324,7 +325,7 @@ class FetchItemStatus(Resource):
         return query
 
     @staticmethod
-    def get_strategy_numbers(bk_biz_id: int, metric_ids: list) -> dict:
+    def get_strategy_numbers(bk_biz_id: int, metric_ids: List) -> Dict:
         """获得指标关联的告警策略 ."""
         # 获得业务下的Item
         strategy_ids = StrategyModel.objects.filter(bk_biz_id=bk_biz_id).values_list("id", flat=True).distinct()
@@ -461,7 +462,7 @@ class DashboardPanelToQueryConfig(Resource):
         ref_id = serializers.CharField(label="图表RefID")
         variables = serializers.DictField(label="变量", child=serializers.ListField(label="变量值"), allow_empty=True)
 
-    def perform_request(self, params: dict[str, Any]):
+    def perform_request(self, params: Dict[str, Any]):
         panel_query = get_grafana_panel_query(
             params["bk_biz_id"], params["dashboard_uid"], params["panel_id"], params["ref_id"]
         )

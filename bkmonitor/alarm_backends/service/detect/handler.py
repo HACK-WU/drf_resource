@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +25,7 @@ mem_cache = caches["locmem"]
 
 class DetectHandler(base.BaseHandler):
     def __init__(self):
-        super().__init__()
+        super(DetectHandler, self).__init__()
         self.client = key.DATA_SIGNAL_KEY.client
         self.data_signal_key = key.DATA_SIGNAL_KEY.get_key()
 
@@ -70,9 +71,9 @@ class DetectCeleryHandler(DetectHandler):
                 continue
             run_detect.apply_async(args=(strategy_id,))
 
-        logger.info(f"[detect] total published {len(strategy_ids)} strategy_ids: {strategy_ids}")
+        logger.info("[detect] total published {} strategy_ids: {}".format(len(strategy_ids), strategy_ids))
         if aiops_strategy_ids:
-            logger.info(f"[detect] published aiops_strategy_ids: {aiops_strategy_ids}")
+            logger.info("[detect] published aiops_strategy_ids: {}".format(aiops_strategy_ids))
 
     @classmethod
     def use_aiops_sdk(cls, strategy_id):

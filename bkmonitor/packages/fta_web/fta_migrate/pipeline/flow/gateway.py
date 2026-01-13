@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云PaaS平台社区版 (BlueKing PaaS Community
 Edition) available.
@@ -23,7 +24,7 @@ class ParallelGateway(Element):
 class ConditionGateway(Element):
     def __init__(self, conditions=None, *args, **kwargs):
         self.conditions = conditions or {}
-        super().__init__(*args, **kwargs)
+        super(ConditionGateway, self).__init__(*args, **kwargs)
 
     def add_condition(self, index, evaluate):
         self.conditions[index] = evaluate

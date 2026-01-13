@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -41,7 +42,7 @@ def get_environ(name, is_list=False):
     index = 0
     result = []
     while True:
-        current_name = f"{name}{index}"
+        current_name = "{}{}".format(name, index)
         current_value = os.environ.get(current_name)
         # 如果当前的这个遍历已经获取不到值了，则直接退出
         if current_value is None:
@@ -69,7 +70,7 @@ def init_influxdb_backend_info(apps, *args, **kwargs):
     host_list = get_environ("INFLUXDB_IP", is_list=True)
 
     for index, ip in enumerate(host_list):
-        host_name = f"INFLUXDB_HOST{index}"
+        host_name = "INFLUXDB_HOST{}".format(index)
 
         # 创建集群信息
         InfluxDBClusterInfo.objects.create(host_name=host_name, cluster_name="default")

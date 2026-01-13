@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import json
+from typing import Dict, Optional
 
 from monitor_web.models.scene_view import SceneViewModel
 from monitor_web.scene_view.builtin import BuiltinProcessor
@@ -43,7 +45,7 @@ class UptimeCheckBuiltinProcessor(BuiltinProcessor):
         )
 
     @classmethod
-    def get_view_config(cls, view: SceneViewModel, *args, **kwargs) -> dict:
+    def get_view_config(cls, view: SceneViewModel, *args, **kwargs) -> Dict:
         if view.id != "task" or view.type != "detail":
             return {}
 
@@ -56,6 +58,6 @@ class UptimeCheckBuiltinProcessor(BuiltinProcessor):
 
     @classmethod
     def create_or_update_view(
-        cls, bk_biz_id: int, scene_id: str, view_type: str, view_id: str, view_config: dict
-    ) -> SceneViewModel | None:
+        cls, bk_biz_id: int, scene_id: str, view_type: str, view_id: str, view_config: Dict
+    ) -> Optional[SceneViewModel]:
         return None

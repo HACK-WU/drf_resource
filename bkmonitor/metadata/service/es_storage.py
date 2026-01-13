@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 import logging
+from typing import Dict, List
 
 from metadata import models
 
@@ -19,7 +21,7 @@ class ESIndex:
     def __init__(self):
         pass
 
-    def query_es_index(self, table_id_list: list) -> dict:
+    def query_es_index(self, table_id_list: List) -> Dict:
         """查询结果表对应的es索引"""
         es_objs = models.ESStorage.objects.filter(table_id__in=table_id_list)
         data = {}
@@ -31,22 +33,22 @@ class ESIndex:
             data[obj.table_id] = item
         return data
 
-    def _query_current_index(self, es_obj: models.ESStorage) -> dict:
+    def _query_current_index(self, es_obj: models.ESStorage) -> Dict:
         try:
             return es_obj.current_index_info()
         except Exception as e:
             logger.error("query current index error, %s", e)
             return {}
 
-    def _query_all_index(self, es_obj: models.ESStorage) -> dict:
+    def _query_all_index(self, es_obj: models.ESStorage) -> Dict:
         try:
             es_client = es_obj.get_client()
-            return es_client.indices.get(f"{es_obj.index_name}*")
+            return es_client.indices.get("{}*".format(es_obj.index_name))
         except Exception as e:
             logger.error("query all index error, %s", e)
             return {}
 
-    def _refine_index_and_aliases(self, index_info: dict) -> dict:
+    def _refine_index_and_aliases(self, index_info: Dict) -> Dict:
         """获取索引和别名"""
         data = {}
         for index, detail in index_info.items():
@@ -54,7 +56,7 @@ class ESIndex:
             data[index] = aliases
         return data
 
-    def _refine_deleted_index(self, es_obj: models.ESStorage, index_info: dict) -> list:
+    def _refine_deleted_index(self, es_obj: models.ESStorage, index_info: Dict) -> List:
         """获取可以删除的index
 
         - 索引的别名已经过期

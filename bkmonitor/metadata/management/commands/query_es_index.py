@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 import json
+from typing import Dict, List
 
 from django.core.management.base import BaseCommand
 
@@ -41,7 +43,7 @@ class Command(BaseCommand):
 
         self.stdout.write(json.dumps(data))
 
-    def _query_table_id(self, bk_data_id_list: list[int]) -> dict:
+    def _query_table_id(self, bk_data_id_list: List[int]) -> Dict:
         rt_ds = {
             ds_rt["table_id"]: ds_rt["bk_data_id"]
             for ds_rt in models.DataSourceResultTable.objects.filter(bk_data_id__in=bk_data_id_list).values(

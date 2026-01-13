@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,6 +14,7 @@ import hashlib
 import json
 import logging
 from os import path
+from typing import Dict
 
 import requests
 from django.conf import settings
@@ -40,7 +42,7 @@ except Exception:
 logger = logging.getLogger("fta_action.run")
 
 
-class BaseSender:
+class BaseSender(object):
     """
     通知发送器
     """
@@ -134,9 +136,9 @@ class BaseSender:
         try:
             get_template(lang_template_path)
         except TemplateDoesNotExist:
-            logger.info(f"use default template because language template file {lang_template_path} load fail")
+            logger.info("use default template because language template file %s load fail" % lang_template_path)
             return template_path
-        logger.info(f"use special language template {lang_template_path} for notice")
+        logger.info("use special language template %s for notice" % lang_template_path)
         return lang_template_path
 
     def get_context_dict(self):
@@ -159,7 +161,7 @@ class BaseSender:
         notice_result = {}
         message: str = api_result.get("message", "")
         msg_id = api_result.get("data", {}).get("msg_id")
-        message_details: dict[str, str] = api_result.get("message_detail", {})
+        message_details: Dict[str, str] = api_result.get("message_detail", {})
         if msg_id:
             # 记录msg_id信息
             message = f"{message} msg_id: {msg_id}"
@@ -202,7 +204,9 @@ class BaseSender:
             content = cut_str_by_max_bytes(content, content_limit, encoding=encoding)
             content = f"{content[:len(content) - 3]}..."
             logger.info(
-                f"send.{notice_way}: \n actual content: {content} \norigin content length({content_length}) is bigger than ({content_limit})  "
+                "send.{}: \n actual content: {} \norigin content length({}) is bigger than ({})  ".format(
+                    notice_way, content, content_length, content_limit
+                )
             )
         return content
 
@@ -394,7 +398,7 @@ class Sender(BaseSender):
         notice_receivers = ",".join(notice_receivers)
 
         logger.info(
-            f"send.voice({notice_receivers}): \ncontent: {self.content}, \n action_plugin {action_plugin}"
+            "send.voice({}): \ncontent: {}, \n action_plugin {}".format(notice_receivers, self.content, action_plugin)
         )
 
         try:
@@ -409,7 +413,7 @@ class Sender(BaseSender):
         except Exception as e:
             result = False
             message = str(e)
-            logger.exception(f"send.voice failed, {e}")
+            logger.exception("send.voice failed, {}".format(e))
 
         notice_result[notice_receivers] = {"message": message, "result": result}
         return notice_result
@@ -550,7 +554,7 @@ class Sender(BaseSender):
             except Exception as e:
                 result = False
                 message = str(e)
-                logger.exception(f"send.wxwork_group failed, {e}")
+                logger.exception("send.wxwork_group failed, {}".format(e))
 
             if action_plugin == ActionPluginType.NOTICE and settings.WXWORK_BOT_SEND_IMAGE:
                 # 只有告警通知才发送图片，执行不做图片发送
@@ -568,7 +572,7 @@ class Sender(BaseSender):
                             )
                         )
                 except Exception as e:
-                    logger.exception(f"send.wxwork_group image failed, {e}")
+                    logger.exception("send.wxwork_group image failed, {}".format(e))
 
         for notice_receiver in notice_receivers:
             notice_result[notice_receiver] = {"message": message, "result": result}
@@ -714,7 +718,7 @@ class ChannelBkchatSender(BaseSender):
 
         msg_param = {
             "keyword1": {
-                "value": f"{_(alarm.level_name)}({alarm.id})",
+                "value": "{level_name}({alert_id})".format(level_name=_(alarm.level_name), alert_id=alarm.id),
                 "color": "#7092ed",
             },
             "keyword2": {"value": alarm.description, "color": "#173177"},

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,6 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import List, Optional
 
 from django.core.cache import cache
 
@@ -14,7 +16,7 @@ from metadata import config, models
 from metadata.utils import consul_tools
 
 
-def get_transfer_cluster(enable_cache: bool | None = True) -> list[str]:
+def get_transfer_cluster(enable_cache: Optional[bool] = True) -> List[str]:
     """通过 consul 路径获取 transfer 集群
 
     TODO: 变动不频繁，是否增加缓存
@@ -22,7 +24,7 @@ def get_transfer_cluster(enable_cache: bool | None = True) -> list[str]:
     cache_key = "cached_transfer_cluster"
     if enable_cache and cache_key in cache:
         return cache.get(cache_key)
-    prefix_path = f"{config.CONSUL_PATH}/v1/"
+    prefix_path = "%s/v1/" % config.CONSUL_PATH
     # 根据前缀，返回路径
     hash_consul = consul_tools.HashConsul()
     result_data = hash_consul.list(prefix_path)

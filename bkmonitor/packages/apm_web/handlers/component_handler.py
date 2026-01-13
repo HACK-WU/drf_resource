@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -116,7 +117,7 @@ class ComponentHandler:
         )
 
         if not rules:
-            raise ValueError("拓扑发现规则为空")
+            raise ValueError(f"拓扑发现规则为空")
 
         rule = rules[0]
         res = []
@@ -183,7 +184,7 @@ class ComponentHandler:
         )
 
         if not rules:
-            raise ValueError("拓扑发现规则为空")
+            raise ValueError(f"拓扑发现规则为空")
 
         rule = rules[0]
         res = {}
@@ -358,7 +359,7 @@ class ComponentHandler:
         )
 
         if not rules:
-            raise ValueError("拓扑发现规则为空")
+            raise ValueError(f"拓扑发现规则为空")
 
         rule = rules[0]
 

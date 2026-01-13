@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 from copy import deepcopy
 from functools import lru_cache
+from typing import Dict, Optional
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -21,7 +23,7 @@ from monitor_web.models.custom_report import CustomEventGroup
 
 
 @lru_cache(maxsize=1000)
-def get_org_id(bk_biz_id: int) -> int | None:
+def get_org_id(bk_biz_id: int) -> Optional[int]:
     """
     获取业务对应的Grafana组织ID
     :param bk_biz_id: 业务
@@ -139,7 +141,7 @@ def patch_home_panels():
     return panels
 
 
-def get_cookies_filter() -> dict | None:
+def get_cookies_filter() -> Optional[Dict]:
     """
     解析Cookies过滤字段
     HTTP_KEEPCOOKIES可能为空
@@ -218,7 +220,7 @@ def convert_to_microseconds(time_str: str) -> int:
     raise ValueError("Unsupported time format")
 
 
-def is_global_k8s_event(params: dict, bk_biz_id: int) -> bool:
+def is_global_k8s_event(params: Dict, bk_biz_id: int) -> bool:
     """
     判断是否是全局k8s事件
     """

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,9 +21,9 @@ def update_user_access_token(sender, request, user, *args, **kwargs):
 
     try:
         access_token = oauth_client.get_access_token(request)
-        LOG.info(f'user logged in get access_token success: {access_token}')
+        LOG.info('user logged in get access_token success: %s' % access_token)
     except TokenAPIError as error:
-        LOG.error(f'user logged in get access_token failed: {error}')  # 改用error级别记录，消除MissingSchema异常堆栈
+        LOG.error('user logged in get access_token failed: %s' % error)  # 改用error级别记录，消除MissingSchema异常堆栈
 
 
 def patch_bkoauth_update_user_access_token(*args, **kwargs):

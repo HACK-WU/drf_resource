@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,7 +21,7 @@ class NextStatusChecker(BaseChecker):
         if alert.strategy_id:
             # 有策略ID的，走监控自身状态管理
             return False
-        return super().is_enabled(alert)
+        return super(NextStatusChecker, self).is_enabled(alert)
 
     def check(self, alert: Alert):
         logger.info(

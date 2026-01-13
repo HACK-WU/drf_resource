@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -95,7 +96,7 @@ class ResultTableCacheManager(CacheManager):
                     )
                 pipeline.execute()
             except Exception as e:
-                cls.logger.error(f"update bkdata result table failed for biz({biz.bk_biz_id}), {e}")
+                cls.logger.error("update bkdata result table failed for biz({}), {}".format(biz.bk_biz_id, e))
 
     @classmethod
     def refresh_bklog(cls):
@@ -144,7 +145,7 @@ class ResultTableCacheManager(CacheManager):
                 pipeline.execute()
 
             except Exception as e:
-                cls.logger.error(f"update bklog result table failed for biz({biz.bk_biz_id}), {e}")
+                cls.logger.error("update bklog result table failed for biz({}), {}".format(biz.bk_biz_id, e))
 
     @classmethod
     def get_result_table_by_id(cls, source_type, table_id):

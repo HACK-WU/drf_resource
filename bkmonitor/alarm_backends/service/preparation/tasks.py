@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -34,9 +35,9 @@ def refresh_aiops_sdk_depend_data(strategy_id, update_time: int = None, force: b
     try:
         TsDependPreparationProcess().process(strategy_id, update_time, force)
     except LockError:
-        logger.info(f"Failed to acquire lock. on strategy({strategy_id}) with update time: {update_time}")
+        logger.info("Failed to acquire lock. on strategy({}) with update time: {}".format(strategy_id, update_time))
     except Exception as e:
-        logger.exception(f"Process strategy({strategy_id}) exception, " f"{e}")
+        logger.exception("Process strategy({strategy_id}) exception, " "{msg}".format(strategy_id=strategy_id, msg=e))
 
 
 @app.task(ignore_result=True, queue="celery_cron")

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 from enum import Enum
-from typing import Any
+from typing import Any, Dict, List, Optional, Set
 
 from django.middleware.csrf import get_token
 from django.utils import timezone
@@ -102,8 +103,8 @@ class EnhancedGetContextResource(Resource):
         )
 
     @classmethod
-    def get_basic_context(cls, request, space_uid: str | None, bk_biz_id: int | None) -> dict[str, Any]:
-        space_list: list[dict[str, Any]] = []
+    def get_basic_context(cls, request, space_uid: Optional[str], bk_biz_id: Optional[int]) -> Dict[str, Any]:
+        space_list: List[Dict[str, Any]] = []
         try:
             space_list = resource.commons.list_spaces()
         except Exception:  # noqa
@@ -129,8 +130,8 @@ class EnhancedGetContextResource(Resource):
         return context
 
     @classmethod
-    def get_extra_context(cls, request, space_uid: str | None, bk_biz_id: int | None) -> dict[str, Any]:
-        space: Space | None = None
+    def get_extra_context(cls, request, space_uid: Optional[str], bk_biz_id: Optional[int]) -> Dict[str, Any]:
+        space: Optional[Space] = None
         if space_uid:
             try:
                 space = SpaceApi.get_space_detail(space_uid)
@@ -149,11 +150,11 @@ class EnhancedGetContextResource(Resource):
 
         return get_extra_context(request, space)
 
-    def perform_request(self, validated_request_data: dict[str, Any]) -> dict[str, Any]:
+    def perform_request(self, validated_request_data: Dict[str, Any]) -> Dict[str, Any]:
         request = get_request()
         context_type: str = validated_request_data["context_type"]
-        bk_biz_id: int | None = validated_request_data["bk_biz_id"]
-        space_uid: str | None = validated_request_data["space_uid"]
+        bk_biz_id: Optional[int] = validated_request_data["bk_biz_id"]
+        space_uid: Optional[str] = validated_request_data["space_uid"]
 
         if context_type == ContextType.BASIC.value:
             context = self.get_basic_context(request, space_uid, bk_biz_id)
@@ -163,7 +164,7 @@ class EnhancedGetContextResource(Resource):
             context = self.get_basic_context(request, space_uid, bk_biz_id)
             context.update(self.get_extra_context(request, space_uid, bk_biz_id))
 
-        external_fields: list[str] = [
+        external_fields: List[str] = [
             "PLATFORM",
             "SPACE_LIST",
             "SITE_URL",
@@ -191,7 +192,7 @@ class EnhancedGetContextResource(Resource):
             context["UIN"] = request.external_user
 
             if context_type not in [ContextType.EXTRA.value]:
-                biz_id_list: set[int] = set(
+                biz_id_list: Set[int] = set(
                     ExternalPermission.objects.filter(
                         authorized_user=request.external_user, expire_time__gt=timezone.now()
                     )

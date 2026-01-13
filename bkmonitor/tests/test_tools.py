@@ -7,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import List
 
 import pytest
 
@@ -59,7 +60,7 @@ class TestMetricUDPSlice:
         print([p.to_tuple() for p in parts])
         assert [p.to_tuple() for p in parts] == expected_tuples
 
-        sliced: list[memoryview] = list(slice_metrics_udp_data(test_bytes, parts))
+        sliced: List[memoryview] = list(slice_metrics_udp_data(test_bytes, parts))
         for index, x in enumerate(sliced):
             assert bytes(x).startswith(b"# HELP")
             assert bytes(x).endswith(b"\n")
@@ -84,7 +85,7 @@ class TestMetricUDPSlice:
 
         # metadata length: 116, one sample 60
         parts = find_udp_data_sliced_indexes(simple_example, 116 + 60 * 2)
-        sliced: list[memoryview] = list(slice_metrics_udp_data(simple_example, parts))
+        sliced: List[memoryview] = list(slice_metrics_udp_data(simple_example, parts))
 
         result_part1 = (
             b"# HELP bkmonitor_access_data_process_count_total help_text\n"

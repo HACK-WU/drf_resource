@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -19,7 +20,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
 from django.conf import settings
 from django.core.cache import cache
@@ -409,7 +410,7 @@ class AlertPermissionResource(Resource):
         return False
 
     @classmethod
-    def filter_alert_ids(cls, alert_ids: list[int]):
+    def filter_alert_ids(cls, alert_ids: List[int]):
         """
         过滤出有权限的事件ID
         """
@@ -471,7 +472,7 @@ class AlertPermissionResource(Resource):
 
 class QuickActionTokenResource(AlertPermissionResource):
     def validate_request_data(self, request_data):
-        validated_data = super().validate_request_data(request_data)
+        validated_data = super(QuickActionTokenResource, self).validate_request_data(request_data)
         validated_data["alert_ids"] = self.validate_token(str(validated_data["action_id"]), validated_data["token"])
         return validated_data
 
@@ -528,7 +529,7 @@ class ListSearchHistoryResource(Resource):
             create_user=username, search_type=validated_request_data["search_type"]
         ).order_by("-create_time")
 
-        result: list[SearchHistory] = []
+        result: List[SearchHistory] = []
         params_set = set()
         for history in histories.iterator():
             query_string = history.params.get("query_string")
@@ -891,7 +892,7 @@ class AlertRelatedInfoResource(Resource):
             return attrs
 
     @staticmethod
-    def get_cmdb_related_info(alerts: list[AlertDocument]) -> dict[str, dict]:
+    def get_cmdb_related_info(alerts: List[AlertDocument]) -> Dict[str, Dict]:
         """
         查询事件拓扑信息
 
@@ -950,9 +951,9 @@ class AlertRelatedInfoResource(Resource):
             service_instance_ids = instances["service_instance_ids"]
             host_ids = instances["host_ids"]
             # 查询主机和服务实例信息
-            hosts: list[Host] = api.cmdb.get_host_by_ip(bk_biz_id=bk_biz_id, ips=list(ips.values()))
+            hosts: List[Host] = api.cmdb.get_host_by_ip(bk_biz_id=bk_biz_id, ips=list(ips.values()))
             hosts.extend(api.cmdb.get_host_by_id(bk_biz_id=bk_biz_id, bk_host_ids=list(host_ids.values())))
-            service_instances: list[ServiceInstance] = api.cmdb.get_service_instance_by_id(
+            service_instances: List[ServiceInstance] = api.cmdb.get_service_instance_by_id(
                 bk_biz_id=bk_biz_id, service_instance_ids=list(service_instance_ids.values())
             )
 
@@ -1020,7 +1021,7 @@ class AlertRelatedInfoResource(Resource):
         return related_infos
 
     @staticmethod
-    def get_log_related_info(alerts: list[AlertDocument]) -> dict[str, dict]:
+    def get_log_related_info(alerts: List[AlertDocument]) -> Dict[str, Dict]:
         """
         日志平台关联信息
 
@@ -1055,7 +1056,7 @@ class AlertRelatedInfoResource(Resource):
         return related_infos
 
     @staticmethod
-    def get_custom_event_related_info(alerts: list[AlertDocument]) -> dict[str, dict]:
+    def get_custom_event_related_info(alerts: List[AlertDocument]) -> Dict[str, Dict]:
         """
         自定义事件关联信息
 
@@ -1093,7 +1094,7 @@ class AlertRelatedInfoResource(Resource):
         return related_infos
 
     @staticmethod
-    def get_bkdata_related_info(alerts: list[AlertDocument]) -> dict[str, dict]:
+    def get_bkdata_related_info(alerts: List[AlertDocument]) -> Dict[str, Dict]:
         """
         数据平台关联信息
         {
@@ -1254,7 +1255,7 @@ class AlertGraphQueryResource(ApiAuthResource):
             index_set_id = serializers.IntegerField(required=False, label="索引集ID")
             functions = serializers.ListField(label="查询函数", default=[])
 
-            def validate(self, attrs: dict) -> dict:
+            def validate(self, attrs: Dict) -> Dict:
                 if attrs["data_source_label"] == DataSourceLabel.BK_LOG_SEARCH and not attrs.get("index_set_id"):
                     raise ValidationError("index_set_id can not be empty.")
                 return attrs
@@ -1268,7 +1269,7 @@ class AlertGraphQueryResource(ApiAuthResource):
         start_time = serializers.IntegerField(required=False, label="开始时间")
         end_time = serializers.IntegerField(required=False, label="结束时间")
 
-    def perform_request(self, params: dict):
+    def perform_request(self, params: Dict):
         alert = AlertDocument.get(params["id"])
         if not params.get("query_configs"):
             graph_query_config = AIOPSManager.get_graph_panel(alert, compare_function={})
@@ -1658,7 +1659,7 @@ class SubActionDetailResource(ApiAuthResource):
                 continue
             for action_id in action["outputs"].get("related_actions", []):
                 notice_way, notice_receiver = self.get_action_notice_info(action)
-                action_relation[f"{str(action_id)}_{notice_way}_{notice_receiver}"] = action
+                action_relation["{}_{}_{}".format(str(action_id), notice_way, notice_receiver)] = action
 
         for action in sub_actions:
             notice_way, notice_receiver = self.get_action_notice_info(action)
@@ -1995,7 +1996,7 @@ class StrategySnapshotResource(Resource):
     获取策略快照
     """
 
-    class ConfigChangedStatus:
+    class ConfigChangedStatus(object):
         """
         策略配置变更状态
         """
@@ -2068,7 +2069,7 @@ class SearchAlertByEventResource(Resource):
         if alert.strategy_id is None:
             # 如果策略ID不存在，通过target， create_time, 告警名称事件查询
             # 告警ID不存在的，都是通过fta接入
-            metric_id = [f"bk_fta.event.{alert.alert_name}", f"bk_fta.alert.{alert.alert_name}"]
+            metric_id = ["bk_fta.event.{}".format(alert.alert_name), "bk_fta.alert.{}".format(alert.alert_name)]
             new_event = None
             try:
                 new_event = EventDocument.get_by_metric_id_and_target(metric_id, event.target, event.time)
@@ -2078,7 +2079,7 @@ class SearchAlertByEventResource(Resource):
                 try:
                     alert = AlertDocument.get_by_dedupe_md5(new_event.dedupe_md5, new_event.time)
                 except AlertNotFoundError:
-                    logger.info(f"no handle alert for event({event.event_id})")
+                    logger.info("no handle alert for event(%s)" % event.event_id)
 
         all_actions = ActionInstanceDocument.mget_by_alert(alert_ids=[alert.id])
 
@@ -2126,7 +2127,7 @@ class SearchAlertByEventResource(Resource):
             "status": alert.status,
             "plugin_id": getattr(alert.event, "plugin_id", None),
             "is_builtin_assign": is_builtin_assign,
-            "target_key": f"{event.target_type.lower()}|{event.target}",
+            "target_key": "{}|{}".format(event.target_type.lower(), event.target),
             "assignee": [assignee for assignee in alert.assignee],
             "event": event_info,
             "is_shielded": alert.is_shielded is True,
@@ -2245,7 +2246,7 @@ class AIOpsBaseResource(Resource, metaclass=ABCMeta):
     class RequestSerializer(serializers.Serializer):
         alert_id = AlertIDField(required=True, label="告警ID")
 
-    def get_cache_results(self, alert_id: str) -> dict:
+    def get_cache_results(self, alert_id: str) -> Dict:
         """获取缓存的AIOps类数据的缓存.
 
         :param alert_id: 告警ID
@@ -2253,7 +2254,7 @@ class AIOpsBaseResource(Resource, metaclass=ABCMeta):
         cache_key = f"{alert_id}_{self.CACHE_SCOPE}_cache"
         return cache.get(cache_key)
 
-    def set_cache_results(self, alert_id: str, cache_result: dict, timeout: int = 86400) -> dict:
+    def set_cache_results(self, alert_id: str, cache_result: Dict, timeout: int = 86400) -> Dict:
         """把AIOps类数据缓存到cache中.
 
         :param alert_id: 告警ID
@@ -2261,7 +2262,7 @@ class AIOpsBaseResource(Resource, metaclass=ABCMeta):
         cache_key = f"{alert_id}_{self.CACHE_SCOPE}_cache"
         return cache.set(cache_key, cache_result, timeout=timeout)
 
-    def cache_valid(self, alert: AlertDocument, cache_result: dict) -> bool:
+    def cache_valid(self, alert: AlertDocument, cache_result: Dict) -> bool:
         """判断当前cache是否还在有效期内.
 
         :param alert: 告警详情
@@ -2295,7 +2296,7 @@ class DimensionDrillDownResource(AIOpsBaseResource):
 
     CACHE_SCOPE = 'drill_down'
 
-    def cache_valid(self, alert: AlertDocument, cache_result: dict) -> bool:
+    def cache_valid(self, alert: AlertDocument, cache_result: Dict) -> bool:
         """判断当前cache是否还在有效期内.
 
         :param cache_result: 缓存的内容
@@ -2313,11 +2314,11 @@ class MetricRecommendationResource(AIOpsBaseResource):
 
     CACHE_SCOPE = 'metric_recommend'
 
-    def fetch_aiops_result(self, alert: AlertDocument) -> dict:
+    def fetch_aiops_result(self, alert: AlertDocument) -> Dict:
         return RecommendMetricManager(alert).fetch_aiops_result()
 
     def perform_request(self, validated_request_data):
-        result = super().perform_request(validated_request_data)
+        result = super(MetricRecommendationResource, self).perform_request(validated_request_data)
 
         # 参数列表,每个列表同位置的元素一一对应，共同组成一对查询参数
         alert_metric_ids = []
@@ -2407,7 +2408,7 @@ class MetricRecommendationFeedbackResource(Resource):
         return good_count, bad_count
 
     @staticmethod
-    def get_feedback_count_batch(alert_metric_ids: list, rec_metric_hashs: list, bk_biz_ids: list) -> dict:
+    def get_feedback_count_batch(alert_metric_ids: List, rec_metric_hashs: List, bk_biz_ids: List) -> Dict:
         """批量获取业务下，告警指标,被推荐指标关系下的点赞和点踩数
         每个参数列表同位置的元素一一对应，共同组成一对查询参数。
         非批量查询时，model.objects.filter(alert_metric_id=alert_metric_ids[0],
@@ -2474,8 +2475,8 @@ class MetricRecommendationFeedbackResource(Resource):
 
     @classmethod
     def get_feedback_batch(
-        cls, alert_metric_ids: list, rec_metric_hashs: list, bk_biz_ids: list, usernames: list
-    ) -> dict:
+        cls, alert_metric_ids: List, rec_metric_hashs: List, bk_biz_ids: List, usernames: List
+    ) -> Dict:
         """批量获取用户的反馈
         每个参数列表同位置的元素一一对应，共同组成一对查询参数。
         非批量查询时，model.objects.filter(alert_metric_id=alert_metric_ids[0],
@@ -2631,7 +2632,7 @@ class MultiAnomalyDetectGraphResource(AIOpsBaseResource):
 
         return graph_panels
 
-    def generate_metric_graph_panel(self, base_graph_panel: dict, anomaly_metric: list) -> dict:
+    def generate_metric_graph_panel(self, base_graph_panel: Dict, anomaly_metric: List) -> Dict:
         """根据图表基础配置和指标ID生成指标图表配置
 
         :param base_graph_panel: 基础图表配置
@@ -2780,7 +2781,7 @@ class GetAlertDataRetrievalResource(Resource):
         alert_id = AlertIDField(required=True, label="告警ID")
 
     @classmethod
-    def metric_query_config_to_query(cls, query_config: dict, filter_dict: dict) -> dict:
+    def metric_query_config_to_query(cls, query_config: Dict, filter_dict: Dict) -> Dict:
         """
         将query_config转换为图标查询配置
         """
@@ -2822,14 +2823,14 @@ class GetAlertDataRetrievalResource(Resource):
         return query
 
     @classmethod
-    def generate_event_query_params(cls, item: dict, filter_dict: dict) -> dict:
+    def generate_event_query_params(cls, item: Dict, filter_dict: Dict) -> Dict:
         """
         TODO: 事件检索跳转参数
         """
         return {}
 
     @classmethod
-    def generate_metric_query_params(cls, item: dict, filter_dict: dict) -> list[dict]:
+    def generate_metric_query_params(cls, item: Dict, filter_dict: Dict) -> List[Dict]:
         """
         指标检索跳转参数
         """
@@ -2879,7 +2880,7 @@ class GetAlertDataRetrievalResource(Resource):
 
         return [{"data": {"mode": "ui", "query_configs": queries, "expressionList": expressions}}]
 
-    def perform_request(self, params: dict[str, Any]):
+    def perform_request(self, params: Dict[str, Any]):
         alert_id = params["alert_id"]
         alert = AlertDocument.get(alert_id)
         if not alert.strategy:
@@ -2890,7 +2891,7 @@ class GetAlertDataRetrievalResource(Resource):
         if not query_configs:
             return []
 
-        data_source: tuple[str, str] = (query_configs[0]["data_source_label"], query_configs[0]["data_type_label"])
+        data_source: Tuple[str, str] = (query_configs[0]["data_source_label"], query_configs[0]["data_type_label"])
 
         # 根据告警维度生成过滤条件
         filter_dict = {}

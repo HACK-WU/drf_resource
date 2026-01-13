@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -30,12 +31,12 @@ class UseSaaSAuthInfoMixin:
     """
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(UseSaaSAuthInfoMixin, self).full_request_data(validated_request_data)
         validated_request_data["bk_app_code"] = settings.SAAS_APP_CODE
         return validated_request_data
 
     def get_headers(self):
-        headers = super().get_headers()
+        headers = super(UseSaaSAuthInfoMixin, self).get_headers()
         auth_info = headers.get("x-bkapi-authorization")
         if not auth_info:
             return headers
@@ -49,7 +50,7 @@ class UseSaaSAuthInfoMixin:
 
 class BkDataAPIGWResource(six.with_metaclass(abc.ABCMeta, APIResource)):
     base_url_statement = None
-    base_url = settings.BKDATA_API_BASE_URL or f"{settings.BK_COMPONENT_API_URL}/api/bk-base/prod/"
+    base_url = settings.BKDATA_API_BASE_URL or "%s/api/bk-base/prod/" % settings.BK_COMPONENT_API_URL
 
     # 模块名
     module_name = "bkdata"
@@ -61,7 +62,7 @@ class BkDataAPIGWResource(six.with_metaclass(abc.ABCMeta, APIResource)):
         return self.__doc__
 
     def get_request_url(self, validated_request_data):
-        return super().get_request_url(validated_request_data).format(**validated_request_data)
+        return super(BkDataAPIGWResource, self).get_request_url(validated_request_data).format(**validated_request_data)
 
     def full_request_data(self, validated_request_data):
         validated_request_data = super().full_request_data(validated_request_data)
@@ -135,7 +136,7 @@ class GetResultTableResource(BkDataAPIGWResource):
 
     def get_request_url(self, validated_request_data):
         return (
-            super().get_request_url(validated_request_data).format(**validated_request_data)
+            super(GetResultTableResource, self).get_request_url(validated_request_data).format(**validated_request_data)
         )
 
 
@@ -153,7 +154,7 @@ class QueryDataResource(UseSaaSAuthInfoMixin, BkDataQueryAPIGWResource):
         _user_request = serializers.BooleanField(required=False, label="是否指定使用 user 鉴权请求接口", default=False)
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(QueryDataResource, self).full_request_data(validated_request_data)
         if validated_request_data.get("_user_request", False):
             validated_request_data["bkdata_authentication_method"] = "user"
             self.bk_username = settings.COMMON_USERNAME
@@ -191,7 +192,7 @@ class DataAccessAPIResource(six.with_metaclass(abc.ABCMeta, BkDataAPIGWResource)
     """
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(DataAccessAPIResource, self).full_request_data(validated_request_data)
         try:
             validated_request_data["_origin_user"] = get_request().user.username
         except Exception:
@@ -428,7 +429,7 @@ class ApiServingExecute(UseSaaSAuthInfoMixin, DataAccessAPIResource):  # noqa
 
     def full_request_data(self, validated_request_data):
         # 组装额外参数
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(ApiServingExecute, self).full_request_data(validated_request_data)
         validated_request_data["bkdata_authentication_method"] = "token"
         validated_request_data["bkdata_data_token"] = settings.BKDATA_DATA_TOKEN
         return validated_request_data
@@ -1265,7 +1266,7 @@ class UpdateIncidentDetail(DataAccessAPIResource):
         feedback = serializers.DictField(required=False, label="故障反馈内容")
 
     def perform_request(self, params):
-        return super().perform_request(params)
+        return super(UpdateIncidentDetail, self).perform_request(params)
 
 
 class GetIncidentSnapshot(DataAccessAPIResource):
@@ -1317,7 +1318,7 @@ class GetStorageMetricsDataCount(DataAccessAPIResource):
             return attrs
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(GetStorageMetricsDataCount, self).full_request_data(validated_request_data)
         validated_request_data["bk_username"] = settings.COMMON_USERNAME
         self.bk_username = settings.COMMON_USERNAME
         return validated_request_data
@@ -1335,7 +1336,7 @@ class GetDataBusSamplingData(DataAccessAPIResource):
         data_id = serializers.IntegerField(required=True, label="数据源ID")
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(GetDataBusSamplingData, self).full_request_data(validated_request_data)
         validated_request_data["bk_username"] = settings.COMMON_USERNAME
         self.bk_username = settings.COMMON_USERNAME
         return validated_request_data
@@ -1354,7 +1355,7 @@ class GetRawDataStoragesInfo(DataAccessAPIResource):
         with_sql = serializers.BooleanField(required=False, label="默认参数", default=True)
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(GetRawDataStoragesInfo, self).full_request_data(validated_request_data)
         validated_request_data["bk_username"] = settings.COMMON_USERNAME
         self.bk_username = settings.COMMON_USERNAME
         return validated_request_data

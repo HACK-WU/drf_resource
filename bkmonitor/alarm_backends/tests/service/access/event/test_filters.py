@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,7 +30,7 @@ from alarm_backends.tests.service.access.data.config import (
 from api.cmdb.define import Host
 
 
-class TestRangeFilter:
+class TestRangeFilter(object):
     def test_ip_filter(self, mocker):
         get_strategy_by_id = mocker.patch.object(StrategyCacheManager, "get_strategy_by_id")
         get_strategy_by_id.return_value = copy.deepcopy(EVENT_STRATEGY_CONFIG)
@@ -138,7 +139,7 @@ class TestRangeFilter:
         assert f.filter(record) is False
 
 
-class TestConditionFilter:
+class TestConditionFilter(object):
     def test_filter(self, mocker):
         get_strategy_by_id = mocker.patch.object(StrategyCacheManager, "get_strategy_by_id")
         get_strategy_by_id.return_value = copy.deepcopy(EVENT_STRATEGY_CONFIG)

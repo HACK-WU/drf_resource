@@ -4,8 +4,7 @@ import re
 import socket
 import time
 from multiprocessing.pool import IMapIterator
-from typing import Any
-from collections.abc import Generator
+from typing import Any, Dict, Generator, List, Optional, Union
 
 from django.db.models import Q
 from django.utils.translation import gettext as _
@@ -35,12 +34,12 @@ class SearchItem(metaclass=abc.ABCMeta):
     _bk_biz_names_cache = {}
 
     @classmethod
-    def _get_biz_name(cls, bk_biz_id: int) -> str | None:
+    def _get_biz_name(cls, bk_biz_id: int) -> Optional[str]:
         """
         Get the space info by bk_biz_id.
         """
         if bk_biz_id not in cls._bk_biz_names_cache:
-            space_info: Space | None = SpaceApi.get_space_detail(bk_biz_id=bk_biz_id)
+            space_info: Optional[Space] = SpaceApi.get_space_detail(bk_biz_id=bk_biz_id)
             if not space_info:
                 cls._bk_biz_names_cache[bk_biz_id] = str(bk_biz_id)
             else:
@@ -48,7 +47,7 @@ class SearchItem(metaclass=abc.ABCMeta):
         return cls._bk_biz_names_cache[bk_biz_id]
 
     @classmethod
-    def _get_allowed_bk_biz_ids(cls, username: str, action: str | ActionMeta) -> list[int]:
+    def _get_allowed_bk_biz_ids(cls, username: str, action: Union[str, ActionMeta]) -> List[int]:
         """
         Get the allowed bk_biz_ids by username.
         """
@@ -353,13 +352,13 @@ class HostSearchItem(SearchItem):
             try:
                 socket.inet_aton(query)
                 return True
-            except OSError:
+            except socket.error:
                 pass
         elif ":" in query:
             try:
                 socket.inet_pton(socket.AF_INET6, query)
                 return True
-            except OSError:
+            except socket.error:
                 pass
         return False
 
@@ -369,7 +368,7 @@ class HostSearchItem(SearchItem):
         Search the host by host name
         """
         result = api.cmdb.get_host_without_biz_v2(ips=[query], limit=limit)
-        hosts: list[dict] = result["hosts"]
+        hosts: List[Dict] = result["hosts"]
 
         items = []
         for host in hosts:
@@ -466,7 +465,7 @@ class Searcher:
     def __init__(self, username: str):
         self.username = username
 
-    def search(self, query: str, timeout: int = 30) -> Generator[dict[str, Any], None, None]:
+    def search(self, query: str, timeout: int = 30) -> Generator[Dict[str, Any], None, None]:
         """
         Search the query in the search items.
         """

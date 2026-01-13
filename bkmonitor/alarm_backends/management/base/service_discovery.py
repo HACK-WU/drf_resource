@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -14,6 +15,7 @@ import time
 
 from consul import NotFound
 from django.utils.functional import cached_property
+from six.moves import map
 
 from alarm_backends.management.base.protocol import AbstractServiceDiscoveryMixin
 from bkmonitor.utils import consul
@@ -29,7 +31,7 @@ class ConsulServiceDiscoveryMixin(AbstractServiceDiscoveryMixin):
     _SESSION_TTL_ = 120
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(ConsulServiceDiscoveryMixin, self).__init__(*args, **kwargs)
         self.last_renew_session_time = 0
 
     @cached_property
@@ -87,7 +89,7 @@ class ConsulServiceDiscoveryMixin(AbstractServiceDiscoveryMixin):
             info = b""
 
         session_id = self._renew_or_create_session_id()
-        assert session_id, f"session_id should not be {type(session_id)!r}"
+        assert session_id, "session_id should not be {!r}".format(type(session_id))
 
         self._client.kv.put(self._registration_path, info, acquire=session_id)
 
@@ -106,4 +108,4 @@ class ConsulServiceDiscoveryMixin(AbstractServiceDiscoveryMixin):
             host_addr = self.host_addr
 
         registry = dict(self._registry)
-        return (list(registry.keys()), [f"{host_addr}/{pid}" for pid in registry.get(host_addr, [])])
+        return (list(registry.keys()), ["{}/{}".format(host_addr, pid) for pid in registry.get(host_addr, [])])

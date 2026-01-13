@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -38,5 +39,7 @@ def get_rabbitmq_settings(app_code: str, backend=False):
         user = os.getenv("RABBITMQ_USER", "guest")
         password = os.getenv("RABBITMQ_PASSWORD", "guest")
 
-    broker_url = f"amqp://{user}:{password}@{host}:{port}/{vhost}"
+    broker_url = "amqp://{user}:{password}@{host}:{port}/{vhost}".format(
+        user=user, password=password, host=host, port=port, vhost=vhost
+    )
     return host, port, vhost, user, password, broker_url

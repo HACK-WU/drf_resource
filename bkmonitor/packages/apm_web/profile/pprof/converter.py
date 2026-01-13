@@ -10,6 +10,7 @@ specific language governing permissions and limitations under the License.
 import datetime
 import gzip
 from dataclasses import dataclass
+from typing import Optional
 
 from apm_web.profile.models import Label, Profile
 from apm_web.profile.profileconverter import ProfileConverter
@@ -19,7 +20,7 @@ from apm_web.profile.profileconverter import ProfileConverter
 class PprofProfileConverter(ProfileConverter):
     """Convert binary to Profile object"""
 
-    def convert(self, raw: bytes) -> Profile | None:
+    def convert(self, raw: bytes) -> Optional[Profile]:
         """Convert binary to Profile object"""
         self.init_profile()
         try:

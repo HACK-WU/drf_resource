@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -54,7 +55,7 @@ class IndexList(IndexList):
         index_lists = utils.chunk_index_list(self.index_names)
 
         for index in index_lists:
-            self.loggit.debug(f"Getting indices: {index}")
+            self.loggit.debug("Getting indices: {}".format(index))
             self.all_indices.extend(
                 list(
                     self.client.indices.get_settings(

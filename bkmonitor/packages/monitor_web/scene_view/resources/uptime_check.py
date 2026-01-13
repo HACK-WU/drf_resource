@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 from collections import defaultdict
+from typing import Dict, List
 
 from django.db.models import Q
 from django.utils.translation import gettext as _
@@ -99,7 +101,7 @@ class GetUptimeCheckTaskDataResource(ApiAuthResource):
         end_time = serializers.IntegerField(required=False, label="结束时间")
 
     @classmethod
-    def get_status_map(cls, params: dict, series: list[dict]):
+    def get_status_map(cls, params: Dict, series: List[Dict]):
         max_value = None
         min_value = None
         for row in series:
@@ -156,7 +158,7 @@ class GetUptimeCheckTaskDataResource(ApiAuthResource):
         }
 
     @classmethod
-    def get_percentage_bar(cls, params: dict, series: list[dict]):
+    def get_percentage_bar(cls, params: Dict, series: List[Dict]):
         if "top" in params:
             reverse = True
             limit = params["top"]
@@ -175,7 +177,7 @@ class GetUptimeCheckTaskDataResource(ApiAuthResource):
         return {"more_data_url": "", "data": series}
 
     @classmethod
-    def get_time_series_chart(cls, params: dict, host_keys, host_to_node):
+    def get_time_series_chart(cls, params: Dict, host_keys, host_to_node):
         task = UptimeCheckTask.objects.get(bk_biz_id=params["bk_biz_id"], id=params["task_id"])
         query_params = {
             "query_configs": [

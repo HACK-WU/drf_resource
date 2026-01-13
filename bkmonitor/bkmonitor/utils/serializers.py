@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +25,7 @@ PATTERN = re.compile(r"^[_a-zA-Z][a-zA-Z0-9_]*$")
 class StrictCharField(serializers.CharField):
     def __init__(self, **kwargs):
         kwargs.update({"trim_whitespace": False})
-        super().__init__(**kwargs)
+        super(StrictCharField, self).__init__(**kwargs)
 
 
 class MetricJsonSerializer(serializers.Serializer):
@@ -137,11 +138,11 @@ class StringSplitListField(serializers.ListField):
 
     def __init__(self, sep, *args, **kwargs):
         self.sep = sep
-        super().__init__(*args, **kwargs)
+        super(StringSplitListField, self).__init__(*args, **kwargs)
 
     def to_internal_value(self, data):
         result = data.split(self.sep) if isinstance(data, str) else data
-        return super().to_internal_value([item for item in result if item])
+        return super(StringSplitListField, self).to_internal_value([item for item in result if item])
 
 
 class BkBizIdSerializer(serializers.Serializer):

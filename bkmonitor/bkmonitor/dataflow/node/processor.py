@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -10,6 +11,7 @@ specific language governing permissions and limitations under the License.
 
 import abc
 from dataclasses import asdict, dataclass, field
+from typing import List
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -53,7 +55,7 @@ class RealTimeNode(ProcessorNode, abc.ABC):
         :param sql: 可选参数，sql语句
         :param name_prefix: 可选参数，节点名称前缀
         """
-        super().__init__(*args, **kwargs)
+        super(RealTimeNode, self).__init__(*args, **kwargs)
 
         self.source_rt_id = source_rt_id
         self.bk_biz_id, _, self.process_rt_id = source_rt_id.partition("_")
@@ -103,12 +105,12 @@ class RealTimeNode(ProcessorNode, abc.ABC):
         """
         输出表名（带上业务ID前缀）
         """
-        return f"{self.bk_biz_id}_{self.table_name}"
+        return "{}_{}".format(self.bk_biz_id, self.table_name)
 
     @property
     def name(self):
         prefix = self.name_prefix or self.get_node_type()
-        return f"{prefix}({self.source_rt_id})"[:50]  # 数据平台的计算节点名称限制50个字符
+        return "{}({})".format(prefix, self.source_rt_id)[:50]  # 数据平台的计算节点名称限制50个字符
 
     @property
     def config(self):
@@ -134,7 +136,7 @@ class RealTimeNode(ProcessorNode, abc.ABC):
     def gen_statistic_sql(self, rt_id, agg_method, metric_fields, dimension_fields):
         select = ",".join(metric_fields + dimension_fields)
         group_by = ",".join(dimension_fields)
-        return f"SELECT {select} FROM {rt_id} GROUP BY {group_by}"
+        return "SELECT {} FROM {} GROUP BY {}".format(select, rt_id, group_by)
 
 
 class DownsamplingNode(RealTimeNode):
@@ -147,20 +149,20 @@ class DownsamplingNode(RealTimeNode):
         if self._process_rt_id:
             return self._process_rt_id
 
-        suffix = f"{self.agg_interval}s"
-        return f"{self.process_rt_id}_{suffix}"
+        suffix = "{}s".format(self.agg_interval)
+        return "{}_{}".format(self.process_rt_id, suffix)
 
     def gen_statistic_sql(self, rt_id, agg_method, metric_fields, dimension_fields):
         agg_method = agg_method or self.DEFAULT_AGG_METHOD
         select_fields = []
         for f in metric_fields or []:
-            select_fields.append(f"{agg_method}(`{f}`) as `{f}`")
+            select_fields.append("{}(`{}`) as `{}`".format(agg_method, f, f))
 
         dimension_fields = dimension_fields or []
 
         select = ",".join(select_fields + dimension_fields)
         group_by = ",".join(dimension_fields)
-        return f"SELECT {select} FROM {rt_id} GROUP BY {group_by}"
+        return "SELECT {} FROM {} GROUP BY {}".format(select, rt_id, group_by)
 
 
 class FilterUnknownTimeNode(RealTimeNode):
@@ -176,10 +178,10 @@ class FilterUnknownTimeNode(RealTimeNode):
         if self._process_rt_id:
             return self._process_rt_id
 
-        return f"{self.process_rt_id}_{settings.BK_DATA_RAW_TABLE_SUFFIX}"
+        return "{}_{}".format(self.process_rt_id, settings.BK_DATA_RAW_TABLE_SUFFIX)
 
     def gen_statistic_sql(self, rt_id, agg_method, metric_fields, dimension_fields):
-        select_fields = [f"`{i}`" for i in metric_fields + dimension_fields]
+        select_fields = ["`{}`".format(i) for i in metric_fields + dimension_fields]
         return """
         SELECT {}
         FROM {}
@@ -195,7 +197,7 @@ class AlarmStrategyNode(DownsamplingNode):
     """
 
     def __init__(self, strategy_id, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(AlarmStrategyNode, self).__init__(*args, **kwargs)
 
         self.strategy_id = strategy_id
 
@@ -204,7 +206,7 @@ class AlarmStrategyNode(DownsamplingNode):
         if self._process_rt_id:
             return self._process_rt_id
 
-        name = f"{self.process_rt_id}_{self.strategy_id}_plan"[-50:]
+        name = "{}_{}_plan".format(self.process_rt_id, self.strategy_id)[-50:]
         while not name[0].isalpha():
             # 保证首字符是英文
             name = name[1:]
@@ -224,7 +226,7 @@ class CMDBPrepareAggregateFullNode(RealTimeNode):
             return self._process_rt_id
 
         process_rt_id, _, _ = self.process_rt_id.rpartition("_")
-        return f"{process_rt_id}_{settings.BK_DATA_CMDB_FULL_TABLE_SUFFIX}"
+        return "{}_{}".format(process_rt_id, settings.BK_DATA_CMDB_FULL_TABLE_SUFFIX)
 
     @property
     def name(self):
@@ -243,7 +245,7 @@ class CMDBPrepareAggregateFullNode(RealTimeNode):
         }
 
     def gen_statistic_sql(self, rt_id, agg_method, metric_fields, dimension_fields):
-        a_select_fields = [f"A.`{i}`" for i in metric_fields + dimension_fields]
+        a_select_fields = ["A.`{}`".format(i) for i in metric_fields + dimension_fields]
         b_select_fields = ["B.bk_host_id", "B.bk_relations"]
         select_fields = ", ".join(a_select_fields + b_select_fields)
         return f"""
@@ -265,7 +267,7 @@ class CMDBPrepareAggregateSplitNode(RealTimeNode):
             return self._process_rt_id
 
         process_rt_id, _, _ = self.process_rt_id.rpartition("_")
-        return f"{process_rt_id}_{settings.BK_DATA_CMDB_SPLIT_TABLE_SUFFIX}"
+        return "{}_{}".format(process_rt_id, settings.BK_DATA_CMDB_SPLIT_TABLE_SUFFIX)
 
     @property
     def name(self):
@@ -284,7 +286,7 @@ class CMDBPrepareAggregateSplitNode(RealTimeNode):
         }
 
     def gen_statistic_sql(self, rt_id, agg_method, metric_fields, dimension_fields):
-        a_select_fields = [f"`{i}`" for i in metric_fields + dimension_fields]
+        a_select_fields = ["`{}`".format(i) for i in metric_fields + dimension_fields]
         b_select_fields = ["bk_host_id", "bk_relations", "bk_obj_id", "bk_inst_id"]
         select_fields = ", ".join(a_select_fields + b_select_fields)
         return f"""select {select_fields}
@@ -295,7 +297,7 @@ class CMDBPrepareAggregateSplitNode(RealTimeNode):
 
 class MultivariateAnomalyAggNode(RealTimeNode):
     def __init__(self, bk_biz_id, table_suffix=None, result_table_name=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(MultivariateAnomalyAggNode, self).__init__(*args, **kwargs)
         self.table_suffix = table_suffix
         self.bk_biz_id = bk_biz_id
         self.result_table_name = result_table_name
@@ -320,7 +322,7 @@ class MergeNode(ProcessorNode):
     NODE_TYPE = "merge"
 
     def __init__(self, result_table_name, bk_biz_id, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(MergeNode, self).__init__(*args, **kwargs)
         self.result_table_name = result_table_name
         self.bk_biz_id = bk_biz_id
 
@@ -368,7 +370,7 @@ class BusinessSceneNode(DownsamplingNode):
 
     def __init__(self, access_bk_biz_id, bk_biz_id, scene_name, strategy_id=None, *args, **kwargs):
         kwargs["agg_interval"] = 0
-        super().__init__(*args, **kwargs)
+        super(BusinessSceneNode, self).__init__(*args, **kwargs)
 
         self.access_bk_biz_id = access_bk_biz_id
         self.bk_biz_id = bk_biz_id
@@ -381,9 +383,9 @@ class BusinessSceneNode(DownsamplingNode):
             return self._process_rt_id
 
         if self.strategy_id:
-            name = f"{self.process_rt_id}_stra_{self.strategy_id}_{self.scene_name}_plan"[-50:]
+            name = "{}_stra_{}_{}_plan".format(self.process_rt_id, self.strategy_id, self.scene_name)[-50:]
         else:
-            name = f"{self.process_rt_id}_{self.access_bk_biz_id}_{self.scene_name}_plan"[-50:]
+            name = "{}_{}_{}_plan".format(self.process_rt_id, self.access_bk_biz_id, self.scene_name)[-50:]
         while not name[0].isalpha():
             # 保证首字符是英文
             name = name[1:]
@@ -406,7 +408,7 @@ class BusinessSceneNode(DownsamplingNode):
 class BizFilterRealTimeNode(RealTimeNode):
     def __init__(self, access_bk_biz_id, *args, **kwargs):
         self.access_bk_biz_id = access_bk_biz_id
-        super().__init__(*args, **kwargs)
+        super(BizFilterRealTimeNode, self).__init__(*args, **kwargs)
 
     @property
     def table_name(self):
@@ -428,7 +430,7 @@ class OffLineCalculateNode(ProcessorNode, abc.ABC):
 
     def __init__(self, access_bk_biz_id, bk_biz_id, sql, suffix, *args, **kwargs):
         kwargs["agg_interval"] = None
-        super().__init__(*args, **kwargs)
+        super(OffLineCalculateNode, self).__init__(*args, **kwargs)
         self.access_bk_biz_id = access_bk_biz_id
         self.bk_biz_id = bk_biz_id
         self.suffix = suffix
@@ -467,7 +469,7 @@ class OffLineCalculateNode(ProcessorNode, abc.ABC):
         return f"{self.access_bk_biz_id}_{self.suffix}"[:50]
 
     def get_api_params(self, *args, **kwargs):
-        api_params = super().get_api_params(*args, **kwargs)
+        api_params = super(OffLineCalculateNode, self).get_api_params(*args, **kwargs)
         config = api_params.setdefault("config", {})
         config["node_type"] = self.get_node_type()
         return api_params
@@ -537,7 +539,7 @@ class FlinkStreamCodeDefine:
     args: str
     language: str
     code: str
-    output_fields: list[FlinkStreamCodeOutputField]
+    output_fields: List[FlinkStreamCodeOutputField]
 
 
 class FlinkStreamNode(ProcessorNode, abc.ABC):
@@ -545,7 +547,7 @@ class FlinkStreamNode(ProcessorNode, abc.ABC):
     PROJECT_PREFIX = ""
 
     def __init__(self, source_rt_id, name, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(FlinkStreamNode, self).__init__(*args, **kwargs)
         self.source_rt_id = source_rt_id
         self.bk_biz_id, self.process_table_name = source_rt_id.split("_", 1)
         self._name = name

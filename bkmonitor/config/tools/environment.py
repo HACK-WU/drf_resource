@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -61,13 +62,15 @@ try:
     # DJANGO_CONF_MODULE 中最后一段包含了PLATFORM信息，以DJANGO_CONF_MODULE为准
     if BKAPP_DEPLOY_PLATFORM != PLATFORM:
         warnings.warn(
-            f"DJANGO_CONF_MODULE[{DJANGO_CONF_MODULE}] set PLATFORM: [{PLATFORM}] but BKAPP_DEPLOY_PLATFORM in env is [{BKAPP_DEPLOY_PLATFORM}]"
+            "DJANGO_CONF_MODULE[{}] set PLATFORM: [{}] but BKAPP_DEPLOY_PLATFORM in env is [{}]".format(
+                DJANGO_CONF_MODULE, PLATFORM, BKAPP_DEPLOY_PLATFORM
+            )
         )
     BKAPP_DEPLOY_PLATFORM = PLATFORM
 except Exception:
     raise RuntimeError(
         "Environment variable 'DJANGO_CONF_MODULE' "
-        "should not be {!r}. format: {!r}".format(DJANGO_CONF_MODULE, "conf.{web|worker}.[environment].[platform]")
+        "should not be %r. format: %r" % (DJANGO_CONF_MODULE, "conf.{web|worker}.[environment].[platform]")
     )
 
 RUN_MODE = {"development": "DEVELOP", "testing": "TEST", "production": "PRODUCT"}.get(ENVIRONMENT)

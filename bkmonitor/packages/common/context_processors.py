@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import os
-from typing import Any
+from typing import Any, Dict, List, Optional, Set
 
 from django.conf import settings
 from django.utils.translation import get_language
@@ -24,7 +25,7 @@ from drf_resource import resource
 from core.errors.api import BKAPIError
 
 
-class Platform:
+class Platform(object):
     """
     平台信息
     """
@@ -34,11 +35,11 @@ class Platform:
     ce = settings.BKAPP_DEPLOY_PLATFORM == "community"
 
     @classmethod
-    def to_dict(cls) -> dict[str, str]:
+    def to_dict(cls) -> Dict[str, str]:
         return {"te": cls.te, "ee": cls.ee, "ce": cls.ce}
 
 
-def get_default_biz_id(request, biz_list: list[dict[str, Any]] | None = None, id_key: str | None = None) -> int:
+def get_default_biz_id(request, biz_list: Optional[List[Dict[str, Any]]] = None, id_key: Optional[str] = None) -> int:
     if getattr(request, "biz_id", None):
         # 如果 request 存在业务缓存字段，优先返回
         biz_id = request.biz_id
@@ -50,7 +51,7 @@ def get_default_biz_id(request, biz_list: list[dict[str, Any]] | None = None, id
         if not biz_id:
             # bizId 是前端业务选择器选中业务后会携带的参数
             # Cookie(bk_biz_id) 请求前端环境变量时，会 set：bkmonitor/packages/monitor_web/commons/context/views.py
-            biz_id_or_none: str | None = request.session.get("bk_biz_id") or request.COOKIES.get("bk_biz_id")
+            biz_id_or_none: Optional[str] = request.session.get("bk_biz_id") or request.COOKIES.get("bk_biz_id")
             if biz_id_or_none:
                 biz_id = safe_int(str(biz_id_or_none).strip("/"), dft=None)
             elif biz_list:
@@ -68,7 +69,7 @@ def get_default_biz_id(request, biz_list: list[dict[str, Any]] | None = None, id
     return biz_id
 
 
-def field_formatter(context: dict[str, Any]):
+def field_formatter(context: Dict[str, Any]):
     # 字段大小写标准化
     standard_context = {
         key.upper(): context[key]
@@ -91,7 +92,7 @@ def k8s_v2_enabled(bk_biz_id):
         return True
 
 
-def json_formatter(context: dict[str, Any]):
+def json_formatter(context: Dict[str, Any]):
     # JSON 返回预处理
     context["PLATFORM"] = Platform.to_dict()
     context["LANGUAGES"] = dict(context["LANGUAGES"])
@@ -99,7 +100,7 @@ def json_formatter(context: dict[str, Any]):
     for key in ["gettext", "_"]:
         context.pop(key, None)
 
-    bool_context: dict[str, bool] = {}
+    bool_context: Dict[str, bool] = {}
     for key, value in context.items():
         if isinstance(value, str) and value in ["false", "False", "true", "True"]:
             bool_context[key] = True if value in {"True", "true"} else False
@@ -156,8 +157,8 @@ def get_core_context(request):
     }
 
 
-def get_basic_context(request, space_list: list[dict[str, Any]], bk_biz_id: int) -> dict[str, Any]:
-    context: dict[str, Any] = get_core_context(request)
+def get_basic_context(request, space_list: List[Dict[str, Any]], bk_biz_id: int) -> Dict[str, Any]:
+    context: Dict[str, Any] = get_core_context(request)
     context.update(
         {
             "uin": request.user.username,
@@ -187,7 +188,7 @@ def get_basic_context(request, space_list: list[dict[str, Any]], bk_biz_id: int)
         }
     )
 
-    allow_biz_ids: set[int] = {space["bk_biz_id"] for space in space_list}
+    allow_biz_ids: Set[int] = {space["bk_biz_id"] for space in space_list}
     # 为什么不直接调用接口检查？相比起 CPU 运算，接口请求耗时更不可控，考虑到大部分场景下 bk_biz_id in allow_biz_ids
     # 故利用该条件进行兼枝
     if bk_biz_id not in allow_biz_ids:
@@ -233,7 +234,7 @@ def get_basic_context(request, space_list: list[dict[str, Any]], bk_biz_id: int)
     return context
 
 
-def get_extra_context(request, space: Space | None) -> dict[str, Any]:
+def get_extra_context(request, space: Optional[Space]) -> Dict[str, Any]:
     context = {
         # 首页跳转到文档配置页面需要
         "AGENT_SETUP_URL": settings.AGENT_SETUP_URL,
@@ -256,14 +257,14 @@ def get_extra_context(request, space: Space | None) -> dict[str, Any]:
     return context
 
 
-def _get_full_monitor_context(request) -> dict[str, Any]:
+def _get_full_monitor_context(request) -> Dict[str, Any]:
     """
     渲染APP基础信息
     :param request:
     :return:
     """
 
-    context: dict[str, Any] = {
+    context: Dict[str, Any] = {
         # 基础信息
         "RUN_MODE": settings.RUN_MODE,
         "APP_CODE": settings.APP_CODE,
@@ -313,14 +314,14 @@ def _get_full_monitor_context(request) -> dict[str, Any]:
     return context
 
 
-def _get_full_fta_context(request) -> dict[str, Any]:
-    context: dict[str, Any] = _get_full_monitor_context(request)
+def _get_full_fta_context(request) -> Dict[str, Any]:
+    context: Dict[str, Any] = _get_full_monitor_context(request)
     # context["SITE_URL"] = f'{context["SITE_URL"]}fta/'
     context["PAGE_TITLE"] = _("故障自愈 | 蓝鲸智云")
     return context
 
 
-def get_full_context(request) -> dict[str, Any]:
+def get_full_context(request) -> Dict[str, Any]:
     # 如果 old，仍走老路由
     if "fta" in request.get_full_path().split("/"):
         # 针对自愈的页面，进行特殊处理
@@ -329,14 +330,14 @@ def get_full_context(request) -> dict[str, Any]:
         return _get_full_monitor_context(request)
 
 
-def get_fta_core_context(request) -> dict[str, Any]:
-    context: dict[str, Any] = get_core_context(request)
+def get_fta_core_context(request) -> Dict[str, Any]:
+    context: Dict[str, Any] = get_core_context(request)
     context["PAGE_TITLE"] = _("故障自愈 | 蓝鲸智云")
     return context
 
 
-def get_weixin_core_context(request) -> dict[str, Any]:
-    context: dict[str, Any] = get_core_context(request)
+def get_weixin_core_context(request) -> Dict[str, Any]:
+    context: Dict[str, Any] = get_core_context(request)
     context.update(
         {
             "WEIXIN_STATIC_URL": settings.WEIXIN_STATIC_URL,
@@ -352,7 +353,7 @@ def get_weixin_core_context(request) -> dict[str, Any]:
     return context
 
 
-def get_context(request) -> dict[str, Any]:
+def get_context(request) -> Dict[str, Any]:
     try:
         # 背景：原来的 context 集成了全量业务列表拉取、用户有权限业务拉取，导致首屏打开耗时较长
         # 改造：前端仅拉取基础 context，待页面初始化后再拉取剩余 context

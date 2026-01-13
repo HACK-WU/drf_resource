@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from fta_web.alert import utils
 
 

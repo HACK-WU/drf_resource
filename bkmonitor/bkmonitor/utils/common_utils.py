@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -25,7 +26,8 @@ import uuid
 from collections import OrderedDict, defaultdict
 from contextlib import contextmanager
 from io import StringIO
-from shlex import quote
+from pipes import quote
+from typing import Dict, List, Union
 from zipfile import ZipFile
 
 from django.conf import settings
@@ -47,11 +49,11 @@ logger = logging.getLogger(__name__)
 
 def package_contents(package):
     if isinstance(package, str):
-        return package_contents(__import__(package, fromlist=["*"]))
+        return package_contents(__import__(package, fromlist=[str("*")]))
     return [name for _, name, _ in pkgutil.iter_modules([os.path.dirname(package.__file__)])]
 
 
-class DictObj:
+class DictObj(object):
     __non_zero = False
 
     def __init__(self, kwargs=None):
@@ -64,7 +66,10 @@ class DictObj:
             try:
                 setattr(self, k, v)
             except AttributeError:
-                msg = f"[{self.__class__.__name__}] attribute: `{k}` has already exists, " "check your class definition `@property`"
+                msg = "[%s] attribute: `%s` has already exists, " "check your class definition `@property`" % (
+                    self.__class__.__name__,
+                    k,
+                )
                 raise AttributeError(msg)
 
     def __str__(self):
@@ -202,7 +207,7 @@ def ok_data(data=None, **options):
 
 
 def href_link(text, href):
-    return f"""<a href="{href}">{text}</a>"""
+    return """<a href="{}">{}</a>""".format(href, text)
 
 
 def strip(obj):
@@ -242,7 +247,9 @@ def check_permission(obj, request_cc_biz_id):
     cc_biz_id = fetch_biz_id_from_obj(obj)
     if cc_biz_id and int(cc_biz_id) != int(request_cc_biz_id):
         logger.exception(
-            f"权限不通过！ 当前请求的业务ID为{request_cc_biz_id}，而对象[{obj.__class__.__name__}]({obj.pk})所属业务ID为{cc_biz_id}"
+            "权限不通过！ 当前请求的业务ID为{}，而对象[{}]({})所属业务ID为{}".format(
+                request_cc_biz_id, obj.__class__.__name__, obj.pk, cc_biz_id
+            )
         )
         return False
     return True
@@ -329,7 +336,7 @@ def parse_tsdb_rt(result_table_id, table_name="", has_biz_id=True):
     """
     sep = "_"
     if not has_biz_id:
-        result_table_id = f"0{sep}{result_table_id}"
+        result_table_id = "0{}{}".format(sep, result_table_id)
     try:
         if table_name:
             item_list = result_table_id[: result_table_id.rfind(table_name) - 1].split(sep)
@@ -370,7 +377,7 @@ def get_list(obj):
 
 
 def get_one(obj):
-    return obj[0] if isinstance(obj, list | tuple) else obj
+    return obj[0] if isinstance(obj, (list, tuple)) else obj
 
 
 def uniqid():
@@ -434,7 +441,7 @@ def file_rename(file, new_file_name=None):
         ext = file.name.split(".")[-1]
 
     if ext:
-        new_file_name = f"{new_file_name}.{ext}"
+        new_file_name = "{}.{}".format(new_file_name, ext)
     return new_file_name
 
 
@@ -456,7 +463,7 @@ REG_SPLIT_LIST = re.compile(r"\s*[;,]\s*")
 
 
 def split_list(raw_string):
-    if isinstance(raw_string, tuple | list | set):
+    if isinstance(raw_string, (tuple, list, set)):
         return raw_string
     return [x for x in REG_SPLIT_LIST.split(raw_string) if x]
 
@@ -478,7 +485,7 @@ def get_local_ip():
         (addr, port) = csock.getsockname()
         csock.close()
         return addr
-    except OSError:
+    except socket.error:
         return "127.0.0.1"
 
 
@@ -523,9 +530,9 @@ def convert_to_cmdline_args_str(kv_dict):
         else:
             v = ""
         if k.startswith("--"):
-            result += f"{k}={v} "
+            result += "{}={} ".format(k, v)
         else:
-            result += f"{k} {v} "
+            result += "{} {} ".format(k, v)
     return result
 
 
@@ -539,7 +546,7 @@ def escape_cmd_argument(arg):
 
     meta_chars = '()%!^"<>&|'
     meta_re = re.compile("(" + "|".join(re.escape(char) for char in list(meta_chars)) + ")")
-    meta_map = {char: f"^{char}" for char in meta_chars}
+    meta_map = {char: "^%s" % char for char in meta_chars}
 
     def escape_meta_chars(m):
         char = m.group(1)
@@ -586,7 +593,7 @@ def convert_img_to_base64(image, format="PNG"):
     img_buffer = StringIO()
     image.save(img_buffer, format=format, quality=95)
     base64_value = base64.b64encode(img_buffer.getvalue().encode("utf8"))
-    return f"data:image/{format.lower()};base64,{base64_value}"
+    return "data:image/{format};base64,{value}".format(format=format.lower(), value=base64_value)
 
 
 def fetch_biz_id_from_dict(data, default=None):
@@ -641,7 +648,7 @@ def safe_float(value):
 
 
 def proxy(obj):
-    class Proxy:
+    class Proxy(object):
         def __getattribute__(self, item):
             return getattr(obj, item)
 
@@ -718,14 +725,14 @@ def chunks(data, n):
     return (data[i : i + n] for i in range(0, len(data), n))
 
 
-def camel_obj_key_to_underscore(obj: list | dict | str) -> object:
+def camel_obj_key_to_underscore(obj: Union[List, Dict, str]) -> object:
     """将一个对象中包含的字典的key全部转换为下划线格式 ."""
     if isinstance(obj, str):
         return camel_to_underscore(obj)
     if isinstance(obj, dict):
         new_obj = {}
         for key, value in obj.items():
-            if isinstance(value, list | dict):
+            if isinstance(value, (list, dict)):
                 value = camel_obj_key_to_underscore(value)
             if isinstance(key, str):
                 new_obj[camel_to_underscore(key)] = value

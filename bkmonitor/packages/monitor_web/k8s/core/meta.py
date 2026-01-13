@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,6 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from typing import Dict, Optional
 
 from django.db.models import F, Max, Value
 from django.db.models.functions import Concat
@@ -19,7 +21,7 @@ from drf_resource import resource
 from monitor_web.k8s.core.filters import load_resource_filter
 
 
-class FilterCollection:
+class FilterCollection(object):
     """
     过滤查询集合
 
@@ -47,7 +49,7 @@ class FilterCollection:
             self.query_set = self.query_set.filter(**self.transform_filter_dict(filter_obj))
         return self.query_set
 
-    def transform_filter_dict(self, filter_obj) -> dict:
+    def transform_filter_dict(self, filter_obj) -> Dict:
         """用于ORM的查询条件"""
         resource_type = filter_obj.resource_type
         resource_meta = load_resource_meta(resource_type, self.meta.bk_biz_id, self.meta.bcs_cluster_id)
@@ -93,7 +95,7 @@ class FilterCollection:
             self.filters.pop(workload_filter.filter_uid, None)
 
 
-class K8sResourceMeta:
+class K8sResourceMeta(object):
     """
     k8s资源基类
     """
@@ -798,7 +800,7 @@ class K8sContainerMeta(K8sResourceMeta):
         return promql
 
 
-def load_resource_meta(resource_type: str, bk_biz_id: int, bcs_cluster_id: str) -> K8sResourceMeta | None:
+def load_resource_meta(resource_type: str, bk_biz_id: int, bcs_cluster_id: str) -> Optional[K8sResourceMeta]:
     resource_meta_map = {
         'node': K8sNodeMeta,
         'container': K8sContainerMeta,

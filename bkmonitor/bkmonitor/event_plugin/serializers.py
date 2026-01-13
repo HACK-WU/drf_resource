@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -126,7 +127,7 @@ class EventPluginBaseSerializer(serializers.ModelSerializer):
         data["normalization_config"] = fields
 
     def to_representation(self, instance):
-        data = super().to_representation(instance)
+        data = super(EventPluginBaseSerializer, self).to_representation(instance)
         self.translate_normalization_config(data)
         self.render_ingest_config(data)
         return data
@@ -137,7 +138,7 @@ class EventPluginSerializer(EventPluginBaseSerializer):
     tags = serializers.ListField(child=serializers.CharField(), label="标签", default=[])
 
     def to_internal_value(self, data):
-        internal_data = super().to_internal_value(data)
+        internal_data = super(EventPluginSerializer, self).to_internal_value(data)
         if not internal_data.get("version"):
             internal_data["version"] = "{}.{}".format(datetime.datetime.now().strftime("%Y.%m.%d"), int(time.time()))
         internal_data["is_latest"] = True

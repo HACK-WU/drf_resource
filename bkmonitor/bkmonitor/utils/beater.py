@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,7 +25,7 @@ class BeatShutdown(Exception):
     always_raise = True
 
 
-class MonitorBeater:
+class MonitorBeater(object):
     """
     任务执行方式：
     dumy: 单进程堵塞式执行，注意该模式可能会让周期任务调度并不是那么精确，但是消耗最小同时最可靠。
@@ -138,7 +139,7 @@ class DummyExecutor(Executor):
             self._shutdown = True
 
 
-class BeaterExecutor:
+class BeaterExecutor(object):
     """
     reference: apscheduler
     """

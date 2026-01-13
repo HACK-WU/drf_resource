@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ import logging
 import time
 from collections import defaultdict
 from itertools import chain
+from typing import Dict, List, Optional, Set
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -30,9 +32,9 @@ class KubernetesCMDBEnricher(BaseAlertEnricher):
     kubernetes相关的告警补全IP信息
     """
 
-    def __init__(self, alerts: list[Alert]):
+    def __init__(self, alerts: List[Alert]):
         # 缓存准备，批量查询避免重复请求redis
-        super().__init__(alerts)
+        super(KubernetesCMDBEnricher, self).__init__(alerts)
         self.kubernetes_alerts = defaultdict(list)
         biz_source_info_list = defaultdict(list)
         self.biz_resource_info = {}
@@ -61,8 +63,8 @@ class KubernetesCMDBEnricher(BaseAlertEnricher):
             )
 
     def refresh_host_by_increment(self):
-        total_host_keys: set[str] = set(self.hosts_cache.keys())
-        to_be_refresh_ips_gby_biz_id: dict[int, set[str]] = defaultdict(set)
+        total_host_keys: Set[str] = set(self.hosts_cache.keys())
+        to_be_refresh_ips_gby_biz_id: Dict[int, Set[str]] = defaultdict(set)
         for alert in self.alerts:
             bk_biz_id: int = int(alert.bk_biz_id)
             if bk_biz_id <= 0:
@@ -71,9 +73,9 @@ class KubernetesCMDBEnricher(BaseAlertEnricher):
             if alert.id not in self.alert_relations:
                 continue
 
-            ip_list: list[str] = self.alert_relations[alert.id]["ip_list"]
+            ip_list: List[str] = self.alert_relations[alert.id]["ip_list"]
             for ip in ip_list:
-                host_keys: list[str] | None = self.ip_cache.get(ip)
+                host_keys: Optional[List[str]] = self.ip_cache.get(ip)
                 if not host_keys:
                     # 主机 IP - Host Keys 缓存不存在
                     to_be_refresh_ips_gby_biz_id[bk_biz_id].add(ip)
@@ -92,7 +94,7 @@ class KubernetesCMDBEnricher(BaseAlertEnricher):
 
         for bk_biz_id, to_be_refresh_ips in to_be_refresh_ips_gby_biz_id.items():
             try:
-                partial_hosts: list = api.cmdb.get_host_by_ip(
+                partial_hosts: List = api.cmdb.get_host_by_ip(
                     ips=[{"ip": ip} for ip in to_be_refresh_ips], bk_biz_id=bk_biz_id
                 )
                 HostManager.fill_attr_to_hosts(bk_biz_id, partial_hosts, with_world_ids=False)
@@ -107,12 +109,12 @@ class KubernetesCMDBEnricher(BaseAlertEnricher):
                 )
                 continue
 
-            partial_host_key__obj_map: dict[str, Host] = HostManager.to_kv(partial_hosts)
+            partial_host_key__obj_map: Dict[str, Host] = HostManager.to_kv(partial_hosts)
 
             # 补充到主机缓存
             self.hosts_cache.update(partial_host_key__obj_map)
             # 补充 IP - IP Keys 缓存
-            partial_host_keys_gby_ip: dict[str, list[str]] = HostIPManager.to_kv(list(partial_host_key__obj_map.keys()))
+            partial_host_keys_gby_ip: Dict[str, List[str]] = HostIPManager.to_kv(list(partial_host_key__obj_map.keys()))
             # 不同业务可能存在同 IP 不同管控区域主机的场景
             # 采取在原有基础上合并列表更新的方式，避免上述场景下导致同 IP 的 Host Keys 相互覆盖
             for ip, host_keys in partial_host_keys_gby_ip.items():

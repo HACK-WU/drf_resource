@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,6 +12,7 @@ specific language governing permissions and limitations under the License.
 import json
 import logging
 from datetime import datetime, timedelta
+from typing import List
 
 from django.conf import settings
 from django.utils import timezone
@@ -42,7 +44,7 @@ class AddBkDataTableIdsResource(Resource):
         bkdata_table_ids = data["bkdata_table_ids"]
         self._add_tid_list(bkdata_table_ids)
 
-    def _add_tid_list(self, bkdata_table_ids: list):
+    def _add_tid_list(self, bkdata_table_ids: List):
         tid_list = list(
             AccessVMRecord.objects.filter(vm_result_table_id__in=bkdata_table_ids).values_list(
                 "result_table_id", flat=True
@@ -194,7 +196,7 @@ class QueryDataLinkInfoResource(Resource):
                 table_ids_details[table_id] = {
                     "存储方案": rt.default_storage,
                     "归属业务ID": rt.bk_biz_id,
-                    "空间UID": f'{space.space_type_id}__{space.space_id}' if rt.bk_biz_id != 0 else '全局',
+                    "空间UID": '{}__{}'.format(space.space_type_id, space.space_id) if rt.bk_biz_id != 0 else '全局',
                     "空间名称": space.space_name if rt.bk_biz_id != 0 else '全局',
                     "是否启用": rt.is_enable,
                     "数据标签(data_label)": rt.data_label,
@@ -321,7 +323,7 @@ class QueryDataLinkInfoResource(Resource):
                                 'Transfer/计算平台时间': datetime.fromtimestamp(
                                     remote_metric['last_modify_time'], tz=timezone.utc
                                 ).strftime("%Y-%m-%d %H:%M:%S"),
-                                "时间差": f"{time_difference}小时",
+                                "时间差": "{}小时".format(time_difference),
                             }
                         )
         except Exception:  # pylint: disable=broad-except

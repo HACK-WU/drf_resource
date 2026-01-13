@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -28,7 +29,7 @@ class SQLCompiler(compiler.SQLCompiler):
             # must add group_by_fields + time_fields into select_fields
             if self.query.time_field:
                 select_fields += self.query.group_by + [
-                    "MAX({field}) as {field}".format(**dict(field=self.query.time_field)),
+                    "MAX(%(field)s) as %(field)s" % dict(field=self.query.time_field),
                 ]
         out_cols = sorted(set(select_fields), key=select_fields.index)
         if out_cols:
@@ -48,18 +49,18 @@ class SQLCompiler(compiler.SQLCompiler):
         params = []
         where, w_params = self.compile(clone_where)
         if where:
-            result.append(f"WHERE {where}")
+            result.append("WHERE %s" % where)
             params.extend(w_params)
 
         group_by_fields = self.query.group_by
         group_by = sorted(set(group_by_fields), key=group_by_fields.index)
         if group_by:
-            result.append("GROUP BY {}".format(", ".join(escape_sql_field_name(col) for col in group_by)))
+            result.append("GROUP BY %s" % ", ".join(escape_sql_field_name(col) for col in group_by))
 
         order_by_fields = self.query.order_by
         order_by = sorted(set(order_by_fields), key=order_by_fields.index)
         if order_by:
-            result.append("ORDER BY {}".format(", ".join(escape_sql_field_name(col) for col in order_by)))
+            result.append("ORDER BY %s" % ", ".join(escape_sql_field_name(col) for col in order_by))
 
         if self.query.high_mark is not None:
             result.append("LIMIT %d" % (self.query.high_mark - self.query.low_mark))
@@ -106,7 +107,7 @@ class SQLCompiler(compiler.SQLCompiler):
             field_lookup = "{}__{}".format(cond["key"], cond["method"])
             value = cond["value"]
 
-            if not isinstance(value, list | tuple):
+            if not isinstance(value, (list, tuple)):
                 value = [value]
 
             condition = cond.get("condition") or "and"
@@ -118,7 +119,7 @@ class SQLCompiler(compiler.SQLCompiler):
                     ret = (ret | q) if ret else q
                 where_cond = [Q(**{field_lookup: value})]
             else:
-                raise Exception(f"Unsupported connector({condition})")
+                raise Exception("Unsupported connector(%s)" % condition)
 
         if where_cond:
             q = Q(reduce(lambda x, y: x & y, where_cond))

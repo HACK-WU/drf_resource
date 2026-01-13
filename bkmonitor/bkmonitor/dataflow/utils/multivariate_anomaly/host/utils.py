@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -59,10 +60,10 @@ def check_and_access_system_tables(sources):
         try:
             api.metadata.access_bk_data_by_result_table(table_id=rt, is_access_now=True)
         except Exception as e:  # noqa
-            err_msg = f"access({rt}) to bkdata failed: {e}"
+            err_msg = "access({}) to bkdata failed: {}".format(rt, e)
             raise Exception(err_msg)
         else:
-            logger.info(f"access({rt}) to bkdata success.")
+            logger.info("access({}) to bkdata success.".format(rt))
 
 
 def build_metric_alias(metric, result_table_id):
@@ -103,7 +104,7 @@ def build_agg_trans_sql(metrics, result_table_id, from_rt_id):
         Context(
             {
                 "metrics": metric_alias_list,
-                "metrics_strs": mark_safe(",".join(map(lambda x: f"'{x}'", metric_alias_list))),
+                "metrics_strs": mark_safe(",".join(map(lambda x: "'{}'".format(x), metric_alias_list))),
                 "output_table_name": from_rt_id,
             }
         )

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -44,7 +45,7 @@ class ActionConfigViewSet(viewsets.ModelViewSet):
             if not permission.has_object_permission(request, self, obj):
                 self.permission_denied(request, message=getattr(permission, "message", None))
         else:
-            super().check_object_permissions(request, obj)
+            super(ActionConfigViewSet, self).check_object_permissions(request, obj)
 
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
@@ -60,7 +61,7 @@ class ActionConfigViewSet(viewsets.ModelViewSet):
         request_biz_id = request.query_params.get("bk_biz_id", 0)
         if request_biz_id:
             self.queryset = self.queryset.filter(bk_biz_id__in=[GLOBAL_BIZ_ID, request_biz_id])
-        response = super().list(request, *args, **kwargs)
+        response = super(ActionConfigViewSet, self).list(request, *args, **kwargs)
 
         if request.query_params.get("with_advance_fields") == "no":
             # 不需要高级字段直接不做统计
@@ -110,7 +111,7 @@ class ActionConfigViewSet(viewsets.ModelViewSet):
         return response
 
     def retrieve(self, request, *args, **kwargs):
-        response = super().retrieve(request, *args, **kwargs)
+        response = super(ActionConfigViewSet, self).retrieve(request, *args, **kwargs)
         request_biz_id = request.query_params.get("bk_biz_id", GLOBAL_BIZ_ID)
         instance_id = response.data["id"]
         config_strategy_dict = get_action_config_strategy_dict(

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +12,7 @@ specific language governing permissions and limitations under the License.
 import copy
 from copy import deepcopy
 
-from unittest import mock
+import mock
 import pytest
 
 from apm_web.models.application import Application
@@ -80,7 +81,7 @@ SETUP = {
 }
 
 
-class TestLogTrace:
+class TestLogTrace(object):
     @mock.patch("drf_resource.api.apm_api.create_application", lambda _: API_APPLICATION)
     @mock.patch("apm_web.models.Application.get_transfer_config", lambda _: {})
     @mock.patch("apm_web.models.Application.authorization", lambda _: {})

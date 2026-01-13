@@ -11,6 +11,7 @@ import functools
 import logging
 import random
 import time
+from typing import Dict, Tuple
 
 import jwt
 from django.conf import settings
@@ -84,7 +85,7 @@ class BkJWTClient:
         def __getattr__(self, item):
             return self[item]
 
-    def __init__(self, request: HttpRequest, public_keys: dict[str, str]):
+    def __init__(self, request: HttpRequest, public_keys: Dict[str, str]):
         self.request = request
         self.public_keys = public_keys
 
@@ -92,7 +93,7 @@ class BkJWTClient:
         self.app = None
         self.user = None
 
-    def validate(self) -> tuple[bool, str]:
+    def validate(self) -> Tuple[bool, str]:
         # jwt内容
         raw_content = self.request.META.get(self.JWT_KEY_NAME, '')
         if not raw_content:
@@ -148,7 +149,7 @@ class AppWhiteListModelBackend(ModelBackend):
             user_model = get_user_model()
             user, _ = user_model.objects.get_or_create(username=username, defaults={"nickname": username})
         except Exception as e:
-            logger.error(f"Auto create & update UserModel fail, username: {username}, error: {e}")
+            logger.error("Auto create & update UserModel fail, username: {}, error: {}".format(username, e))
             return None
 
         if self.user_can_authenticate(user):
@@ -162,7 +163,7 @@ class AppWhiteListModelBackend(ModelBackend):
 class AuthenticationMiddleware(MiddlewareMixin):
     @staticmethod
     @functools.lru_cache(maxsize=1)
-    def get_apigw_public_keys() -> dict[str, str]:
+    def get_apigw_public_keys() -> Dict[str, str]:
         cache = caches["login_db"]
 
         api_names = settings.BK_APIGW_NAME.split(",")

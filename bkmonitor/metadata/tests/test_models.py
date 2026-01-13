@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,7 +30,7 @@ IS_CONSUL_MOCK = True
 es_index = {}
 
 
-class CustomBKConsul:
+class CustomBKConsul(object):
     def __init__(self):
         self.kv = CustomKV()
 
@@ -37,7 +38,7 @@ class CustomBKConsul:
         return True
 
 
-class CustomKV:
+class CustomKV(object):
     def __init__(self):
         self.data = {}
 
@@ -98,7 +99,7 @@ def patch_redis_tools(mocker):
     mocker.patch("metadata.utils.redis_tools.RedisTools.publish", side_effect=mock_publish)
 
 
-class TestKafkaTopic:
+class TestKafkaTopic(object):
     def test_create_info(self, mocker):
         """没有同名的配置，可以正常写入"""
 
@@ -114,7 +115,7 @@ class TestKafkaTopic:
         create_mock.assert_called_once_with(
             bk_data_id="123",
             # 如果topic没有指定，则设定为该data_id同名
-            topic=f"{config.KAFKA_TOPIC_PREFIX}1230",
+            topic="{}1230".format(config.KAFKA_TOPIC_PREFIX),
             partition=1,
             batch_size=None,
             flush_interval=None,
@@ -129,7 +130,7 @@ class TestKafkaTopic:
             models.KafkaTopicInfo.create_info("123")
 
 
-class TestDataSource:
+class TestDataSource(object):
     data_name = "2_system.cpu"
     etl_config = "basereport"
     operator = "operator"
@@ -185,7 +186,7 @@ class TestDataSource:
             out_date = (datetime.datetime.utcnow() - datetime.timedelta(days=365 * 3)).strftime("%Y%m%d%H")
             new_date = (datetime.datetime.utcnow() + datetime.timedelta(days=1)).strftime("%Y%m%d%H")
 
-            return {f"{table_id}_{out_date}_0": "", f"{table_id}_{new_date}_0": ""}
+            return {"{}_{}_0".format(table_id, out_date): "", "{}_{}_0".format(table_id, new_date): ""}
 
         mocker.patch(
             "elasticsearch5.client.indices.IndicesClient.get",
@@ -361,15 +362,15 @@ class TestDataSource:
 
         # 更新配置
         new_data_source.update_config(
-            operator=f"new_{self.operator}",
+            operator="new_%s" % self.operator,
             mq_cluster_id=cluster.cluster_id,
             etl_config="new_etl_config",
-            data_name=f"{self.data_name}_new",
+            data_name="{}_new".format(self.data_name),
         )
         new_data_source.refresh_from_db()
-        assert new_data_source.data_name == f"{self.data_name}_new"
+        assert new_data_source.data_name == "{}_new".format(self.data_name)
 
-        new_data_source.update_config(operator=f"new_{self.operator}", data_name=self.data_name)
+        new_data_source.update_config(operator="new_%s" % self.operator, data_name=self.data_name)
         new_data_source.refresh_from_db()
         assert new_data_source.data_name == self.data_name
 
@@ -381,11 +382,11 @@ class TestDataSource:
 
         with pytest.raises(ValueError):
             new_data_source.update_config(
-                operator=f"new_{self.operator}", mq_cluster_id=123123, etl_config="new_etl_config"
+                operator="new_%s" % self.operator, mq_cluster_id=123123, etl_config="new_etl_config"
             )
 
         new_data_source.refresh_from_db()
-        assert new_data_source.last_modify_user == f"new_{self.operator}"
+        assert new_data_source.last_modify_user == "new_%s" % self.operator
         assert new_data_source.last_modify_time != old_modify_time
         assert new_data_source.etl_config == "new_etl_config"
         assert new_data_source.source_label == self.data_source_label
@@ -712,7 +713,7 @@ class TestDataSource:
         assert influxdb_storage.real_table_name == "cpu" and influxdb_storage.database == "2_system"
 
         # =====================默认存储Kafka测试===========
-        default_storage_table_id = f"{new_data_source.data_name}_kafka_defaul_storage"
+        default_storage_table_id = "{}_kafka_defaul_storage".format(new_data_source.data_name)
         new_table = models.ResultTable.create_result_table(
             bk_data_id=new_data_source.bk_data_id,
             table_id=default_storage_table_id,
@@ -838,7 +839,9 @@ class TestDataSource:
         )
 
         # 先断言判断DataSource是否正确的拼接了Consul路径
-        field_path = f"{settings.APP_CODE}_{settings.PLATFORM}_{settings.ENVIRONMENT}/metadata/v1/default/data_id/{new_data_source.bk_data_id}/fields"
+        field_path = "{}_{}_{}/metadata/v1/default/data_id/{}/fields".format(
+            settings.APP_CODE, settings.PLATFORM, settings.ENVIRONMENT, new_data_source.bk_data_id
+        )
         assert new_data_source.consul_fields_path == field_path
 
         # 执行一次更新字段的逻辑
@@ -881,8 +884,8 @@ class TestDataSource:
         # 写入环境变量
         os.environ["BK_MONITOR_INFLUXDB_PORT"] = "5290"
         for index in range(2):
-            host_name = f"BK_INFLUXDB_BKMONITORV3_IP{index}"
-            os.environ[host_name] = f"127.0.0.{index}"
+            host_name = "BK_INFLUXDB_BKMONITORV3_IP%s" % index
+            os.environ[host_name] = "127.0.0.%s" % index
 
         os.environ["BK_INFLUXDB_PROXY_HOST"] = "test.influxdb.name"
         os.environ["BK_INFLUXDB_PROXY_PORT"] = "10203"
@@ -1189,7 +1192,7 @@ class TestDataSource:
         assert models.Event.objects.filter(event_group_id=new_group.event_group_id).count() == 2
         event = models.Event.objects.get(event_group_id=new_group.event_group_id, event_name="login")
         assert set(event.dimension_list) == {"module", "set", "log_path", "target"}
-        assert new_group.table_id == f"{new_group.bk_biz_id}_bkmonitor_event_{new_group.bk_data_id}"
+        assert new_group.table_id == "{}_bkmonitor_event_{}".format(new_group.bk_biz_id, new_group.bk_data_id)
 
         # 测试不可以同一个数据源注册到多个事件上
         with pytest.raises(ValueError):
@@ -1240,7 +1243,7 @@ class TestDataSource:
             ],
         )
 
-        assert new_group.table_id == f"bkmonitor_event_{new_group.bk_data_id}"
+        assert new_group.table_id == "bkmonitor_event_{}".format(new_group.bk_data_id)
 
     def test_time_series(self, mocker, mock_outer_ralay, patch_redis_tools, create_and_delete_record):
         # 1. 准备工作
@@ -1305,7 +1308,7 @@ class TestDataSource:
             label="applications",
             operator="admin",
         )
-        assert new_group.table_id == f"bkmonitor_time_series_{new_group.bk_data_id}.__default__"
+        assert new_group.table_id == "bkmonitor_time_series_{}.__default__".format(new_group.bk_data_id)
 
     def test_es_storage(self, mocker, create_and_delete_record):
         """

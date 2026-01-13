@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 from enum import Enum
+from typing import Dict, Tuple
 
 from .settings import grafana_settings
 
@@ -76,19 +78,19 @@ class BasePermission:
     A base class from which all permission classes should inherit.
     """
 
-    def has_permission(self, request, view, org_name: str) -> tuple[bool, GrafanaRole, dict[str, GrafanaPermission]]:
+    def has_permission(self, request, view, org_name: str) -> Tuple[bool, GrafanaRole, Dict[str, GrafanaPermission]]:
         raise NotImplementedError(".has_permission() must be overridden.")
 
 
 class AllowAny(BasePermission):
     """ """
 
-    def has_permission(self, request, view, org_name: str) -> tuple[bool, GrafanaRole, dict[str, GrafanaPermission]]:
+    def has_permission(self, request, view, org_name: str) -> Tuple[bool, GrafanaRole, Dict[str, GrafanaPermission]]:
         return True, GrafanaRole[grafana_settings.DEFAULT_ROLE], {}
 
 
 class IsAuthenticated(BasePermission):
     """ """
 
-    def has_permission(self, request, view, org_name: str) -> tuple[bool, GrafanaRole, dict[str, GrafanaPermission]]:
+    def has_permission(self, request, view, org_name: str) -> Tuple[bool, GrafanaRole, Dict[str, GrafanaPermission]]:
         return bool(request.user and request.user.is_authenticated), GrafanaRole[grafana_settings.DEFAULT_ROLE], {}

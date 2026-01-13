@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,13 +30,13 @@ from alarm_backends.service.alert.enricher.whitelist import BizWhiteListFor3rdEv
 
 logger = logging.getLogger("alert.enricher")
 
-INSTALLED_EVENT_ENRICHER: list[type[BaseEventEnricher]] = [
+INSTALLED_EVENT_ENRICHER: List[Type[BaseEventEnricher]] = [
     PreEventEnricher,
     CMDBEnricher,
     BizWhiteListFor3rdEvent,
 ]
 
-INSTALLED_AlERT_ENRICHER: list[type[BaseAlertEnricher]] = [
+INSTALLED_AlERT_ENRICHER: List[Type[BaseAlertEnricher]] = [
     StrategySnapshotEnricher,
     StandardTranslateEnricher,
     MonitorTranslateEnricher,
@@ -46,7 +47,7 @@ INSTALLED_AlERT_ENRICHER: list[type[BaseAlertEnricher]] = [
 
 
 class EventEnrichFactory:
-    def __init__(self, events: list[Event]):
+    def __init__(self, events: List[Event]):
         self.events = events
 
     def enrich(self):
@@ -58,7 +59,7 @@ class EventEnrichFactory:
 
 
 class AlertEnrichFactory:
-    def __init__(self, alerts: list[Alert]):
+    def __init__(self, alerts: List[Alert]):
         self.alerts = alerts
 
     def enrich(self):

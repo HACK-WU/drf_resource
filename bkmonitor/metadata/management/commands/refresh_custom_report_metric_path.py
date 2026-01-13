@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -21,14 +22,14 @@ def update_metrics_report_path_option(data_id):
     res = models.DataSourceOption.objects.filter(
         bk_data_id=data_id,
         name="metrics_report_path",
-    ).update(value=f"{config.CONSUL_PATH}/influxdb_metrics/{data_id}/time_series_metric")
+    ).update(value="{}/influxdb_metrics/{}/time_series_metric".format(config.CONSUL_PATH, data_id))
 
     if not res:
         models.DataSourceOption.objects.create(
             bk_data_id=data_id,
             name="metrics_report_path",
             value_type="string",
-            value=f"{config.CONSUL_PATH}/influxdb_metrics/{data_id}/time_series_metric",
+            value="{}/influxdb_metrics/{}/time_series_metric".format(config.CONSUL_PATH, data_id),
             creator="system",
         )
 

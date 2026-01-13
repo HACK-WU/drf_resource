@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -247,7 +248,7 @@ def render_mails(
     except Exception as e:
         exc = e
         # 有用户发送失败了也得继续，不能影响其他用户的发送流程
-        logger.exception(f"[mail_report] Send mail failed: {e}")
+        logger.exception("[mail_report] Send mail failed: %s" % e)
         status["details"]["error_message"][receivers_string] = str(e)
         status["is_success"] = False
         ReportStatus.objects.create(**status)

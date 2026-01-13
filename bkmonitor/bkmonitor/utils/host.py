@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -21,7 +22,7 @@ from drf_resource import resource
 logger = logging.getLogger(__name__)
 
 
-class Host:
+class Host(object):
     def __init__(self, kwargs, bk_biz_id=None):
         self._bk_biz_id = bk_biz_id
 
@@ -84,7 +85,7 @@ class Host:
                 kwargs.update(kwargs["host"])
                 del kwargs["host"]
         else:
-            raise TypeError(f"Host: expect str or dict but get {type(kwargs)}")
+            raise TypeError("Host: expect str or dict but get {}".format(type(kwargs)))
         self.__dict__.update(kwargs)
 
     def __str__(self):
@@ -139,7 +140,7 @@ class Host:
             data["os_type"] = self.bk_os_type_name
         else:
             data["os_type"] = ""
-            logger.debug(f"Host({self.host_id}) can't get os type")
+            logger.debug("Host(%s) can't get os type" % self.host_id)
 
         return data
 

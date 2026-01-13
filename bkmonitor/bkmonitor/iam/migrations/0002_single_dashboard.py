@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -67,7 +68,9 @@ def migrate_dashboard_permission():
             results.append(future.get())
         except Exception as e:
             print(
-                f"[grant_resource] grant permission for resource: {json.dumps(resource)}, something wrong: {e}"
+                "[grant_resource] grant permission for resource: {}, something wrong: {}".format(
+                    json.dumps(resource), e
+                )
             )
 
     print("migrate dashboard permission finished")

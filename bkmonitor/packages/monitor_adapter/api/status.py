@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -51,7 +52,7 @@ def status_settings(request):
     ret = {}
     for attr in sorted(dir(settings)):
         val = getattr(settings, attr)
-        if not attr.startswith("_") and isinstance(val, int | str | tuple | list | dict):
+        if not attr.startswith("_") and isinstance(val, (int, str, tuple, list, dict)):
             try:
                 _ = json.dumps(val, cls=DatetimeEncoder)
             except Exception:  # noqa

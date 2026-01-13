@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -7,7 +8,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from typing import Any
+from typing import Any, Dict, List
 
 from bkm_space.api import SpaceApi
 from bkmonitor.iam import ActionEnum, Permission
@@ -19,7 +20,7 @@ def get_bk_biz_ids_by_user(user=None, use_cache=True) -> [int]:
     return [biz["bk_biz_id"] for biz in spaces]
 
 
-def get_space_map(use_cache=True) -> dict[int, dict[str, Any]]:
+def get_space_map(use_cache=True) -> Dict[int, Dict[str, Any]]:
     space_map = {}
     spaces = SpaceApi.list_spaces_dict(use_cache)
     for space in spaces:
@@ -27,7 +28,7 @@ def get_space_map(use_cache=True) -> dict[int, dict[str, Any]]:
     return space_map
 
 
-def get_space_dict_by_user(user=None, use_cache=True) -> list[dict[str, Any]]:
+def get_space_dict_by_user(user=None, use_cache=True) -> List[Dict[str, Any]]:
     """
     获取用户拥有的空间列表
     """

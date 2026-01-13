@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,6 +10,7 @@ specific language governing permissions and limitations under the License.
 """
 
 import json
+from typing import List
 
 from django.core.management import BaseCommand, CommandError
 
@@ -72,11 +74,11 @@ class Command(BaseCommand):
 
         self.stdout.write("disable influxdb router successfully")
 
-    def _get_zero_space_table_id_list(self) -> list:
+    def _get_zero_space_table_id_list(self) -> List:
         """获取 0 空间下的单指标单表"""
         return list(models.ResultTable.objects.filter(bk_biz_id=0).values_list("table_id", flat=True))
 
-    def _get_real_space_table_id_list(self, space_type: str, space_id: str) -> list:
+    def _get_real_space_table_id_list(self, space_type: str, space_id: str) -> List:
         """获取真实存在空间的结果表"""
         data_ids = set(
             models.SpaceDataSource.objects.filter(space_type_id=space_type, space_id=space_id).values_list(
@@ -89,7 +91,7 @@ class Command(BaseCommand):
             .distinct()
         )
 
-    def _refine_table_id_list(self, table_id_list: list) -> list:
+    def _refine_table_id_list(self, table_id_list: List) -> List:
         """过滤对应的结果表，排除已经切换过的结果表"""
         # 排除掉已经停用的结果表
         vm_cluster_id_list = list(

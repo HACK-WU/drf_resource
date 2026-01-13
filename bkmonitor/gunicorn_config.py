@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -57,7 +58,7 @@ def when_ready(server):
         return
 
     _ip, _port = get_bind_info(server)
-    node_name = f"{node_name_prefix}-{get_node_id(server)}"
+    node_name = "{}-{}".format(node_name_prefix, get_node_id(server))
 
     if server.cfg.settings["worker_class"].get() == "gevent":
         from gevent import monkey
@@ -77,13 +78,13 @@ def when_ready(server):
 
     signal.signal(signal.SIGCHLD, server.handle_chld)
 
-    server.log.info(f"Server register node: {node_name}")
+    server.log.info("Server register node: {}".format(node_name))
 
 
 def on_exit(server):
     if os.getenv("DEPLOY_MODE") == "kubernetes":
         return
     client = BKConsul()
-    node_name = f"{node_name_prefix}-{get_node_id(server)}"
+    node_name = "{}-{}".format(node_name_prefix, get_node_id(server))
     client.agent.service.deregister(node_name)
-    server.log.info(f"Server deregister node: {node_name}")
+    server.log.info("Server deregister node: {}".format(node_name))

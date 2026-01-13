@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +9,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 import json
+from typing import Dict, List, Tuple
 
 from django.core.management.base import BaseCommand
 from django.db import models
@@ -84,7 +86,7 @@ class Command(BaseCommand):
 
         self.stdout.write(json.dumps(list(space_dict.values())))
 
-    def _refine_space(self, options) -> list[dict]:
+    def _refine_space(self, options) -> List[Dict]:
         space_uids = options.get("space_uid")
         ids = options.get("id")
         # 如果为空，则返回消息
@@ -98,7 +100,7 @@ class Command(BaseCommand):
             space_list.extend(self._query_by_id_list(ids.split(",")))
         return space_list
 
-    def _check_space_uid_list(self, space_uid_list: list) -> bool:
+    def _check_space_uid_list(self, space_uid_list: List) -> bool:
         error_uid_list = []
         for suid in space_uid_list:
             if SPACE_UID_HYPHEN not in suid:
@@ -106,7 +108,7 @@ class Command(BaseCommand):
         if error_uid_list:
             self.stderr.write(f"space_uid:{','.join(error_uid_list)} format error, expect to contains `__`")
 
-    def _query_by_space_uid_list(self, space_uid_list) -> list:
+    def _query_by_space_uid_list(self, space_uid_list) -> List:
         # 使用 annotate 过滤数据
         space_list = (
             Space.objects.annotate(space_uid=Concat("space_type_id", models.Value(SPACE_UID_HYPHEN), "space_id"))
@@ -115,7 +117,7 @@ class Command(BaseCommand):
         )
         return list(space_list)
 
-    def _query_by_id_list(self, id_list: list) -> dict:
+    def _query_by_id_list(self, id_list: List) -> Dict:
         space_list = (
             Space.objects.annotate(space_uid=Concat("space_type_id", models.Value(SPACE_UID_HYPHEN), "space_id"))
             .filter(id__in=id_list)
@@ -124,8 +126,8 @@ class Command(BaseCommand):
         return list(space_list)
 
     def _query_bkcc_space_data(
-        self, space_uid_list: list, removed_cluster_data_id_list: list, disabled_data_id_list: list
-    ) -> tuple[dict, dict]:
+        self, space_uid_list: List, removed_cluster_data_id_list: List, disabled_data_id_list: List
+    ) -> Tuple[Dict, Dict]:
         """获取业务空间关联的数据源 ID 和资源
 
         这里需要过滤业务下的集群资源
@@ -141,8 +143,8 @@ class Command(BaseCommand):
         )
 
     def _query_not_bkcc_space_data(
-        self, space_uid_list: list, removed_cluster_data_id_list: list, disabled_data_id_list: list
-    ) -> tuple[dict, dict]:
+        self, space_uid_list: List, removed_cluster_data_id_list: List, disabled_data_id_list: List
+    ) -> Tuple[Dict, Dict]:
         # 获取关联的 data id
         filter_q = Q()
         # space_uid_list 格式为 [(space_type_id, space_id), (space_type_id1, space_id1)]
@@ -152,8 +154,8 @@ class Command(BaseCommand):
         return self._query_space_data_source(filter_q, removed_cluster_data_id_list, disabled_data_id_list)
 
     def _query_space_data_source(
-        self, filter_q: Q, removed_cluster_data_id_list: list, disabled_data_id_list: list
-    ) -> dict:
+        self, filter_q: Q, removed_cluster_data_id_list: List, disabled_data_id_list: List
+    ) -> Dict:
         # 获取空间下的数据源 ID
         space_data_source = SpaceDataSource.objects.filter(filter_q)
         space_keys, belong_space_data_source_dict, authorized_space_data_source_dict = set(), {}, {}
@@ -177,7 +179,7 @@ class Command(BaseCommand):
             )
         return space_data_source_dict
 
-    def _query_removed_cluster_data_id_list(self) -> list:
+    def _query_removed_cluster_data_id_list(self) -> List:
         """获取已删除的集群数据源 ID"""
         cluster_objs = BCSClusterInfo.objects.filter(
             status__in=[BCSClusterInfo.CLUSTER_STATUS_DELETED, BCSClusterInfo.CLUSTER_RAW_STATUS_DELETED]
@@ -190,11 +192,11 @@ class Command(BaseCommand):
             data_id_list.append(obj["CustomEventDataID"])
         return data_id_list
 
-    def _query_disabled_data_id_list(self) -> list:
+    def _query_disabled_data_id_list(self) -> List:
         """获取已禁用的数据源 ID"""
         return list(DataSource.objects.filter(is_enable=False).values_list("bk_data_id", flat=True))
 
-    def _query_platform_data_id_list(self) -> dict:
+    def _query_platform_data_id_list(self) -> Dict:
         """获取空间类型下数据源 ID"""
         ds_objs = DataSource.objects.filter(is_platform_data_id=True).values("bk_data_id", "space_type_id")
         space_type_data_ids = {}

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import abc
 
@@ -50,10 +51,10 @@ class GetAccessToken(BkSSMBaseResource):
     def get_request_url(self, validated_request_data):
         if Platform.te:
             return f"{self.base_url_prefix}/auth_api/token/"
-        return super().get_request_url(validated_request_data)
+        return super(GetAccessToken, self).get_request_url(validated_request_data)
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super().full_request_data(validated_request_data)
+        validated_request_data = super(GetAccessToken, self).full_request_data(validated_request_data)
         if not Platform.te:
             return validated_request_data
         # NOTE: 去除不需要的key

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import time
 from unittest.mock import patch
@@ -25,7 +26,7 @@ class SearchAlertCase(TestCase):
             ilm.es_client.indices.delete(index=doc.Index.name)
 
     def test_something(self):
-        alert_id = f"{int(time.time())}1111111"
+        alert_id = "{}1111111".format(int(time.time()))
         alert = AlertDocument(
             **{
                 "id": alert_id,
@@ -87,7 +88,7 @@ class SearchAlertCase(TestCase):
             "fta_web.home.resources.BizWithAlertStatisticsResource.get_all_business_list", return_value=business_info
         )
         patch_cmdb.start()
-        alert_id_template = f"{int(time.time())}1111111{{}}"
+        alert_id_template = "%s1111111{}" % (int(time.time()))
         alerts = [
             AlertDocument(
                 **{

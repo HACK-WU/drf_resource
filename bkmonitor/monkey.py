@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,7 +30,7 @@ def patch_module(name, items=None):
             target_module = getattr(target_module, submodule)
     items = items or getattr(rt_module, "__implements__", None)
     if items is None:
-        raise AttributeError(f"{rt_module!r} does not have __implements__")
+        raise AttributeError("%r does not have __implements__" % rt_module)
 
     for attr in items:
         setattr(target_module, attr, getattr(rt_module, attr))

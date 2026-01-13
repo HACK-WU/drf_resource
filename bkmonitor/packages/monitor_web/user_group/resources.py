@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from collections import defaultdict
 from datetime import datetime, timedelta
 
@@ -43,7 +44,7 @@ class DutyPlanUserTranslaterResource(Resource):
     def __init__(self, context=None):
         self.all_group_users = defaultdict(dict)
         self.user_list = {}
-        super().__init__(context)
+        super(DutyPlanUserTranslaterResource, self).__init__(context)
 
     def get_all_plan_users(self, duty_plans):
         """
@@ -60,7 +61,7 @@ class DutyPlanUserTranslaterResource(Resource):
                 )["results"]
             }
         except Exception as error:
-            logger.info(f"query list users error {str(error)}")
+            logger.info("query list users error %s" % str(error))
 
         self.all_group_users = DutyPlanSlz.get_all_recievers()
 

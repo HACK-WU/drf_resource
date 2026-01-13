@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -14,7 +15,7 @@ import arrow
 from bkmonitor.utils import time_tools
 
 
-class AnomalyIDParser:
+class AnomalyIDParser(object):
     """
     异常ID解析器
     格式： "{dimensions_md5}.{timestamp}.{strategy_id}.{item_id}.{level}"
@@ -43,7 +44,7 @@ class EventIDParser(AnomalyIDParser):
 
     def __init__(self, event_id):
         # 格式与异常ID相同，直接复用
-        super().__init__(event_id)
+        super(EventIDParser, self).__init__(event_id)
 
 
 class RecordParser(AnomalyIDParser):
@@ -82,4 +83,4 @@ class RecordParser(AnomalyIDParser):
     def __init__(self, record):
         self.record = record
         anomaly_id = list(self.record["anomaly"].values())[0]["anomaly_id"]
-        super().__init__(anomaly_id)
+        super(RecordParser, self).__init__(anomaly_id)

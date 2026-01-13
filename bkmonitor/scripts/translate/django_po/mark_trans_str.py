@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -37,10 +38,10 @@ Token = namedtuple(
     ],
 )
 
-CHINESE_PATTERN = re.compile("[\u4e00-\u9fa5]+")
+CHINESE_PATTERN = re.compile(u"[\u4e00-\u9fa5]+")
 
 
-class TagString:
+class TagString(object):
     """
     dfa
     """
@@ -172,7 +173,7 @@ class TagString:
         return "".join(self.lines)
 
 
-class TagJSString:
+class TagJSString(object):
     def __init__(self):
         pass
 
@@ -190,7 +191,7 @@ class TagJSString:
                 continue
             chinese_token_set.add(value)
             if CHINESE_PATTERN.search(value):
-                s = s.replace(value, f"gettext({value})")
+                s = s.replace(value, u"gettext(%s)" % value)
         return s
 
 
@@ -221,7 +222,7 @@ def list_dir(path, suffix, exclude_path_list=None):
 
 
 def read_file(file_path):
-    with open(file_path) as f:
+    with open(file_path, "r") as f:
         try:
             return f.read().encode("utf-8").decode("utf-8")
         except:

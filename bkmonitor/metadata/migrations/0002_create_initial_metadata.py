@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -53,7 +54,7 @@ def init_data(apps, schema_editor):
         cluster["port"] = 0
 
         models["ClusterInfo"].objects.create(**cluster)
-        logger.info("cluster->[{}] now is inited done.".format(cluster["cluster_name"]))
+        logger.info("cluster->[%s] now is inited done." % cluster["cluster_name"])
 
     # 2. 写入datasource信息
     kafka_cluster = models["ClusterInfo"].objects.get(cluster_type="kafka")
@@ -69,7 +70,7 @@ def init_data(apps, schema_editor):
             creator="system",
             mq_cluster_id=kafka_cluster.cluster_id,
             is_custom_source=False,
-            data_description="init data_source for {}".format(data_source["data_name"]),
+            data_description="init data_source for %s" % data_source["data_name"],
             # 由于mq_config和data_source两者相互指向对方，所以只能先提供占位符，先创建data_source
             mq_config_id=0,
             last_modify_user="system",
@@ -78,7 +79,7 @@ def init_data(apps, schema_editor):
         # 获取这个数据源对应的配置记录model，并创建一个新的配置记录
         mq_config = models["KafkaTopicInfo"].objects.create(
             bk_data_id=data_object.bk_data_id,
-            topic=f"{config.KAFKA_TOPIC_PREFIX}{data_object.bk_data_id}0",
+            topic="{}{}0".format(config.KAFKA_TOPIC_PREFIX, data_object.bk_data_id),
             partition=1,
         )
         data_object.mq_config_id = mq_config.id
@@ -101,7 +102,7 @@ def init_data(apps, schema_editor):
     # 获取这个数据源对应的配置记录model，并创建一个新的配置记录
     mq_config = models["KafkaTopicInfo"].objects.create(
         bk_data_id=data_object.bk_data_id,
-        topic=f"{config.KAFKA_TOPIC_PREFIX}{data_object.bk_data_id}0",
+        topic="{}{}0".format(config.KAFKA_TOPIC_PREFIX, data_object.bk_data_id),
         partition=1,
     )
     data_object.mq_config_id = mq_config.id

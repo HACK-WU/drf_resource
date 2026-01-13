@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -17,7 +18,7 @@ from constants.data_source import DataSourceLabel, DataTypeLabel
 __all__ = ["DataQueryHandler", "HandlerType"]
 
 
-class DataQueryHandler:
+class DataQueryHandler(object):
     def __new__(cls, data_source_label, data_type_label):
         if (data_source_label, data_type_label) in [
             (DataSourceLabel.BK_MONITOR_COLLECTOR, DataTypeLabel.LOG),
@@ -35,7 +36,7 @@ class DataQueryHandler:
         return q
 
 
-class HandlerType:
+class HandlerType(object):
     KEYWORDS = "keywords"
     LOG_SEARCH = "log_search"
     TIME_SERIES = "time_series"

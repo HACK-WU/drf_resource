@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 
 
 import abc
 import json
+from typing import List
 
 import six
 from django.conf import settings
@@ -78,7 +80,7 @@ class GetClusterList(BcsCcBaseResource):
     def request(self, request_data=None, **kwargs):
         if not settings.BCS_CC_API_URL:
             return []
-        return super().request(request_data, **kwargs)
+        return super(GetClusterList, self).request(request_data, **kwargs)
 
 
 class GetAreaList(BcsCcBaseResource):
@@ -89,7 +91,7 @@ class GetAreaList(BcsCcBaseResource):
     def request(self, request_data=None, **kwargs):
         if not settings.BCS_CC_API_URL:
             return {"results": []}
-        return super().request(request_data, **kwargs)
+        return super(GetAreaList, self).request(request_data, **kwargs)
 
     def render_response_data(self, validated_request_data, response_data):
         response_data["results"].append(
@@ -113,7 +115,7 @@ class GetProjectList(BcsCcBaseResource):
     def request(self, request_data=None, **kwargs):
         if not settings.BCS_CC_API_URL:
             return {"results": []}
-        return super().request(request_data, **kwargs)
+        return super(GetProjectList, self).request(request_data, **kwargs)
 
     def render_response_data(self, validated_request_data, response_data):
         response_data["results"].append(
@@ -162,7 +164,7 @@ class GetSharedClusterNamespaces(BcsCcBaseResource):
 
     def get_request_url(self, validated_request_data):
         return (
-            super()
+            super(GetSharedClusterNamespaces, self)
             .get_request_url(validated_request_data)
             .format(**validated_request_data)
         )
@@ -227,7 +229,7 @@ class BatchGetProjects(Resource):
 
         return self._refine_projects(project_list, validated_request_data["filter_k8s_kind"])
 
-    def _refine_projects(self, project_list: list, filter_k8s_kind: bool) -> list:
+    def _refine_projects(self, project_list: List, filter_k8s_kind: bool) -> List:
         """过滤数据，返回必要信息"""
         data = []
         for p in project_list:

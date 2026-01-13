@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -166,9 +167,9 @@ class SQLCompiler(compiler.SQLCompiler):
             if not (isinstance(i, tuple) and len(i) == 2 and i[0] in time_field_list)
         ]
 
-        gte_field = f"{time_field}__gte"
-        lte_field = f"{time_field}__lte"
-        lt_field = f"{time_field}__lt"
+        gte_field = "{}__gte".format(time_field)
+        lte_field = "{}__lte".format(time_field)
+        lt_field = "{}__lt".format(time_field)
         start_time = where_dict.get(gte_field)
         end_time = where_dict.get(lte_field) or where_dict.get(lt_field)
         if start_time:
@@ -279,7 +280,7 @@ class SQLCompiler(compiler.SQLCompiler):
             time_field: {
                 "date_histogram": {
                     "field": time_field,
-                    "interval": f"{agg_interval}s",
+                    "interval": "%ss" % agg_interval,
                     "time_zone": timezone.get_current_timezone().zone,
                 },
                 "aggregations": metric_aggragations,

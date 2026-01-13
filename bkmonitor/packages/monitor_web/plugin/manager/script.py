@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -44,7 +45,7 @@ class ScriptPluginManager(PluginManager):
 
     def make_package(self, **kwargs):
         kwargs.update(dict(add_files=self.fetch_collector_file()))
-        return super().make_package(**kwargs)
+        return super(ScriptPluginManager, self).make_package(**kwargs)
 
     def _get_debug_config_context(self, config_version, info_version, param, target_nodes):
         specific_version = self.plugin.get_version(config_version, info_version)
@@ -91,13 +92,13 @@ class ScriptPluginManager(PluginManager):
             elif param_mode == ParamMode.OPT_CMD:
                 if param["type"] == "switch":
                     if param_value == "true":
-                        cmd_args += f"{param_name} "
+                        cmd_args += "{opt_name} ".format(opt_name=param_name)
                 elif param_value:
-                    cmd_args += f"{param_name} {param_value} "
+                    cmd_args += "{opt_name} {opt_value} ".format(opt_name=param_name, opt_value=param_value)
 
             elif param_mode == ParamMode.POS_CMD:
                 # 位置参数，直接将参数值拼接进去
-                cmd_args += f"{param_value} "
+                cmd_args += "{pos_value} ".format(pos_value=param_value)
 
             elif param_mode == ParamMode.DMS_INSERT:
                 # 维度注入参数，更新至labels的模板中
@@ -124,7 +125,9 @@ class ScriptPluginManager(PluginManager):
         collector_params = param["collector"]
         collector_params[
             "command"
-        ] = f"{{{{ step_data.{self.plugin.plugin_id}.control_info.setup_path }}}}/{{{{ step_data.{self.plugin.plugin_id}.control_info.start_cmd }}}}"
+        ] = "{{{{ step_data.{}.control_info.setup_path }}}}/{{{{ step_data.{}.control_info.start_cmd }}}}".format(
+            self.plugin.plugin_id, self.plugin.plugin_id
+        )
         env_context = {}
         user_files = []
 
@@ -155,13 +158,13 @@ class ScriptPluginManager(PluginManager):
             elif param_mode == ParamMode.OPT_CMD:
                 if param["type"] == "switch":
                     if param_value == "true":
-                        cmd_args += f"{param_name} "
+                        cmd_args += "{opt_name} ".format(opt_name=param_name)
                 elif param_value:
-                    cmd_args += f"{param_name} {param_value} "
+                    cmd_args += "{opt_name} {opt_value} ".format(opt_name=param_name, opt_value=param_value)
 
             elif param_mode == ParamMode.POS_CMD:
                 # 位置参数，直接将参数值拼接进去
-                cmd_args += f"{param_value} "
+                cmd_args += "{pos_value} ".format(pos_value=param_value)
 
         env_context["cmd_args"] = cmd_args
         deploy_steps = [
