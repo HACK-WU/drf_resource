@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import requests
 import version_log.config as config
 from blueapps.account.decorators import login_exempt
@@ -70,11 +70,11 @@ urlpatterns = [
     re_path(r"^apm/", include("apm_web.urls", namespace="apm_web")),
     re_path(r"^apm_log_forward/", include("apm_web.log_proxy.urls", namespace="log_proxy")),
     re_path(r"^trace/", include("apm_trace.urls", namespace="apm_trace")),
-    re_path(r"^{}".format(config.ENTRANCE_URL), include("version_log.urls")),
+    re_path(rf"^{config.ENTRANCE_URL}", include("version_log.urls")),
     re_path(r"^media/(?P<path>.*)$", wrapped_serve, {"document_root": settings.MEDIA_ROOT}),
     re_path(r"^metrics/$", metrics),
     # env: `BK_API_URL_TMPL` must be set
-    re_path(r'^notice/', include(('bk_notice_sdk.urls', 'notice'), namespace='notice')),
+    re_path(r"^notice/", include(("bk_notice_sdk.urls", "notice"), namespace="notice")),
 ]
 
 # 添加API访问子路径
@@ -88,7 +88,23 @@ if settings.API_SUB_PATH:
 
 # 正式环境屏蔽swagger访问路径
 if settings.ENVIRONMENT != "production":
+    from django.urls import path
+
+    # 导入 API explorer views
+    from drf_resource.api_explorer.views import (
+        IndexView,
+        CatalogView,
+        APIDetailView,
+        InvokeView,
+        ModulesView,
+    )
+
     urlpatterns += [
+        path("api_index/", IndexView.as_view(), name="index"),
+        path("catalog/", CatalogView.as_view(), name="catalog"),
+        path("api_detail/", APIDetailView.as_view(), name="api_detail"),
+        path("invoke/", InvokeView.as_view(), name="invoke"),
+        path("api_modules/", ModulesView.as_view(), name="modules"),
         re_path(r"^swagger(?P<format>\.json|\.yaml)$", schema_view.without_ui(cache_timeout=0), name="schema-json"),
         re_path(r"^swagger/$", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
         re_path(r"^redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),

@@ -56,6 +56,23 @@ API Explorer 提供了一套 RESTful API 接口，用于查看和调试项目中
 
 **请求参数**：无
 
+**响应参数**：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| result | boolean | 请求是否成功 |
+| data | object | 返回数据 |
+| data.title | string | 标题 |
+| data.description | string | 描述 |
+| data.endpoints | object | 端点路径映射 |
+| data.endpoints_info | array | 端点详细信息列表 |
+| data.endpoints_info[].name | string | 端点名称 |
+| data.endpoints_info[].url | string | 端点 URL |
+| data.endpoints_info[].method | string | HTTP 方法 |
+| data.endpoints_info[].description | string | 端点描述 |
+| data.endpoints_info[].params | array | 参数列表 |
+| message | string | 响应消息 |
+
 **响应示例**：
 
 ```json
@@ -68,8 +85,99 @@ API Explorer 提供了一套 RESTful API 接口，用于查看和调试项目中
         "endpoints": {
             "catalog": "/api-explorer/catalog/",
             "api_detail": "/api-explorer/api_detail/",
-            "invoke": "/api-explorer/invoke/"
-        }
+            "invoke": "/api-explorer/invoke/",
+            "modules": "/api-explorer/modules/"
+        },
+        "endpoints_info": [
+            {
+                "name": "catalog",
+                "url": "/api-explorer/catalog/",
+                "method": "GET",
+                "description": "获取 API 目录列表，支持搜索和模块过滤",
+                "params": [
+                    {
+                        "name": "search",
+                        "type": "string",
+                        "required": false,
+                        "description": "搜索关键词，匹配模块名、接口名、类名、标签",
+                        "default": null
+                    },
+                    {
+                        "name": "module",
+                        "type": "string",
+                        "required": false,
+                        "description": "过滤指定模块",
+                        "default": null
+                    }
+                ]
+            },
+            {
+                "name": "api_detail",
+                "url": "/api-explorer/api_detail/",
+                "method": "GET",
+                "description": "获取单个 API 的详细信息，包括请求/响应参数结构",
+                "params": [
+                    {
+                        "name": "module",
+                        "type": "string",
+                        "required": true,
+                        "description": "模块名",
+                        "default": null
+                    },
+                    {
+                        "name": "api_name",
+                        "type": "string",
+                        "required": true,
+                        "description": "API 名称",
+                        "default": null
+                    }
+                ]
+            },
+            {
+                "name": "invoke",
+                "url": "/api-explorer/invoke/",
+                "method": "POST",
+                "description": "在线调用指定的第三方 API，并返回调用结果",
+                "params": [
+                    {
+                        "name": "module",
+                        "type": "string",
+                        "required": true,
+                        "description": "模块名",
+                        "default": null
+                    },
+                    {
+                        "name": "api_name",
+                        "type": "string",
+                        "required": true,
+                        "description": "API 名称",
+                        "default": null
+                    },
+                    {
+                        "name": "params",
+                        "type": "object",
+                        "required": false,
+                        "description": "请求参数（JSON 对象）",
+                        "default": {}
+                    }
+                ]
+            },
+            {
+                "name": "modules",
+                "url": "/api-explorer/modules/",
+                "method": "GET",
+                "description": "获取所有可用的模块列表，支持模糊查询",
+                "params": [
+                    {
+                        "name": "search",
+                        "type": "string",
+                        "required": false,
+                        "description": "搜索关键词，匹配模块名或展示名称",
+                        "default": null
+                    }
+                ]
+            }
+        ]
     }
 }
 ```
@@ -82,7 +190,85 @@ curl -X GET "http://localhost:8000/api-explorer/"
 
 ---
 
-### 2. 获取 API 目录
+### 2. 获取所有模块
+
+获取项目中所有可用的模块列表，支持模糊搜索。
+
+**接口地址**：`GET /api-explorer/modules/`
+
+**请求参数**（Query Parameters）：
+
+| 参数名 | 类型 | 必填 | 说明 | 示例 |
+|--------|------|------|------|------|
+| search | string | 否 | 搜索关键词，匹配模块名或展示名称 | `data` |
+
+**响应参数**：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| result | boolean | 请求是否成功 |
+| data | object | 返回数据 |
+| data.modules | array | 模块列表 |
+| data.modules[].name | string | 模块名称 |
+| data.modules[].display_name | string | 模块展示名称 |
+| data.modules[].api_count | integer | 该模块下的 API 数量 |
+| data.total | integer | 模块总数 |
+| message | string | 响应消息 |
+
+**响应示例**：
+
+```json
+{
+    "result": true,
+    "data": {
+        "modules": [
+            {
+                "name": "bkdata",
+                "display_name": "计算平台",
+                "api_count": 23
+            },
+            {
+                "name": "cmdb",
+                "display_name": "配置平台",
+                "api_count": 45
+            },
+            {
+                "name": "job",
+                "display_name": "作业平台",
+                "api_count": 12
+            }
+        ],
+        "total": 3
+    },
+    "message": "success"
+}
+```
+
+**cURL 示例**：
+
+```bash
+# 获取所有模块
+curl -X GET "http://localhost:8000/api-explorer/modules/"
+
+# 搜索包含 "data" 的模块
+curl -X GET "http://localhost:8000/api-explorer/modules/?search=data"
+```
+
+**错误响应**：
+
+```json
+{
+    "result": false,
+    "message": "参数校验失败",
+    "errors": {
+        "search": ["确保这个字段不为空。"]
+    }
+}
+```
+
+---
+
+### 3. 获取 API 目录
 
 获取项目中所有 API 资源的目录列表，支持搜索和模块过滤。
 
@@ -210,7 +396,7 @@ curl -X GET "http://localhost:8000/api-explorer/catalog/?module=bkdata&search=da
 
 ---
 
-### 3. 获取 API 详细信息
+### 4. 获取 API 详细信息
 
 获取单个 API 的详细信息，包括请求/响应参数结构。
 
@@ -334,7 +520,7 @@ curl -X GET "http://localhost:8000/api-explorer/api_detail/?module=bkdata&api_na
 
 ---
 
-### 4. 在线调用 API
+### 5. 在线调用 API
 
 在线调用指定的第三方 API，并返回调用结果。
 

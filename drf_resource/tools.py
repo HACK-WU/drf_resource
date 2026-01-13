@@ -136,7 +136,7 @@ def render_schema_structured(fields, parent="", using_source=False):
         field_type = field["type"].lower()
         if field["type"] == FieldType.ARRAY:
             # 数组类型，如 "integer[]" 或 "object[]"
-            item_type = field["items"]["type"].lower()
+            # item_type = field["items"]["type"].lower()
             field_type = "array"
         elif field["type"] == FieldType.ENUM:
             # 枚举类型，返回 choices
@@ -230,3 +230,25 @@ def format_serializer_errors(serializer):
         return serializer.errors
     else:
         return message
+
+
+def object_to_dict(obj):
+    """
+    python 对象递归转成字典
+    """
+    if isinstance(obj, dict):
+        data = {}
+        for k, v in list(obj.items()):
+            data[k] = object_to_dict(v)
+        return data
+    elif hasattr(obj, "__iter__") and not isinstance(obj, str):
+        return [object_to_dict(v) for v in obj]
+    elif hasattr(obj, "__dict__"):
+        data = {}
+        for key in dir(obj):
+            value = getattr(obj, key)
+            if not key.startswith("_") and not callable(value):
+                data[key] = object_to_dict(value)
+        return data
+    else:
+        return obj
