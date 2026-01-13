@@ -9,7 +9,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-
 import json
 import logging
 from collections import OrderedDict
@@ -74,7 +73,12 @@ def field_to_schema(field):
     elif isinstance(field, serializers.Serializer):
         type_params = {
             "type": FieldType.OBJECT,
-            "properties": OrderedDict([(key, field_to_schema(value)) for key, value in list(field.fields.items())]),
+            "properties": OrderedDict(
+                [
+                    (key, field_to_schema(value))
+                    for key, value in list(field.fields.items())
+                ]
+            ),
         }
     # elif isinstance(field, serializers.ManyRelatedField):
     #     type_params = {
@@ -115,40 +119,71 @@ def field_to_schema(field):
     return type_params
 
 
-def render_schema(fields, parent="", using_source=False):
+def render_schema_structured(fields, parent="", using_source=False):
     """
-    将field schema渲染成apidoc的格式
+    将field schema渲染成结构化的字典格式
     :param fields: schema list
     :param parent: field name of parent
     :param using_source: using source name of the field
-    :return: list
+    :return: list of dicts
     """
-    print_list = []
+    result_list = []
     for field in fields:
-        real_type = field["type"]
         field_name = field["source_name"] if using_source else field["name"]
         origin_name = "{}.{}".format(parent, field_name) if parent else field_name
-        real_name = origin_name
-        if field["type"] == FieldType.ARRAY:
-            real_type = "%s[]" % field["items"]["type"]
-        elif field["type"] == FieldType.ENUM:
-            choices = ",".join(['"%s"' % c for c in field["choices"]])
-            real_type = "{}={}".format(FieldType.STRING, choices)
-        if field["default"] is not empty:
-            real_name = "{}={}".format(real_name, field["default"])
-        if not field["required"]:
-            real_name = "[%s]" % real_name
-        print_list.append("{{{}}} {} {}".format(real_type, real_name, field["description"]))
 
-        if field["type"] == FieldType.ARRAY and field["items"]["type"] == FieldType.OBJECT:
-            print_list += render_schema(
-                fields=list(field["items"]["properties"].values()), parent=origin_name, using_source=using_source
+        # 确定类型字符串
+        field_type = field["type"].lower()
+        if field["type"] == FieldType.ARRAY:
+            # 数组类型，如 "integer[]" 或 "object[]"
+            item_type = field["items"]["type"].lower()
+            field_type = "array"
+        elif field["type"] == FieldType.ENUM:
+            # 枚举类型，返回 choices
+            field_type = "string"
+
+        # 处理默认值
+        default_value = None
+        if field["default"] is not empty:
+            default_value = field["default"]
+
+        # 构建参数信息字典
+        param_info = {
+            "name": origin_name,
+            "type": field_type,
+            "required": field["required"],
+            "description": field["description"],
+            "default": default_value,
+        }
+
+        # 添加枚举选项
+        if field["type"] == FieldType.ENUM:
+            param_info["choices"] = field.get("choices", [])
+
+        # 添加数组项类型
+        if field["type"] == FieldType.ARRAY:
+            param_info["items_type"] = field["items"]["type"].lower()
+
+        result_list.append(param_info)
+
+        # 递归处理嵌套对象
+        if (
+            field["type"] == FieldType.ARRAY
+            and field["items"]["type"] == FieldType.OBJECT
+        ):
+            result_list += render_schema_structured(
+                fields=list(field["items"]["properties"].values()),
+                parent=origin_name,
+                using_source=using_source,
             )
         elif field["type"] == FieldType.OBJECT:
-            print_list += render_schema(
-                fields=list(field["properties"].values()), parent=origin_name, using_source=using_source
+            result_list += render_schema_structured(
+                fields=list(field["properties"].values()),
+                parent=origin_name,
+                using_source=using_source,
             )
-    return print_list
+
+    return result_list
 
 
 def get_underscore_viewset_name(viewset):
@@ -167,9 +202,13 @@ def _format_serializer_errors_core(errors, fields, params):
             label = field.field_name
             if isinstance(field_errors, dict):
                 if hasattr(field, "child"):
-                    sub_format = _format_serializer_errors_core(field_errors, field.child.fields, params)
+                    sub_format = _format_serializer_errors_core(
+                        field_errors, field.child.fields, params
+                    )
                 else:
-                    sub_format = _format_serializer_errors_core(field_errors, field.fields, params)
+                    sub_format = _format_serializer_errors_core(
+                        field_errors, field.fields, params
+                    )
                 sub_message += sub_format
             elif isinstance(field_errors, list):
                 for error in field_errors:
@@ -183,7 +222,9 @@ def _format_serializer_errors_core(errors, fields, params):
 
 def format_serializer_errors(serializer):
     try:
-        message = _format_serializer_errors_core(serializer.errors, serializer.fields, serializer.get_initial())
+        message = _format_serializer_errors_core(
+            serializer.errors, serializer.fields, serializer.get_initial()
+        )
     except Exception as e:
         logger.warning("序列化器错误信息格式化失败，原因: {}".format(e))
         return serializer.errors

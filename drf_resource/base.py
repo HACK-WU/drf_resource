@@ -9,7 +9,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-
 import abc
 import logging
 
@@ -21,7 +20,7 @@ from drf_resource.tasks import run_perform_request
 from drf_resource.tools import (
     format_serializer_errors,
     get_serializer_fields,
-    render_schema,
+    render_schema_structured,
 )
 from drf_resource.utils.thread_backend import ThreadPool
 from drf_resource.utils.user import get_request_username
@@ -83,7 +82,9 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
     support_data_collect = True
 
     def __init__(self, context=None):
-        self.RequestSerializer, self.ResponseSerializer = self._search_serializer_class()
+        self.RequestSerializer, self.ResponseSerializer = (
+            self._search_serializer_class()
+        )
 
         self.context = context
         self._task_manager = None
@@ -136,10 +137,14 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
 
         if cls.serializers_module:
             if not request_serializer_class:
-                request_serializer_class = getattr(cls.serializers_module, request_serializer_class_name, None)
+                request_serializer_class = getattr(
+                    cls.serializers_module, request_serializer_class_name, None
+                )
 
             if not response_serializer_class:
-                response_serializer_class = getattr(cls.serializers_module, response_serializer_class_name, None)
+                response_serializer_class = getattr(
+                    cls.serializers_module, response_serializer_class_name, None
+                )
 
         return request_serializer_class, response_serializer_class
 
@@ -164,21 +169,28 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
 
         # model类型的数据需要特殊处理
         if isinstance(request_data, (models.Model, models.QuerySet)):
-            request_serializer = self.RequestSerializer(request_data, many=self.many_request_data)
+            request_serializer = self.RequestSerializer(
+                request_data, many=self.many_request_data
+            )
             self._request_serializer = request_serializer
             return request_serializer.data
         else:
-            request_serializer = self.RequestSerializer(data=request_data, many=self.many_request_data)
+            request_serializer = self.RequestSerializer(
+                data=request_data, many=self.many_request_data
+            )
             self._request_serializer = request_serializer
             is_valid_request = request_serializer.is_valid()
             if not is_valid_request:
                 logger.error(
-                    "Resource[{}] 请求参数格式错误：%s".format(self.get_resource_name()),
+                    "Resource[{}] 请求参数格式错误：%s".format(
+                        self.get_resource_name()
+                    ),
                     format_serializer_errors(request_serializer),
                 )
                 raise CustomException(
                     _("Resource[{}] 请求参数格式错误：{}").format(
-                        self.get_resource_name(), format_serializer_errors(request_serializer)
+                        self.get_resource_name(),
+                        format_serializer_errors(request_serializer),
                     )
                 )
             return request_serializer.validated_data
@@ -193,17 +205,22 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
 
         # model类型的数据需要特殊处理
         if isinstance(response_data, (models.Model, models.QuerySet)):
-            response_serializer = self.ResponseSerializer(response_data, many=self.many_response_data)
+            response_serializer = self.ResponseSerializer(
+                response_data, many=self.many_response_data
+            )
             self._response_serializer = response_serializer
             return response_serializer.data
         else:
-            response_serializer = self.ResponseSerializer(data=response_data, many=self.many_response_data)
+            response_serializer = self.ResponseSerializer(
+                data=response_data, many=self.many_response_data
+            )
             self._response_serializer = response_serializer
             is_valid_response = response_serializer.is_valid()
             if not is_valid_response:
                 raise CustomException(
                     _("Resource[{}] 返回参数格式错误：{}").format(
-                        self.get_resource_name(), format_serializer_errors(response_serializer)
+                        self.get_resource_name(),
+                        format_serializer_errors(response_serializer),
                     )
                 )
             return response_serializer.validated_data
@@ -212,7 +229,9 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
         """
         执行请求，并对请求数据和返回数据进行数据校验
         """
-        with tracer.start_as_current_span(self.get_resource_name(), record_exception=False) as span:
+        with tracer.start_as_current_span(
+            self.get_resource_name(), record_exception=False
+        ) as span:
             try:
                 request_data = request_data or kwargs
                 validated_request_data = self.validate_request_data(request_data)
@@ -294,16 +313,22 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
         """
         执行celery异步任务（高级）
         """
-        async_task = run_perform_request.apply_async(args=(self, get_request_username(), request_data), **kwargs)
+        async_task = run_perform_request.apply_async(
+            args=(self, get_request_username(), request_data), **kwargs
+        )
         return {"task_id": async_task.id}
 
     @classmethod
     def generate_doc(cls):
-        request_serializer_class, response_serializer_class = cls._search_serializer_class()
+        request_serializer_class, response_serializer_class = (
+            cls._search_serializer_class()
+        )
         request_params = get_serializer_fields(request_serializer_class)
         response_params = get_serializer_fields(response_serializer_class)
 
         return {
-            "request_params": render_schema(request_params),
-            "response_params": render_schema(response_params, using_source=True),
+            "request_params": render_schema_structured(request_params),
+            "response_params": render_schema_structured(
+                response_params, using_source=True
+            ),
         }
