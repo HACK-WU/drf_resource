@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,10 +23,46 @@ from drf_resource.tools import (
 )
 from drf_resource.utils.thread_backend import ThreadPool
 from drf_resource.utils.user import get_request_username
-from opentelemetry import trace
-from opentelemetry.trace.status import Status, StatusCode
 
-tracer = trace.get_tracer(__name__)
+# OpenTelemetry 可选依赖支持
+try:
+    from opentelemetry import trace
+    from opentelemetry.trace.status import Status, StatusCode
+
+    tracer = trace.get_tracer(__name__)
+except ImportError:
+    # No-op 降级实现
+    class _NoOpTracer:
+        def start_as_current_span(self, *args, **kwargs):
+            return self._NoOpSpan()
+
+        class _NoOpSpan:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args, **kwargs):
+                pass
+
+            def set_status(self, *args, **kwargs):
+                pass
+
+            def add_event(self, *args, **kwargs):
+                pass
+
+            def record_exception(self, *args, **kwargs):
+                pass
+
+        def start_as_current_span(self, *args, **kwargs):
+            return self._NoOpSpan()
+
+    tracer = _NoOpTracer()
+    import warnings
+
+    warnings.warn(
+        "OpenTelemetry not available, using no-op tracer. "
+        "Install opentelemetry to enable tracing."
+    )
+
 logger = logging.getLogger(__name__)
 
 
@@ -132,8 +167,8 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
 
         # 若类中没有声明，则对指定模块进行搜索
         resource_name = cls.get_resource_name()
-        request_serializer_class_name = "%sRequestSerializer" % resource_name
-        response_serializer_class_name = "%sResponseSerializer" % resource_name
+        request_serializer_class_name = f"{resource_name}RequestSerializer"
+        response_serializer_class_name = f"{resource_name}ResponseSerializer"
 
         if cls.serializers_module:
             if not request_serializer_class:
@@ -182,9 +217,7 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
             is_valid_request = request_serializer.is_valid()
             if not is_valid_request:
                 logger.error(
-                    "Resource[{}] 请求参数格式错误：%s".format(
-                        self.get_resource_name()
-                    ),
+                    f"Resource[{self.get_resource_name()}] 请求参数格式错误：%s",
                     format_serializer_errors(request_serializer),
                 )
                 raise CustomException(
@@ -288,9 +321,7 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
         """
         更新执行状态
         """
-        state_message = "Async resource task running - {} [state=`{}` message=`{}` data=`{}`]".format(
-            self.get_resource_name(), state, message, data
-        )
+        state_message = f"Async resource task running - {self.get_resource_name()} [state=`{state}` message=`{message}` data=`{data}`]"
         logger.info(state_message)
 
         if not self._task_manager:
