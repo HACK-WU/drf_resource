@@ -1,53 +1,79 @@
-[tool.black]
-line-length = 120
-include = '\.pyi?$'
-skip-string-normalization = true
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | iam
-)/
-'''
+[build-system]
+build-backend = "setuptools.build_meta"
 
-[tool.isort]
-profile = "black"
-src_paths = ["bkmonitor", "bklog", "bkmonitor/packages"]
-known_third_party = ['Crypto', 'PIL', 'apscheduler', 'arrow', 'babel', 'beanstalkc', 'celery',
-    'chain_relative_strategy', 'consul', 'coreapi', 'coreschema', 'croniter', 'django',
-    'django_apscheduler', 'django_filters', 'dns', 'elasticsearch5', 'fakeredis', 'furl',
-    'gitlab', 'graph_exporter', 'humanize', 'influxdb', 'jinja2', 'kafka', 'kazoo', 'kombu',
-    'mako', 'mistune', 'mock', 'mockredis', 'netifaces', 'prometheus_client', 'psutil',
-    'pygments', 'pymysql', 'pytest', 'pytz', 'redis', 'requests', 'response_tracker',
-    'rest_framework', 'rest_framework_bulk', 'rest_framework_nested', 'schematics',
-    'six', 'sqlparse', 'supervisor', 'version_log', 'weixin', 'whitenoise', 'yaml', 'blueapps', 'iam']
+requires = [ "setuptools>=61", "wheel" ]
 
-[tool.flake8]
-ignore = "C901,E203,W503,F405,E402"
-max-line-length = 120
-max-complexity = 25
-format = "pylint"
-exclude = "*config*,*migrations*,*.pyc,.git,__pycache__.tox,docs,old,build,dist,*.egg-info,.cache,.eggs"
+[project]
+name = "drf-resource"
+version = "0.1.0"
+description = "Django REST Framework 资源化框架，提供声明式 API 开发体验"
+readme = "README.md"
+keywords = [ "api", "django", "drf", "framework", "resource", "rest" ]
+license = { text = "MIT" }
+authors = [
+  { name = "DRF Resource Contributors" },
+]
+requires-python = ">=3.8"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: Django",
+  "Framework :: Django :: 3.2",
+  "Framework :: Django :: 4.0",
+  "Framework :: Django :: 4.1",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.0",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+
+dependencies = [
+  "celery>=5",
+  "django>=3.2",
+  "djangorestframework>=3.12",
+  "requests>=2.25",
+  "six>=1.15",
+]
+
+optional-dependencies.all = [ "drf-resource[cache,otel]" ]
+optional-dependencies.cache = [ "redis>=4" ]
+optional-dependencies.dev = [ "black>=22", "pytest>=7", "pytest-cov>=3", "pytest-django>=4" ]
+optional-dependencies.otel = [ "opentelemetry-api>=1", "opentelemetry-sdk>=1" ]
+urls.Documentation = "https://drf-resource.readthedocs.io"
+urls.Homepage = "https://github.com/your-org/drf-resource"
+urls.Repository = "https://github.com/your-org/drf-resource.git"
+
+[tool.setuptools.packages.find]
+include = [ "drf_resource*" ]
+
+[tool.setuptools.package-data]
+drf_resource = [ "**/*.py" ]
+
+[tool.ruff]
+format.docstring-code-format = true
+lint.select = [ "E4", "E7", "E9", "F", "UP" ]
+lint.extend-ignore = [ "E402" ]
+lint.fixable = [ "ALL" ]
+lint.extend-safe-fixes = [ "UP" ]
 
 [tool.pytest.ini_options]
 # 测试 drf_resource 模块，完全独立不依赖 bkmonitor
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-testpaths = ["tests/api_explorer"]
+testpaths = [ "tests/api_explorer" ]
 pythonpath = "."
 console_output_style = "progress"
 addopts = "-v --strict-markers --tb=short -p no:django -p no:dotenv"
 markers = [
-    "slow: 标记为慢速测试",
-    "unit: 单元测试",
-    "integration: 集成测试",
-    "api: API 测试",
+  "slow: 标记为慢速测试",
+  "unit: 单元测试",
+  "integration: 集成测试",
+  "api: API 测试",
 ]

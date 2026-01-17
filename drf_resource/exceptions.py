@@ -1,12 +1,16 @@
-# -*- coding: utf-8 -*-
 """
-Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
-Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
-Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
+DRF Resource - Django REST Framework 资源化框架
+Copyright (C) 2024-2025
+
+Licensed under the MIT License (the "License");
+you may not use this file except in compliance with the License.
 You may obtain a copy of the License at http://opensource.org/licenses/MIT
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-specific language governing permissions and limitations under the License.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import inspect
@@ -17,8 +21,56 @@ from django.http import Http404
 from django.utils.translation import gettext_lazy as _lazy
 from drf_resource.errors import Error, ErrorDetails
 from drf_resource.errors.common import DrfApiError, HTTP404Error, UnknownError
-from opentelemetry.trace.span import Span
-from opentelemetry.util import types
+
+# OpenTelemetry 可选依赖支持
+try:
+    from opentelemetry.trace.span import Span
+    from opentelemetry.util import types
+
+    _Span = Span
+    _Attributes = types.Attributes
+except ImportError:
+    # No-op 降级实现
+    class _NoOpSpan:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args, **kwargs):
+            pass
+
+        def add_event(self, *args, **kwargs):
+            pass
+
+        def set_status(self, *args, **kwargs):
+            pass
+
+        def set_attributes(self, *args, **kwargs):
+            pass
+
+        def record_exception(self, *args, **kwargs):
+            pass
+
+        def is_recording(self):
+            return False
+
+    _Span = _NoOpSpan
+
+    class _NoOpAttributes:
+        def __setitem__(self, key, value):
+            pass
+
+        def update(self, *args, **kwargs):
+            pass
+
+    _Attributes = _NoOpAttributes
+
+import warnings
+
+warnings.warn(
+    "OpenTelemetry not available, using no-op Span and Attributes. "
+    "Install opentelemetry to enable tracing."
+)
+
 from rest_framework import status
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
@@ -50,7 +102,7 @@ def custom_exception_handler(exc, context):
     """
     针对CustomException返回的错误进行特殊处理，增加了传递数据的特性
     """
-    from drf_resource.utils.common import failed
+    from drf_resource.errors.common import failed
 
     response = None
     if isinstance(exc, Error):
@@ -105,7 +157,7 @@ def custom_exception_handler(exc, context):
                 exc_code=HTTP404Error.code,
                 overview=msg,
                 detail=msg,
-                popup_message="error",  # 红框
+                popup_message="error",  # 蓝鲸框架
             ).to_dict(),
         }
 
@@ -129,9 +181,9 @@ def custom_exception_handler(exc, context):
 
 
 def record_exception(
-    span: Span,
+    span: _Span,
     exception: Exception,
-    attributes: types.Attributes = None,
+    attributes: _Attributes = None,
     timestamp: Optional[int] = None,
     escaped: bool = False,
     out_limit: int = None,
@@ -147,28 +199,21 @@ def record_exception(
             out_frames = out_frames[:out_limit]
         for item in reversed(out_frames):
             row.append(
-                '  File "{}", line {}, in {}\n'.format(
-                    item.filename, item.lineno, item.function
-                )
+                f'  File "{item.filename}", line {item.lineno}, in {item.function}\n'
             )
-            for line in item.code_context:
-                if line:
-                    row.append("    {}\n".format(line.strip()))
 
         for item in inspect.getinnerframes(tb):
             row.append(
-                '  File "{}", line {}, in {}\n'.format(
-                    item.filename, item.lineno, item.function
-                )
+                f'  File "{item.filename}", line {item.lineno}, in {item.function}\n'
             )
             for line in item.code_context:
                 if line:
-                    row.append("    {}\n".format(line.strip()))
+                    row.append(f"    {line.strip()}\n")
 
         stacktrace = "".join(row)
     except Exception:  # pylint: disable=broad-except
         # workaround for python 3.4, format_exc can raise
-        # an AttributeError if the __context__ on
+        # an AttributeError if __context__ on
         # an exception is None
         stacktrace = "Exception occurred on stacktrace formatting"
     _attributes = {

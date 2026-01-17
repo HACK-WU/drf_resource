@@ -1,12 +1,16 @@
-# -*- coding: utf-8 -*-
 """
-Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
-Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
-Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
+DRF Resource - Django REST Framework 资源化框架
+Copyright (C) 2024-2025
+
+Licensed under the MIT License (the "License");
+you may not use this file except in compliance with the License.
 You may obtain a copy of the License at http://opensource.org/licenses/MIT
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-specific language governing permissions and limitations under the License.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 from django.utils.translation import gettext_lazy as _lazy
@@ -16,19 +20,19 @@ from drf_resource.errors import Error, logger
 
 class PermissionDeniedError(Error):
     """
-    无权限异常
+    权限被拒绝异常
     """
 
     status_code = 403
-    code = 9900403
+    code = 3300403
     name = _lazy("权限校验不通过")
     message_tpl = _lazy("当前用户无 [{action_name}] 权限")
-    popup_message = "primary"  # 报错弹框级别-蓝框
+    popup_message = "primary"  # 报错弹框级别
 
 
 class APIPermissionDeniedError(PermissionDeniedError):
     """
-    第三方接口无权限异常
+    权限被拒绝异常（蓝鲸 API 兼容）
     """
 
     def __init__(self, context=None, data=None, extra=None, **kwargs):
@@ -45,9 +49,9 @@ class APIPermissionDeniedError(PermissionDeniedError):
                     break
                 except BaseException as error:
                     logger.error("get related resource name error %s", str(error))
-            permission_actions.append("{}-{}".format(action_name, resource_name))
+            permission_actions.append(f"{action_name}-{resource_name}")
         kwargs.update(permission=",".join(permission_actions))
-        super(APIPermissionDeniedError, self).__init__(context, data, extra, **kwargs)
+        super(PermissionDeniedError, self).__init__(context, data, extra, **kwargs)
 
     message_tpl = _lazy(
         "请求[{system_name}]系统[{url}]权限校验不通过，请前往权限中心申请对应权限[{permission}]"
