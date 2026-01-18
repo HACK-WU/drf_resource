@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,7 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-
 import abc
 
 import six
@@ -17,7 +15,7 @@ from django.conf import settings
 from rest_framework import serializers
 
 from core.cache import CacheType
-from drf_resource.contrib.api import APIResource
+from api.base import BKAPIResource
 
 
 def get_base_url():
@@ -27,7 +25,7 @@ def get_base_url():
     return f"{settings.BK_COMPONENT_API_URL}/api/bk-gse/prod/api/v2/"
 
 
-class GseBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
+class GseBaseResource(six.with_metaclass(abc.ABCMeta, BKAPIResource)):
     base_url = f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/gse/"
     # 如果开启通过 gse agent 2.0 访问 API，则通过 apigw 访问 gse 的服务
     if getattr(settings, "USE_GSE_AGENT_STATUS_NEW_API", False):
@@ -36,7 +34,7 @@ class GseBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
     module_name = "gse"
 
 
-class GseAPIBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
+class GseAPIBaseResource(six.with_metaclass(abc.ABCMeta, BKAPIResource)):
     base_url = get_base_url()
     module_name = "gse"
 
@@ -273,7 +271,9 @@ class AddRoute(GseBaseResource):
         class StreamFilterInfoSerializer(serializers.Serializer):
             name = serializers.CharField(required=True, label="filter名字")
             field_index = serializers.IntegerField(required=True, label="字段索引")
-            field_data_type = serializers.ChoiceField(required=True, label="数据类型", choices=["int", "string", "bytes"])
+            field_data_type = serializers.ChoiceField(
+                required=True, label="数据类型", choices=["int", "string", "bytes"]
+            )
             field_data_value = serializers.CharField(required=True, label="数据值")
             field_separator = serializers.CharField(required=False, label="分隔符")
             field_in = serializers.ChoiceField(
@@ -377,7 +377,9 @@ class DeleteRoute(GseBaseResource):
 
         class SpecificationSerializer(serializers.Serializer):
             route = serializers.ListField(required=False, label="路由名称列表", child=serializers.CharField())
-            stream_filters = serializers.ListField(required=False, label="过滤条件名称列表", child=serializers.CharField())
+            stream_filters = serializers.ListField(
+                required=False, label="过滤条件名称列表", child=serializers.CharField()
+            )
 
         condition = ConditionSerializer(required=True, label="条件信息")
         operation = OperationSerializer(required=True, label="操作配置")

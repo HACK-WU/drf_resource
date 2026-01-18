@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import json
 from json import JSONDecodeError
 
@@ -15,10 +15,10 @@ from django.conf import settings
 from django.http import StreamingHttpResponse
 from rest_framework import serializers
 
-from drf_resource import APIResource
+from api.base import BKAPIResource
 
 
-class AidevAPIGWResource(APIResource):
+class AidevAPIGWResource(BKAPIResource):
     base_url = settings.AIDEV_API_BASE_URL
     # 模块名
     module_name = "aidev"
@@ -54,7 +54,7 @@ class CreateKnowledgebaseQueryResource(AidevAPIGWResource):
             for line in response.iter_lines():
                 if not line:
                     continue
-                result = line.decode('utf-8') + '\n\n'
+                result = line.decode("utf-8") + "\n\n"
                 try:
                     res_data = json.loads(result.split("data: ", 1)[-1])
                     if res_data.get("reject"):
@@ -74,7 +74,9 @@ class CreateKnowledgebaseQueryResource(AidevAPIGWResource):
 
         def add_guide(res_data):
             link_tmp = """<a href="{doc_link}" target="_blank">【BK助手】</a>"""
-            res_data["content"] = "\n如果以上回答不能解决您的问题，您可以尝试换个问法或点击立即联系" + link_tmp.format(doc_link=self._get_wx_link())
+            res_data["content"] = "\n如果以上回答不能解决您的问题，您可以尝试换个问法或点击立即联系" + link_tmp.format(
+                doc_link=self._get_wx_link()
+            )
             res_data["event"] = "text"
             return "data: " + json.dumps(res_data) + "\n\n"
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import abc
 import logging
 
@@ -15,19 +15,19 @@ import six
 from django.conf import settings
 from rest_framework import serializers
 
-from drf_resource import APIResource
+from api.base import BKAPIResource
 
 logger = logging.getLogger(__name__)
 
 
-class BkPaaSAPIGWResource(six.with_metaclass(abc.ABCMeta, APIResource)):
-    base_url = settings.PAASV3_APIGW_BASE_URL or "%s/api/c/compapi/v2/bk_paas/" % settings.BK_COMPONENT_API_URL
+class BkPaaSAPIGWResource(six.with_metaclass(abc.ABCMeta, BKAPIResource)):
+    base_url = settings.PAASV3_APIGW_BASE_URL or f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/bk_paas/"
 
     # 模块名
     module_name = "bk_paas"
 
     def get_request_url(self, validated_request_data):
-        return super(BkPaaSAPIGWResource, self).get_request_url(validated_request_data).format(**validated_request_data)
+        return super().get_request_url(validated_request_data).format(**validated_request_data)
 
 
 class GetAppClusterNamespaceResource(BkPaaSAPIGWResource):
@@ -41,7 +41,7 @@ class GetAppClusterNamespaceResource(BkPaaSAPIGWResource):
 
     def perform_request(self, validated_request_data):
         try:
-            resp = super(GetAppClusterNamespaceResource, self).perform_request(validated_request_data)
+            resp = super().perform_request(validated_request_data)
         except Exception:
             resp = []
 

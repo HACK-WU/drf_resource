@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import abc
 
 import six
@@ -7,10 +5,10 @@ from django.conf import settings
 from rest_framework import serializers
 
 from common.context_processors import Platform
-from drf_resource.contrib.api import APIResource
+from api.base import BKAPIResource
 
 
-class BkSSMBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
+class BkSSMBaseResource(six.with_metaclass(abc.ABCMeta, BKAPIResource)):
     base_url_prefix = f"{settings.BK_SSM_HOST}:{settings.BK_SSM_PORT}"
     base_url = f"{base_url_prefix}/api/v1/auth/"
     module_name = "bkssm"
@@ -49,13 +47,13 @@ class GetAccessToken(BkSSMBaseResource):
         rtx = serializers.CharField(label="用户态rtx", required=False)
 
     def get_request_url(self, validated_request_data):
-        if Platform.te:
+        if Platform.te:  # codespell:ignore
             return f"{self.base_url_prefix}/auth_api/token/"
-        return super(GetAccessToken, self).get_request_url(validated_request_data)
+        return super().get_request_url(validated_request_data)
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super(GetAccessToken, self).full_request_data(validated_request_data)
-        if not Platform.te:
+        validated_request_data = super().full_request_data(validated_request_data)
+        if not Platform.te:  # codespell:ignore
             return validated_request_data
         # NOTE: 去除不需要的key
         for key in ["bk_app_code", "bk_app_secret", "bk_token", "id_provider"]:

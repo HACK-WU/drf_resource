@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import abc
 import copy
 import logging
@@ -9,12 +8,12 @@ from django.conf import settings
 from rest_framework import serializers
 
 from core.cache import CacheType
-from drf_resource.contrib.api import APIResource
+from api.base import BKAPIResource
 
 logger = logging.getLogger("bcs_storage")
 
 
-class BcsStorageBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
+class BcsStorageBaseResource(six.with_metaclass(abc.ABCMeta, BKAPIResource)):
     module_name = "bcs-storage"
 
     # BCS目前是非蓝鲸标准的返回格式，所以需要兼容
@@ -39,7 +38,7 @@ class BcsStorageBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
         return url
 
     def get_headers(self):
-        headers = super(BcsStorageBaseResource, self).get_headers()
+        headers = super().get_headers()
         headers["Authorization"] = f"Bearer {settings.BCS_API_GATEWAY_TOKEN}"
         return headers
 

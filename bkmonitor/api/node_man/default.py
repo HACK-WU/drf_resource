@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -20,16 +19,16 @@ from bkmonitor.commons.tools import batch_request
 from core.cache import CacheType
 from bkmonitor.utils.user import get_backend_username, get_global_user, make_userinfo
 from constants.cmdb import TargetNodeType
-from drf_resource import APIResource
+from api.base import BKAPIResource
 from drf_resource.base import Resource
 
 
-class NodeManAPIGWResource(six.with_metaclass(abc.ABCMeta, APIResource)):
+class NodeManAPIGWResource(six.with_metaclass(abc.ABCMeta, BKAPIResource)):
     # 设置超时时间为 300s
     TIMEOUT = 300
 
     base_url_statement = None
-    base_url = settings.BKNODEMAN_API_BASE_URL or "%s/api/c/compapi/v2/nodeman/" % settings.BK_COMPONENT_API_URL
+    base_url = settings.BKNODEMAN_API_BASE_URL or f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/nodeman/"
 
     # 模块名
     module_name = "node_man"
@@ -39,15 +38,13 @@ class NodeManAPIGWResource(six.with_metaclass(abc.ABCMeta, APIResource)):
         return self.__doc__
 
     def get_request_url(self, validated_request_data):
-        return (
-            super(NodeManAPIGWResource, self).get_request_url(validated_request_data).format(**validated_request_data)
-        )
+        return super().get_request_url(validated_request_data).format(**validated_request_data)
 
     def validate_response_data(self, response_data):
         return response_data
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super(NodeManAPIGWResource, self).full_request_data(validated_request_data)
+        validated_request_data = super().full_request_data(validated_request_data)
         # 业务id判定
         if "bk_biz_id" not in validated_request_data:
             return validated_request_data
@@ -109,7 +106,9 @@ class QueryDebugResource(NodeManAPIGWResource):
         task_id = serializers.CharField(required=True, label="任务ID")
 
     class ResponseSerializer(serializers.Serializer):
-        status = serializers.ChoiceField(required=True, label="任务状态", choices=["QUEUE", "RUNNING", "SUCCESS", "FAILED"])
+        status = serializers.ChoiceField(
+            required=True, label="任务状态", choices=["QUEUE", "RUNNING", "SUCCESS", "FAILED"]
+        )
         step = serializers.CharField(required=True, label="当前步骤")
         # error_code = serializers.CharField(required=True, label="状态代码")
         message = serializers.CharField(required=True, label="任务日志", allow_blank=True)
@@ -535,7 +534,7 @@ class GetProxiesByBizResource(NodeManAPIGWResource):
         bk_biz_id = serializers.IntegerField(required=True, label="业务ID")
 
     def full_request_data(self, validated_request_data):
-        validated_request_data = super(GetProxiesByBizResource, self).full_request_data(validated_request_data)
+        validated_request_data = super().full_request_data(validated_request_data)
         validated_request_data["_origin_user"] = get_global_user()
         setattr(self, "bk_username", settings.COMMON_USERNAME)
         return validated_request_data
@@ -718,8 +717,8 @@ class IpchooserHostDetailResource(NodeManAPIGWResource):
         agent_realtime_state = serializers.BooleanField(label="是否查询Agent实时状态", default=True)
 
         def validate(self, attrs):
-            all_scope = attrs.get('all_scope', None)
-            scope_list = attrs.get('scope_list', None)
+            all_scope = attrs.get("all_scope", None)
+            scope_list = attrs.get("scope_list", None)
             if all_scope is None and scope_list is None:
                 raise serializers.ValidationError("all_scope 和 scope_list 至少存在一个")
             return super().validate(attrs)

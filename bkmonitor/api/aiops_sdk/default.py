@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,19 +7,20 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 from rest_framework import serializers
 
-from drf_resource import APIResource
+from api.base import BKAPIResource
 
 
-class SdkResource(APIResource):
+class SdkResource(BKAPIResource):
     TIMEOUT = 300
 
     # 模块名
     module_name = "aiops_sdk"
 
 
-class SdkPredictResource(APIResource):
+class SdkPredictResource(BKAPIResource):
     """
     SDK执行预测逻辑
     """
@@ -36,7 +36,7 @@ class SdkPredictResource(APIResource):
     method = "POST"
 
 
-class SdkGroupPredictResource(APIResource):
+class SdkGroupPredictResource(BKAPIResource):
     """
     SDK执行分组预测逻辑
     """
@@ -56,7 +56,7 @@ class DependencyDataSerializer(serializers.Serializer):
     partition = serializers.CharField(allow_blank=True, default=None)
 
 
-class SdkInitDependResource(APIResource):
+class SdkInitDependResource(BKAPIResource):
     """
     SDK初始化历史依赖
     """

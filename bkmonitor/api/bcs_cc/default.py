@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
-
-
 import abc
 import json
-from typing import List
 
 import six
 from django.conf import settings
@@ -13,10 +9,10 @@ from bkmonitor.commons.tools import batch_request
 from core.cache import CacheType
 from drf_resource import api
 from drf_resource.base import Resource
-from drf_resource.contrib.api import APIResource
+from api.base import BKAPIResource
 
 
-class BcsCcBaseResource(six.with_metaclass(abc.ABCMeta, APIResource)):
+class BcsCcBaseResource(six.with_metaclass(abc.ABCMeta, BKAPIResource)):
     cache_type = CacheType.BCS
     # 注意这里的系统名字是bcs-cc，查询的方法是在https://{settings.BK_PAAS_INNER_HOST}/admin/apigw/api/查询
     # 这是apigw查询系统的方式，目前由于apigw没有页面，所以只能在这里查询
@@ -80,7 +76,7 @@ class GetClusterList(BcsCcBaseResource):
     def request(self, request_data=None, **kwargs):
         if not settings.BCS_CC_API_URL:
             return []
-        return super(GetClusterList, self).request(request_data, **kwargs)
+        return super().request(request_data, **kwargs)
 
 
 class GetAreaList(BcsCcBaseResource):
@@ -91,7 +87,7 @@ class GetAreaList(BcsCcBaseResource):
     def request(self, request_data=None, **kwargs):
         if not settings.BCS_CC_API_URL:
             return {"results": []}
-        return super(GetAreaList, self).request(request_data, **kwargs)
+        return super().request(request_data, **kwargs)
 
     def render_response_data(self, validated_request_data, response_data):
         response_data["results"].append(
@@ -115,7 +111,7 @@ class GetProjectList(BcsCcBaseResource):
     def request(self, request_data=None, **kwargs):
         if not settings.BCS_CC_API_URL:
             return {"results": []}
-        return super(GetProjectList, self).request(request_data, **kwargs)
+        return super().request(request_data, **kwargs)
 
     def render_response_data(self, validated_request_data, response_data):
         response_data["results"].append(
@@ -163,16 +159,14 @@ class GetSharedClusterNamespaces(BcsCcBaseResource):
     cache_type = None
 
     def get_request_url(self, validated_request_data):
-        return (
-            super(GetSharedClusterNamespaces, self)
-            .get_request_url(validated_request_data)
-            .format(**validated_request_data)
-        )
+        return super().get_request_url(validated_request_data).format(**validated_request_data)
 
     class RequestSerializer(serializers.Serializer):
         cluster_id = serializers.CharField(label="集群 ID")
         project_id = serializers.CharField(label="项目 ID", default="")
-        desire_all_data = serializers.CharField(label="查询全量数据", default="1", help_text="根据服务方提供，字符串`1`为拉取全量数据标识")
+        desire_all_data = serializers.CharField(
+            label="查询全量数据", default="1", help_text="根据服务方提供，字符串`1`为拉取全量数据标识"
+        )
 
     def render_response_data(self, validated_request_data, response_data):
         # 过滤项目下的空间
@@ -229,7 +223,7 @@ class BatchGetProjects(Resource):
 
         return self._refine_projects(project_list, validated_request_data["filter_k8s_kind"])
 
-    def _refine_projects(self, project_list: List, filter_k8s_kind: bool) -> List:
+    def _refine_projects(self, project_list: list, filter_k8s_kind: bool) -> list:
         """过滤数据，返回必要信息"""
         data = []
         for p in project_list:
