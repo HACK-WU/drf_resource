@@ -1,372 +1,499 @@
-# -*- coding: utf-8 -*-
 """
-Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
-Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
-Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
-You may obtain a copy of the License at http://opensource.org/licenses/MIT
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-specific language governing permissions and limitations under the License.
+通用 HTTP API 客户端
+
+基于 httpflex.DRFClient 和 drf_resource.Resource 的多重继承实现，
+提供统一的 HTTP API 请求能力和 drf_resource 架构支持。
+
+使用示例:
+    class MyAPIResource(APIResource):
+        base_url = "https://api.example.com"
+        module_name = "example"
+        action = "/users/"
+        method = "GET"
+
+        class RequestSerializer(serializers.Serializer):
+            user_id = serializers.IntegerField(required=True)
+
+    # 执行请求
+    result = MyAPIResource().request({"user_id": 123})
 """
 
-import abc
-import json
 import logging
+from typing import Any
 
-import requests
-import six
-from django.conf import settings
-from django.http import StreamingHttpResponse
-from django.utils import translation
-from django.utils.translation import gettext as _
+from httpflex import DRFClient
+from httpflex.parser import JSONResponseParser, RawResponseParser
+from httpflex.formatter import BaseResponseFormatter
+
+
+from drf_resource.base import Resource
 from drf_resource.contrib.cache import CacheResource
-from drf_resource.contrib.metrics import metrics
-from drf_resource.errors.api import BKAPIError
-from drf_resource.errors.iam import APIPermissionDeniedError
-from drf_resource.utils.auth import get_bk_login_ticket
-from drf_resource.utils.request import get_request
-from drf_resource.utils.user import make_userinfo
-from requests.exceptions import HTTPError, ReadTimeout
+from drf_resource.errors.api import APIError
 
 logger = logging.getLogger(__name__)
 
-__doc__ = """
-    基于蓝鲸ESB/APIGateWay封装
-    http请求默认带上通用参数：bk_app_code, bk_app_secret, bk_username
-"""
 
-BK_USERNAME_FIELD = "bk_username"
-APIPermissionDeniedCodeList = ["9900403", "35999999"]
-
-
-class APIResource(six.with_metaclass(abc.ABCMeta, CacheResource)):
+class APIResourceResponseFormatter(BaseResponseFormatter):
     """
-    API类型的Resource
+    APIResource 专用响应格式化器
+
+    将 DRFClient 的标准响应格式转换为 APIResource 需要的格式，
+    并处理业务逻辑错误。
     """
 
+    def format(  # noqa
+        self,
+        formated_response,
+        parsed_data,
+        request_id,
+        request_data,
+        response_or_exception,
+        parse_error,
+        base_client_instance,
+        **kwargs,
+    ):
+        """
+        格式化响应
+
+        1. 如果 HTTP 请求失败，直接返回格式化的错误响应
+        2. 如果业务逻辑失败（result=False），抛出 APIError
+        3. 如果成功，根据 IS_STANDARD_FORMAT 返回数据
+        """
+        # HTTP 请求失败
+        if not formated_response.get("result", True):
+            return formated_response
+
+        # 获取 APIResource 实例的配置
+        api_resource = base_client_instance
+        is_standard_format = getattr(api_resource, "IS_STANDARD_FORMAT", True)
+
+        # 解析后的数据
+        data = parsed_data
+
+        # 如果是字典，检查业务逻辑是否成功
+        if isinstance(data, dict):
+            # 检查业务逻辑是否失败
+            if not data.get("result", True) and data.get("code", 0) != 0:
+                # 业务逻辑失败，设置响应为失败
+                formated_response["result"] = False
+                formated_response["code"] = data.get("code")
+                formated_response["message"] = data.get("message", "")
+                formated_response["data"] = data
+                return formated_response
+
+            # 业务逻辑成功，根据格式返回数据
+            if is_standard_format:
+                formated_response["data"] = data.get("data")
+            else:
+                formated_response["data"] = data
+        else:
+            # 非字典数据，直接返回
+            formated_response["data"] = data
+
+        return formated_response
+
+
+class APIResource(DRFClient, Resource):
+    """
+    通用 HTTP API 客户端基类（无缓存）
+
+    通过多重继承结合 httpflex.DRFClient 的 HTTP 能力和
+    drf_resource.Resource 的架构支持。
+
+    继承关系:
+        - DRFClient: 提供 HTTP 请求能力（Session、重试、连接池、钩子等）
+        - Resource: 提供 drf_resource 架构支持（序列化、批量请求等）
+
+    子类必须设置（类属性）:
+        - base_url: API 基础 URL
+        - module_name: 模块名称（用于日志和错误信息）
+        - action: 端点路径（对应 DRFClient 的 endpoint）
+        - method: HTTP 方法
+
+    可选配置:
+        - TIMEOUT: 超时时间（默认 60 秒）
+        - IS_STANDARD_FORMAT: 是否标准响应格式（默认 True）
+        - IS_STREAM: 是否流式响应（默认 False）
+        - enable_retry: 是否启用重试（默认 False）
+        - max_retries: 最大重试次数（默认 0）
+        - verify: 是否验证 SSL（默认 False）
+
+    使用示例:
+        class UserAPI(APIResource):
+            base_url = "https://api.example.com"
+            module_name = "user_service"
+            action = "/api/v1/users/"
+            method = "GET"
+
+        # 单个请求
+        result = UserAPI().request({"user_id": 123})
+
+        # 批量请求
+        results = UserAPI().bulk_request([
+            {"user_id": 1},
+            {"user_id": 2},
+        ])
+    """
+
+    # ========== 必须由子类设置的类属性 ==========
+    # API 基础 URL
+    base_url: str = ""
+
+    # 模块名称，用于日志和错误信息
+    module_name: str = ""
+
+    # 端点路径（对应 DRFClient 的 endpoint）
+    action: str = ""
+
+    # HTTP 方法
+    method: str = "GET"
+
+    # ========== 基础配置 ==========
+    # 请求超时时间（秒）
     TIMEOUT = 60
-    # 是否直接使用标准格式数据，兼容BCS非标准返回的情况
+
+    # 是否使用标准格式数据（{result, code, message, data}）
     IS_STANDARD_FORMAT = True
 
-    @property
-    @abc.abstractmethod
-    def base_url(self):
-        """
-        api gateway 基本url生成规则
-        """
-        raise NotImplementedError
+    # 是否流式响应（SSE）
+    IS_STREAM = False
 
-    @property
-    @abc.abstractmethod
-    def module_name(self):
-        """
-        在apigw中的模块名
-        """
-        raise NotImplementedError
+    # ========== httpflex 配置（继承自 DRFClient） ==========
+    # 默认超时时间
+    default_timeout = 60
 
-    @property
-    @abc.abstractmethod
-    def action(self):
-        """
-        url的后缀，通常是指定特定资源
-        """
-        raise NotImplementedError
+    # SSL 证书验证，默认不验证
+    verify = False
 
-    @property
-    @abc.abstractmethod
-    def method(self):
-        """
-        请求方法，仅支持GET或POST
-        """
-        raise NotImplementedError
+    # 重试配置
+    enable_retry = False
+    max_retries = 0
 
-    @staticmethod
-    def split_request_data(data):
-        """
-        切分请求参数为文件/非文件类型，便于requests参数组装
-        """
-        file_data = {}
-        non_file_data = {}
-        for request_param, param_value in list(data.items()):
-            if hasattr(param_value, "read"):
-                # 一般认为含有read属性的为文件类型
-                file_data[request_param] = param_value
-            else:
-                non_file_data[request_param] = param_value
-        return non_file_data, file_data
+    # 使用自定义响应格式化器
+    response_formatter_class = APIResourceResponseFormatter
 
-    def __init__(self, *args, **kwargs):
-        super(APIResource, self).__init__(*args, **kwargs)
-        assert self.method.upper() in ["GET", "POST", "PUT", "DELETE", "PATCH"], _(
-            "method仅支持GET或POST或PUT或DELETE或PATCH"
+    def __init__(self, context=None):
+        """
+        初始化 APIResource
+
+        完整调用 DRFClient 的初始化逻辑，保留其所有功能：
+        - Session 创建和配置
+        - 重试策略
+        - 连接池
+        - 钩子机制
+        - 响应解析和格式化
+        """
+        # 设置 DRFClient 需要的属性
+        # endpoint 对应 action
+        self.endpoint = self.action
+
+        # 设置超时
+        self.default_timeout = self.TIMEOUT
+
+        # 设置响应解析器
+        response_parser = (
+            RawResponseParser() if self.IS_STREAM else JSONResponseParser()
         )
-        self.method = self.method.upper()
-        self.session = requests.session()
 
-    def request(self, request_data=None, **kwargs):
-        request_data = request_data or kwargs
-        # 如果参数中传递了用户信息，则记录下来，以便接口请求时使用
-        if BK_USERNAME_FIELD in request_data:
-            setattr(self, "bk_username", request_data[BK_USERNAME_FIELD])
-        return super(APIResource, self).request(request_data, **kwargs)
+        # 调用 DRFClient 的初始化（会创建 Session、配置重试等）
+        DRFClient.__init__(
+            self,
+            timeout=self.TIMEOUT,
+            verify=self.verify,
+            response_parser=response_parser,
+        )
+        self.context = context
 
-    def full_request_data(self, validated_request_data):
+    def _validate_request(self, request_data):
         """
-        丰富请求数据
-        添加上请求的用户信息
+        重写DRFClient._validate_request, 使用 Resource.validate_request_data进行请求校验，
+        确保两种校验逻辑流程一致。
+
         """
-        # 组装通用参数： 1. 用户信息 2. SaaS凭证
-        if hasattr(self, "bk_username"):
-            validated_request_data.update({BK_USERNAME_FIELD: self.bk_username})
-        else:
-            request = get_request(peaceful=True)
-            user_info = make_userinfo()
-            self.bk_username = user_info.get("bk_username")
-            if request and not getattr(request, "external_user", None):
-                user_info.update(get_bk_login_ticket(request))
-            validated_request_data.update(user_info)
+        validated_request_data = self.validate_request_data(request_data)
         return validated_request_data
 
-    def before_request(self, kwargs):
-        return kwargs
+    # ========== 统一 request 接口 ==========
 
-    def get_headers(self):
-        headers = {}
-
-        # 增加语言头
-        language = translation.get_language()
-        if language:
-            headers["blueking-language"] = language
-
-        # 添加调用凭证
-        auth_params = {
-            "bk_app_code": settings.APP_CODE,
-            "bk_app_secret": settings.SECRET_KEY,
-        }
-        if getattr(self, "bk_username", None):
-            auth_params["bk_username"] = self.bk_username
-        else:
-            request = get_request(peaceful=True)
-            if request and not getattr(request, "external_user", None):
-                auth_params.update(get_bk_login_ticket(request))
-            auth_params.update(make_userinfo())
-        headers["x-bkapi-authorization"] = json.dumps(auth_params)
-
-        return headers
-
-    def perform_request(self, validated_request_data):
+    def request(self, request_data=None, **kwargs):
         """
-        发起http请求
+        执行请求的统一入口
+
+        流程:
+            1. 合并参数
+            2. 使用 Resource 的 validate_request_data 校验请求
+            3. 调用 perform_request 执行请求（使用 DRFClient 的 HTTP 能力）
+            4. 使用 Resource 的 validate_response_data 校验响应
+
+        参数:
+            request_data: 请求数据字典
+            **kwargs: 额外参数，会与 request_data 合并
+
+        返回:
+            校验后的响应数据
+        """
+        request_data = request_data or kwargs
+
+        # 使用 Resource 的请求校验
+        validated_request_data = self.validate_request_data(request_data)
+
+        # 执行请求
+        response_data = self.perform_request(validated_request_data)
+
+        # 使用 Resource 的响应校验
+        validated_response_data = self.validate_response_data(response_data)
+
+        return validated_response_data
+
+    def perform_request(self, validated_request_data) -> Any:
+        """
+        执行 HTTP 请求
+
+        使用 DRFClient 的 _execute_single_request 执行请求，
+        充分利用 DRFClient 的能力：
+        - 请求前后钩子
+        - 重试机制
+        - 响应解析和格式化
+        - 错误处理
+
+        参数:
+            validated_request_data: 校验后的请求数据
+
+        返回:
+            处理后的响应数据
         """
         validated_request_data = dict(validated_request_data)
         validated_request_data = self.full_request_data(validated_request_data)
 
-        # 拼接最终请求的url
-        request_url = self.get_request_url(validated_request_data)
-        logger.debug("request: {}".format(request_url))
+        # 更新请求头
+        headers = self.get_headers()
+        self.session.headers.update(headers)
 
-        # 是否是流式响应
-        is_stream = getattr(self, "IS_STREAM", False)
-
-        try:
-            headers = self.get_headers()
-            kwargs = {
-                "method": self.method,
-                "url": request_url,
-                "timeout": validated_request_data.get("timeout") or self.TIMEOUT,
-                "headers": headers,
-                "verify": False,
-                "stream": is_stream,
-            }
-            if self.method == "GET":
-                kwargs = self.before_request(kwargs)
-                request_url = kwargs.pop("url")
-                if "method" in kwargs:
-                    del kwargs["method"]
-
-                result = self.session.get(
-                    url=request_url,
-                    params=validated_request_data,
-                    headers=headers,
-                    verify=False,
-                    timeout=validated_request_data.get("timeout") or self.TIMEOUT,
-                    stream=is_stream,
-                )
-            else:
-                non_file_data, file_data = self.split_request_data(
-                    validated_request_data
-                )
-
-                if not file_data:
-                    # 不存在文件数据，则按照json方式去请求
-                    kwargs["json"] = non_file_data
-                else:
-                    # 若存在文件数据，则将非文件数据和文件数据分开传参
-                    kwargs["files"] = file_data
-                    kwargs["data"] = non_file_data
-
-                kwargs = self.before_request(kwargs)
-                result = self.session.request(**kwargs)
-        except ReadTimeout as error:
-            # 上报API调用失败统计指标
-            self.report_api_failure_metric(
-                error_code=getattr(error, "code", 0),
-                exception_type=type(error).__name__,
-            )
-            raise BKAPIError(
-                system_name=self.module_name,
-                url=self.action,
-                result=_("接口返回结果超时"),
-            )
-
-        try:
-            result.raise_for_status()
-        except HTTPError as err:
-            logger.exception(
-                "【模块：{}】请求APIGW错误：{}，请求url: {} ".format(
-                    self.module_name, err, request_url
-                )
-            )
-            self.report_api_failure_metric(
-                error_code=getattr(err, "code", 0), exception_type=type(err).__name__
-            )
-            raise BKAPIError(
-                system_name=self.module_name,
-                url=self.action,
-                result=str(err.response.content),
-            )
-
-        if is_stream:
-            return self.handle_stream_response(result)
-        else:
-            result_json = result.json()
-
-        if not isinstance(result_json, dict):
-            return result_json
-
-        ret_code = result_json.get("code")
-        # 权限中心无权限结构特殊处理
-        if ret_code and str(ret_code) in APIPermissionDeniedCodeList:
-            self.report_api_failure_metric(
-                error_code=ret_code, exception_type=APIPermissionDeniedError.__name__
-            )
-
-            permission = {}
-            if "permission" in result_json and isinstance(
-                result_json["permission"], dict
-            ):
-                permission = result_json["permission"]
-            elif isinstance(result_json.get("data"), dict):
-                permission = result_json["data"].get("permission") or {}
-
-            raise APIPermissionDeniedError(
-                context={"system_name": self.module_name, "url": self.action},
-                data={"apply_url": settings.BK_IAM_SAAS_HOST},
-                extra={"permission": permission},
-            )
-
-        if not result_json.get("result", True) and ret_code != 0:
-            msg = result_json.get("message", "")
-            errors = result_json.get("errors", "")
-            if errors:
-                msg = f"{msg}(detail:{errors})"
-            request_id = result_json.pop("request_id", "") or result.headers.get(
-                "x-bkapi-request-id", ""
-            )
-            logger.error(
-                "【Module: "
-                + self.module_name
-                + "】【Action: "
-                + self.action
-                + "】(%s) get error：%s",
-                request_id,
-                msg,
-                extra=dict(module_name=self.module_name, url=request_url),
-            )
-            self.report_api_failure_metric(
-                error_code=ret_code, exception_type=BKAPIError.__name__
-            )
-            # 调试使用
-            # msg = u"【模块：%s】接口【%s】返回结果错误：%s###%s" % (
-            #     self.module_name, request_url, validated_request_data, result_json)
-            raise BKAPIError(
-                system_name=self.module_name, url=self.action, result=result_json
-            )
-
-        # 渲染数据
-        if self.IS_STANDARD_FORMAT:
-            response_data = self.render_response_data(
-                validated_request_data, result_json.get("data")
-            )
-        else:
-            response_data = self.render_response_data(
-                validated_request_data, result_json
-            )
-
-        return response_data
-
-    def report_api_failure_metric(self, error_code, exception_type):
-        """
-        当调用三方API异常时，上报自定义指标
-        """
-        try:
-            metrics.API_FAILED_REQUESTS_TOTAL.labels(
-                action=self.action,
-                module=self.module_name,
-                code=error_code,
-                role=settings.ROLE,
-                exception=exception_type,
-                user_name=getattr(self, "bk_username", ""),
-            ).inc()
-            metrics.report_all()
-        except Exception as err:  # pylint: disable=broad-except
-            logger.exception(
-                f"Failed to report api_failed_requests metrics,error:{err}"
-            )
-
-    @property
-    def label(self):
-        return ""
-
-    @property
-    def action_display(self):
-        """
-        api描述
-        eg: data(基础事件下发)
-        """
-        if self.label:
-            return "{}-{}".format(self.module_name, self.label)
-        return self.module_name
-
-    def get_request_url(self, validated_request_data):
-        """
-        获取最终请求的url，也可以由子类进行重写
-        base_url="http://www.demo.com/url1/url2/"
-        actions="book"
-        return "http://www.demo.com/url1/url2/book"
-        """
-        return self.base_url.rstrip("/") + "/" + self.action.lstrip("/")
-
-    def render_response_data(self, validated_request_data, response_data):
-        """
-        在提供数据给response_serializer之前，对数据作最后的处理，子类可进行重写
-        """
-        return response_data
-
-    def handle_stream_response(self, response):
         # 处理流式响应
+        if self.IS_STREAM:
+            return self._perform_stream_request(validated_request_data)
+
+        # 使用 DRFClient 的 _execute_single_request 执行请求
+        result = self._execute_single_request(validated_request_data)
+
+        # 处理响应结果
+        return self._handle_response(result, validated_request_data)
+
+    def _perform_stream_request(self, validated_request_data: dict) -> Any:
+        """
+        执行流式请求
+
+        流式请求需要特殊处理，直接返回 StreamingHttpResponse。
+        """
+        from django.http import StreamingHttpResponse
+
+        request_url = self.get_request_url(validated_request_data)
+
+        # 构建请求参数
+        request_kwargs = {
+            "method": self.method.upper(),
+            "url": request_url,
+            "timeout": self.TIMEOUT,
+            "verify": self.verify,
+            "stream": True,
+        }
+
+        if self.method.upper() == "GET":
+            request_kwargs["params"] = validated_request_data
+        else:
+            request_kwargs["json"] = validated_request_data
+
+        response = self.session.request(**request_kwargs)
+        response.raise_for_status()
+
         def event_stream():
             for line in response.iter_lines():
-                if not line:
-                    continue
+                if line:
+                    yield line.decode("utf-8") + "\n\n"
 
-                result = line.decode("utf-8") + "\n\n"
-                yield result
-
-        # 返回 StreamingHttpResponse
         sr = StreamingHttpResponse(
             event_stream(), content_type="text/event-stream; charset=utf-8"
         )
         sr.headers["Cache-Control"] = "no-cache"
         sr.headers["X-Accel-Buffering"] = "no"
         return sr
+
+    def _execute_single_request(self, request_data: dict) -> dict:
+        """
+        执行单个请求
+
+        重写 DRFClient 的方法，添加 APIResource 特定的逻辑。
+        """
+        request_id = self.generate_request_id()
+
+        # 使用 DRFClient 的 _make_request_and_format
+        return self._make_request_and_format(request_id, request_data)
+
+    def _handle_response(self, result: dict, validated_request_data: dict) -> Any:
+        """
+        处理响应结果
+
+        将 DRFClient 的标准响应格式转换为 APIResource 的返回值。
+
+        参数:
+            result: DRFClient 返回的标准格式响应 {result, code, message, data}
+            validated_request_data: 原始请求数据
+
+        返回:
+            处理后的响应数据
+
+        异常:
+            APIError: 当请求失败时抛出
+        """
+        # 检查请求是否成功
+        if not result.get("result", True):
+            raise APIError(
+                system_name=self.module_name,
+                url=self.action,
+                result={
+                    "code": result.get("code"),
+                    "message": result.get("message"),
+                },
+            )
+
+        # 获取数据
+        response_data = result.get("data")
+
+        # 渲染响应数据
+        return self.render_response_data(validated_request_data, response_data)
+
+    # ========== DRFClient 钩子方法重写 ==========
+
+    def before_request(self, request_id: str, request_data: dict) -> dict:
+        """
+        请求前钩子
+
+        子类可覆盖以修改请求数据。
+        """
+        # 调用父类的钩子
+        request_data = super().before_request(request_id, request_data)
+        return request_data
+
+    def after_request(self, request_id: str, response) -> Any:
+        """
+        请求后钩子
+
+        子类可覆盖以处理响应。
+        """
+        return super().after_request(request_id, response)
+
+    def on_request_error(self, request_id: str, error: Exception) -> None:
+        """
+        请求错误钩子
+
+        子类可覆盖以处理错误（如上报指标）。
+        """
+        super().on_request_error(request_id, error)
+
+    # ========== 保留的接口（子类可覆盖） ==========
+
+    def get_headers(self) -> dict:
+        """
+        获取请求头
+
+        子类可覆盖添加认证头或其他自定义头。
+        """
+        return {}
+
+    def full_request_data(self, validated_request_data: dict) -> dict:
+        """
+        丰富请求数据
+
+        子类可覆盖添加通用参数（如用户信息、凭证等）。
+        """
+        return validated_request_data
+
+    def get_request_url(self, validated_request_data: dict) -> str:
+        """
+        获取请求 URL
+
+        子类可覆盖以支持路径参数等。
+        """
+        return self.base_url.rstrip("/") + "/" + self.action.lstrip("/")
+
+    def render_response_data(
+        self, validated_request_data: dict, response_data: Any
+    ) -> Any:
+        """
+        渲染响应数据
+
+        在返回响应前对数据进行最后处理。
+        """
+        return response_data
+
+    # ========== 批量请求（沿用 Resource 的实现） ==========
+    # bulk_request 直接继承自 Resource，无需重写
+
+    # ========== 辅助属性 ==========
+
+    @property
+    def label(self) -> str:
+        """API 标签"""
+        return ""
+
+    @property
+    def action_display(self) -> str:
+        """
+        API 描述
+
+        格式: module_name-label
+        """
+        if self.label:
+            return f"{self.module_name}-{self.label}"
+        return self.module_name
+
+
+class APICacheResource(APIResource, CacheResource):
+    """
+    带缓存的 HTTP API 客户端基类
+
+    继承关系:
+        - APIResource: 提供 HTTP 请求能力
+        - CacheResource: 提供缓存功能
+
+    MRO: APICacheResource -> APIResource -> DRFClient -> CacheResource -> Resource -> object
+
+    缓存配置（继承自 CacheResource）:
+        - cache_type: 缓存类型
+        - backend_cache_type: 后台缓存类型
+        - cache_user_related: 缓存是否与用户关联
+        - cache_compress: 是否压缩缓存
+
+    使用示例:
+        from drf_resource.cache import CacheTypeItem
+
+        class CachedUserAPI(APICacheResource):
+            base_url = "https://api.example.com"
+            module_name = "user_service"
+            action = "/api/v1/users/"
+            method = "GET"
+
+            # 启用缓存，过期时间 60 秒
+            cache_type = CacheTypeItem(timeout=60)
+    """
+
+    def __init__(self, context=None):
+        """
+        初始化 APICacheResource
+
+        需要正确处理多重继承的初始化顺序。
+        缓存包装需要在 request 方法初始化之后完成。
+        """
+        # 先检查是否需要缓存包装
+        need_cache = self._need_cache_wrap()
+
+        # 初始化 APIResource（内部会初始化 DRFClient 和 Resource）
+        APIResource.__init__(self, context=context)
+
+        # 如果需要缓存，包装 request 方法
+        if need_cache:
+            self._wrap_request()
+
+
+# 保留别名以兼容旧代码
+BKAPIError = APIError
