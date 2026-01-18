@@ -37,6 +37,7 @@ dependencies = [
   "celery>=5",
   "django>=3.2",
   "djangorestframework>=3.12",
+  "httpflex @ git+https://github.com/HACK-WU/httpflex-py.git@v0.1.0-alpha",
   "requests>=2.25",
   "six>=1.15",
 ]
