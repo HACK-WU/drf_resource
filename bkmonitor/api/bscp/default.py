@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,20 +7,21 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import hashlib
 import os
 
 from django.conf import settings
 from rest_framework import serializers
 
-from drf_resource.contrib.nested_api import KernelAPIResource
+from api.nested_api import KernelAPIResource
 
 
 class BSCPAPIGWResource(KernelAPIResource):
     TIMEOUT = 300
     base_url_statement = None
     IS_STANDARD_FORMAT = False
-    base_url = settings.MONITOR_API_BASE_URL or "%s/api/c/compapi/v2/monitor_v3/" % settings.BK_COMPONENT_API_URL
+    base_url = settings.MONITOR_API_BASE_URL or f"{settings.BK_COMPONENT_API_URL}/api/c/compapi/v2/monitor_v3/"
 
     # 模块名
     module_name = "bscp"
@@ -49,11 +49,11 @@ class BSCPAPIGWResource(KernelAPIResource):
         # 如果参数中传递了用户信息，则记录下来，以便接口请求时使用
         if "bk_ticket" in request_data:
             setattr(self, "bk_ticket", request_data["bk_ticket"])
-        data = super(BSCPAPIGWResource, self).request(request_data, **kwargs)
+        data = super().request(request_data, **kwargs)
         return data
 
     def full_request_data(self, validated_request_data):
-        data = super(BSCPAPIGWResource, self).full_request_data(validated_request_data)
+        data = super().full_request_data(validated_request_data)
         data["bk_app_code"] = os.getenv("BKAPP_BSCP_DEV_APP_CODE")
         data["bk_app_secret"] = os.getenv("BKAPP_BSCP_DEV_APP_SECRET")
         if hasattr(self, "bk_ticket"):
@@ -87,7 +87,6 @@ class CreateStrategySetResource(BSCPAPIGWResource):
 
 
 class CreateConfigItemResource(BSCPAPIGWResource):
-
     action = "api/v1/config/create/config_item/config_item/app_id/{app_id}/biz_id/{bk_biz_id}"
     method = "POST"
 
@@ -96,7 +95,9 @@ class CreateConfigItemResource(BSCPAPIGWResource):
         app_id = serializers.IntegerField(required=True, label="应用ID")
         name = serializers.CharField(required=True, label="配置项名称", max_length=64)
         path = serializers.CharField(required=True, label="配置项路径", max_length=255)
-        file_type = serializers.ChoiceField(required=True, label="配置项类型", choices=["binary", "json", "yaml", "xml"])
+        file_type = serializers.ChoiceField(
+            required=True, label="配置项类型", choices=["binary", "json", "yaml", "xml"]
+        )
         file_mode = serializers.ChoiceField(required=False, label="配置项模式", choices=["win", "unix"], default="unix")
         user = serializers.CharField(required=True, label="用户名", max_length=64)
         user_group = serializers.CharField(required=True, label="用户组", max_length=64)
@@ -114,7 +115,7 @@ class UploadContentResource(BSCPAPIGWResource):
         content = serializers.CharField(required=True, label="content")
 
     def before_request(self, kwargs):
-        kwargs = super(UploadContentResource, self).before_request(kwargs)
+        kwargs = super().before_request(kwargs)
         content: str = kwargs["json"]["content"]
         content_sh256 = hashlib.sha256(content.encode()).hexdigest()
         kwargs["headers"]["X-Bkapi-File-Content-Id"] = content_sh256
@@ -141,7 +142,7 @@ class CreateContentResource(BSCPAPIGWResource):
         # byte_size = serializers.IntegerField(required=True, label="文件大小 字节")
 
     def before_request(self, kwargs):
-        kwargs = super(CreateContentResource, self).before_request(kwargs)
+        kwargs = super().before_request(kwargs)
         content: str = kwargs["json"]["content"]
         content_sh256 = hashlib.sha256(content.encode()).hexdigest()
         kwargs["json"]["sign"] = content_sh256

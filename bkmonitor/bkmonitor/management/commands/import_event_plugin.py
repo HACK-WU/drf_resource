@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -18,7 +17,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management.base import BaseCommand
 
 from drf_resource import resource
-from drf_resource.contrib import nested_api
+from api import nested_api
 
 
 class Command(BaseCommand):
@@ -32,7 +31,7 @@ class Command(BaseCommand):
 
         try:
             src_path = kwargs["src_path"]
-            print("package to import: {}".format(src_path))
+            print(f"package to import: {src_path}")
             with open(src_path, "rb") as tar_obj:
                 file_data = SimpleUploadedFile("plugin.tar.gz", tar_obj.read())
                 plugin = resource.event_plugin.create_event_plugin(bk_biz_id=0, file_data=file_data, force_update=True)
