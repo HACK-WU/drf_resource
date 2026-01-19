@@ -13,7 +13,7 @@ license = { text = "MIT" }
 authors = [
   { name = "DRF Resource Contributors" },
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Framework :: Django",
@@ -25,9 +25,6 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -37,7 +34,7 @@ dependencies = [
   "celery>=5",
   "django>=3.2",
   "djangorestframework>=3.12",
-  "httpflex @ git+https://github.com/HACK-WU/httpflex-py.git@v0.1.0-alpha",
+  "httpflex @ git+https://github.com/HACK-WU/httpflex-py.git@v0.1.1-alpha",
   "requests>=2.25",
   "six>=1.15",
 ]
