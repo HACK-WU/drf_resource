@@ -4,6 +4,14 @@ from typing import Any
 _BASE_TYPES = (str, int, float, bool, type(None))
 
 
+class classproperty:
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, obj, owner):
+        return self.func(owner)
+
+
 def count_md5(
     content: Any,
     dict_sort: bool = True,
@@ -43,10 +51,12 @@ def count_md5(
             keys = sorted(content) if dict_sort else content.keys()
             for k in keys:
                 hasher.update(f"k:{k!s}|v:".encode())
-                hasher.update(count_md5(content[k], dict_sort, list_sort, _path_ids).encode())
+                hasher.update(
+                    count_md5(content[k], dict_sort, list_sort, _path_ids).encode()
+                )
 
         # 处理列表/元组/set类型数据
-        elif isinstance(content, (list, tuple, set)):
+        elif isinstance(content, list | tuple | set):
             # 获取排序后的迭代器（根据list_sort参数）
             items = sorted(content, key=_stable_order_key) if list_sort else content
             for item in items:
@@ -76,7 +86,7 @@ def _stable_order_key(x: Any) -> str:
     """优先用序列化安全方式生成排序键（覆盖 repr 的缺陷）"""
     try:
         # 首选JSON-safe类型标准化
-        if isinstance(x, (int, float, bool)):
+        if isinstance(x, int | float | bool):
             return f"n:{x}"  # 数字型单独处理
         elif isinstance(x, str):
             return f"s:{x}"
@@ -94,7 +104,14 @@ class ErrorDetails:
     用于封装标准化的错误详情信息，包含错误类型、错误码、错误概述、详情和弹框类型。
     """
 
-    def __init__(self, exc_type=None, exc_code=None, overview=None, detail=None, popup_message="warning"):
+    def __init__(
+        self,
+        exc_type=None,
+        exc_code=None,
+        overview=None,
+        detail=None,
+        popup_message="warning",
+    ):
         """
         初始化错误详情
 
@@ -125,7 +142,14 @@ class ErrorDetails:
         }
 
 
-def failed(message="", error_code=None, error_name=None, exc_type=None, popup_type=None, **options):
+def failed(
+    message="",
+    error_code=None,
+    error_name=None,
+    exc_type=None,
+    popup_type=None,
+    **options,
+):
     """
     生成标准化错误响应字典
 

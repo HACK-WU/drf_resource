@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,7 +10,6 @@ specific language governing permissions and limitations under the License.
 
 import logging
 import os
-from typing import List, Set
 
 from django.apps import apps
 from django.conf import settings
@@ -31,13 +29,15 @@ if API_DIR not in RESOURCE_DIRS:
     RESOURCE_DIRS.append(API_DIR)
 
 # 查找resource模块时将会忽略的目录
-RESOURCE_IGNORE_DIRS = getattr(settings, "RESOURCE_IGNORE_DIRS", ["__pycache__", "migrations", "test"])
+RESOURCE_IGNORE_DIRS = getattr(
+    settings, "RESOURCE_IGNORE_DIRS", ["__pycache__", "migrations", "test"]
+)
 
 
 class ResourceFinder(BaseFinder):
     def __init__(self, app_names=None, *args, **kwargs):
         # Mapping of app names to resource modules
-        self.resource_path: List[ResourcePath] = []
+        self.resource_path: list[ResourcePath] = []
         app_path_directories = []
         app_configs = apps.get_app_configs()  # type: list["AppConfig"]
         if app_names:
@@ -45,9 +45,18 @@ class ResourceFinder(BaseFinder):
             # 过滤只存在app_names的app_config
             app_configs = [ac for ac in app_configs if ac.name in app_names]
 
+        # 过滤掉第三方应用：只保留项目目录下且不在site-packages中的应用
+        app_configs = [
+            ac
+            for ac in app_configs
+            if ac.path.startswith(settings.BASE_DIR) and "site-packages" not in ac.path
+        ]
+
         # 查询每个应用的resources模块
         for app_config in app_configs:
-            self.resource_path += self.find(app_config.path, root_path=os.path.dirname(app_config.path))
+            self.resource_path += self.find(
+                app_config.path, root_path=os.path.dirname(app_config.path)
+            )
             app_path_directories.append(app_config.path)
 
         # 查询settings中配置的额外资源模块目录
@@ -75,7 +84,7 @@ class ResourceFinder(BaseFinder):
         for path in self.resource_path:
             yield path.path, path.status
 
-    def find(self, path, root_path=None, from_settings=False) -> Set:
+    def find(self, path, root_path=None, from_settings=False) -> set:
         """
         root_path: 用于指定查找的根目录，如果为None，则使用settings.BASE_DIR
 
@@ -104,7 +113,10 @@ class ResourceFinder(BaseFinder):
             if os.path.basename(root) in RESOURCE_IGNORE_DIRS:
                 return found_paths
 
-            if any(item in ["resources", "resources.py", "default.py"] for item in dirs + files):
+            if any(
+                item in ["resources", "resources.py", "default.py"]
+                for item in dirs + files
+            ):
                 found_paths.append(root)
                 return found_paths
 
@@ -138,7 +150,7 @@ class ResourceFinder(BaseFinder):
         return ".".join([p for p in path.split(os.sep) if p])
 
 
-class ResourceStatus(object):
+class ResourceStatus:
     # 待加载
     unloaded = "unloaded"
     # 加载成功
@@ -149,7 +161,7 @@ class ResourceStatus(object):
     error = "error"
 
 
-class ResourcePath(object):
+class ResourcePath:
     """
     path = ResourcePath("api.xxx")
     # 调用loader()方法，设置状态，并返回状态的值
@@ -178,7 +190,7 @@ class ResourcePath(object):
             return status_setter(status)(lambda: status, self)
 
     def __repr__(self):
-        return "{}: {}".format(self.path, self.status)
+        return f"{self.path}: {self.status}"
 
 
 def status_setter(status):

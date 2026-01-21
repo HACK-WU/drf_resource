@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -16,7 +15,7 @@ import os
 import yaml
 from django import urls
 from django.conf import settings
-from drf_resource import APIResource
+from drf_resource.contrib.api import APIResource
 from drf_resource.errors.api import BKAPIError
 from drf_resource.errors.common import HTTP404Error
 from drf_resource.utils.request import get_request
@@ -75,7 +74,7 @@ class KernelAPIResource(APIResource):
             # 后台时序数据拉取直联influxdb-proxy获取数据，避免经过esb序列化
             if action in GET_DATA_RESOURCES:
                 return GET_DATA_RESOURCES[action]()(validated_request_data)
-        return super(KernelAPIResource, self).perform_request(validated_request_data)
+        return super().perform_request(validated_request_data)
 
     def direct_request(self, validated_request_data):
         # 重要： 当前不支持action带模板变量的方式（当前kernel_api未使用）
@@ -83,7 +82,7 @@ class KernelAPIResource(APIResource):
         api_name, api_item = self.get_api_from_url(api_url)
         if api_item is None:
             raise HTTP404Error(
-                message="api [{}] not define in monitor_v3.yaml".format(api_name)
+                message=f"api [{api_name}] not define in monitor_v3.yaml"
             )
             # logger.error("api [{}] not define in monitor_v3.yaml".format(api_name))
             # return super().perform_request(validated_request_data)
@@ -141,14 +140,14 @@ def load_api_yaml():
     global API_DEFINE
     yaml_file_path = os.path.join(settings.BASE_DIR, "kernel_api", "monitor_v3.yaml")
     if not os.path.exists(yaml_file_path):
-        logger.error("api configfile not found. [{}]".format(yaml_file_path))
+        logger.error(f"api configfile not found. [{yaml_file_path}]")
         return
 
     with open(yaml_file_path, encoding="utf8") as yaml_fd:
         try:
             api_list = yaml.load(yaml_fd, Loader=yaml.FullLoader)
         except ParserError:
-            logger.error("api configfile is invalid. [{}]".format(yaml_file_path))
+            logger.error(f"api configfile is invalid. [{yaml_file_path}]")
             api_list = []
 
     for api_item in api_list:

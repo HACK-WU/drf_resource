@@ -12,6 +12,7 @@ import abc
 import base64
 import json
 from copy import deepcopy
+from typing import Any
 
 import six
 from django.conf import settings
@@ -47,7 +48,7 @@ class CheckCMSIResource(CMSIBaseResource):
         }
     """
 
-    def perform_request(self, validated_request_data: dict[str, list[str] | any]):
+    def perform_request(self, validated_request_data: dict[str, list[str] | Any]):
         """
         发送请求
         """
@@ -355,7 +356,7 @@ class SendMail(CheckCMSIResource):
 
             return attrs
 
-    def perform_request(self, validated_request_data: dict[str, list[str] | any]):
+    def perform_request(self, validated_request_data: dict[str, list[str] | Any]):
         """
         发送请求
 

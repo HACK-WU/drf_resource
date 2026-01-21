@@ -16,7 +16,7 @@ from bkmonitor.commons.tools import batch_request
 from core.cache import CacheType
 from bkmonitor.utils.user import get_local_username, get_request_username
 from drf_resource import CacheResource, Resource, api
-from api.nested_api import KernelAPIResource
+from api import KernelAPIResource
 
 
 class MetaDataAPIGWResource(KernelAPIResource):

@@ -14,6 +14,7 @@ import six
 from django.conf import settings
 
 from api.base import BKAPIResource
+from drf_resource.utils.common import classproperty
 
 
 class MonitorWorkerAPIGWResource(six.with_metaclass(abc.ABCMeta, BKAPIResource)):
@@ -21,10 +22,10 @@ class MonitorWorkerAPIGWResource(six.with_metaclass(abc.ABCMeta, BKAPIResource))
     # 模块名
     module_name = "bkmonitor-worker"
 
-    @property
-    def base_url(self):
+    @classproperty
+    def base_url(cls):
         stage = "prod" if settings.RUN_MODE == "PRODUCT" else "stag"
-        return settings.MONITOR_WORKER_API_BASE_URL or f"{settings.BK_COMPONENT_API_URL}/api/{self.module_name}/{stage}"
+        return settings.MONITOR_WORKER_API_BASE_URL or f"{settings.BK_COMPONENT_API_URL}/api/{cls.module_name}/{stage}"
 
     @property
     def label(self):

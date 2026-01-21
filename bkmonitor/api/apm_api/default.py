@@ -11,7 +11,7 @@ specific language governing permissions and limitations under the License.
 from django.conf import settings
 
 from core.cache import CacheType
-from api.nested_api import KernelAPIResource
+from api import KernelAPIResource
 
 
 class ApmAPIGWResource(KernelAPIResource):

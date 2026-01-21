@@ -14,7 +14,7 @@ import os
 from django.conf import settings
 from rest_framework import serializers
 
-from api.nested_api import KernelAPIResource
+from api import KernelAPIResource
 
 
 class BSCPAPIGWResource(KernelAPIResource):
