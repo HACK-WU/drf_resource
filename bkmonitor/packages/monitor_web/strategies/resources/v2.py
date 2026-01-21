@@ -3489,7 +3489,7 @@ class GetIntelligentModelResource(Resource):
             "id": plan["plan_id"],
             "is_default": plan["is_default"],
             "document": plan.get("plan_description", ""),
-            "description": plan_document.get("instroduction", ""),   # noqa: typo
+            "description": plan_document.get("instroduction", ""),  # noqa: typo
             "instruction": plan_document.get("content", ""),
             "latest_release_id": plan["latest_plan_version_id"],
             "visual_type": plan["visual_type"],
