@@ -101,7 +101,7 @@ def custom_exception_handler(exc, context):
     """
     针对CustomException返回的错误进行特殊处理，增加了传递数据的特性
     """
-    from drf_resource.errors.common import failed
+    from drf_resource.utils.common import failed
 
     response = None
     if isinstance(exc, Error):
