@@ -40,6 +40,36 @@
             --info-color: #909399;
         }
 
+        /* 深色模式 */
+        [data-theme="dark"] {
+            --primary-color: #409eff;
+            --primary-hover: #66b1ff;
+            --primary-light: #1a3a5c;
+
+            --bg-color: #1a1a2e;
+            --bg-white: #16213e;
+            --bg-sidebar: #0f0f23;
+            --bg-sidebar-hover: #1a1a2e;
+
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+            --text-placeholder: #71717a;
+            --text-white: #ffffff;
+
+            --border-color: #3f3f46;
+            --border-light: #27272a;
+
+            --method-get: #4ade80;
+            --method-post: #60a5fa;
+            --method-put: #fbbf24;
+            --method-delete: #f87171;
+
+            --success-color: #4ade80;
+            --error-color: #f87171;
+            --warning-color: #fbbf24;
+            --info-color: #a1a1aa;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -168,6 +198,35 @@
 
         .toggle-label {
             min-width: 80px;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            background: var(--bg-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .theme-icon {
+            font-size: 16px;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle:hover .theme-icon {
+            transform: rotate(20deg);
         }
 
         .btn {
@@ -815,6 +874,10 @@
                 </label>
             </div>
             <button class="btn btn-primary" id="searchBtn">搜索</button>
+            <button class="theme-toggle" id="themeToggle" title="切换主题">
+                <span class="theme-icon" id="themeIcon">🌙</span>
+                <span id="themeText">深色</span>
+            </button>
         </div>
     </header>
 
@@ -953,6 +1016,7 @@
             searchKeyword: '',
             searchAllModules: false, // 是否搜索全部模块
             moduleFilterKeyword: '', // 模块筛选关键词
+            darkMode: false, // 深色模式
             selectedAPI: null,
             apiDetail: null,
             invokePanel: {
@@ -962,6 +1026,45 @@
                 response: null
             }
         };
+
+        // 初始化主题
+        function initTheme() {
+            const savedTheme = localStorage.getItem('api-explorer-theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            // 优先使用保存的主题，否则跟随系统
+            if (savedTheme) {
+                AppState.darkMode = savedTheme === 'dark';
+            } else {
+                AppState.darkMode = prefersDark;
+            }
+
+            applyTheme();
+        }
+
+        // 应用主题
+        function applyTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+
+            if (AppState.darkMode) {
+                html.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = '浅色';
+            } else {
+                html.removeAttribute('data-theme');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = '深色';
+            }
+        }
+
+        // 切换主题
+        function toggleTheme() {
+            AppState.darkMode = !AppState.darkMode;
+            localStorage.setItem('api-explorer-theme', AppState.darkMode ? 'dark' : 'light');
+            applyTheme();
+        }
 
         // API 请求函数
         async function request(url, options = {}) {
@@ -1550,8 +1653,14 @@
 
         // 事件绑定
         document.addEventListener('DOMContentLoaded', () => {
-            // 初始化
+            // 初始化主题（优先执行，避免闪烁）
+            initTheme();
+
+            // 初始化应用
             initApp();
+
+            // 主题切换
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
             // 搜索
             const searchInput = document.getElementById('searchInput');
