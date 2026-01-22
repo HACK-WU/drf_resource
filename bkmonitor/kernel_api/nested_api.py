@@ -66,9 +66,7 @@ class KernelAPIResource(APIResource):
         if IS_API_MODE:
             return self.direct_request(validated_request_data)
 
-        api_name, api_item = self.get_api_from_url(
-            self.get_request_url(validated_request_data)
-        )
+        api_name, api_item = self.get_api_from_url(self.get_request_url(validated_request_data))
         if api_item and api_item.get("dest_path"):
             action = api_item["dest_path"].strip("/").rsplit("/", 1)[-1]
             # 后台时序数据拉取直联influxdb-proxy获取数据，避免经过esb序列化
@@ -81,9 +79,7 @@ class KernelAPIResource(APIResource):
         api_url = self.get_request_url(validated_request_data)
         api_name, api_item = self.get_api_from_url(api_url)
         if api_item is None:
-            raise HTTP404Error(
-                message=f"api [{api_name}] not define in monitor_v3.yaml"
-            )
+            raise HTTP404Error(message=f"api [{api_name}] not define in monitor_v3.yaml")
             # logger.error("api [{}] not define in monitor_v3.yaml".format(api_name))
             # return super().perform_request(validated_request_data)
 
@@ -103,12 +99,8 @@ class KernelAPIResource(APIResource):
         # 请求身份透传
         source_request = get_request(peaceful=True)
         if source_request:
-            request.META["HTTP_BK_APP_CODE"] = source_request.META.get(
-                "HTTP_BK_APP_CODE"
-            )
-            request.META["HTTP_BK_USERNAME"] = source_request.META.get(
-                "HTTP_BK_USERNAME"
-            )
+            request.META["HTTP_BK_APP_CODE"] = source_request.META.get("HTTP_BK_APP_CODE")
+            request.META["HTTP_BK_USERNAME"] = source_request.META.get("HTTP_BK_USERNAME")
 
         response = match_obj.func(request, **match_obj.kwargs)
         result_json = json.loads(response.rendered_content)
@@ -116,22 +108,14 @@ class KernelAPIResource(APIResource):
         if not result_json["result"]:
             msg = result_json.get("message", "")
             logger.error(
-                "【Module: "
-                + self.module_name
-                + "】【Action: "
-                + self.action
-                + "】get error：%s",
+                "【Module: " + self.module_name + "】【Action: " + self.action + "】get error：%s",
                 msg,
                 extra=dict(module_name=self.module_name, url=api_url),
             )
-            raise BKAPIError(
-                system_name=self.module_name, url=self.action, result=result_json
-            )
+            raise BKAPIError(system_name=self.module_name, url=self.action, result=result_json)
 
         # 渲染数据
-        response_data = self.render_response_data(
-            validated_request_data, result_json.get("data")
-        )
+        response_data = self.render_response_data(validated_request_data, result_json.get("data"))
 
         return response_data
 

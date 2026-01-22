@@ -8,6 +8,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-from drf_resource.contrib.nested_api import KernelAPIResource
+from kernel_api.nested_api import KernelAPIResource
 
 __all__ = ["KernelAPIResource"]
