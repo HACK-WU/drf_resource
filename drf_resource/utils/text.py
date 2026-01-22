@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 文本处理工具模块
 
@@ -36,7 +35,10 @@ def camel_to_underscore(camel_str):
             next_letter = camel_str[i + 1] if i < str_len - 1 else "A"
             # 如果当前字符是字母，并且前一个字符或后一个字符不是大写，则插入下划线
             if cur_letter.isalpha():
-                if prev_letter != prev_letter.upper() or next_letter != next_letter.upper():
+                if (
+                    prev_letter != prev_letter.upper()
+                    or next_letter != next_letter.upper()
+                ):
                     buf.write("_")
         # 将当前字符写入缓冲区
         buf.write(cur_letter)

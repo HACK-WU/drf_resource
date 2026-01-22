@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 drf_resource 工具模块
 

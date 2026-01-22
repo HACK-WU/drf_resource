@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +7,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-
 
 import inspect
 import logging
@@ -62,21 +60,23 @@ def render(define_tree, tab=0):
     # 引入依赖
     for key, value in list(define_tree.items()):
         if value.get("type") in ["class", "function"]:
-            result += "{}from {} import {} as {}\n".format(tab_string, value["module"], value["name"], key)
+            result += "{}from {} import {} as {}\n".format(
+                tab_string, value["module"], value["name"], key
+            )
 
     # 函数及类定义
     for key, value in list(define_tree.items()):
         if value.get("type") == "class":
-            result += "{}{}: {} = ...\n".format(tab_string, key, key)
+            result += f"{tab_string}{key}: {key} = ...\n"
         elif value.get("type") == "function":
-            result += "{}{}: function = {}\n".format(tab_string, key, key)
+            result += f"{tab_string}{key}: function = {key}\n"
 
     # 递归定义子类
     for key, value in list(define_tree.items()):
         if value.get("type") not in ["class", "function"]:
-            result += "\n{}class {}:\n".format(tab_string, key)
+            result += f"\n{tab_string}class {key}:\n"
             result += render(value, tab + 1)
-            result += "%s    ...\n" % tab_string
+            result += f"{tab_string}    ...\n"
 
     return result
 
@@ -96,7 +96,11 @@ def search_attr(instance):
                 logger.exception(err)
             resource_tree[name] = {}
             for key, value in list(obj._methods.items()):
-                resource_tree[name][key] = {"name": value.__name__, "module": value.__module__, "cls": value}
+                resource_tree[name][key] = {
+                    "name": value.__name__,
+                    "module": value.__module__,
+                    "cls": value,
+                }
                 if inspect.isfunction(value):
                     resource_tree[name][key]["type"] = "function"
                 else:

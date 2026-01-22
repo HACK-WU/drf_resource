@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -35,7 +34,7 @@ class CacheResource(six.with_metaclass(abc.ABCMeta, Resource)):
         # 若cache_type为None则视为关闭缓存功能
         if self._need_cache_wrap():
             self._wrap_request()
-        super(CacheResource, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def _need_cache_wrap(self):
         """
@@ -56,7 +55,10 @@ class CacheResource(six.with_metaclass(abc.ABCMeta, Resource)):
         if self.cache_type is not None:
             # 检查cache_type是否为CacheTypeItem的实例，如果不是则抛出TypeError
             if not isinstance(self.cache_type, CacheTypeItem):
-                raise TypeError("param 'cache_type' must be an" "instance of <utils.cache.CacheTypeItem>")
+                raise TypeError(
+                    "param 'cache_type' must be an"
+                    "instance of <utils.cache.CacheTypeItem>"
+                )
             # 如果cache_type符合条件，设置need_cache为True
             need_cache = True
 
@@ -64,7 +66,10 @@ class CacheResource(six.with_metaclass(abc.ABCMeta, Resource)):
         if self.backend_cache_type is not None:
             # 检查backend_cache_type是否为CacheTypeItem的实例，如果不是则抛出TypeError
             if not isinstance(self.backend_cache_type, CacheTypeItem):
-                raise TypeError("param 'cache_type' must be an" "instance of <utils.cache.CacheTypeItem>")
+                raise TypeError(
+                    "param 'cache_type' must be an"
+                    "instance of <utils.cache.CacheTypeItem>"
+                )
             # 如果backend_cache_type符合条件，设置need_cache为True
             need_cache = True
 
@@ -77,7 +82,7 @@ class CacheResource(six.with_metaclass(abc.ABCMeta, Resource)):
         """
 
         def func_key_generator(resource):
-            key = "{}.{}".format(resource.__self__.__class__.__module__, resource.__self__.__class__.__name__)
+            key = f"{resource.__self__.__class__.__module__}.{resource.__self__.__class__.__name__}"
             return key
 
         self.request = using_cache(

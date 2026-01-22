@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +12,7 @@ import functools
 import json
 import logging
 import zlib
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from django.core.cache import cache, caches
 from django.utils.encoding import force_bytes
@@ -29,7 +28,7 @@ except Exception:
     mem_cache = cache
 
 
-class CacheTypeItem(object):
+class CacheTypeItem:
     """
     缓存类型定义
     """
@@ -65,7 +64,7 @@ class DefaultCacheType(BaseCacheType):
     backend = CacheTypeItem(key="backend", timeout=60, user_related=False)
 
 
-class BaseUsingCache(object):
+class BaseUsingCache:
     """
     使用缓存基类
     """
@@ -116,13 +115,13 @@ class DefaultUsingCache(BaseUsingCache):
     default_user_info = "backend"
 
     def __init__(
-            self,
-            cache_type,
-            backend_cache_type=None,
-            user_related=None,
-            compress=True,
-            cache_write_trigger=lambda res: True,
-            func_key_generator=lambda func: "{}.{}".format(func.__module__, func.__name__),
+        self,
+        cache_type,
+        backend_cache_type=None,
+        user_related=None,
+        compress=True,
+        cache_write_trigger=lambda res: True,
+        func_key_generator=lambda func: f"{func.__module__}.{func.__name__}",
     ):
         """
         :param cache_type: 缓存类型
@@ -230,12 +229,15 @@ class DefaultUsingCache(BaseUsingCache):
         # 检查using_cache_type是否为有效的缓存类型，如果不是则抛出异常
         if using_cache_type:
             if not isinstance(using_cache_type, CacheTypeItem):
-                raise TypeError("param 'cache_type' must be an" "instance of <utils.cache.CacheTypeItem>")
+                raise TypeError(
+                    "param 'cache_type' must be an"
+                    "instance of <utils.cache.CacheTypeItem>"
+                )
 
         # 返回确定的缓存类型
         return using_cache_type
 
-    def generate_cache_key(self, target_fun: Callable, args, kwargs) -> Optional[str]:
+    def generate_cache_key(self, target_fun: Callable, args, kwargs) -> str | None:
         # 新增根据用户openid设置缓存key
         if self.using_cache_type:
             return (
@@ -246,7 +248,9 @@ class DefaultUsingCache(BaseUsingCache):
         return None
 
     def get_value(self, cache_key, default=None):
-        value = mem_cache.get(cache_key, default=None) or cache.get(cache_key, default=None)
+        value = mem_cache.get(cache_key, default=None) or cache.get(
+            cache_key, default=None
+        )
         if value is None:
             return default
 
@@ -267,7 +271,7 @@ class DefaultUsingCache(BaseUsingCache):
             try:
                 value = json.dumps(value)
             except Exception:
-                logger.exception("[Cache]不支持序列化的类型: %s" % type(value))
+                logger.exception(f"[Cache]不支持序列化的类型: {type(value)}")
                 return False
 
             if len(value) > self.min_length:
@@ -284,7 +288,10 @@ class DefaultUsingCache(BaseUsingCache):
             except Exception:
                 request_path = ""
             # 缓存出错不影响主流程
-            logger.exception("存缓存[key:{}]时报错：{}\n value: {!r}\nurl: {}".format(key, e, value, request_path))
+            logger.exception(
+                f"存缓存[key:{key}]时报错：{e}\n value: {value!r}\nurl: {request_path}"
+            )
+
 
 # todo 后续将其挂载到Resource类上
 using_cache = DefaultUsingCache
