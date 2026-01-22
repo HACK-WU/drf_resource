@@ -10,29 +10,29 @@
             --primary-color: #3a8ee6;
             --primary-hover: #2d7ad6;
             --primary-light: #ecf5ff;
-            
+
             /* 背景色 */
             --bg-color: #f5f7fa;
             --bg-white: #ffffff;
             --bg-sidebar: #2c3e50;
             --bg-sidebar-hover: #34495e;
-            
+
             /* 文字色 */
             --text-primary: #303133;
             --text-secondary: #606266;
             --text-placeholder: #c0c4cc;
             --text-white: #ffffff;
-            
+
             /* 边框色 */
             --border-color: #dcdfe6;
             --border-light: #ebeef5;
-            
+
             /* HTTP 方法颜色 */
             --method-get: #67c23a;
             --method-post: #409eff;
             --method-put: #e6a23c;
             --method-delete: #f56c6c;
-            
+
             /* 状态颜色 */
             --success-color: #67c23a;
             --error-color: #f56c6c;
@@ -47,7 +47,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
                          'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
             font-size: 14px;
             line-height: 1.6;
@@ -95,6 +95,7 @@
         .search-container {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
         .search-input {
@@ -108,6 +109,65 @@
 
         .search-input:focus {
             border-color: var(--primary-color);
+        }
+
+        /* Toggle Switch */
+        .search-scope-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            user-select: none;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color);
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        .toggle-label {
+            min-width: 80px;
         }
 
         .btn {
@@ -157,12 +217,45 @@
             color: var(--text-white);
             overflow-y: auto;
             flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar-header {
             padding: 16px;
             font-weight: 600;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-filter {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-white);
+            font-size: 13px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .filter-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .filter-input:focus {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .module-list-container {
+            flex: 1;
+            overflow-y: auto;
         }
 
         .module-list {
@@ -594,6 +687,110 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-placeholder);
         }
+
+        /* Confirmation Modal */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .confirm-modal.visible {
+            display: flex;
+        }
+
+        .confirm-dialog {
+            background: var(--bg-white);
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .confirm-icon {
+            font-size: 32px;
+        }
+
+        .confirm-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .confirm-body {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .confirm-info {
+            background-color: var(--bg-color);
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+
+        .confirm-info-item {
+            display: flex;
+            margin-bottom: 6px;
+        }
+
+        .confirm-info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .confirm-info-label {
+            font-weight: 600;
+            min-width: 80px;
+            color: var(--text-primary);
+        }
+
+        .confirm-info-value {
+            color: var(--text-secondary);
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-danger {
+            background-color: #f56c6c;
+            color: var(--text-white);
+        }
+
+        .btn-danger:hover {
+            background-color: #f45454;
+        }
     </style>
 </head>
 <body>
@@ -604,12 +801,19 @@
             <h1 class="title">API Explorer</h1>
         </div>
         <div class="search-container">
-            <input 
-                type="text" 
-                class="search-input" 
-                id="searchInput" 
+            <input
+                type="text"
+                class="search-input"
+                id="searchInput"
                 placeholder="搜索 API..."
             >
+            <div class="search-scope-toggle">
+                <span class="toggle-label" id="searchScopeLabel">当前模块</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="searchAllToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
             <button class="btn btn-primary" id="searchBtn">搜索</button>
         </div>
     </header>
@@ -619,14 +823,24 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">📦 模块列表</div>
-            <ul class="module-list" id="moduleList">
-                <li class="module-item active" data-module="">
-                    <div class="module-name">
-                        <span>全部</span>
-                        <span class="module-count" id="totalCount">0</span>
-                    </div>
-                </li>
-            </ul>
+            <div class="sidebar-filter">
+                <input
+                    type="text"
+                    class="filter-input"
+                    id="moduleFilterInput"
+                    placeholder="筛选模块..."
+                >
+            </div>
+            <div class="module-list-container">
+                <ul class="module-list" id="moduleList">
+                    <li class="module-item active" data-module="">
+                        <div class="module-name">
+                            <span>全部</span>
+                            <span class="module-count" id="totalCount">0</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </aside>
 
         <!-- Main Content -->
@@ -694,6 +908,38 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-dialog">
+            <div class="confirm-header">
+                <span class="confirm-icon">⚠️</span>
+                <h3 class="confirm-title">确认操作</h3>
+            </div>
+            <div class="confirm-body">
+                <p>您即将发送一个<strong>非 GET 请求</strong>，此操作可能会修改服务器数据。</p>
+                <div class="confirm-info">
+                    <div class="confirm-info-item">
+                        <span class="confirm-info-label">请求方法:</span>
+                        <span class="confirm-info-value" id="confirmMethod"></span>
+                    </div>
+                    <div class="confirm-info-item">
+                        <span class="confirm-info-label">接口名称:</span>
+                        <span class="confirm-info-value" id="confirmApiName"></span>
+                    </div>
+                    <div class="confirm-info-item">
+                        <span class="confirm-info-label">模块:</span>
+                        <span class="confirm-info-value" id="confirmModule"></span>
+                    </div>
+                </div>
+                <p style="margin-top: 16px; font-weight: 500;">请确认是否继续执行？</p>
+            </div>
+            <div class="confirm-actions">
+                <button class="btn btn-secondary" id="confirmCancelBtn">取消</button>
+                <button class="btn btn-danger" id="confirmOkBtn">确认发送</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 全局状态
         const AppState = {
@@ -701,9 +947,12 @@
             endpointsInfo: [],
             initialized: false,
             modules: [],
+            allModules: [], // 保存完整模块列表用于筛选
             currentModule: null,
             apiList: [],
             searchKeyword: '',
+            searchAllModules: false, // 是否搜索全部模块
+            moduleFilterKeyword: '', // 模块筛选关键词
             selectedAPI: null,
             apiDetail: null,
             invokePanel: {
@@ -721,10 +970,10 @@
                     'Content-Type': 'application/json',
                 },
             };
-            
+
             try {
                 const response = await fetch(url, { ...defaultOptions, ...options });
-                
+
                 // 检查响应类型
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {
@@ -737,13 +986,13 @@
                         throw new Error(`服务器返回非 JSON 响应 (HTTP ${response.status})，请检查路由配置`);
                     }
                 }
-                
+
                 const data = await response.json();
-                
+
                 if (!data.result) {
                     throw new Error(data.message || '请求失败');
                 }
-                
+
                 return data.data;
             } catch (error) {
                 console.error('API 请求失败:', error);
@@ -771,7 +1020,7 @@
         async function fetchApiIndex() {
             // 构建 api_index 的 URL
             const baseUrl = window.location.pathname.replace(/\/$/, '');
-            const apiIndexUrl = baseUrl + '/api_index/';
+            const apiIndexUrl = baseUrl + '/api_info/';
             const data = await request(apiIndexUrl);
             initEndpoints(data.endpoints, data.endpoints_info);
             return data;
@@ -779,14 +1028,14 @@
 
         // 获取模块列表
         async function fetchModules(search = '') {
-            const baseUrl = getEndpointUrl('modules');
+            const baseUrl = getEndpointUrl('module_list');
             const url = search ? `${baseUrl}?search=${encodeURIComponent(search)}` : baseUrl;
             return request(url);
         }
 
         // 获取 API 目录
         async function fetchCatalog(module = '', search = '') {
-            const baseUrl = getEndpointUrl('catalog');
+            const baseUrl = getEndpointUrl('api_list');
             const params = new URLSearchParams();
             if (module) params.append('module', module);
             if (search) params.append('search', search);
@@ -803,7 +1052,7 @@
 
         // 调用 API
         async function invokeAPI(module, apiName, params) {
-            const url = getEndpointUrl('invoke');
+            const url = getEndpointUrl('api_invoke');
             return request(url, {
                 method: 'POST',
                 body: JSON.stringify({ module, api_name: apiName, params }),
@@ -811,14 +1060,17 @@
         }
 
         // 渲染模块列表
-        function renderModules(modules) {
+        function renderModules(modules, preserveSelection = false) {
             const moduleList = document.getElementById('moduleList');
             const totalCount = modules.reduce((sum, m) => sum + m.api_count, 0);
-            
+
             document.getElementById('totalCount').textContent = totalCount;
-            
+
+            // 保存当前选中的模块
+            const currentSelection = preserveSelection ? AppState.currentModule : null;
+
             const items = modules.map(module => `
-                <li class="module-item" data-module="${module.name}">
+                <li class="module-item ${currentSelection === module.name ? 'active' : ''}" data-module="${module.name}">
                     <div class="module-name">
                         <span>${module.name}</span>
                         <span class="module-count">${module.api_count}</span>
@@ -826,9 +1078,22 @@
                     <div class="module-display-name">${module.display_name}</div>
                 </li>
             `).join('');
-            
-            moduleList.innerHTML += items;
-            
+
+            // 保留 "全部" 选项并更新模块列表
+            const allItem = moduleList.querySelector('[data-module=""]');
+            if (currentSelection === '' || currentSelection === null) {
+                allItem.classList.add('active');
+            } else {
+                allItem.classList.remove('active');
+            }
+
+            // 移除旧的模块项（保留"全部"）
+            const oldItems = moduleList.querySelectorAll('.module-item:not([data-module=""])');
+            oldItems.forEach(item => item.remove());
+
+            // 添加新的模块项
+            moduleList.insertAdjacentHTML('beforeend', items);
+
             // 绑定点击事件
             moduleList.querySelectorAll('.module-item').forEach(item => {
                 item.addEventListener('click', () => {
@@ -838,15 +1103,34 @@
             });
         }
 
+        // 筛选模块列表（纯前端）
+        function filterModules(keyword) {
+            AppState.moduleFilterKeyword = keyword.toLowerCase();
+
+            if (!keyword) {
+                // 无筛选关键词，显示所有模块
+                renderModules(AppState.allModules, true);
+                return;
+            }
+
+            // 根据关键词筛选模块
+            const filtered = AppState.allModules.filter(module => {
+                return module.name.toLowerCase().includes(keyword) ||
+                       module.display_name.toLowerCase().includes(keyword);
+            });
+
+            renderModules(filtered, true);
+        }
+
         // 选择模块
         async function selectModule(moduleName) {
             AppState.currentModule = moduleName;
-            
+
             // 更新高亮
             document.querySelectorAll('.module-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.module === moduleName);
             });
-            
+
             // 加载 API 列表
             showLoading();
             try {
@@ -861,16 +1145,16 @@
         function renderAPIList(data) {
             const apiListEl = document.getElementById('apiList');
             const listTitleEl = document.getElementById('listTitle');
-            
+
             const apis = [];
             data.modules.forEach(module => {
                 module.apis.forEach(api => {
                     apis.push(api);
                 });
             });
-            
+
             listTitleEl.textContent = `📋 API 列表 (${data.total} 个接口)`;
-            
+
             if (apis.length === 0) {
                 apiListEl.innerHTML = `
                     <div class="empty-state">
@@ -880,7 +1164,7 @@
                 `;
                 return;
             }
-            
+
             const items = apis.map(api => `
                 <div class="api-card" data-module="${api.module}" data-api="${api.name}">
                     <div class="api-card-header">
@@ -899,9 +1183,9 @@
                     </div>
                 </div>
             `).join('');
-            
+
             apiListEl.innerHTML = items;
-            
+
             // 绑定点击事件
             apiListEl.querySelectorAll('.api-card').forEach(card => {
                 card.addEventListener('click', () => {
@@ -915,13 +1199,13 @@
         // 显示 API 详情
         async function showAPIDetail(module, apiName) {
             AppState.selectedAPI = { module, api_name: apiName };
-            
+
             const detailPanel = document.getElementById('detailPanel');
             const detailContent = document.getElementById('detailContent');
-            
+
             detailContent.innerHTML = '<div class="loading"><div class="spinner"></div><div>加载中...</div></div>';
             detailPanel.classList.add('visible');
-            
+
             try {
                 const detail = await fetchAPIDetail(module, apiName);
                 AppState.apiDetail = detail;
@@ -934,7 +1218,7 @@
         // 渲染 API 详情
         function renderAPIDetail(detail) {
             const detailContent = document.getElementById('detailContent');
-            
+
             const requestParams = detail.request_params && detail.request_params.length > 0
                 ? `
                     <table class="params-table">
@@ -961,7 +1245,7 @@
                     </table>
                 `
                 : '<div style="color: var(--text-secondary);">无参数定义</div>';
-            
+
             const responseParams = detail.response_params && detail.response_params.length > 0
                 ? `
                     <table class="params-table">
@@ -984,7 +1268,7 @@
                     </table>
                 `
                 : '<div style="color: var(--text-secondary);">无参数定义</div>';
-            
+
             detailContent.innerHTML = `
                 <div class="detail-section">
                     <div class="section-title">基本信息</div>
@@ -1004,22 +1288,22 @@
                     </div>
                     ${detail.doc ? `<div style="margin-top: 12px; padding: 10px; background: var(--bg-color); border-radius: 4px;">${detail.doc}</div>` : ''}
                 </div>
-                
+
                 <div class="detail-section">
                     <div class="section-title">📥 请求参数</div>
                     ${requestParams}
                 </div>
-                
+
                 <div class="detail-section">
                     <div class="section-title">📤 响应参数</div>
                     ${responseParams}
                 </div>
-                
+
                 <div style="text-align: center; margin-top: 20px;">
                     <button class="btn btn-primary" id="openInvokeBtn">🚀 立即调用</button>
                 </div>
             `;
-            
+
             // 绑定调用按钮
             document.getElementById('openInvokeBtn').addEventListener('click', openInvokePanel);
         }
@@ -1028,7 +1312,7 @@
         function openInvokePanel() {
             const invokePanel = document.getElementById('invokePanel');
             const paramsEditor = document.getElementById('paramsEditor');
-            
+
             // 生成参数模板
             if (AppState.apiDetail && AppState.apiDetail.request_params) {
                 const template = generateParamsTemplate(AppState.apiDetail.request_params);
@@ -1036,17 +1320,17 @@
             } else {
                 paramsEditor.value = '{}';
             }
-            
+
             // 清空响应
             document.getElementById('responseContainer').style.display = 'none';
-            
+
             invokePanel.classList.add('visible');
         }
 
         // 生成参数模板
         function generateParamsTemplate(requestParams) {
             const template = {};
-            
+
             requestParams.forEach(param => {
                 if (param.default !== null && param.default !== undefined) {
                     template[param.name] = param.default;
@@ -1061,7 +1345,7 @@
                     }
                 }
             });
-            
+
             return JSON.stringify(template, null, 2);
         }
 
@@ -1072,7 +1356,7 @@
             const responseContainer = document.getElementById('responseContainer');
             const responseStatus = document.getElementById('responseStatus');
             const responseBody = document.getElementById('responseBody');
-            
+
             let params;
             try {
                 params = JSON.parse(paramsEditor.value);
@@ -1080,28 +1364,43 @@
                 showToast('JSON 格式错误', 'error');
                 return;
             }
-            
+
+            // 检查是否为非 GET 请求，需要二次确认
+            const method = AppState.apiDetail?.method?.toUpperCase() || 'GET';
+            if (method !== 'GET') {
+                // 显示确认对话框
+                const confirmed = await showConfirmDialog({
+                    method: method,
+                    apiName: AppState.selectedAPI.api_name,
+                    module: AppState.selectedAPI.module
+                });
+
+                if (!confirmed) {
+                    return; // 用户取消操作
+                }
+            }
+
             invokeBtn.disabled = true;
             invokeBtn.textContent = '⏳ 调用中...';
             responseContainer.style.display = 'none';
-            
+
             const startTime = Date.now();
-            
+
             try {
                 const result = await invokeAPI(
                     AppState.selectedAPI.module,
                     AppState.selectedAPI.api_name,
                     params
                 );
-                
+
                 const duration = ((Date.now() - startTime) / 1000).toFixed(3);
-                
+
                 responseStatus.className = 'response-status ' + (result.success ? 'success' : 'error');
                 responseStatus.innerHTML = `
                     <span>${result.success ? '✅ 成功' : '❌ 失败'}</span>
                     <span>耗时: ${duration}s</span>
                 `;
-                
+
                 responseBody.textContent = JSON.stringify(
                     result.success ? result.response : {
                         error_code: result.error_code,
@@ -1110,7 +1409,7 @@
                     null,
                     2
                 );
-                
+
                 responseContainer.style.display = 'block';
                 showToast(result.success ? '调用成功' : '调用失败', result.success ? 'success' : 'error');
             } catch (error) {
@@ -1122,6 +1421,61 @@
                 invokeBtn.disabled = false;
                 invokeBtn.textContent = '▶ 发送请求';
             }
+        }
+
+        // 显示确认对话框
+        function showConfirmDialog(options) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('confirmModal');
+                const methodEl = document.getElementById('confirmMethod');
+                const apiNameEl = document.getElementById('confirmApiName');
+                const moduleEl = document.getElementById('confirmModule');
+                const okBtn = document.getElementById('confirmOkBtn');
+                const cancelBtn = document.getElementById('confirmCancelBtn');
+
+                // 设置信息
+                methodEl.innerHTML = `<span class="method-badge method-${options.method.toLowerCase()}">${options.method}</span>`;
+                apiNameEl.textContent = options.apiName;
+                moduleEl.textContent = options.module;
+
+                // 显示对话框
+                modal.classList.add('visible');
+
+                // 点击确认
+                const handleOk = () => {
+                    modal.classList.remove('visible');
+                    cleanup();
+                    resolve(true);
+                };
+
+                // 点击取消
+                const handleCancel = () => {
+                    modal.classList.remove('visible');
+                    cleanup();
+                    resolve(false);
+                };
+
+                // 点击遮罩关闭
+                const handleOverlay = (e) => {
+                    if (e.target === modal) {
+                        modal.classList.remove('visible');
+                        cleanup();
+                        resolve(false);
+                    }
+                };
+
+                // 绑定事件
+                okBtn.addEventListener('click', handleOk);
+                cancelBtn.addEventListener('click', handleCancel);
+                modal.addEventListener('click', handleOverlay);
+
+                // 清理事件监听
+                function cleanup() {
+                    okBtn.removeEventListener('click', handleOk);
+                    cancelBtn.removeEventListener('click', handleCancel);
+                    modal.removeEventListener('click', handleOverlay);
+                }
+            });
         }
 
         // 搜索
@@ -1137,7 +1491,9 @@
             AppState.searchKeyword = keyword;
             showLoading();
             try {
-                const data = await fetchCatalog(AppState.currentModule || '', keyword);
+                // 根据开关状态决定搜索范围
+                const searchModule = AppState.searchAllModules ? '' : (AppState.currentModule || '');
+                const data = await fetchCatalog(searchModule, keyword);
                 renderAPIList(data);
             } catch (error) {
                 showError('搜索失败');
@@ -1150,7 +1506,7 @@
             toast.className = `toast toast-${type}`;
             toast.textContent = message;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => toast.remove(), 3000);
         }
 
@@ -1173,16 +1529,17 @@
                 showToast('正在初始化...', 'info');
                 const indexData = await fetchApiIndex();
                 console.log('API Explorer 初始化完成', AppState.endpoints);
-                
+
                 // 步骤 2: 加载模块列表
                 const modulesData = await fetchModules();
                 AppState.modules = modulesData.modules;
+                AppState.allModules = modulesData.modules; // 保存完整列表用于筛选
                 renderModules(modulesData.modules);
-                
+
                 // 步骤 3: 加载默认 API 列表
                 const catalogData = await fetchCatalog();
                 renderAPIList(catalogData);
-                
+
                 showToast('加载完成!', 'success');
             } catch (error) {
                 console.error('初始化失败:', error);
@@ -1195,42 +1552,68 @@
         document.addEventListener('DOMContentLoaded', () => {
             // 初始化
             initApp();
-            
+
             // 搜索
             const searchInput = document.getElementById('searchInput');
             const searchBtn = document.getElementById('searchBtn');
-            
+
             searchInput.addEventListener('input', (e) => {
                 handleSearch(e.target.value);
             });
-            
+
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     handleSearch(e.target.value);
                 }
             });
-            
+
             searchBtn.addEventListener('click', () => {
                 handleSearch(searchInput.value);
             });
-            
+
+            // 搜索范围开关
+            const searchAllToggle = document.getElementById('searchAllToggle');
+            const searchScopeLabel = document.getElementById('searchScopeLabel');
+
+            searchAllToggle.addEventListener('change', (e) => {
+                AppState.searchAllModules = e.target.checked;
+
+                // 更新标签文本
+                if (e.target.checked) {
+                    searchScopeLabel.textContent = '全部模块';
+                } else {
+                    searchScopeLabel.textContent = '当前模块';
+                }
+
+                // 如果有搜索关键词，重新执行搜索
+                if (AppState.searchKeyword) {
+                    handleSearch(AppState.searchKeyword);
+                }
+            });
+
+            // 模块筛选（纯前端）
+            const moduleFilterInput = document.getElementById('moduleFilterInput');
+            moduleFilterInput.addEventListener('input', (e) => {
+                filterModules(e.target.value);
+            });
+
             // 关闭详情面板
             document.getElementById('closeDetailBtn').addEventListener('click', () => {
                 document.getElementById('detailPanel').classList.remove('visible');
             });
-            
+
             // 关闭调用面板
             document.getElementById('closeInvokeBtn').addEventListener('click', () => {
                 document.getElementById('invokePanel').classList.remove('visible');
             });
-            
+
             // 点击遮罩关闭
             document.getElementById('invokePanel').addEventListener('click', (e) => {
                 if (e.target.id === 'invokePanel') {
                     document.getElementById('invokePanel').classList.remove('visible');
                 }
             });
-            
+
             // 生成模板
             document.getElementById('generateTemplateBtn').addEventListener('click', () => {
                 if (AppState.apiDetail && AppState.apiDetail.request_params) {
@@ -1238,7 +1621,7 @@
                     document.getElementById('paramsEditor').value = template;
                 }
             });
-            
+
             // 格式化 JSON
             document.getElementById('formatJsonBtn').addEventListener('click', () => {
                 const editor = document.getElementById('paramsEditor');
@@ -1250,15 +1633,15 @@
                     showToast('JSON 格式错误', 'error');
                 }
             });
-            
+
             // 清空参数
             document.getElementById('clearParamsBtn').addEventListener('click', () => {
                 document.getElementById('paramsEditor').value = '{}';
             });
-            
+
             // 发送请求
             document.getElementById('invokeBtn').addEventListener('click', handleInvoke);
-            
+
             // 复制响应
             document.getElementById('copyResponseBtn').addEventListener('click', () => {
                 const responseBody = document.getElementById('responseBody');

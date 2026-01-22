@@ -8,23 +8,11 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-from django.urls import path
-from drf_resource.api_explorer.views import (
-    APIDetailView,
-    CatalogView,
-    HomeView,
-    IndexView,
-    InvokeView,
-    ModulesView,
-)
+from drf_resource.api_explorer.views import ApiHomeResourceViewSet
+from drf_resource.routers import ResourceRouter
 
-app_name = "api_explorer"
+# 使用 ResourceRouter 注册 ViewSet
+router = ResourceRouter()
+router.register("api_home", ApiHomeResourceViewSet, basename="api_home")
 
-urlpatterns = [
-    path("api_home/", HomeView.as_view(), name="api_home"),
-    path("api_index/", IndexView.as_view(), name="index"),
-    path("catalog/", CatalogView.as_view(), name="catalog"),
-    path("api_detail/", APIDetailView.as_view(), name="api_detail"),
-    path("invoke/", InvokeView.as_view(), name="invoke"),
-    path("api_modules/", ModulesView.as_view(), name="modules"),
-]
+urlpatterns = router.urls
