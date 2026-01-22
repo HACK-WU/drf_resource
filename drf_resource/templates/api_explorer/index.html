@@ -1799,13 +1799,13 @@
                 const copyBtn = document.getElementById('copyResponseBtn');
                 const copyIcon = copyBtn.querySelector('.copy-icon');
                 const copyText = copyBtn.querySelector('.copy-text');
+                const text = responseBody.textContent;
 
-                navigator.clipboard.writeText(responseBody.textContent).then(() => {
-                    // 复制成功的视觉反馈
+                // 复制成功后的视觉反馈
+                function onCopySuccess() {
                     copyBtn.classList.add('copied');
                     copyIcon.textContent = '✅';
                     copyText.textContent = '已复制';
-
                     showToast('已复制到剪贴板', 'success');
 
                     // 2秒后恢复原状
@@ -1814,11 +1814,47 @@
                         copyIcon.textContent = '📋';
                         copyText.textContent = '一键复制';
                     }, 2000);
-                }).catch(() => {
-                    showToast('复制失败，请手动复制', 'error');
-                });
+                }
+
+                // 尝试使用现代 Clipboard API
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text)
+                        .then(onCopySuccess)
+                        .catch(() => {
+                            // 降级到传统方法
+                            fallbackCopy(text, onCopySuccess);
+                        });
+                } else {
+                    // 使用传统复制方法
+                    fallbackCopy(text, onCopySuccess);
+                }
             });
         });
+
+        // 传统复制方法（兼容非 HTTPS 环境）
+        function fallbackCopy(text, onSuccess) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    onSuccess();
+                } else {
+                    showToast('复制失败，请手动复制', 'error');
+                }
+            } catch (err) {
+                showToast('复制失败，请手动复制', 'error');
+            }
+
+            document.body.removeChild(textarea);
+        }
     </script>
 </body>
 </html>
