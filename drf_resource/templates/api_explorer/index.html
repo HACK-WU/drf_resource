@@ -658,6 +658,45 @@
             word-break: break-all;
         }
 
+        /* Copy Button */
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .btn-copy {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-copy:active {
+            transform: translateY(0);
+        }
+
+        .btn-copy.copied {
+            background-color: var(--success-color);
+        }
+
+        .btn-copy .copy-icon {
+            font-size: 16px;
+        }
+
         /* Loading */
         .loading {
             text-align: center;
@@ -957,13 +996,16 @@
                 </div>
                 <div class="response-container" id="responseContainer" style="display: none;">
                     <div class="detail-section">
-                        <div class="section-title">📊 响应结果</div>
+                        <div class="response-header">
+                            <div class="section-title">📊 响应结果</div>
+                            <button class="btn-copy" id="copyResponseBtn">
+                                <span class="copy-icon">📋</span>
+                                <span class="copy-text">一键复制</span>
+                            </button>
+                        </div>
                         <div id="responseStatus"></div>
                         <div class="response-body">
                             <pre id="responseBody"></pre>
-                        </div>
-                        <div class="editor-actions">
-                            <button class="btn btn-secondary btn-small" id="copyResponseBtn">📋 复制结果</button>
                         </div>
                     </div>
                 </div>
@@ -1751,11 +1793,29 @@
             // 发送请求
             document.getElementById('invokeBtn').addEventListener('click', handleInvoke);
 
-            // 复制响应
+            // 复制响应结果
             document.getElementById('copyResponseBtn').addEventListener('click', () => {
                 const responseBody = document.getElementById('responseBody');
+                const copyBtn = document.getElementById('copyResponseBtn');
+                const copyIcon = copyBtn.querySelector('.copy-icon');
+                const copyText = copyBtn.querySelector('.copy-text');
+
                 navigator.clipboard.writeText(responseBody.textContent).then(() => {
+                    // 复制成功的视觉反馈
+                    copyBtn.classList.add('copied');
+                    copyIcon.textContent = '✅';
+                    copyText.textContent = '已复制';
+
                     showToast('已复制到剪贴板', 'success');
+
+                    // 2秒后恢复原状
+                    setTimeout(() => {
+                        copyBtn.classList.remove('copied');
+                        copyIcon.textContent = '📋';
+                        copyText.textContent = '一键复制';
+                    }, 2000);
+                }).catch(() => {
+                    showToast('复制失败，请手动复制', 'error');
                 });
             });
         });
