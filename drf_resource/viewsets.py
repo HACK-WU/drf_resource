@@ -53,6 +53,8 @@ class ResourceRoute:
         # if method.upper() not in ["GET", "POST"]:
         #     raise ValueError(_("method参数错误，目前仅支持GET或POST方法"))
 
+        # todo 增加basename参数用于反向解析路由
+
         self.method = method.upper()
 
         if isinstance(resource_class, Resource):
@@ -362,13 +364,14 @@ class ResourceViewSet(viewsets.GenericViewSet):
         """
 
         def view(self, request, *args, **kwargs):
-            resource = resource_route.resource_class()
+            resource = resource_route.resource_class(*args, **kwargs)
             params = (
                 request.query_params.copy()
                 if resource_route.method == "GET"
                 else request.data
             )
             local.current_request = request
+            resource._current_request = request
 
             if resource_route.pk_field:
                 # 如果是detail route，需要重url参数中获取主键，并塞到请求参数中

@@ -11,7 +11,6 @@ specific language governing permissions and limitations under the License.
 import abc
 import logging
 
-import six
 from django.db import models
 from django.http.response import HttpResponseBase
 from django.utils.translation import gettext as _
@@ -65,40 +64,118 @@ logger = logging.getLogger(__name__)
 
 
 __doc__ = """
-Non-ORM for DRF 的架构：
-serializers -> resources -> views
+DRF Resource - 声明式 API 资源框架
 
-各模块的职责
-serializers: 负责请求数据与返回数据的校验，包括简单的数据渲染
-resources: 此处编写业务逻辑（工作重点）
-views: 定义请求方法、使用到的Resource、是否分页、鉴权等配置（几乎没有代码量）
+这是一个基于 Django REST Framework 的轻量级资源化框架，通过声明式的方式简化 API 开发。
 
-Resource定义：
-对传入的数据进行特定处理并返回处理后的数据，这样的处理单元称为Resource
-可以通过继承Resource类来实现自定义的Resource
+核心概念
+--------
+Resource 是对业务逻辑的封装单元，负责处理输入数据并返回处理结果。
+通过继承 Resource 基类（abc.ABC）实现自定义资源。
 
-Resource的执行流程：
-1. 新建Resource实例
-2. 若用户未手动设置需要用到的RequestSerializer及ResponseSerializer，
-   则根据命名规则自动查找可用的serializers，并进行设置
-3. 调用request方法，并传入请求参数(request_data)
-4. 调用request_serializer(如果有)对request_data进行数据校验，
-   返回validated_request_data
-5. 用户自行实现perform_request方法，根据validated_request_data，通过用户编写的业务
-   逻辑，生成返回结果response_data
-6. 调用response_serializer(如果有)对response_data进行数据校验，
-   返回validated_response_data
-7. 将validated_response_data交给上层的views，由views进行最后的数据渲染及返回到前端
+基本用法
+--------
+```python
+from rest_framework import serializers
+from drf_resource.base import Resource
 
-为了Resource能够正确搜索到其对应的serializers，需要遵循以下命名规则：
-某Resource名称为: TestResource
-其对应的request serializer应命名为: TestRequestSerializer
-其对应的response serializer应命名为: TestResponseSerializer
+class MyRequestSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField(required=True)
+
+class MyResource(Resource):
+    RequestSerializer = MyRequestSerializer
+
+    def perform_request(self, validated_request_data):
+        user_id = validated_request_data['user_id']
+        # 业务逻辑处理
+        return {'result': 'success', 'user_id': user_id}
+
+# 调用方式
+resource = MyResource()
+result = resource.request({'user_id': 123})
+```
+
+执行流程
+--------
+1. 实例化 Resource（可传递 context 上下文参数）
+2. 自动搜索并绑定 RequestSerializer 和 ResponseSerializer（基于命名约定）
+3. 调用 request() 方法，传入请求数据
+4. 使用 RequestSerializer 校验输入（如果定义）
+5. 调用子类实现的 perform_request() 执行业务逻辑
+6. 判断返回值类型：
+   - HttpResponse 类型：直接返回（用于渲染页面等场景）
+   - 普通数据：使用 ResponseSerializer 校验输出（如果定义）
+7. 返回最终结果
+
+命名约定
+--------
+为了自动发现 Serializer，需遵循以下命名规则：
+- Resource 类名：XxxResource
+- 请求序列化器：XxxRequestSerializer
+- 响应序列化器：XxxResponseSerializer
+
+高级特性
+--------
+返回 HttpResponse：
+    perform_request() 可直接返回 Django 响应对象（HttpResponse、render 结果、
+    JsonResponse 等），框架会自动识别并跳过响应数据校验，直接透传给客户端。
+
+    示例：
+    ```python
+    def perform_request(self, validated_request_data):
+        return render(request, 'template.html', context)
+    ```
+
+访问请求对象：
+    在 ViewSet 中使用时，可通过 self._current_request 访问当前的 Django request 对象。
+
+    示例：
+    ```python
+    def perform_request(self, validated_request_data):
+        user = self._current_request.user
+        return {'username': user.username}
+    ```
+
+上下文传递：
+    初始化时可传递任意上下文参数，通过 self.context 访问。
+
+    示例：
+    ```python
+    resource = MyResource(context={'db': 'master'})
+    # 或
+    resource = MyResource(db='master', cache=True)
+    ```
+
+异步任务支持：
+    支持 Celery 异步任务执行。
+
+    示例：
+    ```python
+    result = resource.delay({'user_id': 123})  # 返回 task_id
+    ```
+
+批量请求：
+    支持多线程批量并发请求。
+
+    示例：
+    ```python
+    results = resource.bulk_request([
+        {'user_id': 1},
+        {'user_id': 2},
+    ])
+    ```
+
+注意事项
+--------
+- perform_request() 是抽象方法，子类必须实现
+- RequestSerializer 和 ResponseSerializer 是可选的
+- 返回 HttpResponse 时会跳过 ResponseSerializer 校验
+- 使用 self._current_request 仅在通过 ViewSet 调用时有效
 
 """
 
 
-class Resource(six.with_metaclass(abc.ABCMeta, object)):
+class Resource(abc.ABC):
     RequestSerializer = None
     ResponseSerializer = None
 
@@ -114,13 +191,13 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
     # 记录所有`support_data_collect`为True的resource请求)
     support_data_collect = True
 
-    def __init__(self, context=None):
+    def __init__(self, *args, **kwargs):
         self.RequestSerializer, self.ResponseSerializer = (
             self._search_serializer_class()
         )
-
-        self.context = context
+        self.context = kwargs.get("context", kwargs)
         self._task_manager = None
+        self._current_request = None
 
     def __call__(self, *args, **kwargs):
         # thread safe
