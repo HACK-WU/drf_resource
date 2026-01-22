@@ -13,6 +13,7 @@ import logging
 
 import six
 from django.db import models
+from django.http.response import HttpResponseBase
 from django.utils.translation import gettext as _
 from drf_resource.exceptions import CustomException, record_exception
 from drf_resource.tasks import run_perform_request
@@ -266,6 +267,11 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
                 request_data = request_data or kwargs
                 validated_request_data = self.validate_request_data(request_data)
                 response_data = self.perform_request(validated_request_data)
+
+                # 如果返回的是 Django 响应对象（HttpResponse、render 等），直接返回，跳过响应数据校验
+                if isinstance(response_data, HttpResponseBase):
+                    return response_data
+
                 validated_response_data = self.validate_response_data(response_data)
                 return validated_response_data
             except Exception as exc:  # pylint: disable=broad-except
