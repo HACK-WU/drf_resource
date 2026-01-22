@@ -52,9 +52,6 @@ except ImportError:
             def record_exception(self, *args, **kwargs):
                 pass
 
-        def start_as_current_span(self, *args, **kwargs):
-            return self._NoOpSpan()
-
     tracer = _NoOpTracer()
     import warnings
 
@@ -203,7 +200,7 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
             return request_data
 
         # model类型的数据需要特殊处理
-        if isinstance(request_data, (models.Model, models.QuerySet)):
+        if isinstance(request_data, models.Model | models.QuerySet):
             request_serializer = self.RequestSerializer(
                 request_data, many=self.many_request_data
             )
@@ -237,7 +234,7 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
             return response_data
 
         # model类型的数据需要特殊处理
-        if isinstance(response_data, (models.Model, models.QuerySet)):
+        if isinstance(response_data, models.Model | models.QuerySet):
             response_serializer = self.ResponseSerializer(
                 response_data, many=self.many_response_data
             )
@@ -288,7 +285,7 @@ class Resource(six.with_metaclass(abc.ABCMeta, object)):
         """
         基于多线程的批量并发请求
         """
-        if not isinstance(request_data_iterable, (list, tuple)):
+        if not isinstance(request_data_iterable, list | tuple):
             raise TypeError("'request_data_iterable' object is not iterable")
 
         pool = ThreadPool()

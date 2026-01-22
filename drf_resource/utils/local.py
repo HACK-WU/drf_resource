@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -42,7 +41,7 @@ except ImportError:
 __all__ = ["local", "Local", "get_ident"]
 
 
-class Localbase(object):
+class Localbase:
     __slots__ = ("__storage__", "__ident_func__")
 
     def __new__(cls, *args, **kwargs):
@@ -122,7 +121,9 @@ class Local(Localbase):
             AttributeError: 当尝试修改只读属性(__storage__或__ident_func__)时抛出
         """
         if name in ("__storage__", "__ident_func__"):
-            raise AttributeError("{!r} object attribute '{}' is read-only".format(self.__class__.__name__, name))
+            raise AttributeError(
+                f"{self.__class__.__name__!r} object attribute '{name}' is read-only"
+            )
 
         ident = self.__ident_func__()
         storage = self.__storage__
@@ -141,7 +142,9 @@ class Local(Localbase):
             AttributeError: 当尝试删除只读属性或不存在的属性时抛出
         """
         if name in ("__storage__", "__ident_func__"):
-            raise AttributeError("{!r} object attribute '{}' is read-only".format(self.__class__.__name__, name))
+            raise AttributeError(
+                f"{self.__class__.__name__!r} object attribute '{name}' is read-only"
+            )
 
         ident = self.__ident_func__()
         try:

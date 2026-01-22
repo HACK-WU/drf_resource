@@ -15,7 +15,6 @@ limitations under the License.
 
 import inspect
 import logging
-from typing import Optional
 
 from django.http import Http404
 from django.utils.translation import gettext_lazy as _lazy
@@ -110,7 +109,7 @@ def custom_exception_handler(exc, context):
         if getattr(exc, "auth_header", None):
             headers["WWW-Authenticate"] = exc.auth_header
         if getattr(exc, "wait", None):
-            headers["Retry-After"] = "%d" % exc.wait
+            headers["Retry-After"] = f"{exc.wait:d}"
         result = {
             "result": False,
             "code": exc.code,
@@ -126,7 +125,7 @@ def custom_exception_handler(exc, context):
         if getattr(exc, "auth_header", None):
             headers["WWW-Authenticate"] = exc.auth_header
         if getattr(exc, "wait", None):
-            headers["Retry-After"] = "%d" % exc.wait
+            headers["Retry-After"] = f"{exc.wait:d}"
         msg = DrfApiError.drf_error_processor(exc.detail)
         error_detail = ErrorDetails(
             exc_type=type(exc).__name__,
@@ -184,7 +183,7 @@ def record_exception(
     span: _Span,
     exception: Exception,
     attributes: _Attributes = None,
-    timestamp: Optional[int] = None,
+    timestamp: int | None = None,
     escaped: bool = False,
     out_limit: int = None,
 ) -> None:

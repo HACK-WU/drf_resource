@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -21,7 +20,7 @@ from rest_framework.fields import empty
 logger = logging.getLogger(__name__)
 
 
-class FieldType(object):
+class FieldType:
     BOOLEAN = "Boolean"
     NUMBER = "Number"
     STRING = "String"
@@ -67,7 +66,7 @@ def field_to_schema(field):
         "type": FieldType.STRING,
     }
 
-    if isinstance(field, (serializers.ListSerializer, serializers.ListField)):
+    if isinstance(field, serializers.ListSerializer | serializers.ListField):
         child_schema = field_to_schema(field.child)
         type_params = {"type": FieldType.ARRAY, "items": child_schema}
     elif isinstance(field, serializers.Serializer):
@@ -89,7 +88,7 @@ def field_to_schema(field):
         type_params = {
             "type": FieldType.STRING,
         }
-    elif isinstance(field, (serializers.MultipleChoiceField, serializers.ChoiceField)):
+    elif isinstance(field, serializers.MultipleChoiceField | serializers.ChoiceField):
         type_params = {
             "type": FieldType.ENUM,
             "choices": list(field.choices.keys()),
@@ -98,7 +97,7 @@ def field_to_schema(field):
         type_params = {
             "type": FieldType.BOOLEAN,
         }
-    elif isinstance(field, (serializers.DecimalField, serializers.FloatField)):
+    elif isinstance(field, serializers.DecimalField | serializers.FloatField):
         type_params = {
             "type": FieldType.NUMBER,
         }
@@ -130,7 +129,7 @@ def render_schema_structured(fields, parent="", using_source=False):
     result_list = []
     for field in fields:
         field_name = field["source_name"] if using_source else field["name"]
-        origin_name = "{}.{}".format(parent, field_name) if parent else field_name
+        origin_name = f"{parent}.{field_name}" if parent else field_name
 
         # 确定类型字符串
         field_type = field["type"].lower()
@@ -215,7 +214,7 @@ def _format_serializer_errors_core(errors, fields, params):
                     # 若错误信息中有%s可将错误值加入其中
                     sub_message = error.format(**{key: params.get(key, "")})
 
-        message = "({}) {}".format(label, sub_message)
+        message = f"({label}) {sub_message}"
         return message
     return ""
 
@@ -226,7 +225,7 @@ def format_serializer_errors(serializer):
             serializer.errors, serializer.fields, serializer.get_initial()
         )
     except Exception as e:
-        logger.warning("序列化器错误信息格式化失败，原因: {}".format(e))
+        logger.warning(f"序列化器错误信息格式化失败，原因: {e}")
         return serializer.errors
     else:
         return message

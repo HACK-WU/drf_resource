@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -42,5 +41,5 @@ class DRFResourceConfig(AppConfig):
                 adapter.cc -> cc/adapter/default.py -> cc/adapter/${platform}/resources.py
                 # 调用adapter.cc 即可访问对应文件下的resource，
                 # 如果在${platform}/resources.py里面有相同定义，会重载default.py下的resource
-            """
+        """
         setup()

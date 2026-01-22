@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,7 +11,6 @@ specific language governing permissions and limitations under the License.
 import logging
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
 
 from drf_resource.api_explorer.exceptions import ResourceNotFoundError
 from drf_resource.management.root import APIResourceShortcut, api
@@ -26,8 +24,8 @@ class APIDiscoveryService:
 
     @classmethod
     def discover_all_apis(
-        cls, search: Optional[str] = None, module_filter: Optional[str] = None
-    ) -> Dict:
+        cls, search: str | None = None, module_filter: str | None = None
+    ) -> dict:
         """
         发现所有 API 资源
 
@@ -90,7 +88,7 @@ class APIDiscoveryService:
         return {"modules": modules, "total": sum(len(m["apis"]) for m in modules)}
 
     @classmethod
-    def get_all_modules(cls, search: Optional[str] = None) -> Dict:
+    def get_all_modules(cls, search: str | None = None) -> dict:
         """
         获取所有可用的模块列表
 
@@ -159,8 +157,8 @@ class APIDiscoveryService:
 
     @classmethod
     def _extract_module_apis(
-        cls, module_name: str, module_obj: APIResourceShortcut, search: Optional[str]
-    ) -> List[Dict]:
+        cls, module_name: str, module_obj: APIResourceShortcut, search: str | None
+    ) -> list[dict]:
         """
         提取模块下的所有 API
 
@@ -207,7 +205,7 @@ class APIDiscoveryService:
         return apis
 
     @classmethod
-    def _extract_metadata(cls, module: str, api_name: str, resource_class) -> Dict:
+    def _extract_metadata(cls, module: str, api_name: str, resource_class) -> dict:
         """
         提取 Resource 元数据
 
@@ -315,7 +313,7 @@ class APIDiscoveryService:
         )
 
     @classmethod
-    def _match_search(cls, metadata: Dict, search: str) -> bool:
+    def _match_search(cls, metadata: dict, search: str) -> bool:
         """
         检查元数据是否匹配搜索关键词
 
@@ -337,7 +335,7 @@ class APIDiscoveryService:
         )
 
     @classmethod
-    def get_api_detail(cls, module: str, api_name: str) -> Dict:
+    def get_api_detail(cls, module: str, api_name: str) -> dict:
         """
         获取单个 API 的详细信息（包含请求/响应字段结构）
 
@@ -408,7 +406,7 @@ class APIInvokeService:
     @classmethod
     def invoke_api(
         cls, module: str, api_name: str, params: dict, username: str
-    ) -> Dict:
+    ) -> dict:
         """
         调用指定的 API
 

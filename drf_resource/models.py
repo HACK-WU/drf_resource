@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +7,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-
 
 import json
 import logging
@@ -31,7 +29,7 @@ class ResourceDataManager(models.Manager):
         """
         数据转换为字符串，同时避免QuerySet查询
         """
-        if isinstance(data, (dict, list, six.string_types, int)) or data is None:
+        if isinstance(data, dict | list | six.string_types | int) or data is None:
             try:
                 data_string = json.dumps(data)
             except Exception as e:
@@ -49,10 +47,13 @@ class ResourceDataManager(models.Manager):
         :return: Resource response
         """
         # 如果没有配置则退出
-        if not (getattr(settings, "ENABLE_RESOURCE_DATA_COLLECT", False) and resource.support_data_collect):
+        if not (
+            getattr(settings, "ENABLE_RESOURCE_DATA_COLLECT", False)
+            and resource.support_data_collect
+        ):
             return resource.request(*args, **kwargs)
 
-        resource_name = "{}.{}".format(resource.__class__.__module__, resource.__class__.__name__)
+        resource_name = f"{resource.__class__.__module__}.{resource.__class__.__name__}"
         # Resource首次访问必收集，否则采样
         if resource_name in ResourceNameCache:
             ratio = getattr(settings, "RESOURCE_DATA_COLLECT_RATIO", 0)

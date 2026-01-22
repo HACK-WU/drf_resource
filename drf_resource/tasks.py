@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +7,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-
 
 import logging
 from functools import wraps
@@ -76,8 +74,8 @@ def query_task_result(task_id):
             message = e.message
             data = e.data
         except Exception as e:
-            logger.exception("Caught exception when running async resource task : %s" % e)
-            message = "%s" % e
+            logger.exception(f"Caught exception when running async resource task : {e}")
+            message = f"{e}"
             data = None
 
     return {

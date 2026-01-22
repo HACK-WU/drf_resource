@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -29,18 +28,18 @@ def is_test_environment():
         bool: 是否为测试环境
     """
     # 优先级1：显式配置
-    if hasattr(settings, 'DRF_RESOURCE'):
-        explicit = settings.DRF_RESOURCE.get('API_EXPLORER_ENABLED')
+    if hasattr(settings, "DRF_RESOURCE"):
+        explicit = settings.DRF_RESOURCE.get("API_EXPLORER_ENABLED")
         if explicit is not None:
             return explicit
 
     # 优先级2：DEBUG 模式
-    if hasattr(settings, 'DEBUG') and settings.DEBUG:
+    if hasattr(settings, "DEBUG") and settings.DEBUG:
         return True
 
     # 优先级3：环境变量
-    env = os.getenv('ENV', '').lower()
-    if env in ['dev', 'test', 'development', 'testing', 'local']:
+    env = os.getenv("ENV", "").lower()
+    if env in ["dev", "test", "development", "testing", "local"]:
         return True
 
     # 默认禁用

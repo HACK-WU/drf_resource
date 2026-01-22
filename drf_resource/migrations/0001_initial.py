@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -9,24 +8,47 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
-
 from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = []
 
     operations = [
         migrations.CreateModel(
             name="ResourceData",
             fields=[
-                ("id", models.AutoField(verbose_name="ID", serialize=False, auto_created=True, primary_key=True)),
-                ("name", models.CharField(max_length=128, verbose_name="\u540d\u79f0", db_index=True)),
-                ("start_time", models.DateTimeField(verbose_name="\u5f00\u59cb\u65f6\u95f4")),
-                ("end_time", models.DateTimeField(verbose_name="\u7ed3\u675f\u4e8b\u4ef6")),
-                ("request_data", models.TextField(verbose_name="\u8bf7\u6c42\u53c2\u6570")),
-                ("response_data", models.TextField(verbose_name="\u54cd\u5e94\u53c2\u6570")),
+                (
+                    "id",
+                    models.AutoField(
+                        verbose_name="ID",
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True,
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=128, verbose_name="\u540d\u79f0", db_index=True
+                    ),
+                ),
+                (
+                    "start_time",
+                    models.DateTimeField(verbose_name="\u5f00\u59cb\u65f6\u95f4"),
+                ),
+                (
+                    "end_time",
+                    models.DateTimeField(verbose_name="\u7ed3\u675f\u4e8b\u4ef6"),
+                ),
+                (
+                    "request_data",
+                    models.TextField(verbose_name="\u8bf7\u6c42\u53c2\u6570"),
+                ),
+                (
+                    "response_data",
+                    models.TextField(verbose_name="\u54cd\u5e94\u53c2\u6570"),
+                ),
             ],
             options={
                 "db_table": "resource_data",
