@@ -1,1 +1,0 @@
-{{ collector_json.config_yaml | safe }}

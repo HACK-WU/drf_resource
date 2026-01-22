@@ -1,8 +1,0 @@
-apiVersion: 1
-providers:
-  - name: default
-    folder: ""
-    folderUid: ""
-    type: file
-    options:
-      path: $SETTINGS_BASE_DIR/packages/monitor_web/grafana/dashboards/
