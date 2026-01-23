@@ -209,6 +209,56 @@
             color: #fff;
         }
 
+        /* 嵌套子分组样式 */
+        .subgroup-item-wrapper {
+            width: 100%;
+        }
+
+        .subgroup-item.has-children {
+            position: relative;
+        }
+
+        .subgroup-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            color: #909399;
+            transition: transform 0.2s;
+            margin-right: 4px;
+        }
+
+        .subgroup-arrow.expanded {
+            transform: rotate(90deg);
+        }
+
+        .subgroup-badge {
+            font-size: 10px;
+            color: #909399;
+            background-color: #f0f2f5;
+            padding: 1px 6px;
+            border-radius: 8px;
+            margin-left: 6px;
+        }
+
+        .nested-subgroup-list {
+            background-color: #f5f7fa;
+        }
+
+        .nested-subgroup-list .subgroup-item {
+            border-left: 2px solid var(--border-color);
+        }
+
+        .nested-subgroup-list .subgroup-item:hover {
+            border-left-color: var(--primary-color);
+        }
+
+        .nested-subgroup-list .subgroup-item.active {
+            border-left-color: var(--primary-color);
+        }
+
         /* 中间主区域 */
         .main-content {
             flex: 1;
@@ -589,6 +639,7 @@
             currentGroupId: null,
             currentSubgroupId: null,
             expandedGroups: new Set(),
+            expandedSubgroups: new Set(),  // 新增：展开的子分组
             groupSearchKeyword: '',
             methodFilter: '',
             searchKeyword: '',
@@ -628,7 +679,7 @@
             return group.count || 0;
         }
 
-        // 标准化分组数据格式
+        // 标准化分组数据格式（递归处理嵌套子分组）
         function normalizeGroups(groups) {
             return groups.map(group => ({
                 ...group,
@@ -636,14 +687,21 @@
                 display_name: group.name,
                 api_count: group.count || 0,
                 icon: '📁',
-                // 二级分组数据
-                subgroups: (group.subgroups || []).map(sub => ({
-                    ...sub,
-                    id: sub.prefix || sub.name,
-                    display_name: sub.name || sub.prefix,
-                    api_count: sub.count || 0,
-                    prefix: sub.prefix
-                }))
+                // 递归处理二级分组数据
+                subgroups: normalizeSubgroups(group.subgroups || [])
+            }));
+        }
+
+        // 递归标准化子分组
+        function normalizeSubgroups(subgroups) {
+            return subgroups.map(sub => ({
+                ...sub,
+                id: sub.prefix || sub.name,
+                display_name: sub.name || sub.prefix,
+                api_count: sub.count || 0,
+                prefix: sub.prefix,
+                // 递归处理嵌套的子分组
+                subgroups: normalizeSubgroups(sub.subgroups || [])
             }));
         }
 
@@ -780,6 +838,38 @@
         }
 
         // ==================== 渲染函数 ====================
+
+        // 递归渲染子分组列表
+        function renderSubgroupList(groupId, subgroups, level = 1) {
+            if (!subgroups || subgroups.length === 0) return '';
+
+            const indent = 46 + (level - 1) * 20;  // 每级增加 20px 缩进
+
+            return subgroups.map(sub => {
+                const hasNestedSubgroups = sub.has_subgroups && sub.subgroups && sub.subgroups.length > 0;
+                const isExpanded = AppState.expandedSubgroups && AppState.expandedSubgroups.has(sub.id);
+                const isActive = AppState.currentSubgroupId === sub.id;
+
+                return `
+                    <div class="subgroup-item-wrapper">
+                        <div class="subgroup-item ${isActive ? 'active' : ''} ${hasNestedSubgroups ? 'has-children' : ''}"
+                             style="padding-left: ${indent}px;"
+                             onclick="handleSubgroupClick(event, '${groupId}', '${sub.id}', '${sub.prefix || ''}', ${hasNestedSubgroups})">
+                            ${hasNestedSubgroups ? `<span class="subgroup-arrow ${isExpanded ? 'expanded' : ''}">▶</span>` : ''}
+                            <span class="subgroup-prefix">${sub.display_name || sub.name}</span>
+                            <span class="subgroup-count">${sub.api_count || sub.count || 0}</span>
+                            ${hasNestedSubgroups ? '<span class="subgroup-badge">含子分组</span>' : ''}
+                        </div>
+                        ${hasNestedSubgroups && isExpanded ? `
+                            <div class="nested-subgroup-list">
+                                ${renderSubgroupList(groupId, sub.subgroups, level + 1)}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
         function renderGroupList() {
             const filterLower = AppState.groupSearchKeyword.toLowerCase();
 
@@ -828,13 +918,7 @@
                         </div>
                         ${hasSubgroups ? `
                             <div class="subgroup-list ${isExpanded ? 'expanded' : ''}">
-                                ${group.subgroups.map(sub => `
-                                    <div class="subgroup-item ${AppState.currentSubgroupId === sub.id ? 'active' : ''}"
-                                         onclick="handleSubgroupClick(event, '${group.id}', '${sub.id}', '${sub.prefix || ''}')">
-                                        <span class="subgroup-prefix">${sub.display_name || sub.name}</span>
-                                        <span class="subgroup-count">${sub.api_count || sub.count || 0}</span>
-                                    </div>
-                                `).join('')}
+                                ${renderSubgroupList(group.id, group.subgroups)}
                             </div>
                         ` : ''}
                     </div>
@@ -882,19 +966,26 @@
                     // 手风琴效果：收起其他分组
                     AppState.expandedGroups.clear();
                     AppState.expandedGroups.add(groupId);
+                    // 清空子分组展开状态
+                    AppState.expandedSubgroups.clear();
                 }
                 AppState.currentGroupId = groupId;
                 AppState.currentSubgroupId = null;
 
-                // 显示第一个子分组的 API
-                if (group.subgroups.length > 0) {
-                    const firstSub = group.subgroups[0];
-                    AppState.currentSubgroupId = firstSub.id;
-                    loadSwaggerUI(group.name, firstSub.prefix, `${group.name} / ${firstSub.display_name || firstSub.name}`);
+                // 找到第一个叶子节点（没有嵌套子分组的）并加载
+                const firstLeaf = findFirstLeafSubgroup(group.subgroups);
+                if (firstLeaf) {
+                    AppState.currentSubgroupId = firstLeaf.id;
+                    const displayTitle = buildDisplayTitle(group.name, firstLeaf);
+                    loadSwaggerUI(group.name, firstLeaf.prefix, displayTitle);
+
+                    // 展开到该叶子节点的路径
+                    expandPathToSubgroup(group.subgroups, firstLeaf.id);
                 }
             } else {
                 // 无子分组：直接显示 API 列表
                 AppState.expandedGroups.clear();
+                AppState.expandedSubgroups.clear();
                 AppState.currentGroupId = groupId;
                 AppState.currentSubgroupId = null;
                 loadSwaggerUI(group.name, null, group.name);
@@ -903,20 +994,84 @@
             renderGroupList();
         }
 
-        function handleSubgroupClick(event, groupId, subgroupId, prefix) {
+        // 找到第一个叶子节点（没有嵌套子分组的）
+        function findFirstLeafSubgroup(subgroups) {
+            for (const sub of subgroups) {
+                if (!sub.has_subgroups || !sub.subgroups || sub.subgroups.length === 0) {
+                    return sub;
+                }
+                const leaf = findFirstLeafSubgroup(sub.subgroups);
+                if (leaf) return leaf;
+            }
+            return null;
+        }
+
+        // 展开到指定子分组的路径
+        function expandPathToSubgroup(subgroups, targetId) {
+            for (const sub of subgroups) {
+                if (sub.id === targetId) return true;
+                if (sub.subgroups && sub.subgroups.length > 0) {
+                    if (expandPathToSubgroup(sub.subgroups, targetId)) {
+                        AppState.expandedSubgroups.add(sub.id);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function handleSubgroupClick(event, groupId, subgroupId, prefix, hasNestedSubgroups = false) {
             event.stopPropagation();
 
             const group = AppState.groups.find(g => g.id === groupId);
             if (!group || !group.subgroups) return;
 
-            const subgroup = group.subgroups.find(s => s.id === subgroupId);
+            // 递归查找子分组
+            const subgroup = findSubgroupById(group.subgroups, subgroupId);
             if (!subgroup) return;
 
+            // 如果有嵌套子分组，切换展开/收起状态
+            if (hasNestedSubgroups) {
+                if (AppState.expandedSubgroups.has(subgroupId)) {
+                    AppState.expandedSubgroups.delete(subgroupId);
+                } else {
+                    AppState.expandedSubgroups.add(subgroupId);
+                }
+                // 不立即加载 Swagger，只是展开子分组列表
+                renderGroupList();
+                return;
+            }
+
+            // 没有嵌套子分组，加载 Swagger UI
             AppState.currentGroupId = groupId;
             AppState.currentSubgroupId = subgroupId;
 
-            loadSwaggerUI(group.name, subgroup.prefix, `${group.name} / ${subgroup.display_name || subgroup.name}`);
+            // 构建显示标题
+            const displayTitle = buildDisplayTitle(group.name, subgroup);
+            loadSwaggerUI(group.name, subgroup.prefix, displayTitle);
             renderGroupList();
+        }
+
+        // 递归查找子分组
+        function findSubgroupById(subgroups, targetId) {
+            for (const sub of subgroups) {
+                if (sub.id === targetId) return sub;
+                if (sub.subgroups && sub.subgroups.length > 0) {
+                    const found = findSubgroupById(sub.subgroups, targetId);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        // 构建显示标题（根据 prefix 生成层级路径）
+        function buildDisplayTitle(groupName, subgroup) {
+            const prefix = subgroup.prefix || '';
+            const parts = prefix.split('/').filter(p => p);
+            if (parts.length <= 1) {
+                return `${groupName} / ${subgroup.display_name || subgroup.name}`;
+            }
+            return `${groupName} / ${parts.join(' / ')}`;
         }
 
         function loadSwaggerUI(tag, prefix, displayTitle) {
