@@ -640,9 +640,67 @@ class FilterableSpectacularAPIView(SpectacularAPIView):
 # ============================================================================
 
 
+def _build_recursive_subgroups(paths_list, parent_prefix="", max_depth=5):
+    """
+    递归构建子分组，支持多级分组
+
+    Args:
+        paths_list: 路径列表
+        parent_prefix: 父级前缀
+        max_depth: 最大递归深度，防止无限递归
+
+    Returns:
+        list: 子分组列表，每个子分组包含 prefix, name, count, has_subgroups, subgroups
+    """
+    from drf_resource.docs.grouper import should_enable_grouping, PathPrefixGrouper
+
+    if not paths_list or max_depth <= 0:
+        return []
+
+    # 使用 PathPrefixGrouper 进行分组
+    groups = PathPrefixGrouper.group_paths_by_prefix(paths_list)
+
+    # 如果只有一个分组且分组名等于父前缀，说明无法继续分组
+    if len(groups) == 1:
+        single_prefix = list(groups.keys())[0]
+        if single_prefix == parent_prefix or not parent_prefix:
+            return []
+
+    result = []
+    for prefix, group_paths in sorted(groups.items()):
+        count = len(group_paths)
+
+        # 从前缀中提取友好名称（取最后一级路径）
+        name_parts = prefix.strip("/").split("/")
+        friendly_name = name_parts[-1] if name_parts else prefix
+
+        # 检查是否需要继续分组
+        nested_subgroups = []
+        has_nested_subgroups = False
+
+        if should_enable_grouping(count) and max_depth > 1:
+            # 递归检查是否需要更深层的分组
+            nested_subgroups = _build_recursive_subgroups(
+                group_paths, parent_prefix=prefix, max_depth=max_depth - 1
+            )
+            has_nested_subgroups = len(nested_subgroups) > 1  # 至少有2个子分组才有意义
+
+        result.append(
+            {
+                "prefix": prefix,
+                "name": friendly_name,
+                "count": count,
+                "has_subgroups": has_nested_subgroups,
+                "subgroups": nested_subgroups if has_nested_subgroups else [],
+            }
+        )
+
+    return result
+
+
 def get_all_api_tags(request=None):
     """
-    获取所有已注册 API 的标签信息，包括二级分组详情
+    获取所有已注册 API 的标签信息，包括递归多级分组详情
 
     Returns:
         list: [{
@@ -651,7 +709,16 @@ def get_all_api_tags(request=None):
             "has_subgroups": True,
             "subgroup_count": 2,
             "subgroups": [
-                {"prefix": "/rest/v2/action", "name": "action", "count": 45},
+                {
+                    "prefix": "/rest/v2",
+                    "name": "v2",
+                    "count": 536,
+                    "has_subgroups": True,
+                    "subgroups": [
+                        {"prefix": "/rest/v2/action", "name": "action", "count": 45, ...},
+                        ...
+                    ]
+                },
                 ...
             ]
         }, ...]
@@ -659,7 +726,7 @@ def get_all_api_tags(request=None):
     from drf_resource.docs.grouper import should_enable_grouping
 
     # 尝试从缓存获取
-    cache_key = "drf_resource:api_tags_summary_v2"  # 更新缓存 key 版本
+    cache_key = "drf_resource:api_tags_summary_v3"  # 更新缓存 key 版本
     cache_timeout = get_schema_cache_timeout()
 
     cached_result = django_cache.get(cache_key)
@@ -684,9 +751,9 @@ def get_all_api_tags(request=None):
         )
         return []
 
-    # 统计每个标签的接口数量和路径前缀分组
-    tags_count = {}
-    tags_prefixes = {}  # {tag: {prefix: count, ...}}
+    # 收集每个标签下的所有路径
+    tags_paths = {}  # {tag: [path1, path2, ...]}
+    tags_count = {}  # {tag: count}
     paths = schema.get("paths", {})
     logger.info(f"[drf-spectacular] schema 生成完成，共 {len(paths)} 个路径")
 
@@ -694,18 +761,15 @@ def get_all_api_tags(request=None):
         for method, operation in path_item.items():
             if isinstance(operation, dict):
                 operation_tags = operation.get("tags", ["未分类"])
-                path_prefix = operation.get("x-path-prefix")
 
                 for tag in operation_tags:
                     tags_count[tag] = tags_count.get(tag, 0) + 1
 
-                    # 收集路径前缀及其计数
-                    if path_prefix:
-                        if tag not in tags_prefixes:
-                            tags_prefixes[tag] = {}
-                        if path_prefix not in tags_prefixes[tag]:
-                            tags_prefixes[tag][path_prefix] = 0
-                        tags_prefixes[tag][path_prefix] += 1
+                    # 收集该标签下的所有路径
+                    if tag not in tags_paths:
+                        tags_paths[tag] = []
+                    if path not in tags_paths[tag]:
+                        tags_paths[tag].append(path)
 
     # 获取 schema 中定义的标签描述
     schema_tags = {
@@ -715,21 +779,16 @@ def get_all_api_tags(request=None):
     # 合并结果
     result = []
     for tag_name, count in sorted(tags_count.items()):
-        tag_prefix_dict = tags_prefixes.get(tag_name, {})
-        subgroup_count = len(tag_prefix_dict)
-        has_subgroups = should_enable_grouping(count) and subgroup_count > 0
+        tag_paths = tags_paths.get(tag_name, [])
 
-        # 构建子分组详情列表
+        # 检查是否需要分组
         subgroups = []
-        if has_subgroups:
-            for prefix, prefix_count in sorted(tag_prefix_dict.items()):
-                # 从前缀中提取友好名称（取最后一级路径）
-                name_parts = prefix.strip("/").split("/")
-                friendly_name = name_parts[-1] if name_parts else prefix
+        has_subgroups = False
 
-                subgroups.append(
-                    {"prefix": prefix, "name": friendly_name, "count": prefix_count}
-                )
+        if should_enable_grouping(count) and len(tag_paths) > 1:
+            # 递归构建子分组
+            subgroups = _build_recursive_subgroups(tag_paths, max_depth=5)
+            has_subgroups = len(subgroups) > 1  # 至少有2个子分组才有意义
 
         result.append(
             {
@@ -738,8 +797,8 @@ def get_all_api_tags(request=None):
                 "count": count,
                 "warning": count > get_docs_tag_threshold(),
                 "has_subgroups": has_subgroups,
-                "subgroup_count": subgroup_count,
-                "subgroups": subgroups,  # 新增：子分组详情
+                "subgroup_count": len(subgroups) if has_subgroups else 0,
+                "subgroups": subgroups if has_subgroups else [],
             }
         )
 
@@ -758,8 +817,10 @@ def clear_schema_cache():
 
     可在接口变更后调用此函数刷新缓存
     """
-    # 清除标签统计缓存
+    # 清除标签统计缓存（所有版本）
     django_cache.delete("drf_resource:api_tags_summary")
+    django_cache.delete("drf_resource:api_tags_summary_v2")
+    django_cache.delete("drf_resource:api_tags_summary_v3")
     # 注意：由于 schema 缓存使用了 hash key，这里无法清除所有 schema 缓存
     # 建议在 settings 中配置合理的缓存超时时间
     logger.info("[drf-spectacular] Schema 缓存已清除")
