@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import logging
 import os
 
@@ -15,7 +15,6 @@ import six
 from blueapps.conf.log import get_logging_config_dict
 from blueapps.patch.log import get_paas_v2_logging_config_dict
 
-from config.tools.rabbitmq import get_rabbitmq_settings
 
 from ..tools.environment import (
     DJANGO_CONF_MODULE,
@@ -39,7 +38,7 @@ try:
     _module = __import__(f"config.{NEW_ENV}", globals(), locals(), ["*"])
 except ImportError as e:
     logging.exception(e)
-    raise ImportError("Could not import config '{}' (Is it on sys.path?): {}".format(DJANGO_CONF_MODULE, e))
+    raise ImportError(f"Could not import config '{DJANGO_CONF_MODULE}' (Is it on sys.path?): {e}")
 
 for _setting in dir(_module):
     if _setting == _setting.upper():
@@ -54,7 +53,7 @@ INSTALLED_APPS += (
     "django_elasticsearch_dsl",
     "rest_framework",
     "django_filters",
-    "drf_yasg",
+    "drf_spectacular",
     "bkmonitor",
     "healthz",
     "metadata",
@@ -75,7 +74,7 @@ INSTALLED_APPS += (
     "fta_web",
     "audit",
     "apigw_manager",
-    'bk_notice_sdk',
+    "bk_notice_sdk",
 )
 
 # 切换session的backend后， 需要设置该中间件，确保新的 csrftoken 被设置到新的session中
@@ -98,7 +97,7 @@ MIDDLEWARE = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.security.SecurityMiddleware",
     # 静态资源
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     # Auth middleware
     "weixin.core.middlewares.WeixinAuthenticationMiddleware",
     "weixin.core.middlewares.WeixinLoginMiddleware",
@@ -208,10 +207,10 @@ CACHES = {
     "space": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "LOCATION": "space",
-        'OPTIONS': {
+        "OPTIONS": {
             # 5w空间支持
-            'MAX_ENTRIES': 50000,
-            'CULL_FREQUENCY': 0,
+            "MAX_ENTRIES": 50000,
+            "CULL_FREQUENCY": 0,
         },
     },
 }
@@ -316,6 +315,16 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "bkm_ipchooser.authentication.CsrfExemptSessionAuthentication",
     ),
+    # drf-spectacular schema 生成（使用容错版本，遇到错误时跳过而非失败）
+    "DEFAULT_SCHEMA_CLASS": "drf_resource.contrib.spectacular.FaultTolerantAutoSchema",
+}
+
+# drf-spectacular 配置
+SPECTACULAR_SETTINGS = {
+    "TITLE": "BK Monitor API",
+    "VERSION": "1.0.0",
+    "DESCRIPTION": "蓝鲸监控平台 API 文档",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 #
@@ -340,7 +349,7 @@ SIGNATURE_FONT_PATH = os.getenv("BKAPP_SIGNATURE_FONT_PATH", "/usr/share/fonts/t
 CLEAR_CACHE_ON_RESTART = False
 
 # csrf token name
-CSRF_COOKIE_NAME = "%s_monitor_csrftoken" % BKAPP_DEPLOY_PLATFORM
+CSRF_COOKIE_NAME = f"{BKAPP_DEPLOY_PLATFORM}_monitor_csrftoken"
 
 # 主机任务状态码: 1.Agent异常; 3.上次已成功; 5.等待执行; 7.正在执行;
 # 9.执行成功; 11.任务失败; 12.任务下发失败; 13.任务超时; 15.任务日志错误;

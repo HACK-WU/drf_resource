@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-import typing
-
-from django.utils.translation import gettext_lazy as _
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
@@ -66,7 +62,7 @@ class CommonViewSet(GenericViewSet):
         return dict(_serializer.data)
 
     @property
-    def validated_data(self) -> typing.Dict:
+    def validated_data(self) -> dict:
         """
         校验的数据
         """
@@ -94,17 +90,17 @@ class CommonViewSet(GenericViewSet):
 
         # 返回响应头禁用浏览器的类型猜测行为
         # response.headers["x-content-type-options"] = ("X-Content-Type-Options", "nosniff")
-        return super(CommonViewSet, self).finalize_response(request, response, *args, **kwargs)
+        return super().finalize_response(request, response, *args, **kwargs)
 
 
 class IpChooserTopoViewSet(CommonViewSet):
     URL_BASE_NAME = "ipchooser_topo"
 
-    @swagger_auto_schema(
-        operation_summary=_("批量获取含各节点主机数量的拓扑树"),
+    @extend_schema(
+        summary="批量获取含各节点主机数量的拓扑树",
         tags=IP_CHOOSER_VIEW_TAGS,
-        request_body=topo_sers.TreesRequestSer(),
-        responses={status.HTTP_200_OK: topo_sers.TreesResponseSer()},
+        request=topo_sers.TreesRequestSer,
+        responses={200: topo_sers.TreesResponseSer},
     )
     @list_route(methods=["POST"], serializer_class=topo_sers.TreesRequestSer)
     def trees(self, request, *args, **kwargs):
@@ -115,11 +111,11 @@ class IpChooserTopoViewSet(CommonViewSet):
             )
         )
 
-    @swagger_auto_schema(
-        operation_summary=_("查询多个节点拓扑路径"),
+    @extend_schema(
+        summary="查询多个节点拓扑路径",
         tags=IP_CHOOSER_VIEW_TAGS,
-        request_body=topo_sers.QueryPathRequestSer(),
-        responses={status.HTTP_200_OK: topo_sers.QueryPathResponseSer()},
+        request=topo_sers.QueryPathRequestSer,
+        responses={200: topo_sers.QueryPathResponseSer},
     )
     @list_route(methods=["POST"], serializer_class=topo_sers.QueryPathRequestSer)
     def query_path(self, request, *args, **kwargs):
@@ -131,11 +127,11 @@ class IpChooserTopoViewSet(CommonViewSet):
             )
         )
 
-    @swagger_auto_schema(
-        operation_summary=_("根据多个拓扑节点与搜索条件批量分页查询所包含的主机信息"),
+    @extend_schema(
+        summary="根据多个拓扑节点与搜索条件批量分页查询所包含的主机信息",
         tags=IP_CHOOSER_VIEW_TAGS,
-        request_body=topo_sers.QueryHostsRequestSer(),
-        responses={status.HTTP_200_OK: topo_sers.QueryHostsResponseSer()},
+        request=topo_sers.QueryHostsRequestSer,
+        responses={200: topo_sers.QueryHostsResponseSer},
     )
     @list_route(methods=["POST"], serializer_class=topo_sers.QueryHostsRequestSer)
     def query_hosts(self, request, *args, **kwargs):
@@ -149,11 +145,11 @@ class IpChooserTopoViewSet(CommonViewSet):
             )
         )
 
-    @swagger_auto_schema(
-        operation_summary=_("根据多个拓扑节点与搜索条件批量分页查询所包含的主机 ID 信息"),
+    @extend_schema(
+        summary="根据多个拓扑节点与搜索条件批量分页查询所包含的主机 ID 信息",
         tags=IP_CHOOSER_VIEW_TAGS,
-        request_body=topo_sers.QueryHostIdInfosRequestSer(),
-        responses={status.HTTP_200_OK: topo_sers.QueryHostIdInfosResponseSer()},
+        request=topo_sers.QueryHostIdInfosRequestSer,
+        responses={200: topo_sers.QueryHostIdInfosResponseSer},
     )
     @list_route(methods=["POST"], serializer_class=topo_sers.QueryHostIdInfosRequestSer)
     def query_host_id_infos(self, request, *args, **kwargs):
@@ -167,11 +163,11 @@ class IpChooserTopoViewSet(CommonViewSet):
             )
         )
 
-    @swagger_auto_schema(
-        operation_summary=_("根据多个拓扑节点与搜索条件批量分页查询所包含的服务实例"),
+    @extend_schema(
+        summary="根据多个拓扑节点与搜索条件批量分页查询所包含的服务实例",
         tags=IP_CHOOSER_VIEW_TAGS,
-        request_body=topo_sers.QueryServiceInstancesRequestSer(),
-        responses={status.HTTP_200_OK: topo_sers.QueryServiceInstancesResponseSer()},
+        request=topo_sers.QueryServiceInstancesRequestSer,
+        responses={200: topo_sers.QueryServiceInstancesResponseSer},
     )
     @list_route(methods=["POST"], serializer_class=topo_sers.QueryServiceInstancesRequestSer)
     def query_service_instances(self, request, *args, **kwargs):
@@ -207,11 +203,11 @@ class IpChooserServiceInstanceViewSet(CommonViewSet):
     URL_BASE_NAME = "ipchooser_service_instance"
     pagination_class = None
 
-    @swagger_auto_schema(
-        operation_summary=_("根据服务实例关键信息获取服务实例详情信息"),
+    @extend_schema(
+        summary="根据服务实例关键信息获取服务实例详情信息",
         tags=IP_CHOOSER_VIEW_TAGS,
-        request_body=topo_sers.QueryServiceInstancesRequestSer(),
-        responses={status.HTTP_200_OK: topo_sers.QueryServiceInstancesResponseSer()},
+        request=topo_sers.QueryServiceInstancesRequestSer,
+        responses={200: topo_sers.QueryServiceInstancesResponseSer},
     )
     @list_route(methods=["POST"], serializer_class=topo_sers.QueryServiceInstancesRequestSer)
     def details(self, request, *args, **kwargs):
@@ -228,11 +224,11 @@ class IpChooserHostViewSet(CommonViewSet):
     URL_BASE_NAME = "ipchooser_host"
     pagination_class = None
 
-    @swagger_auto_schema(
-        operation_summary=_("根据用户手动输入的`IP`/`IPv6`/`主机名`/`host_id`等关键字信息获取真实存在的机器信息"),
+    @extend_schema(
+        summary="根据用户手动输入的IP/IPv6/主机名/host_id等关键字信息获取真实存在的机器信息",
         tags=IP_CHOOSER_VIEW_TAGS,
-        request_body=host_sers.HostCheckRequestSer(),
-        responses={status.HTTP_200_OK: host_sers.HostCheckResponseSer()},
+        request=host_sers.HostCheckRequestSer,
+        responses={200: host_sers.HostCheckResponseSer},
     )
     @list_route(methods=["POST"], serializer_class=host_sers.HostCheckRequestSer)
     def check(self, request, *args, **kwargs):
@@ -245,11 +241,11 @@ class IpChooserHostViewSet(CommonViewSet):
             )
         )
 
-    @swagger_auto_schema(
-        operation_summary=_("根据主机关键信息获取机器详情信息"),
+    @extend_schema(
+        summary="根据主机关键信息获取机器详情信息",
         tags=IP_CHOOSER_VIEW_TAGS,
-        request_body=host_sers.HostDetailsRequestSer(),
-        responses={status.HTTP_200_OK: host_sers.HostDetailsResponseSer()},
+        request=host_sers.HostDetailsRequestSer,
+        responses={200: host_sers.HostDetailsResponseSer},
     )
     @list_route(methods=["POST"], serializer_class=host_sers.HostDetailsRequestSer)
     def details(self, request, *args, **kwargs):
@@ -264,11 +260,11 @@ class IpChooserTemplateViewSet(CommonViewSet):
     URL_BASE_NAME = "ipchooser_template"
     pagination_class = None
 
-    @swagger_auto_schema(
-        operation_summary=_("拉取模板列表"),
+    @extend_schema(
+        summary="拉取模板列表",
         tags=IP_CHOOSER_VIEW_TAGS,
-        request_body=template_sers.ListTemplateSer(),
-        responses={status.HTTP_200_OK: template_sers.ListTemplateResponseSer()},
+        request=template_sers.ListTemplateSer,
+        responses={200: template_sers.ListTemplateResponseSer},
     )
     @list_route(methods=["POST"], serializer_class=template_sers.ListTemplateSer)
     def templates(self, request, *args, **kwargs):
