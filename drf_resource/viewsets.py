@@ -12,7 +12,6 @@ from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_control
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -24,6 +23,89 @@ from drf_resource.utils.local import local
 """
 Resource的ViewSet定义
 """
+
+# ============================================================================
+# API 文档装饰器配置
+# ============================================================================
+# 支持 drf-spectacular（推荐）或禁用文档生成
+# 通过 settings.DRF_RESOURCE['ENABLE_API_DOCS'] 控制是否启用
+
+_schema_decorator_func = None
+
+
+def _get_schema_decorator():
+    """
+    懒加载获取 schema 装饰器函数
+
+    优先级：drf-spectacular > 无文档（空装饰器）
+
+    Returns:
+        装饰器工厂函数，接收 request_serializer, response_serializer, method, description 参数
+    """
+    global _schema_decorator_func
+    if _schema_decorator_func is not None:
+        return _schema_decorator_func
+
+    # 检查是否启用 API 文档
+    from drf_resource.settings import resource_settings
+
+    enable_docs = getattr(resource_settings, "ENABLE_API_DOCS", True)
+    if not enable_docs:
+
+        def _noop_decorator(
+            request_serializer, response_serializer, method, description
+        ):
+            """空装饰器，不生成文档"""
+            return lambda f: f
+
+        _schema_decorator_func = _noop_decorator
+        return _schema_decorator_func
+
+    # 尝试使用 drf-spectacular
+    try:
+        from drf_spectacular.utils import extend_schema
+
+        def spectacular_decorator(
+            request_serializer, response_serializer, method, description
+        ):
+            """使用 drf-spectacular 生成 OpenAPI 3.0 文档"""
+            # 强制转换 description 为字符串，避免 lazy translation 对象导致 YAML 序列化失败
+            desc_str = str(description).strip() if description else ""
+
+            # 检查 serializer 是否有效（不是空的 Serializer 基类）
+            has_request_fields = (
+                request_serializer
+                and request_serializer is not Serializer
+                and hasattr(request_serializer, "_declared_fields")
+                and request_serializer._declared_fields
+            )
+
+            # 构建 extend_schema 参数
+            kwargs = {
+                "responses": {200: response_serializer}
+                if response_serializer and response_serializer is not Serializer
+                else None,
+                "description": desc_str,
+            }
+
+            # 非 GET 请求：添加 request body
+            if method != "GET" and has_request_fields:
+                kwargs["request"] = request_serializer
+
+            return extend_schema(**{k: v for k, v in kwargs.items() if v is not None})
+
+        _schema_decorator_func = spectacular_decorator
+        return _schema_decorator_func
+    except ImportError:
+        pass
+
+    # 无可用的文档库，返回空装饰器
+    def _noop_decorator(request_serializer, response_serializer, method, description):
+        """空装饰器，不生成文档"""
+        return lambda f: f
+
+    _schema_decorator_func = _noop_decorator
+    return _schema_decorator_func
 
 
 class ResourceRoute:
@@ -120,7 +202,7 @@ class ResourceViewSet(viewsets.GenericViewSet):
 
     def get_queryset(self):
         """
-        添加默认函数，避免swagger生成报错
+        添加默认函数，避免 schema 生成报错
         """
         return
 
@@ -150,7 +232,7 @@ class ResourceViewSet(viewsets.GenericViewSet):
         │                    │                                       │               │
         │                    ▼                                       │               │
         │   ┌────────────────────────────────┐                       │               │
-        │   │ 步骤2: 配置 Swagger 文档装饰器  │                       │               │
+        │   │ 步骤2: 配置 API 文档装饰器      │                       │               │
         │   └────────────────────────────────┘                       │               │
         │                    │                                       │               │
         │                    ▼                                       │               │
@@ -217,31 +299,26 @@ class ResourceViewSet(viewsets.GenericViewSet):
             function = cls._generate_view_function(resource_route)
 
             # ────────────────────────────────────────────────────────────────
-            # 步骤2: 配置 Swagger 文档装饰器
+            # 步骤2: 配置 API 文档装饰器（drf-spectacular）
             # ────────────────────────────────────────────────────────────────
-            # 获取请求序列化器（用于文档展示请求参数结构）
+            # 获取请求序列化器类（用于文档展示请求参数结构）
             request_serializer_class = (
                 resource_route.resource_class.RequestSerializer or Serializer
             )
-            request_serializer = request_serializer_class(
-                many=resource_route.resource_class.many_request_data
-            )
 
-            # 获取响应序列化器（用于文档展示响应数据结构）
+            # 获取响应序列化器类（用于文档展示响应数据结构）
             response_serializer_class = (
                 resource_route.resource_class.ResponseSerializer or Serializer
             )
-            response_serializer = response_serializer_class(
-                many=resource_route.resource_class.many_response_data
-            )
 
-            # 创建 swagger 装饰器，自动生成 API 文档
-            decorator_function = swagger_auto_schema(
-                responses={200: response_serializer},  # 200 响应的数据结构
-                operation_description=resource_route.resource_class.__doc__,  # 接口描述取自 Resource 类文档
-                query_serializer=request_serializer
-                if resource_route.method == "GET"
-                else None,  # GET 请求展示查询参数
+            # 创建 schema 装饰器，自动生成 API 文档（使用 drf-spectacular）
+            # 注意：传入 serializer 类而不是实例
+            schema_decorator = _get_schema_decorator()
+            decorator_function = schema_decorator(
+                request_serializer=request_serializer_class,
+                response_serializer=response_serializer_class,
+                method=resource_route.method,
+                description=resource_route.resource_class.__doc__,
             )
 
             # ────────────────────────────────────────────────────────────────
@@ -343,7 +420,7 @@ class ResourceViewSet(viewsets.GenericViewSet):
                     ),  # URL 名称 (下划线转中划线)
                 )(function)
 
-                # 应用 swagger 文档装饰器
+                # 应用 API 文档装饰器
                 function = decorator_function(function)
 
                 # 将函数绑定到 ViewSet 类
