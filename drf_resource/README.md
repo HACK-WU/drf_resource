@@ -57,7 +57,7 @@ DRF Resource 将业务逻辑封装为独立的 **Resource** 单元，每个 Reso
 ### 安装
 
 ```bash
-pip install drf-resource
+git clone https://github.com/HACK-WU/drf_resource.git
 ```
 
 ### 配置
