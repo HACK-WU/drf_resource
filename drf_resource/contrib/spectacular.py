@@ -461,10 +461,17 @@ class FilterableSpectacularAPIView(SpectacularAPIView):
         cache_key = self._get_cache_key(request, tags)
         cache_timeout = get_schema_cache_timeout()
 
+        logger.info(
+            f"[drf-spectacular] Schema 请求: tags={tags}, cache_key={cache_key}"
+        )
+
         # 检查缓存（除非强制刷新）
         if not should_refresh and cache_timeout > 0:
             cached_schema = django_cache.get(cache_key)
             if cached_schema is not None:
+                logger.debug(
+                    f"[drf-spectacular] 返回缓存的 schema, paths 数量={len(cached_schema.get('paths', {}))}"
+                )
                 return Response(data=cached_schema)
 
         # 使用自定义的 FilterableSchemaGenerator
@@ -476,7 +483,12 @@ class FilterableSpectacularAPIView(SpectacularAPIView):
             tags=tags,  # 传递标签过滤参数
         )
 
-        schema = generator.get_schema(request=request, public=self.serve_public)
+        # 不传递 request，避免 auth 属性问题
+        schema = generator.get_schema(request=None, public=self.serve_public)
+
+        logger.info(
+            f"[drf-spectacular] 生成 schema 完成: paths 数量={len(schema.get('paths', {}))}"
+        )
 
         # 缓存结果
         if cache_timeout > 0:
@@ -626,13 +638,21 @@ class FilterableSwaggerView(SpectacularSwaggerView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        tags = self.request.GET.get("tags", "")
+        # 使用 query_params 兼容 DRF Request 对象
+        tags = (
+            self.request.query_params.get("tags", "")
+            if hasattr(self.request, "query_params")
+            else self.request.GET.get("tags", "")
+        )
 
-        # 构建带标签过滤的 schema URL
-        schema_url = self.url or context.get("url", "/schema/")
+        # 构建带标签过滤的 schema URL - 使用绝对路径
+        schema_url = "/schema/"
         if tags:
-            separator = "&" if "?" in schema_url else "?"
-            schema_url = f"{schema_url}{separator}tags={tags}"
+            schema_url = f"{schema_url}?tags={tags}"
+
+        logger.debug(
+            f"[drf-spectacular] FilterableSwaggerView: tags={tags}, schema_url={schema_url}"
+        )
 
         context["schema_url"] = schema_url
         context["tags"] = tags
