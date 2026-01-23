@@ -10,13 +10,12 @@ router.register("api_home", ApiHomeResourceViewSet, basename="api_home")
 
 # drf-spectacular 文档路由（可选，需安装 drf-spectacular）
 try:
-    from drf_spectacular.views import SpectacularRedocView
     from drf_resource.contrib.spectacular import (
         FilterableSpectacularAPIView,
-        DocsIndexView,
         FilterableSwaggerView,
-        DocsLiteView,
+        FilterableSpectacularRedocView,
         ApiTagsView,
+        ApiDocsView,
         clear_schema_cache,
     )
 
@@ -30,20 +29,22 @@ try:
     spectacular_urlpatterns = [
         # OpenAPI Schema (支持标签过滤和缓存)
         path("schema/", FilterableSpectacularAPIView.as_view(), name="schema"),
-        # 分组文档入口页面
-        path("docs/", DocsIndexView.as_view(), name="docs-index"),
         # 支持标签过滤的 Swagger UI
         path(
             "docs/swagger/",
             FilterableSwaggerView.as_view(url_name="schema"),
             name="swagger-ui",
         ),
-        # 轻量级 API 列表
-        path("docs/lite/", DocsLiteView.as_view(), name="docs-lite"),
         # API 标签统计接口
         path("docs/tags/", ApiTagsView.as_view(), name="api-tags"),
-        # ReDoc（可选的另一种文档 UI）
-        path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+        # API 文档正式版页面
+        path("docs/", ApiDocsView.as_view(), name="api-docs"),
+        # ReDoc（支持缓存和标签过滤）
+        path(
+            "redoc/",
+            FilterableSpectacularRedocView.as_view(url_name="schema"),
+            name="redoc",
+        ),
         # 调试：清除缓存
         path("docs/clear-cache/", debug_clear_cache, name="clear-cache"),
     ]

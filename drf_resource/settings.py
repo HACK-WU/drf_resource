@@ -27,6 +27,8 @@ DEFAULT = {
     "ENABLE_API_DOCS": True,  # 是否启用 API 文档（drf-spectacular）
     "SCHEMA_CACHE_TIMEOUT": 3600,  # Schema 缓存超时时间（秒），默认 1 小时。设为 0 禁用缓存
     "DOCS_TAG_THRESHOLD": 100,  # 分组接口数量警告阈值，超过此数量会显示警告提示
+    "DOCS_PATH_PREFIX_GROUPING_ENABLED": True,  # 是否启用路径前缀二级分组功能
+    "DOCS_PATH_PREFIX_THRESHOLD": 50,  # 启用路径前缀分组的API数量阈值，超过此数量才启用分组
 }
 
 # 配置项列表（包含向后兼容配置）
