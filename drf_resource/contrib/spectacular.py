@@ -278,25 +278,31 @@ class FilterableSchemaGenerator(SchemaGenerator):
     允许通过 tags 参数只生成包含指定标签的 API 端点的 schema，
     从而实现按需加载 API 文档，减少浏览器内存占用。
 
+    同时支持路径前缀二级分组功能，当某个标签下的 API 数量超过阈值时，
+    会自动根据 URL 路径前缀进行二级分组，并通过 x-path-prefix 扩展字段传递分组信息。
+
     使用方法：
     - 设置 tags 属性为要过滤的标签列表
     - 调用 get_schema() 生成过滤后的 schema
     """
 
-    def __init__(self, *args, tags=None, **kwargs):
+    def __init__(self, *args, tags=None, path_prefix=None, **kwargs):
         """
         初始化 Schema 生成器
 
         Args:
             tags: 要过滤的标签列表，如 ['user', 'auth']。
                   如果为 None 或空列表，则返回完整 schema。
+            path_prefix: 要过滤的路径前缀，如 '/apm/meta'。
+                        只返回匹配该前缀的 API。
         """
         super().__init__(*args, **kwargs)
         self.filter_tags = tags or []
+        self.filter_prefix = path_prefix
 
     def parse(self, request, public):
         """
-        重写 parse 方法，实现标签过滤
+        重写 parse 方法，实现标签和路径前缀过滤
 
         Returns:
             过滤后的 paths 字典
@@ -304,8 +310,8 @@ class FilterableSchemaGenerator(SchemaGenerator):
         # 调用父类的 parse 方法获取完整的 paths
         result = super().parse(request, public)
 
-        # 如果没有指定过滤标签，返回完整结果
-        if not self.filter_tags:
+        # 如果没有指定过滤条件，返回完整结果
+        if not self.filter_tags and not self.filter_prefix:
             return result
 
         # 过滤 paths，只保留包含指定标签的端点
@@ -324,9 +330,16 @@ class FilterableSchemaGenerator(SchemaGenerator):
 
                 # 获取该操作的标签
                 operation_tags = operation.get("tags", [])
-                # 检查是否有任何标签匹配过滤条件
-                if any(tag in self.filter_tags for tag in operation_tags):
-                    filtered_operations[method] = operation
+
+                # 标签过滤
+                if self.filter_tags and not any(
+                    tag in self.filter_tags for tag in operation_tags
+                ):
+                    continue
+
+                # 路径前缀过滤（需要先生成 x-path-prefix）
+                # 这里暂时跳过，在 get_schema 后再过滤
+                filtered_operations[method] = operation
 
             # 只有当路径下还有操作时才添加
             if filtered_operations:
@@ -343,11 +356,20 @@ class FilterableSchemaGenerator(SchemaGenerator):
 
     def get_schema(self, request=None, public=False):
         """
-        重写 get_schema 方法，过滤 tags 列表
+        重写 get_schema 方法，过滤 tags 列表并添加路径前缀分组
 
-        确保返回的 schema 中的 tags 列表也只包含被使用的标签。
+        确保返回的 schema 中的 tags 列表也只包含被使用的标签，
+        并为超过阈值的标签自动计算路径前缀分组。
+        支持按路径前缀过滤 API。
         """
         schema = super().get_schema(request=request, public=public)
+
+        # 添加路径前缀分组信息
+        schema = self._add_path_prefix_grouping(schema)
+
+        # 路径前缀过滤（必须在添加 x-path-prefix 之后）
+        if self.filter_prefix:
+            schema = self._filter_by_path_prefix(schema)
 
         # 如果没有过滤标签，返回完整 schema
         if not self.filter_tags:
@@ -358,6 +380,111 @@ class FilterableSchemaGenerator(SchemaGenerator):
             schema["tags"] = [
                 tag for tag in schema["tags"] if tag.get("name") in self.filter_tags
             ]
+
+        return schema
+
+    def _filter_by_path_prefix(self, schema):
+        """
+        根据路径前缀过滤 schema
+
+        只保留以指定前缀开头的 API 路径。
+
+        Args:
+            schema: OpenAPI schema 字典
+
+        Returns:
+            过滤后的 schema
+        """
+        paths = schema.get("paths", {})
+        filtered_paths = {}
+
+        for path, path_item in paths.items():
+            # 检查路径是否以指定前缀开头
+            if not path.startswith(self.filter_prefix):
+                continue
+
+            if not isinstance(path_item, dict):
+                continue
+
+            filtered_paths[path] = path_item
+
+        schema["paths"] = filtered_paths
+
+        logger.debug(
+            f"[drf-spectacular] 路径前缀过滤完成: "
+            f"过滤前缀={self.filter_prefix}, "
+            f"原始路径数={len(paths)}, "
+            f"过滤后路径数={len(filtered_paths)}"
+        )
+
+        return schema
+
+    def _add_path_prefix_grouping(self, schema):
+        """
+        为 schema 中的操作添加路径前缀分组信息
+
+        根据配置项和 API 数量判断是否启用分组，
+        并为每个操作添加 x-path-prefix 扩展字段。
+
+        Args:
+            schema: OpenAPI schema 字典
+
+        Returns:
+            添加了 x-path-prefix 扩展字段的 schema
+        """
+        from drf_resource.docs.grouper import (
+            PathPrefixGrouper,
+            should_enable_grouping,
+        )
+
+        paths = schema.get("paths", {})
+        if not paths:
+            return schema
+
+        # 按标签收集路径
+        paths_by_tag = {}
+        for path, path_item in paths.items():
+            if not isinstance(path_item, dict):
+                continue
+            for method, operation in path_item.items():
+                if not isinstance(operation, dict):
+                    continue
+                operation_tags = operation.get("tags", ["未分类"])
+                for tag in operation_tags:
+                    if tag not in paths_by_tag:
+                        paths_by_tag[tag] = []
+                    paths_by_tag[tag].append(path)
+
+        # 为每个标签计算分组
+        tag_path_prefixes = {}
+        for tag, tag_paths in paths_by_tag.items():
+            # 去重
+            unique_paths = list(set(tag_paths))
+            if should_enable_grouping(len(unique_paths)):
+                tag_path_prefixes[tag] = PathPrefixGrouper.group_paths_with_info(
+                    unique_paths
+                )
+                logger.debug(
+                    f"[drf-spectacular] 标签 '{tag}' 启用路径前缀分组, "
+                    f"API数量={len(unique_paths)}, "
+                    f"分组数={len(set(tag_path_prefixes[tag].values()))}"
+                )
+            else:
+                # 不需要分组，设为 None
+                tag_path_prefixes[tag] = {p: None for p in unique_paths}
+
+        # 为每个操作添加 x-path-prefix 扩展字段
+        for path, path_item in paths.items():
+            if not isinstance(path_item, dict):
+                continue
+            for method, operation in path_item.items():
+                if not isinstance(operation, dict):
+                    continue
+                operation_tags = operation.get("tags", ["未分类"])
+                # 使用第一个标签来确定分组（因为一个 API 可能有多个标签）
+                primary_tag = operation_tags[0] if operation_tags else "未分类"
+                path_prefix = tag_path_prefixes.get(primary_tag, {}).get(path)
+                operation["x-path-prefix"] = path_prefix
 
         return schema
 
@@ -419,6 +546,7 @@ class FilterableSpectacularAPIView(SpectacularAPIView):
 
     查询参数：
     - tags: 逗号分隔的标签列表，如 ?tags=user,auth
+    - prefix: 路径前缀过滤，如 ?prefix=/apm/meta
     - refresh: 设置为 1 时强制刷新缓存，如 ?refresh=1
     - format: 输出格式 (json/yaml)
 
@@ -426,6 +554,7 @@ class FilterableSpectacularAPIView(SpectacularAPIView):
     - /schema/ - 返回完整 schema（带缓存）
     - /schema/?tags=user - 返回 user 标签的 schema
     - /schema/?tags=user,auth - 返回 user 和 auth 标签的 schema
+    - /schema/?tags=apm&prefix=/apm/meta - 返回 apm 标签下 /apm/meta 前缀的 API
     - /schema/?refresh=1 - 强制刷新缓存
     """
 
@@ -440,29 +569,37 @@ class FilterableSpectacularAPIView(SpectacularAPIView):
             return [tag.strip() for tag in tags_param.split(",") if tag.strip()]
         return []
 
+    def _get_prefix_from_request(self, request):
+        """从请求中提取路径前缀"""
+        return request.query_params.get("prefix", "").strip() or None
+
     def _should_refresh_cache(self, request):
         """检查是否需要强制刷新缓存"""
         return request.query_params.get("refresh", "") == "1"
 
-    def _get_cache_key(self, request, tags):
+    def _get_cache_key(self, request, tags, path_prefix):
         """生成缓存 key"""
         tags_str = ",".join(sorted(tags)) if tags else "all"
+        prefix_str = path_prefix or "all"
         format_type = request.query_params.get("format", "json")
-        return generate_cache_key("drf_resource:schema", tags_str, format_type)
+        return generate_cache_key(
+            "drf_resource:schema", tags_str, prefix_str, format_type
+        )
 
     def _get_schema_response(self, request):
         """
-        重写父类方法，添加标签过滤和缓存支持
+        重写父类方法，添加标签和路径前缀过滤、缓存支持
         """
         from rest_framework.response import Response
 
         tags = self._get_tags_from_request(request)
+        path_prefix = self._get_prefix_from_request(request)
         should_refresh = self._should_refresh_cache(request)
-        cache_key = self._get_cache_key(request, tags)
+        cache_key = self._get_cache_key(request, tags, path_prefix)
         cache_timeout = get_schema_cache_timeout()
 
         logger.info(
-            f"[drf-spectacular] Schema 请求: tags={tags}, cache_key={cache_key}"
+            f"[drf-spectacular] Schema 请求: tags={tags}, prefix={path_prefix}, cache_key={cache_key}"
         )
 
         # 检查缓存（除非强制刷新）
@@ -481,6 +618,7 @@ class FilterableSpectacularAPIView(SpectacularAPIView):
             api_version=self.api_version,
             patterns=self.patterns,
             tags=tags,  # 传递标签过滤参数
+            path_prefix=path_prefix,  # 传递路径前缀过滤参数
         )
 
         # 不传递 request，避免 auth 属性问题
@@ -504,15 +642,24 @@ class FilterableSpectacularAPIView(SpectacularAPIView):
 
 def get_all_api_tags(request=None):
     """
-    获取所有已注册 API 的标签信息
+    获取所有已注册 API 的标签信息，包括二级分组详情
 
     Returns:
-        dict: {tag_name: endpoint_count} 的字典
+        list: [{
+            "name": "tag",
+            "count": 123,
+            "has_subgroups": True,
+            "subgroup_count": 2,
+            "subgroups": [
+                {"prefix": "/rest/v2/action", "name": "action", "count": 45},
+                ...
+            ]
+        }, ...]
     """
-    from drf_spectacular.generators import SchemaGenerator
+    from drf_resource.docs.grouper import should_enable_grouping
 
     # 尝试从缓存获取
-    cache_key = "drf_resource:api_tags_summary"
+    cache_key = "drf_resource:api_tags_summary_v2"  # 更新缓存 key 版本
     cache_timeout = get_schema_cache_timeout()
 
     cached_result = django_cache.get(cache_key)
@@ -524,10 +671,11 @@ def get_all_api_tags(request=None):
 
     # 生成 schema 以获取所有端点信息
     logger.info("[drf-spectacular] 开始生成 API schema...")
-    generator = SchemaGenerator()
+    generator = (
+        FilterableSchemaGenerator()
+    )  # 使用 FilterableSchemaGenerator 以获取 x-path-prefix
     try:
         # 不传递 request 参数，避免 WSGIRequest 缺少 auth 属性的问题
-        # drf-spectacular 会自动创建 mock request
         schema = generator.get_schema(request=None, public=True)
     except Exception as e:
         logger.error(
@@ -536,8 +684,9 @@ def get_all_api_tags(request=None):
         )
         return []
 
-    # 统计每个标签的接口数量
+    # 统计每个标签的接口数量和路径前缀分组
     tags_count = {}
+    tags_prefixes = {}  # {tag: {prefix: count, ...}}
     paths = schema.get("paths", {})
     logger.info(f"[drf-spectacular] schema 生成完成，共 {len(paths)} 个路径")
 
@@ -545,8 +694,18 @@ def get_all_api_tags(request=None):
         for method, operation in path_item.items():
             if isinstance(operation, dict):
                 operation_tags = operation.get("tags", ["未分类"])
+                path_prefix = operation.get("x-path-prefix")
+
                 for tag in operation_tags:
                     tags_count[tag] = tags_count.get(tag, 0) + 1
+
+                    # 收集路径前缀及其计数
+                    if path_prefix:
+                        if tag not in tags_prefixes:
+                            tags_prefixes[tag] = {}
+                        if path_prefix not in tags_prefixes[tag]:
+                            tags_prefixes[tag][path_prefix] = 0
+                        tags_prefixes[tag][path_prefix] += 1
 
     # 获取 schema 中定义的标签描述
     schema_tags = {
@@ -556,12 +715,31 @@ def get_all_api_tags(request=None):
     # 合并结果
     result = []
     for tag_name, count in sorted(tags_count.items()):
+        tag_prefix_dict = tags_prefixes.get(tag_name, {})
+        subgroup_count = len(tag_prefix_dict)
+        has_subgroups = should_enable_grouping(count) and subgroup_count > 0
+
+        # 构建子分组详情列表
+        subgroups = []
+        if has_subgroups:
+            for prefix, prefix_count in sorted(tag_prefix_dict.items()):
+                # 从前缀中提取友好名称（取最后一级路径）
+                name_parts = prefix.strip("/").split("/")
+                friendly_name = name_parts[-1] if name_parts else prefix
+
+                subgroups.append(
+                    {"prefix": prefix, "name": friendly_name, "count": prefix_count}
+                )
+
         result.append(
             {
                 "name": tag_name,
                 "description": schema_tags.get(tag_name, ""),
                 "count": count,
                 "warning": count > get_docs_tag_threshold(),
+                "has_subgroups": has_subgroups,
+                "subgroup_count": subgroup_count,
+                "subgroups": subgroups,  # 新增：子分组详情
             }
         )
 
@@ -593,24 +771,6 @@ def clear_schema_cache():
 
 from django.views.generic import TemplateView
 from django.http import JsonResponse
-
-
-class DocsIndexView(TemplateView):
-    """
-    分组文档入口页面视图
-
-    展示所有可用的 API 分组（标签），让用户选择要查看的分组，
-    避免一次性加载所有 API 文档导致浏览器卡顿。
-    """
-
-    template_name = "spectacular/docs_index.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # 不传递 request，避免 WSGIRequest 缺少 auth 属性的问题
-        context["tags"] = get_all_api_tags()
-        context["threshold"] = get_docs_tag_threshold()
-        return context
 
 
 try:
@@ -664,88 +824,6 @@ class FilterableSwaggerView(SpectacularSwaggerView):
         return response
 
 
-class DocsLiteView(TemplateView):
-    """
-    轻量级 API 文档列表视图
-
-    只展示 API 的基本信息（路径、方法、描述、标签），
-    不加载完整的 serializer schema，适合接口数量庞大的项目快速浏览。
-    """
-
-    template_name = "spectacular/docs_lite.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # 获取标签过滤参数
-        tags_param = self.request.GET.get("tags", "")
-        filter_tags = (
-            [t.strip() for t in tags_param.split(",") if t.strip()]
-            if tags_param
-            else []
-        )
-
-        # 获取 API 列表
-        context["apis"] = self._get_api_list(filter_tags)
-        # 不传递 request，避免 WSGIRequest 缺少 auth 属性的问题
-        context["tags"] = get_all_api_tags()
-        context["filter_tags"] = filter_tags
-        return context
-
-    def _get_api_list(self, filter_tags=None):
-        """
-        获取简化的 API 列表
-
-        Args:
-            filter_tags: 要过滤的标签列表
-
-        Returns:
-            按标签分组的 API 列表
-        """
-        from drf_spectacular.generators import SchemaGenerator
-
-        try:
-            generator = SchemaGenerator()
-            # 不传递 request 参数，避免 WSGIRequest 缺少 auth 属性的问题
-            schema = generator.get_schema(request=None, public=True)
-        except Exception as e:
-            logger.warning(f"[drf-spectacular] 获取 API 列表时发生错误: {e}")
-            return {}
-
-        # 按标签分组
-        apis_by_tag = {}
-        paths = schema.get("paths", {})
-
-        for path, path_item in paths.items():
-            for method, operation in path_item.items():
-                if not isinstance(operation, dict):
-                    continue
-
-                operation_tags = operation.get("tags", ["未分类"])
-
-                # 如果指定了过滤标签，检查是否匹配
-                if filter_tags and not any(
-                    tag in filter_tags for tag in operation_tags
-                ):
-                    continue
-
-                api_info = {
-                    "path": path,
-                    "method": method.upper(),
-                    "summary": operation.get("summary", ""),
-                    "description": operation.get("description", ""),
-                    "operation_id": operation.get("operationId", ""),
-                    "deprecated": operation.get("deprecated", False),
-                }
-
-                for tag in operation_tags:
-                    if tag not in apis_by_tag:
-                        apis_by_tag[tag] = []
-                    apis_by_tag[tag].append(api_info)
-
-        return dict(sorted(apis_by_tag.items()))
-
-
 class ApiTagsView(TemplateView):
     """
     API 标签统计接口
@@ -757,3 +835,107 @@ class ApiTagsView(TemplateView):
         # 不传递 request，避免 WSGIRequest 缺少 auth 属性的问题
         tags = get_all_api_tags()
         return JsonResponse({"tags": tags, "threshold": get_docs_tag_threshold()})
+
+
+class ApiDocsView(TemplateView):
+    """
+    API 文档正式版页面
+
+    采用左侧分组导航 + 中间 API 列表的双栏布局，支持：
+    - API 搜索（根据路径和描述进行搜索）
+    - HTTP 方法快捷过滤（GET/POST/PUT/DELETE）
+    - 后端真实数据对接
+    - 点击 API 跳转到 Swagger UI 详情页
+
+    访问路径：/api_docs/
+    """
+
+    template_name = "spectacular/api_docs.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 构建 API 端点 URL
+        from django.urls import reverse
+
+        context["tags_url"] = reverse("api-tags")
+        context["schema_url"] = reverse("schema")
+        context["swagger_url"] = reverse("swagger-ui")
+        return context
+
+
+# ============================================================================
+# 缓存版 ReDoc 视图
+# ============================================================================
+
+try:
+    from drf_spectacular.views import SpectacularRedocView
+
+    _HAS_REDOC_VIEW = True
+except ImportError:
+    from django.views.generic import TemplateView as SpectacularRedocView
+
+    _HAS_REDOC_VIEW = False
+
+
+class FilterableSpectacularRedocView(SpectacularRedocView):
+    """
+    支持缓存和标签过滤的 ReDoc UI 视图
+
+    优化了原生的 SpectacularRedocView，支持：
+    1. Schema 缓存（大幅提升性能）
+    2. 标签过滤（减少加载的数据量）
+    3. 路径前缀过滤
+
+    使用方法：
+    - /redoc/ - 完整文档（带缓存）
+    - /redoc/?tags=user - 只显示 user 标签的文档
+    - /redoc/?tags=user,auth - 只显示 user 和 auth 标签的文档
+    - /redoc/?refresh=1 - 强制刷新缓存
+
+    性能优化说明：
+    通过使用 FilterableSpectacularAPIView 的 schema 生成和缓存机制，
+    避免了每次访问都重新生成完整的 OpenAPI schema，显著提升加载速度。
+    """
+
+    def _get_schema_url(self, request):
+        """
+        重写父类方法，添加标签、路径前缀和缓存刷新参数到 schema URL
+        """
+        # 获取原始 schema URL
+        schema_url = super()._get_schema_url(request)
+
+        # 获取查询参数
+        tags = request.GET.get("tags", "")
+        prefix = request.GET.get("prefix", "")
+        refresh = request.GET.get("refresh", "")
+        format_type = request.GET.get("format", "json")
+
+        # 构建查询参数
+        params = []
+        if tags:
+            params.append(f"tags={tags}")
+        if prefix:
+            params.append(f"prefix={prefix}")
+        if refresh:
+            params.append(f"refresh={refresh}")
+        if format_type:
+            params.append(f"format={format_type}")
+
+        # 添加参数到 URL
+        if params:
+            separator = "?" if "?" not in schema_url else "&"
+            schema_url = schema_url + separator + "&".join(params)
+
+        logger.debug(
+            f"[drf-spectacular] FilterableSpectacularRedocView: "
+            f"tags={tags}, prefix={prefix}, schema_url={schema_url}"
+        )
+
+        return schema_url
+
+    def get_context_data(self, **kwargs):
+        """添加当前过滤状态到模板上下文"""
+        context = super().get_context_data(**kwargs)
+        context["tags"] = self.request.GET.get("tags", "")
+        context["prefix"] = self.request.GET.get("prefix", "")
+        return context
