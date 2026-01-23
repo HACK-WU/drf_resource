@@ -262,6 +262,77 @@
             font-size: 12px;
         }
 
+        /* Method Filter (在 header 左侧，搜索栏左边) */
+        .method-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .method-filter-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .method-filter-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .method-filter-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+
+        .method-filter-btn:hover {
+            opacity: 1;
+        }
+
+        .method-filter-btn.active {
+            opacity: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .method-filter-btn.all {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .method-filter-btn.all.active {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            border-color: var(--primary-color);
+        }
+
+        .method-filter-btn.get {
+            background-color: var(--method-get);
+            color: var(--text-white);
+        }
+
+        .method-filter-btn.post {
+            background-color: var(--method-post);
+            color: var(--text-white);
+        }
+
+        .method-filter-btn.put {
+            background-color: var(--method-put);
+            color: var(--text-white);
+        }
+
+        .method-filter-btn.delete {
+            background-color: var(--method-delete);
+            color: var(--text-white);
+        }
+
         /* Layout */
         .container {
             display: flex;
@@ -898,6 +969,16 @@
             <span class="logo">🔍</span>
             <h1 class="title">API Explorer</h1>
         </div>
+        <div class="method-filter">
+            <span class="method-filter-title">快捷过滤：</span>
+            <div class="method-filter-btns" id="methodFilterBtns">
+                <span class="method-filter-btn all active" data-method="">全部</span>
+                <span class="method-filter-btn get" data-method="GET">GET</span>
+                <span class="method-filter-btn post" data-method="POST">POST</span>
+                <span class="method-filter-btn put" data-method="PUT">PUT</span>
+                <span class="method-filter-btn delete" data-method="DELETE">DELETE</span>
+            </div>
+        </div>
         <div class="search-container">
             <input
                 type="text"
@@ -1055,9 +1136,11 @@
             allModules: [], // 保存完整模块列表用于筛选
             currentModule: null,
             apiList: [],
+            apiListData: null, // 保存原始 API 列表数据用于前端过滤
             searchKeyword: '',
             searchAllModules: false, // 是否搜索全部模块
             moduleFilterKeyword: '', // 模块筛选关键词
+            methodFilter: '', // HTTP 方法过滤
             darkMode: false, // 深色模式
             selectedAPI: null,
             apiDetail: null,
@@ -1288,23 +1371,42 @@
 
         // 渲染 API 列表
         function renderAPIList(data) {
+            // 保存原始数据用于前端过滤
+            AppState.apiListData = data;
+
+            // 应用方法过滤
+            renderFilteredAPIList();
+        }
+
+        // 渲染过滤后的 API 列表
+        function renderFilteredAPIList() {
+            const data = AppState.apiListData;
+            if (!data) return;
+
             const apiListEl = document.getElementById('apiList');
             const listTitleEl = document.getElementById('listTitle');
 
             const apis = [];
             data.modules.forEach(module => {
                 module.apis.forEach(api => {
-                    apis.push(api);
+                    // 应用方法过滤
+                    if (!AppState.methodFilter || api.method.toUpperCase() === AppState.methodFilter) {
+                        apis.push(api);
+                    }
                 });
             });
 
-            listTitleEl.textContent = `📋 API 列表 (${data.total} 个接口)`;
+            const filteredTotal = apis.length;
+            const totalLabel = AppState.methodFilter
+                ? `📋 API 列表 (${filteredTotal}/${data.total} 个接口)`
+                : `📋 API 列表 (${data.total} 个接口)`;
+            listTitleEl.textContent = totalLabel;
 
             if (apis.length === 0) {
                 apiListEl.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
-                        <div>暂无 API</div>
+                        <div>${AppState.methodFilter ? '没有匹配的 ' + AppState.methodFilter + ' 接口' : '暂无 API'}</div>
                     </div>
                 `;
                 return;
@@ -1339,6 +1441,19 @@
                     showAPIDetail(module, apiName);
                 });
             });
+        }
+
+        // 设置方法过滤
+        function setMethodFilter(method) {
+            AppState.methodFilter = method;
+
+            // 更新按钮状态
+            document.querySelectorAll('.method-filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.method === method);
+            });
+
+            // 重新渲染列表
+            renderFilteredAPIList();
         }
 
         // 显示 API 详情
@@ -1746,6 +1861,14 @@
             const moduleFilterInput = document.getElementById('moduleFilterInput');
             moduleFilterInput.addEventListener('input', (e) => {
                 filterModules(e.target.value);
+            });
+
+            // 方法过滤
+            document.getElementById('methodFilterBtns').addEventListener('click', (e) => {
+                const btn = e.target.closest('.method-filter-btn');
+                if (btn) {
+                    setMethodFilter(btn.dataset.method);
+                }
             });
 
             // 关闭详情面板
