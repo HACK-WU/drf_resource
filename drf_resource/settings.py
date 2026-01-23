@@ -23,6 +23,10 @@ DEFAULT = {
     "CELERY_QUEUE": "celery_resource",
     # OpenTelemetry 配置
     "OPENTELEMETRY_ENABLED": False,
+    # API 文档配置
+    "ENABLE_API_DOCS": True,  # 是否启用 API 文档（drf-spectacular）
+    "SCHEMA_CACHE_TIMEOUT": 3600,  # Schema 缓存超时时间（秒），默认 1 小时。设为 0 禁用缓存
+    "DOCS_TAG_THRESHOLD": 100,  # 分组接口数量警告阈值，超过此数量会显示警告提示
 }
 
 # 配置项列表（包含向后兼容配置）
@@ -45,6 +49,8 @@ IMPORT_STRINGS = [
     "CELERY_QUEUE",
     # OpenTelemetry 配置
     "OPENTELEMETRY_ENABLED",
+    # API 文档配置
+    "ENABLE_API_DOCS",
 ]
 
 

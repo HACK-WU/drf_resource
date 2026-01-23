@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 文档 - 轻量级列表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .back-link {
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .back-link svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 6px;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .search-wrapper svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #999;
+        }
+
+        .tag-filter {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .tag-filter select {
+            padding: 8px 30px 8px 12px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 130px;
+            height: fit-content;
+            max-height: calc(100vh - 150px);
+            overflow-y: auto;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .sidebar-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-list {
+            list-style: none;
+        }
+
+        .tag-list li {
+            margin-bottom: 4px;
+        }
+
+        .tag-list a {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .tag-list a:hover,
+        .tag-list a.active {
+            background: #f0f4ff;
+            color: #667eea;
+        }
+
+        .tag-list .count {
+            font-size: 0.8rem;
+            color: #999;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .tag-list a.active .count {
+            background: #667eea;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .api-group {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: #fafbfc;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .group-header:hover {
+            background: #f5f6f7;
+        }
+
+        .group-title {
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .group-title svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            color: #667eea;
+        }
+
+        .group-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .group-count {
+            font-size: 0.85rem;
+            color: #666;
+            background: #e9ecef;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        .group-toggle {
+            width: 24px;
+            height: 24px;
+            color: #999;
+            transition: transform 0.3s ease;
+        }
+
+        .api-group.collapsed .group-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .api-group.collapsed .group-body {
+            display: none;
+        }
+
+        .group-body {
+            padding: 0;
+        }
+
+        .api-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+
+        .api-item:last-child {
+            border-bottom: none;
+        }
+
+        .api-item:hover {
+            background: #fafbfc;
+        }
+
+        .api-method {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 12px;
+            min-width: 60px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .api-method.get { background: #e7f5ff; color: #1971c2; }
+        .api-method.post { background: #e6fcf5; color: #087f5b; }
+        .api-method.put { background: #fff3bf; color: #e67700; }
+        .api-method.patch { background: #fff0f6; color: #c2255c; }
+        .api-method.delete { background: #ffe3e3; color: #c92a2a; }
+
+        .api-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .api-path {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: #333;
+            word-break: break-all;
+        }
+
+        .api-summary {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .api-deprecated {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .api-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+            margin-left: 15px;
+        }
+
+        .api-action {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .api-action.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .api-action.primary:hover {
+            background: #5a6fd6;
+        }
+
+        .api-action.secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .api-action.secondary:hover {
+            background: #dee2e6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+            }
+
+            .tag-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .tag-list li {
+                margin-bottom: 0;
+            }
+
+            .tag-list a {
+                padding: 6px 12px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-wrapper {
+                max-width: none;
+            }
+
+            .api-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .api-method {
+                margin-bottom: 8px;
+            }
+
+            .api-actions {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>📋 API 轻量级列表</h1>
+            <p>快速浏览所有 API 接口，点击可查看详细文档</p>
+
+            <div class="header-actions">
+                <a href="../" class="back-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    返回分组
+                </a>
+
+                <div class="search-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="M21 21l-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="搜索接口路径或描述...">
+                </div>
+
+                <div class="tag-filter">
+                    <select id="tag-filter">
+                        <option value="">所有分组</option>
+                        {% for tag in tags %}
+                        <option value="{{ tag.name }}" {% if tag.name in filter_tags %}selected{% endif %}>
+                            {{ tag.name }} ({{ tag.count }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-card">
+                <h3 class="sidebar-title">API 分组</h3>
+                <ul class="tag-list">
+                    <li>
+                        <a href="?tags=" class="{% if not filter_tags %}active{% endif %}">
+                            全部
+                            <span class="count">{% for tag in tags %}{{ tag.count }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}</span>
+                        </a>
+                    </li>
+                    {% for tag in tags %}
+                    <li>
+                        <a href="?tags={{ tag.name|urlencode }}" class="{% if tag.name in filter_tags %}active{% endif %}">
+                            {{ tag.name }}
+                            <span class="count">{{ tag.count }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            {% for tag_name, api_list in apis.items %}
+            <div class="api-group" data-tag="{{ tag_name|lower }}">
+                <div class="group-header" onclick="toggleGroup(this.parentElement)">
+                    <div class="group-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                            <line x1="7" y1="7" x2="7.01" y2="7"/>
+                        </svg>
+                        {{ tag_name }}
+                    </div>
+                    <div class="group-meta">
+                        <span class="group-count">{{ api_list|length }} 个接口</span>
+                        <svg class="group-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="group-body">
+                    {% for api in api_list %}
+                    <div class="api-item {% if api.deprecated %}api-deprecated{% endif %}"
+                         data-path="{{ api.path|lower }}"
+                         data-summary="{{ api.summary|lower }}">
+                        <span class="api-method {{ api.method|lower }}">{{ api.method }}</span>
+                        <div class="api-info">
+                            <div class="api-path">{{ api.path }}</div>
+                            {% if api.summary %}
+                            <div class="api-summary">{{ api.summary }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="api-actions">
+                            <a href="../swagger/?tags={{ tag_name|urlencode }}" class="api-action primary">
+                                查看文档
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M16 16s-1.5-2-4-2-4 2-4 2"/>
+                    <line x1="9" y1="9" x2="9.01" y2="9"/>
+                    <line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>
+                <h3>暂无 API 接口</h3>
+                <p>没有找到任何 API 接口，请检查是否已正确配置</p>
+            </div>
+            {% endfor %}
+        </main>
+    </div>
+
+    <script>
+        // 折叠/展开分组
+        function toggleGroup(group) {
+            group.classList.toggle('collapsed');
+        }
+
+        // 搜索功能
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const keyword = e.target.value.toLowerCase().trim();
+            const groups = document.querySelectorAll('.api-group');
+
+            groups.forEach(group => {
+                const items = group.querySelectorAll('.api-item');
+                let hasVisible = false;
+
+                items.forEach(item => {
+                    const path = item.getAttribute('data-path') || '';
+                    const summary = item.getAttribute('data-summary') || '';
+
+                    if (keyword === '' || path.includes(keyword) || summary.includes(keyword)) {
+                        item.classList.remove('hidden');
+                        hasVisible = true;
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+
+                // 如果分组内没有可见项，隐藏整个分组
+                if (hasVisible || keyword === '') {
+                    group.classList.remove('hidden');
+                    // 搜索时自动展开分组
+                    if (keyword !== '') {
+                        group.classList.remove('collapsed');
+                    }
+                } else {
+                    group.classList.add('hidden');
+                }
+            });
+        });
+
+        // 分组过滤
+        document.getElementById('tag-filter').addEventListener('change', function(e) {
+            const tag = e.target.value;
+            if (tag) {
+                window.location.href = '?tags=' + encodeURIComponent(tag);
+            } else {
+                window.location.href = '?';
+            }
+        });
+    </script>
+</body>
+</html>
