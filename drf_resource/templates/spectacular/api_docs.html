@@ -1,0 +1,1032 @@
+{% load static %}<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 文档</title>
+    <!-- Swagger UI 样式 -->
+    <link rel="stylesheet" type="text/css" href="{% static 'drf_resource/swagger-ui/swagger-ui.css' %}">
+    <style>
+        /* 重置样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #3a8ee6;
+            --primary-hover: #2d7ad6;
+            --primary-light: #ecf5ff;
+            --bg-color: #f5f7fa;
+            --bg-white: #ffffff;
+            --text-primary: #303133;
+            --text-secondary: #606266;
+            --text-placeholder: #c0c4cc;
+            --border-color: #e4e7ed;
+            --border-light: #f0f0f0;
+            --method-get: #67c23a;
+            --method-post: #409eff;
+            --method-put: #e6a23c;
+            --method-delete: #f56c6c;
+            --method-patch: #e91e63;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        /* 页面容器 */
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 左侧边栏 */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background-color: var(--bg-white);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 0;
+        }
+
+        /* 分组导航 */
+        .group-item {
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+
+        .group-header:hover {
+            background-color: var(--bg-color);
+        }
+
+        .group-header.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .group-arrow {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            color: #909399;
+            font-size: 12px;
+        }
+
+        .group-arrow.expanded {
+            transform: rotate(90deg);
+        }
+
+        .group-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 14px;
+            background-color: #f0f2f5;
+        }
+
+        .group-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .group-name {
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .group-count {
+            font-size: 12px;
+            color: #909399;
+            background-color: #f0f2f5;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+
+        .group-header.active .group-count {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        /* 子分组 */
+        .subgroup-list {
+            display: none;
+            background-color: #fafbfc;
+        }
+
+        .subgroup-list.expanded {
+            display: block;
+        }
+
+        .subgroup-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px 10px 46px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .subgroup-item:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .subgroup-item.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .subgroup-prefix {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .subgroup-count {
+            font-size: 11px;
+            color: #909399;
+            background-color: #e8e8e8;
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        .subgroup-item.active .subgroup-count {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        /* 中间主区域 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: var(--bg-white);
+        }
+
+        /* 顶部工具栏 */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-white);
+            flex-wrap: wrap;
+        }
+
+        .toolbar-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-right: auto;
+        }
+
+        .toolbar-title small {
+            font-weight: normal;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-left: 8px;
+        }
+
+        /* 搜索框 */
+        .search-wrapper {
+            position: relative;
+            width: 280px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-placeholder);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-placeholder);
+            font-size: 14px;
+        }
+
+        /* HTTP 方法过滤按钮 */
+        .method-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .method-filter-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .method-filter-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .method-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            opacity: 0.6;
+        }
+
+        .method-btn:hover {
+            opacity: 0.9;
+        }
+
+        .method-btn.active {
+            opacity: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .method-btn.all {
+            background-color: #f0f2f5;
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+        }
+
+        .method-btn.all.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+
+        .method-btn.get {
+            background-color: #e8f5e9;
+            color: var(--method-get);
+        }
+
+        .method-btn.get.active {
+            background-color: var(--method-get);
+            color: #fff;
+        }
+
+        .method-btn.post {
+            background-color: #e3f2fd;
+            color: var(--method-post);
+        }
+
+        .method-btn.post.active {
+            background-color: var(--method-post);
+            color: #fff;
+        }
+
+        .method-btn.put {
+            background-color: #fff3e0;
+            color: var(--method-put);
+        }
+
+        .method-btn.put.active {
+            background-color: var(--method-put);
+            color: #fff;
+        }
+
+        .method-btn.delete {
+            background-color: #ffebee;
+            color: var(--method-delete);
+        }
+
+        .method-btn.delete.active {
+            background-color: var(--method-delete);
+            color: #fff;
+        }
+
+        /* Swagger UI 容器 */
+        .swagger-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* 自定义 Swagger UI 样式 */
+        .swagger-ui .topbar {
+            display: none;
+        }
+
+        .swagger-ui .info {
+            margin: 20px 0;
+        }
+
+        .swagger-ui .scheme-container {
+            padding: 10px 20px;
+            background: var(--bg-color);
+        }
+
+        .swagger-ui .opblock-tag {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .swagger-ui .opblock-tag-section h3 {
+            font-size: 18px;
+        }
+
+        /* 搜索框 - 左侧边栏 */
+        .search-box {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .sidebar-search-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .sidebar-search-input::placeholder {
+            color: var(--text-placeholder);
+        }
+
+        /* 加载状态 */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #909399;
+        }
+
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 空状态 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #909399;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* 错误状态 */
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #f56c6c;
+        }
+
+        .error-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .retry-btn {
+            padding: 8px 20px;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 16px;
+        }
+
+        .retry-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 240px;
+                min-width: 240px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .search-wrapper {
+                width: 100%;
+            }
+
+            .method-filter {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>API 文档</h1>
+                <p>共 <span id="total-groups">0</span> 个分组，<span id="total-apis">0</span> 个接口</p>
+            </div>
+            <div class="search-box">
+                <input type="text" class="sidebar-search-input" placeholder="搜索分组..." id="sidebar-search-input">
+            </div>
+            <div class="sidebar-content" id="group-list">
+                <!-- 分组列表由 JS 动态渲染 -->
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <div>加载分组中...</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 中间主区域 -->
+        <main class="main-content">
+            <!-- 顶部工具栏 -->
+            <div class="toolbar">
+                <div class="toolbar-title" id="toolbar-title">
+                    API 文档
+                    <small id="toolbar-subtitle">请从左侧选择一个分组</small>
+                </div>
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="搜索 API（支持路径和描述）..." id="api-search-input">
+                </div>
+                <div class="method-filter">
+                    <span class="method-filter-label">快捷过滤：</span>
+                    <div class="method-filter-btns" id="method-filter-btns">
+                        <span class="method-btn all active" data-method="">全部</span>
+                        <span class="method-btn get" data-method="get">GET</span>
+                        <span class="method-btn post" data-method="post">POST</span>
+                        <span class="method-btn put" data-method="put">PUT</span>
+                        <span class="method-btn delete" data-method="delete">DELETE</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Swagger UI 容器 -->
+            <div class="swagger-container" id="swagger-ui">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-state-text">请从左侧选择一个分组查看 API 文档</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Swagger UI Bundle -->
+    <script src="{% static 'drf_resource/swagger-ui/swagger-ui-bundle.js' %}"></script>
+    <script src="{% static 'drf_resource/swagger-ui/swagger-ui-standalone-preset.js' %}"></script>
+
+    <script>
+        // ==================== 配置 ====================
+        const CONFIG = {
+            tagsUrl: '{{ tags_url|default:"/docs/tags/" }}',
+            schemaUrl: '{{ schema_url|default:"/schema/" }}',
+            debounceDelay: 300
+        };
+
+        // ==================== 状态管理 ====================
+        const AppState = {
+            groups: [],
+            currentGroupId: null,
+            currentSubgroupId: null,
+            expandedGroups: new Set(),
+            groupSearchKeyword: '',
+            methodFilter: '',
+            searchKeyword: '',
+            swaggerUI: null
+        };
+
+        // ==================== DOM 元素 ====================
+        const Elements = {
+            groupList: document.getElementById('group-list'),
+            swaggerUI: document.getElementById('swagger-ui'),
+            totalGroups: document.getElementById('total-groups'),
+            totalApis: document.getElementById('total-apis'),
+            sidebarSearchInput: document.getElementById('sidebar-search-input'),
+            apiSearchInput: document.getElementById('api-search-input'),
+            methodFilterBtns: document.getElementById('method-filter-btns'),
+            toolbarTitle: document.getElementById('toolbar-title'),
+            toolbarSubtitle: document.getElementById('toolbar-subtitle')
+        };
+
+        // ==================== 工具函数 ====================
+        function debounce(fn, delay) {
+            let timer = null;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        function countTotalApis(groups) {
+            return groups.reduce((total, group) => total + (group.count || 0), 0);
+        }
+
+        function getGroupApiCount(group) {
+            if (group.subgroups && group.subgroups.length > 0) {
+                return group.subgroups.reduce((sum, sub) => sum + (sub.count || 0), 0);
+            }
+            return group.count || 0;
+        }
+
+        // 标准化分组数据格式
+        function normalizeGroups(groups) {
+            return groups.map(group => ({
+                ...group,
+                id: group.name,
+                display_name: group.name,
+                api_count: group.count || 0,
+                icon: '📁',
+                // 二级分组数据
+                subgroups: (group.subgroups || []).map(sub => ({
+                    ...sub,
+                    id: sub.prefix || sub.name,
+                    display_name: sub.name || sub.prefix,
+                    api_count: sub.count || 0,
+                    prefix: sub.prefix
+                }))
+            }));
+        }
+
+        // ==================== API 请求 ====================
+        async function fetchGroups() {
+            const response = await fetch(CONFIG.tagsUrl);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        }
+
+        // ==================== Swagger UI 管理 ====================
+        function initSwaggerUI(tag, prefix = null) {
+            // 构建 Schema URL
+            let schemaUrl = `${CONFIG.schemaUrl}?tags=${encodeURIComponent(tag)}`;
+            if (prefix) {
+                schemaUrl += `&prefix=${encodeURIComponent(prefix)}`;
+            }
+
+            // 销毁旧实例
+            if (AppState.swaggerUI) {
+                Elements.swaggerUI.innerHTML = '';
+            }
+
+            // 创建新的 Swagger UI 实例
+            AppState.swaggerUI = SwaggerUIBundle({
+                url: schemaUrl,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl,
+                    // 自定义过滤插件
+                    () => ({
+                        fn: {
+                            opsFilter: (taggedOps, phrase) => {
+                                // 应用搜索关键词过滤
+                                if (AppState.searchKeyword) {
+                                    const keyword = AppState.searchKeyword.toLowerCase();
+                                    return taggedOps.filter((tagObj) => {
+                                        return tagObj.get('operations').some((op) => {
+                                            const path = op.get('path') || '';
+                                            const summary = op.get('operation')?.get('summary') || '';
+                                            const description = op.get('operation')?.get('description') || '';
+                                            return path.toLowerCase().includes(keyword) ||
+                                                   summary.toLowerCase().includes(keyword) ||
+                                                   description.toLowerCase().includes(keyword);
+                                        });
+                                    }).map((tagObj) => {
+                                        return tagObj.set('operations', tagObj.get('operations').filter((op) => {
+                                            const path = op.get('path') || '';
+                                            const summary = op.get('operation')?.get('summary') || '';
+                                            const description = op.get('operation')?.get('description') || '';
+                                            return path.toLowerCase().includes(keyword) ||
+                                                   summary.toLowerCase().includes(keyword) ||
+                                                   description.toLowerCase().includes(keyword);
+                                        }));
+                                    });
+                                }
+                                return taggedOps;
+                            }
+                        }
+                    })
+                ],
+                layout: "StandaloneLayout",
+                docExpansion: "list",
+                defaultModelsExpandDepth: -1,
+                filter: true,
+                showExtensions: false,
+                showCommonExtensions: false,
+                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+                onComplete: () => {
+                    // 应用方法过滤
+                    applyMethodFilter();
+                    // 应用搜索过滤
+                    applySearchFilter();
+                }
+            });
+        }
+
+        function applyMethodFilter() {
+            const method = AppState.methodFilter;
+            if (!method) {
+                // 显示所有方法
+                document.querySelectorAll('.swagger-ui .opblock').forEach(el => {
+                    el.style.display = '';
+                });
+                return;
+            }
+
+            // 隐藏不匹配的方法
+            document.querySelectorAll('.swagger-ui .opblock').forEach(el => {
+                const isMatch = el.classList.contains(`opblock-${method}`);
+                el.style.display = isMatch ? '' : 'none';
+            });
+
+            // 隐藏空的 tag 组
+            document.querySelectorAll('.swagger-ui .opblock-tag-section').forEach(section => {
+                const visibleOps = section.querySelectorAll('.opblock:not([style*="display: none"])');
+                section.style.display = visibleOps.length > 0 ? '' : 'none';
+            });
+        }
+
+        function applySearchFilter() {
+            const keyword = AppState.searchKeyword.toLowerCase();
+            if (!keyword) {
+                document.querySelectorAll('.swagger-ui .opblock').forEach(el => {
+                    if (!AppState.methodFilter || el.classList.contains(`opblock-${AppState.methodFilter}`)) {
+                        el.style.display = '';
+                    }
+                });
+                return;
+            }
+
+            // 过滤操作块
+            document.querySelectorAll('.swagger-ui .opblock').forEach(el => {
+                const path = el.querySelector('.opblock-summary-path')?.textContent?.toLowerCase() || '';
+                const description = el.querySelector('.opblock-summary-description')?.textContent?.toLowerCase() || '';
+                const isMatch = path.includes(keyword) || description.includes(keyword);
+
+                // 同时考虑方法过滤
+                const methodMatch = !AppState.methodFilter || el.classList.contains(`opblock-${AppState.methodFilter}`);
+
+                el.style.display = (isMatch && methodMatch) ? '' : 'none';
+            });
+
+            // 隐藏空的 tag 组
+            document.querySelectorAll('.swagger-ui .opblock-tag-section').forEach(section => {
+                const visibleOps = section.querySelectorAll('.opblock:not([style*="display: none"])');
+                section.style.display = visibleOps.length > 0 ? '' : 'none';
+            });
+        }
+
+        // ==================== 渲染函数 ====================
+        function renderGroupList() {
+            const filterLower = AppState.groupSearchKeyword.toLowerCase();
+
+            const filteredGroups = AppState.groups.filter(group => {
+                if (!filterLower) return true;
+                // 搜索组名
+                if (group.name.toLowerCase().includes(filterLower)) return true;
+                // 搜索子分组名
+                if (group.subgroups) {
+                    return group.subgroups.some(sub =>
+                        (sub.name || '').toLowerCase().includes(filterLower) ||
+                        (sub.prefix || '').toLowerCase().includes(filterLower)
+                    );
+                }
+                return false;
+            });
+
+            if (filteredGroups.length === 0) {
+                Elements.groupList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">未找到匹配的分组</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filteredGroups.forEach(group => {
+                const isExpanded = AppState.expandedGroups.has(group.id);
+                const isActive = AppState.currentGroupId === group.id && !AppState.currentSubgroupId;
+                const apiCount = group.count || 0;
+                const hasSubgroups = group.has_subgroups && group.subgroups && group.subgroups.length > 0;
+
+                html += `
+                    <div class="group-item" data-group-id="${group.id}">
+                        <div class="group-header ${isActive ? 'active' : ''}" onclick="handleGroupClick('${group.id}')">
+                            ${hasSubgroups ? `
+                                <span class="group-arrow ${isExpanded ? 'expanded' : ''}">▶</span>
+                            ` : '<span class="group-arrow"></span>'}
+                            <span class="group-icon">${group.icon || '📁'}</span>
+                            <div class="group-info">
+                                <span class="group-name">${group.display_name || group.name}</span>
+                            </div>
+                            <span class="group-count">${apiCount}</span>
+                        </div>
+                        ${hasSubgroups ? `
+                            <div class="subgroup-list ${isExpanded ? 'expanded' : ''}">
+                                ${group.subgroups.map(sub => `
+                                    <div class="subgroup-item ${AppState.currentSubgroupId === sub.id ? 'active' : ''}"
+                                         onclick="handleSubgroupClick(event, '${group.id}', '${sub.id}', '${sub.prefix || ''}')">
+                                        <span class="subgroup-prefix">${sub.display_name || sub.name}</span>
+                                        <span class="subgroup-count">${sub.api_count || sub.count || 0}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            Elements.groupList.innerHTML = html;
+        }
+
+        function updateToolbarTitle(title, subtitle) {
+            Elements.toolbarTitle.innerHTML = `${title}<small id="toolbar-subtitle">${subtitle}</small>`;
+        }
+
+        function showLoading() {
+            Elements.swaggerUI.innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <div>加载 API 文档中...</div>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            Elements.swaggerUI.innerHTML = `
+                <div class="error-state">
+                    <div class="error-state-icon">❌</div>
+                    <div>${message}</div>
+                    <button class="retry-btn" onclick="retryLoad()">重试</button>
+                </div>
+            `;
+        }
+
+        // ==================== 事件处理 ====================
+        function handleGroupClick(groupId) {
+            const group = AppState.groups.find(g => g.id === groupId);
+            if (!group) return;
+
+            const hasSubgroups = group.has_subgroups && group.subgroups && group.subgroups.length > 0;
+
+            if (hasSubgroups) {
+                // 有子分组：切换展开/收起状态
+                if (AppState.expandedGroups.has(groupId)) {
+                    AppState.expandedGroups.delete(groupId);
+                } else {
+                    // 手风琴效果：收起其他分组
+                    AppState.expandedGroups.clear();
+                    AppState.expandedGroups.add(groupId);
+                }
+                AppState.currentGroupId = groupId;
+                AppState.currentSubgroupId = null;
+
+                // 显示第一个子分组的 API
+                if (group.subgroups.length > 0) {
+                    const firstSub = group.subgroups[0];
+                    AppState.currentSubgroupId = firstSub.id;
+                    loadSwaggerUI(group.name, firstSub.prefix, `${group.name} / ${firstSub.display_name || firstSub.name}`);
+                }
+            } else {
+                // 无子分组：直接显示 API 列表
+                AppState.expandedGroups.clear();
+                AppState.currentGroupId = groupId;
+                AppState.currentSubgroupId = null;
+                loadSwaggerUI(group.name, null, group.name);
+            }
+
+            renderGroupList();
+        }
+
+        function handleSubgroupClick(event, groupId, subgroupId, prefix) {
+            event.stopPropagation();
+
+            const group = AppState.groups.find(g => g.id === groupId);
+            if (!group || !group.subgroups) return;
+
+            const subgroup = group.subgroups.find(s => s.id === subgroupId);
+            if (!subgroup) return;
+
+            AppState.currentGroupId = groupId;
+            AppState.currentSubgroupId = subgroupId;
+
+            loadSwaggerUI(group.name, subgroup.prefix, `${group.name} / ${subgroup.display_name || subgroup.name}`);
+            renderGroupList();
+        }
+
+        function loadSwaggerUI(tag, prefix, displayTitle) {
+            // 重置搜索和过滤
+            AppState.searchKeyword = '';
+            AppState.methodFilter = '';
+            Elements.apiSearchInput.value = '';
+            updateMethodFilterBtns('');
+
+            updateToolbarTitle(displayTitle, '加载中...');
+            showLoading();
+
+            try {
+                initSwaggerUI(tag, prefix);
+                updateToolbarTitle(displayTitle, '');
+            } catch (error) {
+                console.error('加载 Swagger UI 失败:', error);
+                showError('加载 API 文档失败');
+            }
+        }
+
+        function retryLoad() {
+            if (AppState.currentGroupId) {
+                const group = AppState.groups.find(g => g.id === AppState.currentGroupId);
+                if (group) {
+                    if (AppState.currentSubgroupId) {
+                        const subgroup = group.subgroups?.find(s => s.id === AppState.currentSubgroupId);
+                        if (subgroup) {
+                            loadSwaggerUI(group.name, subgroup.prefix, `${group.name} / ${subgroup.display_name || subgroup.name}`);
+                            return;
+                        }
+                    }
+                    loadSwaggerUI(group.name, null, group.name);
+                }
+            }
+        }
+
+        function handleMethodFilter(method) {
+            AppState.methodFilter = method;
+            updateMethodFilterBtns(method);
+            applyMethodFilter();
+            applySearchFilter();
+        }
+
+        function updateMethodFilterBtns(activeMethod) {
+            const btns = Elements.methodFilterBtns.querySelectorAll('.method-btn');
+            btns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.method === activeMethod);
+            });
+        }
+
+        function handleSearchInput(keyword) {
+            AppState.searchKeyword = keyword;
+            applySearchFilter();
+        }
+
+        // ==================== 初始化 ====================
+        async function init() {
+            try {
+                // 加载分组数据
+                const data = await fetchGroups();
+                const rawGroups = data.tags || data.groups || data;
+                AppState.groups = normalizeGroups(rawGroups);
+
+                // 更新统计信息
+                Elements.totalGroups.textContent = AppState.groups.length;
+                Elements.totalApis.textContent = countTotalApis(AppState.groups);
+
+                // 渲染分组列表
+                renderGroupList();
+
+                // 默认选中第一个分组
+                if (AppState.groups.length > 0) {
+                    handleGroupClick(AppState.groups[0].id);
+                }
+            } catch (error) {
+                console.error('初始化失败:', error);
+                Elements.groupList.innerHTML = `
+                    <div class="error-state">
+                        <div class="error-state-icon">❌</div>
+                        <div>加载分组失败</div>
+                        <button class="retry-btn" onclick="init()">重试</button>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== 事件绑定 ====================
+        // 分组搜索
+        Elements.sidebarSearchInput.addEventListener('input', (e) => {
+            AppState.groupSearchKeyword = e.target.value;
+            renderGroupList();
+        });
+
+        // API 搜索（防抖）
+        const debouncedSearch = debounce(handleSearchInput, CONFIG.debounceDelay);
+        Elements.apiSearchInput.addEventListener('input', (e) => {
+            debouncedSearch(e.target.value);
+        });
+
+        // HTTP 方法过滤
+        Elements.methodFilterBtns.addEventListener('click', (e) => {
+            const btn = e.target.closest('.method-btn');
+            if (btn) {
+                handleMethodFilter(btn.dataset.method);
+            }
+        });
+
+        // 启动应用
+        init();
+    </script>
+</body>
+</html>
