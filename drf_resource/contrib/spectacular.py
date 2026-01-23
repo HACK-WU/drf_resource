@@ -311,8 +311,17 @@ class FilterableSchemaGenerator(SchemaGenerator):
         # 过滤 paths，只保留包含指定标签的端点
         filtered_paths = {}
         for path, path_item in result.items():
+            # 跳过非字典类型的 path_item
+            if not isinstance(path_item, dict):
+                continue
+
             filtered_operations = {}
             for method, operation in path_item.items():
+                # 跳过非字典类型的 operation（比如 "parameters" 等键）
+                if not isinstance(operation, dict):
+                    filtered_operations[method] = operation
+                    continue
+
                 # 获取该操作的标签
                 operation_tags = operation.get("tags", [])
                 # 检查是否有任何标签匹配过滤条件
@@ -322,6 +331,13 @@ class FilterableSchemaGenerator(SchemaGenerator):
             # 只有当路径下还有操作时才添加
             if filtered_operations:
                 filtered_paths[path] = filtered_operations
+
+        logger.debug(
+            f"[drf-spectacular] 标签过滤完成: "
+            f"过滤标签={self.filter_tags}, "
+            f"原始路径数={len(result)}, "
+            f"过滤后路径数={len(filtered_paths)}"
+        )
 
         return filtered_paths
 
