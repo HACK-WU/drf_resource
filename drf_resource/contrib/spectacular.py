@@ -636,27 +636,32 @@ class FilterableSwaggerView(SpectacularSwaggerView):
 
     template_name = "spectacular/swagger.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # 使用 query_params 兼容 DRF Request 对象
-        tags = (
-            self.request.query_params.get("tags", "")
-            if hasattr(self.request, "query_params")
-            else self.request.GET.get("tags", "")
-        )
+    def _get_schema_url(self, request):
+        """重写父类方法，添加 tags 过滤参数"""
+        # 调用父类方法获取基础 URL
+        schema_url = super()._get_schema_url(request)
 
-        # 构建带标签过滤的 schema URL - 使用绝对路径
-        schema_url = "/schema/"
+        # 获取 tags 参数
+        tags = request.GET.get("tags", "")
+
+        # 如果有 tags，添加到 URL
         if tags:
-            schema_url = f"{schema_url}?tags={tags}"
+            separator = "&" if "?" in schema_url else "?"
+            schema_url = f"{schema_url}{separator}tags={tags}"
 
         logger.debug(
             f"[drf-spectacular] FilterableSwaggerView: tags={tags}, schema_url={schema_url}"
         )
 
-        context["schema_url"] = schema_url
-        context["tags"] = tags
-        return context
+        return schema_url
+
+    def get(self, request, *args, **kwargs):
+        """重写 get 方法，添加 tags 到模板 context"""
+        response = super().get(request, *args, **kwargs)
+        # 添加 tags 到 context，用于模板显示当前过滤状态
+        if hasattr(response, "data") and isinstance(response.data, dict):
+            response.data["tags"] = request.GET.get("tags", "")
+        return response
 
 
 class DocsLiteView(TemplateView):
