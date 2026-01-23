@@ -155,7 +155,7 @@ DRF_RESOURCE = {
 ```python
 # urls.py
 urlpatterns = [
-    path('api-explorer/', include('drf_resource.api_explorer.urls')),
+    path('api-explorer/', include('drf_resource.urls')),
 ]
 ```
 

@@ -49,7 +49,7 @@ from django.urls import path, include
 
 urlpatterns = [
     # ... 其他路由
-    path('api-explorer/', include('drf_resource.api_explorer.urls')),
+    path('api-explorer/', include('drf_resource.urls')),
 ]
 ```
 
@@ -315,8 +315,9 @@ DRF_RESOURCE = {
 ### Q2: 如何自定义 URL 前缀？
 
 在 `urls.py` 中修改路由：
+
 ```python
-path('custom-prefix/', include('drf_resource.api_explorer.urls')),
+path('custom-prefix/', include('drf_resource.urls')),
 ```
 
 ### Q3: 如何查看审计日志？
