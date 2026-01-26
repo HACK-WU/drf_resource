@@ -1068,9 +1068,20 @@
         function buildDisplayTitle(groupName, subgroup) {
             const prefix = subgroup.prefix || '';
             const parts = prefix.split('/').filter(p => p);
-            if (parts.length <= 1) {
+
+            if (parts.length === 0) {
+                return groupName;
+            }
+
+            if (parts.length === 1) {
                 return `${groupName} / ${subgroup.display_name || subgroup.name}`;
             }
+
+            // 如果第一个路径段与分组名相同，去除重复
+            if (parts[0].toLowerCase() === groupName.toLowerCase()) {
+                parts.shift(); // 移除第一个元素
+            }
+
             return `${groupName} / ${parts.join(' / ')}`;
         }
 
