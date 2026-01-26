@@ -10,13 +10,11 @@ specific language governing permissions and limitations under the License.
 
 import abc
 
-import six
-
 from drf_resource.base import Resource
 from drf_resource.cache import CacheTypeItem, using_cache
 
 
-class CacheResource(six.with_metaclass(abc.ABCMeta, Resource)):
+class CacheResource(Resource, metaclass=abc.ABCMeta):
     """
     支持缓存的resource，开发环境下缓存默认不生效。
     """

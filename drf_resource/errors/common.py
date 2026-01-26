@@ -12,8 +12,6 @@ specific language governing permissions and limitations under the License.
 公共错误
 """
 
-import six
-
 from drf_resource.errors import Error
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy as _lazy
@@ -50,7 +48,7 @@ class DrfApiError(CommonError):
         """
         将DRF ValidationError 错误信息转换为字符串
         """
-        if isinstance(detail, six.text_type):
+        if isinstance(detail, str):
             return detail
         elif isinstance(detail, dict):
             for k, v in list(detail.items()):

@@ -13,7 +13,6 @@ import logging
 import random
 
 import arrow
-import six
 from django.conf import settings
 from django.db import models
 
@@ -29,7 +28,7 @@ class ResourceDataManager(models.Manager):
         """
         数据转换为字符串，同时避免QuerySet查询
         """
-        if isinstance(data, dict | list | six.string_types | int) or data is None:
+        if isinstance(data, dict | list | int) or data is None:
             try:
                 data_string = json.dumps(data)
             except Exception as e:
