@@ -1,4 +1,5 @@
 import hashlib
+import types
 from typing import Any
 
 _BASE_TYPES = (str, int, float, bool, type(None))
@@ -65,8 +66,8 @@ def count_md5(
                 hasher.update(count_md5(item, dict_sort, list_sort, _path_ids).encode())
                 hasher.update(b"|")
 
-        # 处理可调用对象
-        elif callable(content):
+        # 处理可调用对象（仅限函数/方法）
+        elif isinstance(content, types.FunctionType | types.MethodType):
             # 使用函数名称进行哈希
             hasher.update(f"fn:{content.__name__}".encode())
 
