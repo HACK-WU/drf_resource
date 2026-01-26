@@ -6,7 +6,7 @@ from drf_resource.routers import ResourceRouter
 
 # 使用 ResourceRouter 注册 ViewSet
 router = ResourceRouter()
-router.register("api_home", ApiHomeResourceViewSet, basename="api_home")
+router.register("api_resource", ApiHomeResourceViewSet, basename="api-resource")
 
 # drf-spectacular 文档路由（可选，需安装 drf-spectacular）
 try:
