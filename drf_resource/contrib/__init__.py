@@ -10,6 +10,5 @@ specific language governing permissions and limitations under the License.
 
 from .api import APIResource, APICacheResource
 from .cache import CacheResource
-from kernel_api.nested_api import KernelAPIResource
 
-__all__ = ["APIResource", "APICacheResource", "CacheResource", "KernelAPIResource"]
+__all__ = ["APIResource", "APICacheResource", "CacheResource"]
