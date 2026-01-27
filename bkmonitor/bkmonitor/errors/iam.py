@@ -53,9 +53,7 @@ class APIPermissionDeniedError(PermissionDeniedError):
         kwargs.update(permission=",".join(permission_actions))
         super(PermissionDeniedError, self).__init__(context, data, extra, **kwargs)
 
-    message_tpl = _lazy(
-        "请求[{system_name}]系统[{url}]权限校验不通过，请前往权限中心申请对应权限[{permission}]"
-    )
+    message_tpl = _lazy("请求[{system_name}]系统[{url}]权限校验不通过，请前往权限中心申请对应权限[{permission}]")
 
 
 class ActionNotExistError(Error):
