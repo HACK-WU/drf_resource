@@ -5,8 +5,8 @@ DRF-Resource 基础异常模块
 """
 
 import logging
+import time
 from dataclasses import dataclass, field
-from datetime import datetime
 from typing import Any
 from uuid import uuid4
 
@@ -31,7 +31,7 @@ class ExceptionContext:
     4. 自动生成 UUID4（兜底方案）
     """
 
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: float = field(default_factory=lambda: time.time())
     trace_id: str = None
 
     def __post_init__(self):
@@ -66,7 +66,7 @@ class ExceptionContext:
     def _get_trace_id_from_thread(self) -> str | None:
         """从线程本地变量获取 trace_id"""
         try:
-            from .middleware import get_current_trace_id
+            from drf_resource.middlewares.exceptions import get_current_trace_id
 
             return get_current_trace_id()
         except (ImportError, AttributeError):
@@ -75,7 +75,7 @@ class ExceptionContext:
     def to_dict(self) -> dict:
         """转换为字典格式"""
         return {
-            "timestamp": self.timestamp.isoformat(),
+            "timestamp": self.timestamp,
             "trace_id": self.trace_id,
         }
 
@@ -103,7 +103,7 @@ class ExceptionDetail:
         if self.field:
             result["field"] = self.field
         if self.context:
-            result["context"] = self.context.to_dict()
+            result["context"] = self.context.to_dict()  # noqa
         return result
 
 

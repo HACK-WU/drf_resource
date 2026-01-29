@@ -16,12 +16,8 @@ Trace ID 中间件
     ]
 """
 
-from threading import local
+from drf_resource.utils.local import local as _thread_local
 from uuid import uuid4
-
-
-# 线程本地存储
-_thread_local = local()
 
 
 def get_current_trace_id() -> str | None:
