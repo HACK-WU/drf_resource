@@ -86,7 +86,7 @@ from .handlers import (
 )
 
 # Middleware - 中间件
-from .middleware import (
+from drf_resource.middlewares.exceptions import (
     TraceIdMiddleware,
     get_current_trace_id,
     set_current_trace_id,
