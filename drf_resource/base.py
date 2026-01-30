@@ -14,7 +14,7 @@ import logging
 from django.db import models
 from django.http.response import HttpResponseBase
 from django.utils.translation import gettext as _
-from drf_resource.exceptions import CustomException, record_exception
+from drf_resource.common_errors.exceptions import CustomException, record_exception
 from drf_resource.tasks import run_perform_request
 from drf_resource.tools import (
     format_serializer_errors,

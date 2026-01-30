@@ -4,7 +4,7 @@ DRF-Resource 验证异常模块
 提供参数验证相关的异常类。
 
 Example:
-    from drf_resource.exceptions import (
+    from drf_resource.common_errors.exceptions  import (
         ValidationException,
         ParameterMissingError,
         ParameterInvalidError,

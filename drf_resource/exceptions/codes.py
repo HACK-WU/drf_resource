@@ -4,7 +4,7 @@ DRF-Resource 错误码系统
 提供可扩展的错误码定义和注册机制。
 
 Example:
-    from drf_resource.exceptions.codes import (
+    from drf_resource.common_errors.exceptions .codes import (
         ErrorCode,
         ErrorCodeRegistry,
         StandardErrorCodes,
@@ -176,7 +176,7 @@ class StandardErrorCodes:
         - 4000-4999: 外部 API 错误
 
     Example:
-        from drf_resource.exceptions.codes import StandardErrorCodes
+        from drf_resource.common_errors.exceptions .codes import StandardErrorCodes
 
         # 使用标准错误码
         raise ResourceException(error_code=StandardErrorCodes.NOT_FOUND)

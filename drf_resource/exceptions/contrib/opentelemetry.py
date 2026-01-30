@@ -7,7 +7,7 @@ OpenTelemetry 集成模块
     pip install opentelemetry-api
 
 Example:
-    from drf_resource.exceptions.contrib.opentelemetry import (
+    from drf_resource.common_errors.exceptions .contrib.opentelemetry import (
         get_trace_id_from_otel,
         get_span_id_from_otel,
     )
