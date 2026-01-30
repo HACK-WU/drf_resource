@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import copy
 import datetime
 import json
@@ -72,7 +72,7 @@ from constants.apm import (
     TraceWaterFallDisplayKey,
 )
 from drf_resource import Resource, api
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from metadata import models
 from metadata.models import DataSource
 
@@ -244,15 +244,15 @@ class ApplicationRequestSerializer(serializers.Serializer):
         if application_id:
             app = Application.objects.filter(application_id=application_id).first()
             if app:
-                attrs['bk_biz_id'] = app.bk_biz_id
-                attrs['app_name'] = app.app_name
+                attrs["bk_biz_id"] = app.bk_biz_id
+                attrs["app_name"] = app.app_name
                 return attrs
             raise ValidationError(f"the application({application_id}) does not exist")
 
         if app_name and bk_biz_id:
             app = Application.objects.filter(bk_biz_id=bk_biz_id, app_name=app_name).first()
             if app:
-                attrs['application_id'] = app.application_id
+                attrs["application_id"] = app.application_id
                 return attrs
             raise ValidationError(f"the application({app_name}) does not exist")
 
@@ -261,8 +261,8 @@ class ApplicationRequestSerializer(serializers.Serializer):
             if bk_biz_id:
                 app = Application.objects.filter(bk_biz_id=bk_biz_id, app_name=app_name).first()
                 if app:
-                    attrs['application_id'] = app.application_id
-                    attrs['bk_biz_id'] = bk_biz_id
+                    attrs["application_id"] = app.application_id
+                    attrs["bk_biz_id"] = bk_biz_id
                     return attrs
                 # space_uid和app_name都合法并存在，但是组合起来查不到数据
                 raise ValidationError(f"the application({app_name}) does not exist")
@@ -924,7 +924,9 @@ class QuerySerializer(serializers.Serializer):
     class FilterSerializer(serializers.Serializer):
         key = serializers.CharField(label="查询键")
         operator = serializers.CharField(label="操作符")
-        value = serializers.ListSerializer(label="查询值", child=serializers.CharField(allow_blank=True), allow_empty=True)
+        value = serializers.ListSerializer(
+            label="查询值", child=serializers.CharField(allow_blank=True), allow_empty=True
+        )
 
     bk_biz_id = serializers.IntegerField(label="业务id")
     app_name = serializers.CharField(label="应用名称", max_length=50)
@@ -1263,9 +1265,7 @@ class QueryTraceByIdsResource(Resource):
         trace_ids = list(set(validated_request_data["trace_ids"]))
         if len(trace_ids) > settings.APM_APP_QUERY_TRACE_MAX_COUNT:
             logger.warning(
-                "QueryTraceByIdsResource len of trace_ids({}) has exceeded the maximum number({})".format(
-                    len(trace_ids), settings.APM_APP_QUERY_TRACE_MAX_COUNT
-                )
+                f"QueryTraceByIdsResource len of trace_ids({len(trace_ids)}) has exceeded the maximum number({settings.APM_APP_QUERY_TRACE_MAX_COUNT})"
             )
             validated_request_data["trace_ids"] = trace_ids[: settings.APM_APP_QUERY_TRACE_MAX_COUNT]
 
@@ -1312,9 +1312,7 @@ class QueryAppByTraceResource(Resource):
         trace_ids = validated_request_data["trace_ids"]
         if len(trace_ids) > settings.APM_APP_QUERY_TRACE_MAX_COUNT:
             logger.warning(
-                "QueryTraceByIdsResource len of trace_ids({}) has exceeded the maximum number({})".format(
-                    len(trace_ids), settings.APM_APP_QUERY_TRACE_MAX_COUNT
-                )
+                f"QueryTraceByIdsResource len of trace_ids({len(trace_ids)}) has exceeded the maximum number({settings.APM_APP_QUERY_TRACE_MAX_COUNT})"
             )
             trace_ids = trace_ids[: settings.APM_APP_QUERY_TRACE_MAX_COUNT]
 
@@ -1717,7 +1715,9 @@ class CreateApplicationSimpleResource(Resource):
         app_alias = serializers.CharField(label="应用别名", max_length=255, required=False)
         description = serializers.CharField(label="描述", required=False, max_length=255, default="", allow_blank=True)
         plugin_id = serializers.CharField(label="插件ID", max_length=255, required=False)
-        deployment_ids = serializers.ListField(label="环境", child=serializers.CharField(max_length=255), required=False)
+        deployment_ids = serializers.ListField(
+            label="环境", child=serializers.CharField(max_length=255), required=False
+        )
         language_ids = serializers.ListField(label="语言", child=serializers.CharField(max_length=255), required=False)
         space_uid = serializers.CharField(label="空间唯一标识", required=False, default="")
         enabled_profiling = serializers.BooleanField(label="是否开启 Profiling 功能", required=False, default=False)

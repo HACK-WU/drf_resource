@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import pytest
 import logging
 from datetime import datetime
@@ -21,7 +21,7 @@ from calendars.resources import (
     ItemListResource,
     ItemDetailResource,
 )
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 
 logger = logging.getLogger("calendars")
 
@@ -122,7 +122,10 @@ class TestItem:
         with pytest.raises(CustomException) as e:
             SaveItemResource().request(**request_data)
         exec_msg = e.value.args[0]
-        assert exec_msg == "Resource[SaveItem] 请求参数格式错误：(重复事项配置信息) 当重复频率为week时，重复区间里的值应该在0-6之间"
+        assert (
+            exec_msg
+            == "Resource[SaveItem] 请求参数格式错误：(重复事项配置信息) 当重复频率为week时，重复区间里的值应该在0-6之间"
+        )
 
         logger.info("添加事项测试完成")
 
@@ -213,7 +216,11 @@ class TestItem:
 
         # 子事项
         sun_item = EditItemResource().request(
-            id=item_id, name="测试编辑事项_2", start_time=1648080000, end_time=1648175400, change_type=1  # 3.24
+            id=item_id,
+            name="测试编辑事项_2",
+            start_time=1648080000,
+            end_time=1648175400,
+            change_type=1,  # 3.24
         )
 
         # 1。删除当前事项
@@ -322,7 +329,9 @@ class TestItem:
             },
         )
         all_item_list = ItemListResource().request(
-            calendar_ids=[calendar_id], start_time=1645891200, end_time=1649174400  # 2.27
+            calendar_ids=[calendar_id],
+            start_time=1645891200,
+            end_time=1649174400,  # 2.27
         )  # 4.6
         assert len(all_item_list) == 13
         item_1 = all_item_list[0]["list"][0]
@@ -346,7 +355,9 @@ class TestItem:
             },
         )
         all_item_list = ItemListResource().request(
-            calendar_ids=[calendar_id], start_time=1642089600, end_time=1648828800  # 1.14
+            calendar_ids=[calendar_id],
+            start_time=1642089600,
+            end_time=1648828800,  # 1.14
         )  # 4.2
         assert len(all_item_list) == 21
 
@@ -386,7 +397,9 @@ class TestItem:
         )
 
         all_item_list = ItemListResource().request(
-            calendar_ids=[calendar_id], start_time=1641347400, end_time=1812160200  # 2022,1,5 9.50
+            calendar_ids=[calendar_id],
+            start_time=1641347400,
+            end_time=1812160200,  # 2022,1,5 9.50
         )  # 2027,6,5 9.50
         assert len(all_item_list) == 8
 
@@ -437,7 +450,9 @@ class TestItem:
         )
         # 测试查找的开始时间大于日日历开始时间和小于结束时间
         all_items = ItemDetailResource().request(
-            calendar_ids=[calendar_id], time=1641776400, start_time=1641657600  # 1,10 9:00
+            calendar_ids=[calendar_id],
+            time=1641776400,
+            start_time=1641657600,  # 1,10 9:00
         )
         assert len(all_items) == 1
         # 测试查询开始时间为当前时间（大于until的情况）

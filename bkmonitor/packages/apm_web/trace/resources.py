@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import copy
 import logging
 
@@ -44,7 +44,7 @@ from constants.apm import (
     TraceWaterFallDisplayKey,
 )
 from drf_resource import Resource, api
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from core.errors.api import BKAPIError
 from core.prometheus.base import OPERATION_REGISTRY
 from core.prometheus.metrics import safe_push_to_gateway
@@ -800,7 +800,9 @@ class TraceDetailResource(Resource):
             validated_request_data.get("enabled_time_alignment"),
         )
         if not handled_data.get("original_data", []):
-            raise CustomException(_lazy("trace_id: {} 没有有效的 trace 数据").format(validated_request_data['trace_id']))
+            raise CustomException(
+                _lazy("trace_id: {} 没有有效的 trace 数据").format(validated_request_data["trace_id"])
+            )
 
         topo_data = trace_data_to_topo_data(handled_data["original_data"])
         handled_data["topo_relation"] = topo_data["relations"]
@@ -827,7 +829,9 @@ class TraceDiagramResource(Resource):
         app_name = serializers.CharField(label="应用名称")
         trace_id = serializers.CharField(label="Trace ID")
 
-        diagram_type = serializers.ChoiceField(label="图表类型", choices=("flamegraph", "sequence", "topo", "statistics"))
+        diagram_type = serializers.ChoiceField(
+            label="图表类型", choices=("flamegraph", "sequence", "topo", "statistics")
+        )
         displays = serializers.ListField(
             child=serializers.ChoiceField(
                 choices=TraceWaterFallDisplayKey.choices(),
@@ -841,7 +845,9 @@ class TraceDiagramResource(Resource):
         prefer_raw = serializers.BooleanField(label="是否优先展示原始数据", required=False, default=False)
         absolute_time_sequence = serializers.BooleanField(label="是否展示绝对时间", required=False, default=False)
 
-        filter = TraceStatisticsResource.RequestSerializer.FilterSerializer(label="过滤", required=False, allow_null=True)
+        filter = TraceStatisticsResource.RequestSerializer.FilterSerializer(
+            label="过滤", required=False, allow_null=True
+        )
         group_fields = serializers.ListField(child=serializers.CharField(), label="分组字段列表", required=False)
 
     def get_comparison_details(self, bk_biz_id: str, app_name: str, trace_id: str, displays: list) -> dict:
@@ -930,8 +936,7 @@ class TraceDiagramResource(Resource):
 
 class TraceListByIdResource(Resource):
     TRACE_INFO_URL = (
-        "/?bizId={bk_biz_id}#/trace/home?"
-        "app_name={app_name}&search_id=traceID&search_type=accurate&trace_id={trace_id}"
+        "/?bizId={bk_biz_id}#/trace/home?app_name={app_name}&search_id=traceID&search_type=accurate&trace_id={trace_id}"
     )
 
     class RequestSerializer(serializers.Serializer):
@@ -977,8 +982,7 @@ class TraceListByIdResource(Resource):
 
 class TraceListByHostInstanceResource(Resource):
     TRACE_INFO_URL = (
-        "/?bizId={bk_biz_id}#/trace/home?"
-        "app_name={app_name}&search_id=traceID&search_type=accurate&trace_id={trace_id}"
+        "/?bizId={bk_biz_id}#/trace/home?app_name={app_name}&search_id=traceID&search_type=accurate&trace_id={trace_id}"
     )
 
     class RequestSerializer(serializers.Serializer):

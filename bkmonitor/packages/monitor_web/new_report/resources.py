@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import copy
 import logging
 from collections import defaultdict
@@ -45,7 +45,7 @@ from constants.new_report import (
 )
 from drf_resource import api, resource
 from drf_resource.base import Resource
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from drf_resource.utils.request import get_request
 
 logger = logging.getLogger(__name__)
@@ -76,7 +76,9 @@ class GetReportListResource(Resource):
 
     class RequestSerializer(serializers.Serializer):
         bk_biz_id = serializers.IntegerField(label="业务id", required=True)
-        search_key = serializers.CharField(required=False, label="搜索关键字", default="", allow_null=True, allow_blank=True)
+        search_key = serializers.CharField(
+            required=False, label="搜索关键字", default="", allow_null=True, allow_blank=True
+        )
         query_type = serializers.CharField(required=False, label="查询类型", default=ReportQueryTypeEnum.ALL.value)
         create_type = serializers.CharField(required=False, label="创建类型", default=ReportCreateTypeEnum.SELF.value)
         conditions = serializers.ListField(required=False, child=serializers.DictField(), default=[], label="查询条件")
@@ -194,7 +196,7 @@ class GetReportListResource(Resource):
 
     def sort_reports(self, reports: list, order: str) -> list:
         reverse_order = False
-        if order.startswith('-'):
+        if order.startswith("-"):
             reverse_order = True
             order = order[1:]  # 去掉负号
 
@@ -219,7 +221,7 @@ class GetReportListResource(Resource):
             # 过滤conditions中额外字段
             need_filter = False
             for key, value in external_filter_dict.items():
-                if not report[key] in value:
+                if report[key] not in value:
                     need_filter = True
                     break
             if not need_filter:
@@ -272,8 +274,7 @@ class GetReportListResource(Resource):
         # 分页
         total = len(reports)
         reports = reports[
-            (validated_request_data["page"] - 1)
-            * validated_request_data["page_size"] : validated_request_data["page"]
+            (validated_request_data["page"] - 1) * validated_request_data["page_size"] : validated_request_data["page"]
             * validated_request_data["page_size"]
         ]
 
@@ -316,7 +317,7 @@ class CloneReportResource(Resource):
         if not report_qs.exists():
             raise CustomException(f"[report] report id: {validated_request_data['report_id']} not exists.")
         report = report_qs.values()[0]
-        new_name = f'{report["name"]}_clone'
+        new_name = f"{report['name']}_clone"
 
         i = 1
         while Report.objects.filter(name=new_name):
@@ -483,7 +484,7 @@ class SendReportResource(Resource):
         try:
             api.monitor.send_report(**validated_request_data)
         except Exception as e:  # pylint: disable=broad-except
-            logger.exception("send report error:{}".format(e))
+            logger.exception(f"send report error:{e}")
         return "success"
 
 
@@ -504,9 +505,7 @@ class CancelOrResubscribeReportResource(Resource):
                 report_id=validated_request_data["report_id"], channel_name=ChannelEnum.USER.value
             )
         except ReportChannel.DoesNotExist:
-            raise CustomException(
-                f"[report] report id: " f"{validated_request_data['report_id']} user channel not exists."
-            )
+            raise CustomException(f"[report] report id: {validated_request_data['report_id']} user channel not exists.")
 
         for subscriber in channel.subscribers:
             if subscriber["id"] == username and subscriber["type"] == "user":
@@ -543,7 +542,9 @@ class GetApplyRecordsResource(Resource):
 
     class RequestSerializer(serializers.Serializer):
         bk_biz_id = serializers.IntegerField(required=True)
-        query_type = serializers.CharField(required=False, label="查询类型", default=ApplyRecordQueryTypeEnum.USER.value)
+        query_type = serializers.CharField(
+            required=False, label="查询类型", default=ApplyRecordQueryTypeEnum.USER.value
+        )
         status = serializers.ChoiceField(required=False, label="审批状态", choices=ApprovalStatusEnum.get_choices())
 
     def perform_request(self, validated_request_data):

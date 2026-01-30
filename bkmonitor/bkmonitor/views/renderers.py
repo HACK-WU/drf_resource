@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -24,8 +23,8 @@ def is_status_code_ok(code):
 
 
 class PlainTextRenderer(BaseRenderer):
-    media_type = 'text/plain'
-    format = 'txt'
+    media_type = "text/plain"
+    format = "txt"
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         return smart_str(data, encoding=self.charset)
@@ -45,7 +44,7 @@ class UJSONRenderer(BaseRenderer):
 
     def render(self, data, *args, **kwargs):
         if data is None:
-            return bytes()
+            return b""
 
         ret = json.dumps(data, ensure_ascii=self.ensure_ascii, cls=DatetimeEncoder)
 
@@ -57,7 +56,7 @@ class UJSONRenderer(BaseRenderer):
 
 class MonitorJSONRenderer(UJSONRenderer):
     def get_result(self, data, renderer_context=None):
-        from drf_resource.common_errors.exceptions  import CustomException
+        from drf_resource.common_errors.exceptions import CustomException
 
         if hasattr(self, "rendered_content"):
             return self.rendered_content
@@ -106,4 +105,4 @@ class MonitorJSONRenderer(UJSONRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         formatted_data = self.get_result(data, renderer_context)
-        return super(MonitorJSONRenderer, self).render(formatted_data, accepted_media_type, renderer_context)
+        return super().render(formatted_data, accepted_media_type, renderer_context)

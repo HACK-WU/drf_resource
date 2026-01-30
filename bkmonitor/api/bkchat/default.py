@@ -16,7 +16,7 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from api.base import BKAPIResource
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from core.errors.api import BKAPIError
 
 

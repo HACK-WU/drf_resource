@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -15,7 +15,7 @@ from rest_framework.exceptions import ValidationError
 from bkmonitor.action.serializers import ActionConfigDetailSlz
 from bkmonitor.models import ActionConfig, StrategyActionConfigRelation
 from drf_resource import Resource
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from drf_resource.viewsets import ResourceRoute, ResourceViewSet
 
 action_configs = ActionConfig.objects.exclude(plugin_id=ActionConfig.NOTICE_PLUGIN_ID).all()
@@ -148,17 +148,21 @@ class DeleteActionConfigResource(Resource):
         id = serializers.IntegerField(required=True)
 
     def validate_request_data(self, request_data):
-        validate_data = super(DeleteActionConfigResource, self).validate_request_data(request_data)
+        validate_data = super().validate_request_data(request_data)
         try:
             self.instance = action_configs.get(id=validate_data["id"])
         except ActionConfig.DoesNotExist:
             raise CustomException(
-                _("Resource[{}] 请求参数格式错误：{}").format(self.get_resource_name(), _("当前操作的处理套餐不存在，请确认信息是否正确!"))
+                _("Resource[{}] 请求参数格式错误：{}").format(
+                    self.get_resource_name(), _("当前操作的处理套餐不存在，请确认信息是否正确!")
+                )
             )
 
         if StrategyActionConfigRelation.objects.filter(config_id=validate_data["id"]).exists():
             raise CustomException(
-                _("Resource[{}] 请求参数格式错误：{}").format(self.get_resource_name(), _("当前套餐关联了告警策略，无法删除!!"))
+                _("Resource[{}] 请求参数格式错误：{}").format(
+                    self.get_resource_name(), _("当前套餐关联了告警策略，无法删除!!")
+                )
             )
 
     def perform_request(self, params):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +7,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -21,7 +19,7 @@ from common.log import logger
 from constants.data_source import LabelType
 from drf_resource import api, resource
 from drf_resource.contrib.cache import CacheResource
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 
 
 @using_cache(CacheType.DATA(60 * 60))
@@ -40,7 +38,7 @@ def get_desc_by_field(rt_id, field):
         ret = get_key_alias(rt_id).get(field, field)
         return _(ret) if ret else ret
     except Exception as e:
-        logger.warning("获取表字段的中文描述失败" + " rt_id:{} field:{}, except:{}".format(rt_id, field, e))
+        logger.warning("获取表字段的中文描述失败" + f" rt_id:{rt_id} field:{field}, except:{e}")
         return field
 
 

@@ -1,6 +1,6 @@
 import pytest
 
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from metadata.models import ESStorage, Event, EventGroup, ResultTable, TimeSeriesGroup
 from metadata.resources import GetEventGroupResource, QueryTimeSeriesGroupResource
 from metadata.tests.common_utils import any_return_model
@@ -119,5 +119,5 @@ class TestTimeSeriesGroupResource:
             assert response_data["count"] == self.COUNT
             assert len(response_data["info"]) == self.PAGE_SIZE
             # 检查每页第一项的名称是否正确
-            expected_group_name = f'{self.GROUP_NAME_PREFIX}{(page_number - 1) * self.PAGE_SIZE + 1}'
+            expected_group_name = f"{self.GROUP_NAME_PREFIX}{(page_number - 1) * self.PAGE_SIZE + 1}"
             assert response_data["info"][0]["time_series_group_name"] == expected_group_name

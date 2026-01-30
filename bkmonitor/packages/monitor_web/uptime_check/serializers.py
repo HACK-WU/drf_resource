@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import arrow
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -24,7 +24,7 @@ from bkmonitor.views import serializers
 from common.log import logger
 from constants.data_source import DataSourceLabel, DataTypeLabel
 from drf_resource import api, resource
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from core.errors.uptime_check import UptimeCheckProcessError
 from monitor_web.models.uptime_check import (
     UptimeCheckGroup,
@@ -99,7 +99,9 @@ class UptimeCheckNodeSerializer(serializers.ModelSerializer):
                 if task.bk_biz_id != instance.bk_biz_id:
                     other_biz_task.append(_("{}(业务id:{})").format(task.name, task.bk_biz_id))
             if other_biz_task:
-                raise CustomException(_("不能取消公共节点勾选，若要取消，请先删除以下任务的当前节点：%s") % "，".join(other_biz_task))
+                raise CustomException(
+                    _("不能取消公共节点勾选，若要取消，请先删除以下任务的当前节点：%s") % "，".join(other_biz_task)
+                )
         for attr, value in list(validated_data.items()):
             setattr(instance, attr, value)
         instance.save(update=True)
@@ -301,7 +303,7 @@ class UptimeCheckTaskSerializer(UptimeCheckTaskBaseSerializer):
                 task_data = resource.uptime_check.get_recent_task_data({"task_id": obj.id, "type": "available"})
                 return task_data["available"] * 100
             except Exception as e:
-                logger.exception("get available failed: %s" % str(e))
+                logger.exception(f"get available failed: {str(e)}")
                 return 0
         else:
             return None
@@ -318,7 +320,7 @@ class UptimeCheckTaskSerializer(UptimeCheckTaskBaseSerializer):
                 task_data = resource.uptime_check.get_recent_task_data({"task_id": obj.id, "type": "task_duration"})
                 return task_data["task_duration"]
             except Exception as e:
-                logger.exception("get task duration failed:%s" % str(e))
+                logger.exception(f"get task duration failed:{str(e)}")
                 return None
         else:
             return None
@@ -408,7 +410,7 @@ class UptimeCheckGroupSerializer(serializers.ModelSerializer):
     task_id_list = serializers.ListField(required=False, write_only=True)
 
     def validate(self, data):
-        if self.instance is None and 'task_id_list' not in data:
+        if self.instance is None and "task_id_list" not in data:
             raise serializers.ValidationError(_("创建拨测任务组时需必传参数task_id_list"))
         return data
 

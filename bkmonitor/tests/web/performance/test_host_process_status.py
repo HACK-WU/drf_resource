@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,11 +11,11 @@ specific language governing permissions and limitations under the License.
 import pytest
 
 from drf_resource import resource
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from tests.web.performance import mock_cache, mock_cc
 
 
-class TestProcessStatus(object):
+class TestProcessStatus:
     def test_process_status_no_host(self, mocker):
         mock_cache(mocker)
         mock_cc(mocker)

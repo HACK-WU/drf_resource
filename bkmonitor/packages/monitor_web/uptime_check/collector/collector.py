@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,7 +7,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-
 
 import abc
 import json
@@ -21,7 +19,7 @@ from django.utils.translation import gettext as _
 from jinja2 import Template as JTemplate
 
 from drf_resource import resource
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from core.errors.uptime_check import UnknownProtocolError
 from monitor.constants import UptimeCheckProtocol
 from monitor_web.commons.job import JobTaskClient
@@ -29,7 +27,7 @@ from monitor_web.commons.job import JobTaskClient
 logger = logging.getLogger(__name__)
 
 
-class CollectorInstallWay(object):
+class CollectorInstallWay:
     """采集器安装方式"""
 
     BUILD_IN = 0
@@ -71,12 +69,12 @@ class UptimeCheckCollector(six.with_metaclass(abc.ABCMeta, object)):
         """
         for host in task_result["failed"]:
             host["errmsg"] = "[{}] {}: {}".format(self.COLLECTOR_NAME, label, host.get("errmsg", ""))
-        logger.warning("Execute job task failed: result = %s" % json.dumps(task_result))
+        logger.warning(f"Execute job task failed: result = {json.dumps(task_result)}")
         return task_result
 
     # 使用jinjia的原因是为了让配置文件的模板适配节点管理的订阅机制
     def render_script_jinjia(self, directory, name, ctx):
-        with open(os.path.join(pwd, directory, name), "r", encoding="utf-8") as fd:
+        with open(os.path.join(pwd, directory, name), encoding="utf-8") as fd:
             script_tpl = fd.read()
         template = JTemplate(script_tpl)
 

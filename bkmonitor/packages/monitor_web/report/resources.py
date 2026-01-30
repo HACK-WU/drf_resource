@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -13,7 +12,6 @@ import copy
 import datetime
 import logging
 from collections import defaultdict
-from typing import Dict, Tuple
 
 from django.apps import apps
 from django.conf import settings
@@ -37,7 +35,7 @@ from constants.report import GRAPH_ID_REGEX, GroupId, StaffChoice
 from drf_resource import CacheResource, api, resource
 from drf_resource.base import Resource
 from core.cache import CacheType
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from drf_resource.utils.request import get_request
 
 logger = logging.getLogger(__name__)
@@ -142,7 +140,7 @@ class ReportContentResource(Resource):
         )
 
         # 补充图表名称
-        panel_names: Dict[Tuple[int, str], Dict[str, str]] = {}
+        panel_names: dict[tuple[int, str], dict[str, str]] = {}
         for content in ret_data["contents"]:
             content["graph_name"] = []
             for graph in content["graphs"]:
@@ -188,7 +186,7 @@ class ReportCloneResource(Resource):
         if not report_item:
             raise CustomException(f"[mail_report] item id: {validated_request_data['report_item_id']} not exists.")
         report_item = report_item[0]
-        new_mail_title = f'{report_item["mail_title"]}_copy'
+        new_mail_title = f"{report_item['mail_title']}_copy"
 
         # 判断重名
         i = 1
@@ -267,7 +265,7 @@ class GetPanelsByDashboardResource(Resource):
         bk_biz_id = serializers.IntegerField(required=True)
         uid = serializers.CharField(required=True)
 
-    def perform_request(self, params: Dict):
+    def perform_request(self, params: dict):
         return fetch_panel_title_ids(params["bk_biz_id"], params["uid"])
 
 

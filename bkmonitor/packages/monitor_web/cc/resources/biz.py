@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 """
 业务相关（业务，人员，角色，权限）
 """
@@ -21,12 +21,12 @@ from django.utils.translation import gettext as _
 from bkmonitor.utils.common_utils import to_dict
 from core.cache import CacheType, using_cache
 from drf_resource import api
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 
 logger = logging.getLogger(__name__)
 
 
-class Business(object):
+class Business:
     def __init__(self, kwargs=None):
         if kwargs is None:
             kwargs = dict()

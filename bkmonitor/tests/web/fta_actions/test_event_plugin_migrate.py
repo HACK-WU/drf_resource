@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import json
 import os
 from unittest import mock
@@ -18,7 +18,7 @@ from django.test import TestCase
 
 from bkmonitor.event_plugin.serializers import HttpPullPluginInstSerializer
 from bkmonitor.models import EventPluginInstance, EventPluginV2
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from core.errors.event_plugin import PluginIDExistError
 from fta_web.event_plugin.resources import (
     CreateEventPluginInstanceResource,
@@ -332,7 +332,7 @@ def get_multi_cloud_plugin_info():
             {
                 "rules": [
                     {"key": 'headers."user-agent"', "value": ["Google-Alerts"], "method": "eq", "condition": "or"},
-                    {"key": '__http_query_params__.source', "value": ["google"], "method": "eq", "condition": "or"},
+                    {"key": "__http_query_params__.source", "value": ["google"], "method": "eq", "condition": "or"},
                 ],
                 "normalization_config": [
                     {"field": "alert_name", "expr": "incident.policy_name"},
@@ -367,7 +367,7 @@ def get_multi_cloud_plugin_info():
             },
             {
                 "rules": [
-                    {"key": '__http_query_params__.source', "value": ["tencent"], "method": "eq"},
+                    {"key": "__http_query_params__.source", "value": ["tencent"], "method": "eq"},
                 ],
                 "normalization_config": [
                     {"field": "alert_name", "expr": "alarmPolicyInfo.policyName"},

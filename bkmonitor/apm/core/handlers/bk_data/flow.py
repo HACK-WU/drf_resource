@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2022 THL A29 Limited, a Tencent company. All rights reserved.
@@ -8,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import copy
 import json
 import logging
@@ -22,7 +22,7 @@ from apm.core.handlers.bk_data.constants import FlowStatus
 from apm.models import ApmApplication, BkdataFlowConfig
 from bkmonitor.dataflow.auth import check_has_permission
 from drf_resource import api, resource
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from drf_resource.utils.common import count_md5
 from core.errors.api import BKAPIError
 from metadata.models.storage import DataBusStatus
@@ -233,13 +233,13 @@ class ApmFlow:
                             "master": f"{access_conf['mq_config']['cluster_config']['domain_name']}"
                             f":{access_conf['mq_config']['cluster_config']['port']}",
                             "group": f"{access_conf['mq_config']['storage_config']['topic']}_0000",
-                            "topic": access_conf['mq_config']["storage_config"]["topic"],
-                            "tasks": access_conf['mq_config']["storage_config"]["partition"],
-                            "use_sasl": access_conf['mq_config']["cluster_config"]["is_ssl_verify"],
+                            "topic": access_conf["mq_config"]["storage_config"]["topic"],
+                            "tasks": access_conf["mq_config"]["storage_config"]["partition"],
+                            "use_sasl": access_conf["mq_config"]["cluster_config"]["is_ssl_verify"],
                             "security_protocol": "SASL_PLAINTEXT",
                             "sasl_mechanism": "SCRAM-SHA-512",
-                            "user": access_conf['mq_config']["auth_info"]["username"],
-                            "password": access_conf['mq_config']["auth_info"]["password"],
+                            "user": access_conf["mq_config"]["auth_info"]["username"],
+                            "password": access_conf["mq_config"]["auth_info"]["password"],
                         }
                     ],
                 },

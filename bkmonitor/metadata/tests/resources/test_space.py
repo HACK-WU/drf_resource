@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 
 import pytest
@@ -6,7 +5,7 @@ from django.core.cache import cache
 from mockredis import mock_redis_client
 from rest_framework.exceptions import ValidationError
 
-from drf_resource.common_errors.exceptions  import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from drf_resource.utils.local import local
 from metadata import models
 from metadata.models.space import (
@@ -61,13 +60,13 @@ def create_and_delete_space_record():
 @pytest.fixture
 def create_or_delete_records(mocker):
     models.SpaceResource.objects.create(
-        space_type_id=SpaceTypes.BKCI.value, space_id='space1', resource_type=SpaceTypes.BKCC.value, resource_id=1001
+        space_type_id=SpaceTypes.BKCI.value, space_id="space1", resource_type=SpaceTypes.BKCC.value, resource_id=1001
     )
     models.SpaceResource.objects.create(
-        space_type_id=SpaceTypes.BKCI.value, space_id='space2', resource_type=SpaceTypes.BKCC.value, resource_id=1001
+        space_type_id=SpaceTypes.BKCI.value, space_id="space2", resource_type=SpaceTypes.BKCC.value, resource_id=1001
     )
     models.SpaceResource.objects.create(
-        space_type_id=SpaceTypes.BKCI.value, space_id='space3', resource_type=SpaceTypes.BKCC.value, resource_id=1002
+        space_type_id=SpaceTypes.BKCI.value, space_id="space3", resource_type=SpaceTypes.BKCC.value, resource_id=1002
     )
     yield
     models.SpaceResource.objects.all().delete()
@@ -79,7 +78,7 @@ def test_get_biz_related_bkci_spaces_resource(create_or_delete_records):
     测试获取业务关联的bkci空间
     """
     params = dict(space_id=1001)
-    expected = ['space1', 'space2']
+    expected = ["space1", "space2"]
     result = GetBizRelatedBkciSpacesResource().request(params)
     assert len(result) == 2
     assert set(result) == set(expected)
