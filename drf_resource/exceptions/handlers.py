@@ -17,17 +17,21 @@ from rest_framework import status
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
+from drf_resource.response import BaseResponseFormatter
+
 from .base import ResourceException
 from .codes import StandardErrorCodes
 
 logger = logging.getLogger(__name__)
 
 
-class ExceptionResponseFormatter:
+class ExceptionResponseFormatter(BaseResponseFormatter):
     """
     异常响应格式化器
 
-    支持自定义响应格式，默认格式：
+    继承自 BaseResponseFormatter，用于格式化异常响应。
+
+    默认格式：
     {
         "result": false,
         "code": 1000,
@@ -52,7 +56,7 @@ class ExceptionResponseFormatter:
 
     def format(self, exc: Exception, context: dict) -> dict:
         """
-        格式化异常响应
+        格式化异常响应（统一入口）
 
         Args:
             exc: 异常实例
@@ -64,17 +68,93 @@ class ExceptionResponseFormatter:
         if isinstance(exc, ResourceException):
             return exc.to_dict()
 
-        return {
-            "result": False,
-            "code": StandardErrorCodes.INTERNAL_ERROR.code,
-            "message": str(exc),
-            "data": None,
-            "error": {
-                "type": exc.__class__.__name__,
-                "code": StandardErrorCodes.INTERNAL_ERROR.code,
-                "message": str(exc),
-            },
-        }
+        error_code = self._get_error_code(exc)
+        message = self._get_error_message(exc)
+        data = self._get_error_data(exc)
+
+        error_detail = self.build_error_detail(
+            error_type=exc.__class__.__name__,
+            code=error_code,
+            message=message,
+        )
+        return self.format_error(
+            code=error_code,
+            message=message,
+            data=data,
+            error=error_detail,
+        )
+
+    def _get_error_code(self, exc: Exception) -> int:
+        """
+        从异常中获取错误码
+
+        优先级：
+        1. exc.code 属性
+        2. exc.error_code 属性
+        3. 根据异常类型映射（Http404 -> NOT_FOUND, APIException -> VALIDATION_ERROR）
+        4. 默认 INTERNAL_ERROR
+
+        Args:
+            exc: 异常实例
+
+        Returns:
+            错误码
+        """
+        # 优先使用 code 属性
+        if hasattr(exc, "code") and isinstance(exc.code, int):
+            return exc.code
+
+        # 其次使用 error_code 属性
+        if hasattr(exc, "error_code") and isinstance(exc.error_code, int):
+            return exc.error_code
+
+        # 根据异常类型映射错误码
+        if isinstance(exc, Http404):
+            return StandardErrorCodes.NOT_FOUND.code
+
+        if isinstance(exc, APIException):
+            return StandardErrorCodes.VALIDATION_ERROR.code
+
+        # 默认返回内部错误码
+        return StandardErrorCodes.INTERNAL_ERROR.code
+
+    def _get_error_message(self, exc: Exception) -> str:
+        """
+        从异常中获取错误消息
+
+        Args:
+            exc: 异常实例
+
+        Returns:
+            错误消息
+        """
+        if isinstance(exc, Http404):
+            return "Resource not found"
+
+        if isinstance(exc, APIException):
+            return _extract_drf_error_detail(exc.detail)
+
+        return str(exc) if str(exc) else "Internal server error"
+
+    def _get_error_data(self, exc: Exception) -> Any:
+        """
+        从异常中获取附加数据
+
+        Args:
+            exc: 异常实例
+
+        Returns:
+            附加数据，如果没有则返回 None
+        """
+        # 优先使用自定义异常的 data 属性
+        if hasattr(exc, "data"):
+            return exc.data
+
+        # DRF 异常包含 detail 作为附加数据
+        if isinstance(exc, APIException):
+            return exc.detail
+
+        return None
 
 
 # 默认格式化器实例
@@ -152,49 +232,19 @@ def resource_exception_handler(
 
     # 处理 DRF 内置异常
     if isinstance(exc, APIException):
-        detail = _extract_drf_error_detail(exc.detail)
-        result = {
-            "result": False,
-            "code": StandardErrorCodes.VALIDATION_ERROR.code,
-            "message": detail,
-            "data": exc.detail,
-            "error": {
-                "type": exc.__class__.__name__,
-                "code": StandardErrorCodes.VALIDATION_ERROR.code,
-                "message": detail,
-            },
-        }
-        return Response(result, status=exc.status_code)
+        return Response(formatter.format(exc, context), status=exc.status_code)
 
     # 处理 Django 404
     if isinstance(exc, Http404):
-        result = {
-            "result": False,
-            "code": StandardErrorCodes.NOT_FOUND.code,
-            "message": "Resource not found",
-            "data": None,
-            "error": {
-                "type": "NotFoundError",
-                "code": StandardErrorCodes.NOT_FOUND.code,
-                "message": "Resource not found",
-            },
-        }
-        return Response(result, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            formatter.format(exc, context), status=status.HTTP_404_NOT_FOUND
+        )
 
     # 未知异常 - 记录日志并返回 500
     logger.exception("Unhandled exception: %s", exc)
-    result = {
-        "result": False,
-        "code": StandardErrorCodes.INTERNAL_ERROR.code,
-        "message": "Internal server error",
-        "data": None,
-        "error": {
-            "type": exc.__class__.__name__,
-            "code": StandardErrorCodes.INTERNAL_ERROR.code,
-            "message": str(exc),
-        },
-    }
-    return Response(result, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return Response(
+        formatter.format(exc, context), status=status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
 
 
 def get_exception_handler(formatter: ExceptionResponseFormatter | None = None):
