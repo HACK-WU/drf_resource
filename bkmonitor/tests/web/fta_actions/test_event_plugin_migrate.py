@@ -18,7 +18,7 @@ from django.test import TestCase
 
 from bkmonitor.event_plugin.serializers import HttpPullPluginInstSerializer
 from bkmonitor.models import EventPluginInstance, EventPluginV2
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from core.errors.event_plugin import PluginIDExistError
 from fta_web.event_plugin.resources import (
     CreateEventPluginInstanceResource,

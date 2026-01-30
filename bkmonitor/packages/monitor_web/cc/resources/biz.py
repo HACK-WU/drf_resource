@@ -21,7 +21,7 @@ from django.utils.translation import gettext as _
 from bkmonitor.utils.common_utils import to_dict
 from core.cache import CacheType, using_cache
 from drf_resource import api
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 
 logger = logging.getLogger(__name__)
 

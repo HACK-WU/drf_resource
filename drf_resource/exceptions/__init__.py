@@ -11,7 +11,7 @@ DRF-Resource Exceptions Module
 - 国际化支持
 
 Example:
-    from drf_resource.exceptions import (
+    from drf_resource.common_errors.exceptions  import (
         ResourceException,
         NotFoundError,
         ValidationException,

@@ -227,13 +227,13 @@ BKAPIError = APIError
 1. **导入更新**:
    ```python
    # 改造前
-   from drf_resource.errors.api import BKAPIError
+   from drf_resource.common_errors.api import BKAPIError
    
    # 改造后（选项 A - 需要修改）
-   from drf_resource.errors.api import APIError
+   from drf_resource.common_errors.api import APIError
    
    # 改造后（选项 B - 无需修改）
-   from drf_resource.errors.api import BKAPIError  # 仍可用
+   from drf_resource.common_errors.api import BKAPIError  # 仍可用
    ```
 
 2. **错误实例化**:
@@ -883,17 +883,18 @@ def test_api_resource_with_config():
 **测试目标**: 验证错误类正常工作
 
 **测试方法**:
+
 ```python
 # test_error_handling.py
 def test_bkapi_error():
-    from drf_resource.errors.api import BKAPIError, APIError
-    
+    from drf_resource.common_errors.api import BKAPIError, APIError
+
     # 测试 BKAPIError（兼容别名）
     try:
         raise BKAPIError(system_name="test", result={"code": "404", "message": "Not found"})
     except APIError as e:
         print("错误捕获成功:", e.message)
-    
+
     # 测试 APIError
     try:
         raise APIError(system_name="test", result={"code": "404", "message": "Not found"})
@@ -1016,12 +1017,12 @@ DRF_RESOURCE = {
 **解决方案**:
 - 方案 A（推荐）: 使用兼容别名，无需修改代码
   ```python
-  from drf_resource.errors.api import BKAPIError  # 仍可用
+  from drf_resource.common_errors.api import BKAPIError  # 仍可用
   ```
 
 - 方案 B: 更新导入
   ```python
-  from drf_resource.errors.api import APIError
+  from drf_resource.common_errors.api import APIError
   
   # 更新代码中的 BKAPIError 为 APIError
   ```

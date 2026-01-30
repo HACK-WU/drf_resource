@@ -12,7 +12,7 @@ specific language governing permissions and limitations under the License.
 公共错误
 """
 
-from drf_resource.errors import Error
+from drf_resource.common_errors import Error
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy as _lazy
 

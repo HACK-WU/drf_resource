@@ -25,7 +25,7 @@ from bkmonitor.commons.tools import is_ipv6_biz
 from bkmonitor.utils.db.fields import ConfigDataField, JsonField, SymmetricJsonField
 from common.log import logger
 from drf_resource import api, resource
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from core.errors.api import BKAPIError
 from core.errors.uptime_check import DeprecatedFunctionError
 from monitor.constants import UPTIME_CHECK_DB, UptimeCheckProtocol

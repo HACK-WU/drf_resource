@@ -15,7 +15,7 @@ from django.utils.translation import gettext as _
 
 from bkmonitor.share.utils import check_api_permission
 from drf_resource import Resource
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from drf_resource.tools import format_serializer_errors
 from drf_resource.utils.request import get_request
 

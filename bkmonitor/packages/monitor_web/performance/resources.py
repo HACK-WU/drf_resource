@@ -20,7 +20,7 @@ from bkmonitor.views import serializers
 from drf_resource import api, resource
 from drf_resource.base import Resource
 from drf_resource.contrib.cache import CacheResource
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from monitor_web.constants import AGENT_STATUS
 
 

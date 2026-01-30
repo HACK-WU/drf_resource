@@ -15,7 +15,7 @@ limitations under the License.
 
 from django.utils.translation import gettext_lazy as _lazy
 
-from drf_resource.errors import Error, logger
+from drf_resource.common_errors import Error, logger
 
 
 class PermissionDeniedError(Error):

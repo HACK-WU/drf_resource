@@ -13,7 +13,7 @@ from functools import wraps
 
 from celery import shared_task
 from celery.result import AsyncResult
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions import CustomException
 from drf_resource.utils.user import set_local_username
 
 logger = logging.getLogger(__name__)

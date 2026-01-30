@@ -49,7 +49,7 @@ from constants.cmdb import TargetNodeType
 from constants.data_source import DataSourceLabel, DataTypeLabel
 from drf_resource import api, resource
 from drf_resource.base import Resource
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from drf_resource.utils.local import with_client_operator
 from core.errors.api import BKAPIError
 from core.errors.dataapi import EmptyQueryException

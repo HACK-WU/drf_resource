@@ -45,7 +45,7 @@ from constants.new_report import (
 )
 from drf_resource import api, resource
 from drf_resource.base import Resource
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from drf_resource.utils.request import get_request
 
 logger = logging.getLogger(__name__)

@@ -22,7 +22,7 @@ from apm.core.handlers.bk_data.constants import FlowStatus
 from apm.models import ApmApplication, BkdataFlowConfig
 from bkmonitor.dataflow.auth import check_has_permission
 from drf_resource import api, resource
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from drf_resource.utils.common import count_md5
 from core.errors.api import BKAPIError
 from metadata.models.storage import DataBusStatus

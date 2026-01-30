@@ -17,7 +17,7 @@ from apm.constants import DiscoverRuleType
 from bkmonitor.utils.db import JsonField
 from constants.apm import SpanKind
 from core.cache import CacheType, using_cache
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 
 
 class TopoBase(models.Model):

@@ -19,7 +19,7 @@ from six.moves import range
 from bkmonitor.views import serializers
 from drf_resource import api, resource
 from drf_resource.base import Resource
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 
 
 class IPListRequestSerializer(serializers.Serializer):

@@ -37,7 +37,7 @@ from constants.report import GRAPH_ID_REGEX, GroupId, StaffChoice
 from drf_resource import CacheResource, api, resource
 from drf_resource.base import Resource
 from core.cache import CacheType
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from drf_resource.utils.request import get_request
 
 logger = logging.getLogger(__name__)

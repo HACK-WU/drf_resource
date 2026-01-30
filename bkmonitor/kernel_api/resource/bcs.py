@@ -15,7 +15,7 @@ from rest_framework import serializers
 
 from bkmonitor.utils.request import get_request_username
 from drf_resource import Resource, api
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from metadata.models import BCSClusterInfo
 
 logger = logging.getLogger(__name__)

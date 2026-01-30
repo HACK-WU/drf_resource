@@ -23,7 +23,7 @@ from bkmonitor.utils.cipher import RSACipher
 from constants.cmdb import TargetNodeType
 from constants.data_source import DataSourceLabel, DataTypeLabel
 from drf_resource import Resource, api
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from drf_resource.utils.request import get_request
 from core.errors.api import BKAPIError
 from core.errors.collecting import CollectingError

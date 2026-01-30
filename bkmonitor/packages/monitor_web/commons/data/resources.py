@@ -21,7 +21,7 @@ from common.log import logger
 from constants.data_source import LabelType
 from drf_resource import api, resource
 from drf_resource.contrib.cache import CacheResource
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 
 
 @using_cache(CacheType.DATA(60 * 60))

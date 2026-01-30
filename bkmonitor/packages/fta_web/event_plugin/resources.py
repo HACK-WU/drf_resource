@@ -40,7 +40,7 @@ from bkmonitor.utils.serializers import StringSplitListField
 from bkmonitor.utils.template import jinja_render
 from bkmonitor.utils.time_tools import utc2biz_str
 from drf_resource import Resource, api, resource
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from drf_resource.tools import format_serializer_errors
 from core.errors.event_plugin import (
     DataIDNotSetError,

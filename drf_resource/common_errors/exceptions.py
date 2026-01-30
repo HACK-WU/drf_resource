@@ -13,8 +13,8 @@ import logging
 
 from django.http import Http404
 from django.utils.translation import gettext_lazy as _lazy
-from drf_resource.errors import Error, ErrorDetails
-from drf_resource.errors.common import DrfApiError, HTTP404Error, UnknownError
+from drf_resource.common_errors import Error, ErrorDetails
+from drf_resource.common_errors.common import DrfApiError, HTTP404Error, UnknownError
 
 # OpenTelemetry 可选依赖支持
 try:

@@ -16,8 +16,8 @@ import yaml
 from django import urls
 from django.conf import settings
 from drf_resource.contrib.api import APIResource
-from drf_resource.errors.api import BKAPIError
-from drf_resource.errors.common import HTTP404Error
+from drf_resource.common_errors.api import BKAPIError
+from drf_resource.common_errors.common import HTTP404Error
 from drf_resource.utils.request import get_request
 from rest_framework.test import APIRequestFactory
 from yaml.parser import ParserError

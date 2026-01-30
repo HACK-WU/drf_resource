@@ -17,7 +17,7 @@ from django.conf import settings
 from rest_framework import serializers
 
 from drf_resource import Resource, api
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from core.errors.api import BKAPIError
 
 

@@ -44,7 +44,7 @@ from constants.strategy import (
     TargetFieldType,
 )
 from drf_resource import Resource, api, resource
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from drf_resource.management.exceptions import ResourceNotRegistered
 from drf_resource.utils.request import get_request
 from core.errors.strategy import StrategyNotExist

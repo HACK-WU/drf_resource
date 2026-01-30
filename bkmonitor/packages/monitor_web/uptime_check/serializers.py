@@ -24,7 +24,7 @@ from bkmonitor.views import serializers
 from common.log import logger
 from constants.data_source import DataSourceLabel, DataTypeLabel
 from drf_resource import api, resource
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from core.errors.uptime_check import UptimeCheckProcessError
 from monitor_web.models.uptime_check import (
     UptimeCheckGroup,

@@ -20,7 +20,7 @@ from monitor_web.models.uptime_check import UptimeCheckNode
 from monitor_web.uptime_check.constants import RESULT_MSG
 
 from drf_resource import resource
-from drf_resource.exceptions import CustomException  # noqa
+from drf_resource.common_errors.exceptions  import CustomException  # noqa
 
 
 class FilterList(UserList):

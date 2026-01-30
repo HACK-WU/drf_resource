@@ -14,7 +14,7 @@ import pytest
 from django.utils.translation import gettext as _
 from mock import Mock
 
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from monitor_web.models.uptime_check import UptimeCheckTask
 
 

@@ -44,7 +44,7 @@ from constants.apm import (
     TraceWaterFallDisplayKey,
 )
 from drf_resource import Resource, api
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from core.errors.api import BKAPIError
 from core.prometheus.base import OPERATION_REGISTRY
 from core.prometheus.metrics import safe_push_to_gateway

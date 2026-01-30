@@ -14,7 +14,7 @@ import mock
 import pytest
 from influxdb.resultset import ResultSet
 
-from drf_resource.exceptions import CustomException
+from drf_resource.common_errors.exceptions  import CustomException
 from query_api.drivers import influxdb
 from query_api.exceptions import StorageNotSupported
 from query_api.resources import GetTSDataResource

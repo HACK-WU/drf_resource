@@ -15,10 +15,10 @@ DRF-Resource Exceptions 兼容层
 
 Usage:
     # 旧代码（已废弃）
-    from drf_resource.exceptions.compat import Error, APIError
+    from drf_resource.common_errors.exceptions .compat import Error, APIError
 
     # 新代码（推荐）
-    from drf_resource.exceptions import ResourceException, ExternalServiceException
+    from drf_resource.common_errors.exceptions  import ResourceException, ExternalServiceException
 """
 
 import warnings
@@ -106,7 +106,7 @@ def check_deprecated_usage():
     此函数用于辅助迁移，会打印出所有废弃用法的替换建议。
 
     Usage:
-        from drf_resource.exceptions.compat import check_deprecated_usage
+        from drf_resource.common_errors.exceptions .compat import check_deprecated_usage
         check_deprecated_usage()
     """
     deprecation_map = {
@@ -130,7 +130,7 @@ def check_deprecated_usage():
     print("\n导入路径变更:")
     print("  旧: from drf_resource.errors import Error, APIError")
     print(
-        "  新: from drf_resource.exceptions import ResourceException, ExternalServiceException"
+        "  新: from drf_resource.common_errors.exceptions  import ResourceException, ExternalServiceException"
     )
     print("\n" + "=" * 60)
 

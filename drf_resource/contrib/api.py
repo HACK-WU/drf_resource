@@ -38,7 +38,7 @@ from httpflex.formatter import BaseResponseFormatter
 
 from drf_resource.base import Resource
 from drf_resource.contrib.cache import CacheResource
-from drf_resource.errors.api import APIError
+from drf_resource.common_errors.api import APIError
 
 logger = logging.getLogger(__name__)
 
