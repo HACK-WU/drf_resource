@@ -14,7 +14,7 @@ import logging
 from django.db import models
 from django.http.response import HttpResponseBase
 from django.utils.translation import gettext as _
-from drf_resource.common_errors.exceptions import CustomException, record_exception
+from drf_resource.exceptions import ResourceException
 from drf_resource.tasks import run_perform_request
 from drf_resource.tools import (
     format_serializer_errors,
@@ -295,7 +295,7 @@ class Resource(abc.ABC):
                     f"Resource[{self.get_resource_name()}] 请求参数格式错误：%s",
                     format_serializer_errors(request_serializer),
                 )
-                raise CustomException(
+                raise ResourceException(
                     _("Resource[{}] 请求参数格式错误：{}").format(
                         self.get_resource_name(),
                         format_serializer_errors(request_serializer),
@@ -325,7 +325,7 @@ class Resource(abc.ABC):
             self._response_serializer = response_serializer
             is_valid_response = response_serializer.is_valid()
             if not is_valid_response:
-                raise CustomException(
+                raise ResourceException(
                     _("Resource[{}] 返回参数格式错误：{}").format(
                         self.get_resource_name(),
                         format_serializer_errors(response_serializer),
@@ -353,7 +353,7 @@ class Resource(abc.ABC):
                 return validated_response_data
             except Exception as exc:  # pylint: disable=broad-except
                 # Record the exception as an event
-                record_exception(span, exc, out_limit=10)
+                span.record_exception(exc)
 
                 # Set status in case exception was raised
                 span.set_status(
