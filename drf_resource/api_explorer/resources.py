@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from rest_framework import serializers
 
-from drf_resource.base import Resource
+from drf_resource.resources.base import Resource
 from drf_resource.api_explorer.services import APIDiscoveryService, APIInvokeService
 
 

@@ -186,7 +186,7 @@ def preprocess_resource_routes(endpoints, **kwargs):
         # drf-spectacular 未安装，直接返回原始端点
         return endpoints
 
-    from drf_resource.viewsets import ResourceViewSet
+    from drf_resource.views.viewsets import ResourceViewSet
 
     processed = []
     for endpoint_tuple in endpoints:

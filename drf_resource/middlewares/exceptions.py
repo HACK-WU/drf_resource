@@ -68,14 +68,14 @@ class TraceIdMiddleware:
 
     使用示例：
         # 在代码中获取当前 trace_id
-        from drf_resource.common_errors.exceptions .middleware import get_current_trace_id
+        from drf_resource.exceptions import get_current_trace_id
 
         trace_id = get_current_trace_id()
         print(f"Current trace_id: {trace_id}")
 
     跨服务调用示例：
         import requests
-        from drf_resource.common_errors.exceptions .middleware import get_current_trace_id
+        from drf_resource.exceptions import get_current_trace_id
 
         def call_downstream_service():
             trace_id = get_current_trace_id()

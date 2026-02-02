@@ -13,7 +13,7 @@ from functools import wraps
 
 from celery import shared_task
 from celery.result import AsyncResult
-from drf_resource.common_errors.exceptions import CustomException
+from drf_resource.exceptions import ResourceException
 from drf_resource.utils.user import set_local_username
 
 logger = logging.getLogger(__name__)
@@ -70,9 +70,9 @@ def query_task_result(task_id):
             # 任务执行完成，则读取结果数据
             message = None
             data = result.get()
-        except CustomException as e:
-            message = e.message
-            data = e.data
+        except ResourceException as e:
+            message = str(e)
+            data = getattr(e, "data", None)
         except Exception as e:
             logger.exception(f"Caught exception when running async resource task : {e}")
             message = f"{e}"

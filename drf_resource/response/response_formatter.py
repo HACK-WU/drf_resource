@@ -15,7 +15,7 @@ DRF-Resource 响应格式化器
 
 from typing import Any
 
-from drf_resource.response import BaseResponseFormatter
+from drf_resource.response.formatter import BaseResponseFormatter
 
 
 class ResponseFormatter(BaseResponseFormatter):

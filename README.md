@@ -93,7 +93,7 @@ DRF_RESOURCE = {
 
 ```python
 from rest_framework import serializers
-from drf_resource.base import Resource
+from drf_resource.resources.base import Resource
 
 # 定义请求序列化器
 class UserRequestSerializer(serializers.Serializer):
@@ -141,7 +141,7 @@ results = resource.bulk_request([
 
 ```python
 from rest_framework.routers import DefaultRouter
-from drf_resource.viewsets import ResourceViewSet, ResourceRoute
+from drf_resource.views.viewsets import ResourceViewSet, ResourceRoute
 
 # 定义 ViewSet
 class UserViewSet(ResourceViewSet):

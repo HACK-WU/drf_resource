@@ -17,7 +17,7 @@ from importlib import import_module
 
 from django.conf import settings
 
-from drf_resource.base import Resource
+from drf_resource.resources.base import Resource
 from drf_resource.management.exceptions import (
     ResourceModuleConflict,
     ResourceModuleNotRegistered,
@@ -132,7 +132,7 @@ class ResourceShortcut:
         对于每个函数，直接绑定为当前实例的属性。
         此方法在内部使用，主要用于初始化和动态加载资源。
         """
-        from drf_resource.contrib.api import APIResource
+        from drf_resource.resources.api import APIResource
 
         try:
             # 尝试导入指定路径下的模块

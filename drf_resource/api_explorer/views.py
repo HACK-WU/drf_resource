@@ -7,7 +7,7 @@ from drf_resource.api_explorer.resources import (
     InfoResource,
     ModuleListResource,
 )
-from drf_resource.viewsets import ResourceRoute, ResourceViewSet
+from drf_resource.views.viewsets import ResourceViewSet, ResourceRoute
 
 
 class ApiHomeResourceViewSet(ResourceViewSet):

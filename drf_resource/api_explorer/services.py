@@ -4,7 +4,7 @@ from datetime import datetime
 
 from drf_resource.api_explorer.exceptions import ResourceNotFoundError
 from drf_resource.management.root import APIResourceShortcut, api
-from drf_resource.tools import object_to_dict
+from drf_resource.utils.tools import object_to_dict
 
 logger = logging.getLogger(__name__)
 

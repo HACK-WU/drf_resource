@@ -44,6 +44,17 @@ from drf_resource.utils.user import (
     set_request_username,
 )
 
+# Serializer 工具（从 tools.py 移入）
+from drf_resource.utils.tools import (
+    FieldType,
+    get_serializer_fields,
+    field_to_schema,
+    render_schema_structured,
+    get_underscore_viewset_name,
+    format_serializer_errors,
+    object_to_dict,
+)
+
 __all__ = [
     # 用户信息工具
     "get_request_username",
@@ -76,4 +87,12 @@ __all__ = [
     "with_client_operator",
     # 请求工具
     "get_request",
+    # Serializer 工具（从 tools.py 移入）
+    "FieldType",
+    "get_serializer_fields",
+    "field_to_schema",
+    "render_schema_structured",
+    "get_underscore_viewset_name",
+    "format_serializer_errors",
+    "object_to_dict",
 ]

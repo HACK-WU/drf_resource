@@ -12,8 +12,8 @@ from django.core.exceptions import ImproperlyConfigured
 from rest_framework.routers import DefaultRouter
 from rest_framework.viewsets import GenericViewSet
 
-from drf_resource.tools import get_underscore_viewset_name
-from drf_resource.viewsets import ResourceViewSet
+from drf_resource.utils.tools import get_underscore_viewset_name
+from drf_resource.views.viewsets import ResourceViewSet
 
 
 class ResourceRouter(DefaultRouter):

@@ -19,7 +19,7 @@ from typing import Any
 
 from rest_framework.renderers import JSONRenderer
 
-from .base import ResponseFormatter, default_response_formatter
+from .response_formatter import ResponseFormatter, default_response_formatter
 
 
 class ResourceJSONEncoder(json.JSONEncoder):
@@ -243,7 +243,7 @@ def get_renderer(formatter: ResponseFormatter | None = None) -> type:
 
     Example:
         # settings.py
-        from drf_resource.renderers import get_renderer, ResponseFormatter
+        from drf_resource.response import get_renderer, ResponseFormatter
 
         class MyFormatter(ResponseFormatter):
             SUCCESS_MESSAGE = "OK"

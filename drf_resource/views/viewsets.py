@@ -17,7 +17,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 
-from drf_resource.base import Resource
+from drf_resource.resources.base import Resource
 from drf_resource.utils.local import local
 
 """

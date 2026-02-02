@@ -83,7 +83,7 @@ class MockResponseSerializer(Serializer):
 
 def create_mock_resource_class():
     """创建 Mock Resource 类"""
-    from drf_resource.base import Resource
+    from drf_resource.resources.base import Resource
 
     class MockResource(Resource):
         """Mock Resource 类"""
@@ -107,7 +107,7 @@ def create_mock_resource_class():
 
 def create_mock_fail_resource_class():
     """创建 Mock 失败的 Resource 类"""
-    from drf_resource.base import Resource
+    from drf_resource.resources.base import Resource
 
     class MockFailResource(Resource):
         """Mock 失败的 Resource"""

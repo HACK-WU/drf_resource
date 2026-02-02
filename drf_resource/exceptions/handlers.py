@@ -255,7 +255,7 @@ def get_exception_handler(formatter: ExceptionResponseFormatter | None = None):
 
     Example:
         # settings.py
-        from drf_resource.common_errors.exceptions .handlers import get_exception_handler, ExceptionResponseFormatter
+        from drf_resource.exceptions.handlers import get_exception_handler, ExceptionResponseFormatter
 
         class MyFormatter(ExceptionResponseFormatter):
             pass

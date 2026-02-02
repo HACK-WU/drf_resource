@@ -7,3 +7,21 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
+"""
+视图模块
+
+本模块提供了 drf_resource 的视图相关类：
+    - ResourceViewSet: Resource 视图集基类
+    - ResourceRoute: Resource 路由配置
+    - ResourceRouter: Resource 路由器
+"""
+
+from drf_resource.views.viewsets import ResourceViewSet, ResourceRoute
+from drf_resource.views.routers import ResourceRouter
+
+__all__ = [
+    "ResourceViewSet",
+    "ResourceRoute",
+    "ResourceRouter",
+]

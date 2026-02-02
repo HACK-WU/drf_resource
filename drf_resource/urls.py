@@ -2,7 +2,7 @@ from django.urls import path
 from django.http import JsonResponse
 
 from drf_resource.api_explorer.views import ApiHomeResourceViewSet
-from drf_resource.routers import ResourceRouter
+from drf_resource.views.routers import ResourceRouter
 
 # 使用 ResourceRouter 注册 ViewSet
 router = ResourceRouter()

@@ -6,8 +6,8 @@ import pytest
 from unittest.mock import MagicMock
 from rest_framework import serializers
 
-from drf_resource.contrib.api import APIResource, APICacheResource
-from drf_resource.common_errors.api import APIError
+from drf_resource.resources.api import APIResource, APICacheResource
+from drf_resource.exceptions import BKAPIError as APIError
 
 
 # ========== 测试用的具体实现类 ==========
@@ -301,7 +301,7 @@ class TestAPIError:
 
     def test_bk_api_error_alias(self):
         """测试 BKAPIError 别名"""
-        from drf_resource.common_errors.api import BKAPIError
+        from drf_resource.exceptions import BKAPIError
 
         assert BKAPIError is APIError
 

@@ -15,8 +15,8 @@ from django.db import models
 from django.http.response import HttpResponseBase
 from django.utils.translation import gettext as _
 from drf_resource.exceptions import ResourceException
-from drf_resource.tasks import run_perform_request
-from drf_resource.tools import (
+from drf_resource.tasks.celery import run_perform_request
+from drf_resource.utils.tools import (
     format_serializer_errors,
     get_serializer_fields,
     render_schema_structured,

@@ -36,9 +36,9 @@ from httpflex.parser import JSONResponseParser, RawResponseParser
 from httpflex.formatter import BaseResponseFormatter
 
 
-from drf_resource.base import Resource
-from drf_resource.contrib.cache import CacheResource
-from drf_resource.common_errors.api import APIError
+from drf_resource.resources.base import Resource
+from drf_resource.resources.cache import CacheResource
+from drf_resource.exceptions.api import BKAPIError as APIError
 
 logger = logging.getLogger(__name__)
 
@@ -475,7 +475,7 @@ class APICacheResource(APIResource, CacheResource):
         - cache_compress: 是否压缩缓存
 
     使用示例:
-        from drf_resource.cache import CacheTypeItem
+        from drf_resource.resources.cache import CacheTypeItem
 
         class CachedUserAPI(APICacheResource):
             base_url = "https://api.example.com"

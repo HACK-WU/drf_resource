@@ -9,9 +9,10 @@ DRF-Resource Exceptions Module
 - 自动 trace_id 追踪
 - DRF 深度集成
 - 国际化支持
+- OpenTelemetry 集成
 
 Example:
-    from drf_resource.common_errors.exceptions  import (
+    from drf_resource.exceptions import (
         ResourceException,
         NotFoundError,
         ValidationException,
@@ -37,14 +38,14 @@ Example:
 """
 
 # Base - 基础异常类
-from .base import (
+from drf_resource.exceptions.base import (
     ResourceException,
     ExceptionContext,
     ExceptionDetail,
 )
 
 # Error Codes - 错误码系统
-from .codes import (
+from drf_resource.exceptions.codes import (
     ErrorCode,
     ErrorCodeRange,
     ErrorCodeRegistry,
@@ -52,7 +53,7 @@ from .codes import (
 )
 
 # HTTP Exceptions - HTTP 异常
-from .http import (
+from drf_resource.exceptions.http import (
     HTTPException,
     NotFoundError,
     PermissionDeniedError,
@@ -63,7 +64,7 @@ from .http import (
 )
 
 # Validation Exceptions - 验证异常
-from .validation import (
+from drf_resource.exceptions.validation import (
     ValidationException,
     ParameterMissingError,
     ParameterInvalidError,
@@ -72,15 +73,17 @@ from .validation import (
 )
 
 # API Exceptions - 外部服务异常
-from .api import (
+from drf_resource.exceptions.api import (
     ExternalServiceException,
     ServiceTimeoutError,
     ServiceConnectionError,
     ServiceResponseError,
+    BKAPIError,
+    APIError,
 )
 
 # Handlers - DRF 异常处理器
-from .handlers import (
+from drf_resource.exceptions.handlers import (
     resource_exception_handler,
     ExceptionResponseFormatter,
 )
@@ -90,6 +93,15 @@ from drf_resource.middlewares.exceptions import (
     TraceIdMiddleware,
     get_current_trace_id,
     set_current_trace_id,
+)
+
+# OpenTelemetry - 分布式追踪集成（从 contrib 移入）
+from drf_resource.exceptions.opentelemetry import (
+    OPENTELEMETRY_AVAILABLE,
+    is_opentelemetry_available,
+    get_trace_id_from_otel,
+    get_span_id_from_otel,
+    get_trace_context_from_otel,
 )
 
 __all__ = [
@@ -121,6 +133,8 @@ __all__ = [
     "ServiceTimeoutError",
     "ServiceConnectionError",
     "ServiceResponseError",
+    "BKAPIError",
+    "APIError",
     # Handlers - 处理器
     "resource_exception_handler",
     "ExceptionResponseFormatter",
@@ -128,4 +142,10 @@ __all__ = [
     "TraceIdMiddleware",
     "get_current_trace_id",
     "set_current_trace_id",
+    # OpenTelemetry - 分布式追踪
+    "OPENTELEMETRY_AVAILABLE",
+    "is_opentelemetry_available",
+    "get_trace_id_from_otel",
+    "get_span_id_from_otel",
+    "get_trace_context_from_otel",
 ]
