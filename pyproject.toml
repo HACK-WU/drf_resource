@@ -36,16 +36,24 @@ dependencies = [
   "djangorestframework>=3.12",
   "httpflex @ git+https://github.com/HACK-WU/httpflex-py.git@v0.1.1-alpha",
   "requests>=2.25",
-  "six>=1.15",
 ]
 
-optional-dependencies.all = [ "drf-resource[cache,otel]" ]
 optional-dependencies.cache = [ "redis>=4" ]
 optional-dependencies.dev = [ "black>=22", "pytest>=7", "pytest-cov>=3", "pytest-django>=4" ]
 optional-dependencies.otel = [ "opentelemetry-api>=1", "opentelemetry-sdk>=1" ]
 urls.Documentation = "https://drf-resource.readthedocs.io"
 urls.Homepage = "https://github.com/your-org/drf-resource"
 urls.Repository = "https://github.com/your-org/drf-resource.git"
+
+[dependency-groups]
+dev = [
+  "black>=24",
+  "pre-commit>=4.5.1",
+  "pytest>=8",
+  "pytest-cov>=4",
+  "pytest-django>=4.5",
+  "virtualenv==20.29.3",
+]
 
 [tool.setuptools.packages.find]
 include = [ "drf_resource*" ]

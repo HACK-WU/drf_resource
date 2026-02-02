@@ -8,16 +8,12 @@ repos:
           - "@commitlint/config-conventional"
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v5.0.0
     hooks:
       # 检查 merge conflict
       - id: check-merge-conflict
       # 检查 private key
       - id: detect-private-key
-
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
       - id: check-executables-have-shebangs
       - id: check-toml
       - id: check-yaml
@@ -63,7 +59,8 @@ repos:
              tests/.*|
              .*\.json|
              .*\.lock|
-             .*\.min\..*
+             .*\.min\..*|
+             drf_resource/static/.*\.js
           )
         # 添加常见技术术语到忽略列表
         args: ['--ignore-words-list=crate,damon,fo,hist,iff,som,sur,tim']

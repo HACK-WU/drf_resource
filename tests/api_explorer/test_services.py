@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tencent is pleased to support the open source community by making 蓝鲸智云 - 监控平台 (BlueKing - Monitor) available.
 Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -293,7 +292,7 @@ class TestAPIInvokeService:
         )
 
         assert "duration" in result
-        assert isinstance(result["duration"], (int, float))
+        assert isinstance(result["duration"], int | float)
         assert result["duration"] >= 0
 
     def test_invoke_records_timestamp(self, mock_api_module):
