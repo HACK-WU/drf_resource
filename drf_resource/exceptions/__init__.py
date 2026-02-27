@@ -94,8 +94,8 @@ from drf_resource.middlewares.exceptions import (
     set_current_trace_id,
 )
 
-# OpenTelemetry - 分布式追踪集成（从 contrib 移入）
-from drf_resource.exceptions.opentelemetry import (
+# OpenTelemetry - 分布式追踪集成（已移至 utils 模块）
+from drf_resource.utils.opentelemetry import (
     OPENTELEMETRY_AVAILABLE,
     is_opentelemetry_available,
     get_trace_id_from_otel,

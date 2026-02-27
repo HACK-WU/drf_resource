@@ -44,6 +44,15 @@ from drf_resource.utils.user import (
     set_request_username,
 )
 
+# OpenTelemetry - 分布式追踪集成
+from drf_resource.utils.opentelemetry import (
+    OPENTELEMETRY_AVAILABLE,
+    is_opentelemetry_available,
+    get_trace_id_from_otel,
+    get_span_id_from_otel,
+    get_trace_context_from_otel,
+)
+
 # Serializer 工具（从 tools.py 移入）
 from drf_resource.utils.tools import (
     FieldType,
@@ -87,6 +96,12 @@ __all__ = [
     "with_client_operator",
     # 请求工具
     "get_request",
+    # OpenTelemetry - 分布式追踪
+    "OPENTELEMETRY_AVAILABLE",
+    "is_opentelemetry_available",
+    "get_trace_id_from_otel",
+    "get_span_id_from_otel",
+    "get_trace_context_from_otel",
     # Serializer 工具（从 tools.py 移入）
     "FieldType",
     "get_serializer_fields",
