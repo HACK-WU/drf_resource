@@ -78,7 +78,6 @@ from drf_resource.exceptions.api import (
     ServiceTimeoutError,
     ServiceConnectionError,
     ServiceResponseError,
-    BKAPIError,
     APIError,
 )
 
@@ -133,7 +132,6 @@ __all__ = [
     "ServiceTimeoutError",
     "ServiceConnectionError",
     "ServiceResponseError",
-    "BKAPIError",
     "APIError",
     # Handlers - 处理器
     "resource_exception_handler",

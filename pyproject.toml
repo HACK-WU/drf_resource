@@ -31,6 +31,7 @@ classifiers = [
 ]
 
 dependencies = [
+  "arrow>=1.4",
   "celery>=5",
   "django>=3.2",
   "djangorestframework>=3.12",
