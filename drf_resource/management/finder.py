@@ -19,6 +19,7 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 # API 模块目录名，用于区分 API 资源和普通资源
+# todo 支持在drf_resource中配置
 API_DIR = "api"
 
 
