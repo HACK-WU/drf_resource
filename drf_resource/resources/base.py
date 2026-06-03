@@ -24,42 +24,6 @@ from drf_resource.utils.tools import (
 from drf_resource.utils.thread_backend import ThreadPool
 from drf_resource.utils.user import get_request_username
 
-# OpenTelemetry 可选依赖支持
-try:
-    from opentelemetry import trace
-    from opentelemetry.trace.status import Status, StatusCode
-
-    tracer = trace.get_tracer(__name__)
-except ImportError:
-    # No-op 降级实现
-    class _NoOpTracer:
-        def start_as_current_span(self, *args, **kwargs):
-            return self._NoOpSpan()
-
-        class _NoOpSpan:
-            def __enter__(self):
-                return self
-
-            def __exit__(self, *args, **kwargs):
-                pass
-
-            def set_status(self, *args, **kwargs):
-                pass
-
-            def add_event(self, *args, **kwargs):
-                pass
-
-            def record_exception(self, *args, **kwargs):
-                pass
-
-    tracer = _NoOpTracer()
-    import warnings
-
-    warnings.warn(
-        "OpenTelemetry not available, using no-op tracer. "
-        "Install opentelemetry to enable tracing."
-    )
-
 logger = logging.getLogger(__name__)
 
 
@@ -337,32 +301,16 @@ class Resource(abc.ABC):
         """
         执行请求，并对请求数据和返回数据进行数据校验
         """
-        with tracer.start_as_current_span(
-            self.get_resource_name(), record_exception=False
-        ) as span:
-            try:
-                request_data = request_data or kwargs
-                validated_request_data = self.validate_request_data(request_data)
-                response_data = self.perform_request(validated_request_data)
+        request_data = request_data or kwargs
+        validated_request_data = self.validate_request_data(request_data)
+        response_data = self.perform_request(validated_request_data)
 
-                # 如果返回的是 Django 响应对象（HttpResponse、render 等），直接返回，跳过响应数据校验
-                if isinstance(response_data, HttpResponseBase):
-                    return response_data
+        # 如果返回的是 Django 响应对象（HttpResponse、render 等），直接返回，跳过响应数据校验
+        if isinstance(response_data, HttpResponseBase):
+            return response_data
 
-                validated_response_data = self.validate_response_data(response_data)
-                return validated_response_data
-            except Exception as exc:  # pylint: disable=broad-except
-                # Record the exception as an event
-                span.record_exception(exc)
-
-                # Set status in case exception was raised
-                span.set_status(
-                    Status(
-                        status_code=StatusCode.ERROR,
-                        description=f"{type(exc).__name__}: {exc}",
-                    )
-                )
-                raise
+        validated_response_data = self.validate_response_data(response_data)
+        return validated_response_data
 
     def bulk_request(self, request_data_iterable=None, ignore_exceptions=False):
         """

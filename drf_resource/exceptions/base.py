@@ -25,10 +25,8 @@ class ExceptionContext:
     - trace_id: 分布式追踪 ID
 
     获取 trace_id 的优先级：
-    1. OpenTelemetry 当前 span 的 trace_id
-    2. 从请求头 (X-Trace-ID) 读取
-    3. 从线程本地变量读取（通过中间件设置）
-    4. 自动生成 UUID4（兜底方案）
+    1. 从线程本地变量读取（通过中间件设置）
+    2. 自动生成 UUID4（兜底方案）
     """
 
     timestamp: float = field(default_factory=lambda: time.time())
@@ -41,27 +39,13 @@ class ExceptionContext:
 
     def _get_trace_id(self) -> str:
         """获取 trace_id，按优先级尝试多种来源"""
-        # 优先级 1: OpenTelemetry
-        trace_id = self._get_trace_id_from_otel()
-        if trace_id:
-            return trace_id
-
-        # 优先级 2: 线程本地变量
+        # 优先级 1: 线程本地变量
         trace_id = self._get_trace_id_from_thread()
         if trace_id:
             return trace_id
 
-        # 优先级 3: 生成新的 UUID
+        # 优先级 2: 生成新的 UUID
         return str(uuid4())
-
-    def _get_trace_id_from_otel(self) -> str | None:
-        """从 OpenTelemetry 获取 trace_id"""
-        try:
-            from .contrib.opentelemetry import get_trace_id_from_otel
-
-            return get_trace_id_from_otel()
-        except (ImportError, AttributeError):
-            return None
 
     def _get_trace_id_from_thread(self) -> str | None:
         """从线程本地变量获取 trace_id"""

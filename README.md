@@ -32,7 +32,6 @@ DRF Resource 将业务逻辑封装为独立的 **Resource** 单元，每个 Reso
 - **异步任务支持**：集成 Celery，支持异步任务执行
 - **ViewSet 集成**：通过 `ResourceViewSet` 将 Resource 快速暴露为 RESTful API
 - **多平台适配**：通过 adapter 机制支持多版本/多平台的差异化逻辑
-- **OpenTelemetry 支持**：可选的分布式追踪能力
 - **API Explorer**：内置 API 调试界面，方便接口测试
 
 ## 📦 项目来源与致谢
@@ -440,9 +439,6 @@ DRF_RESOURCE = {
     
     # ========== Celery 配置 ==========
     'CELERY_QUEUE': 'celery_resource',      # Celery 队列名
-    
-    # ========== OpenTelemetry 配置 ==========
-    'OPENTELEMETRY_ENABLED': False,         # 是否启用追踪
 }
 ```
 

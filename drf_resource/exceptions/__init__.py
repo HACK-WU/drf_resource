@@ -9,7 +9,6 @@ DRF-Resource Exceptions Module
 - 自动 trace_id 追踪
 - DRF 深度集成
 - 国际化支持
-- OpenTelemetry 集成
 
 Example:
     from drf_resource.exceptions import (
@@ -93,15 +92,6 @@ from drf_resource.middlewares.exceptions import (
     set_current_trace_id,
 )
 
-# OpenTelemetry - 分布式追踪集成（已移至 utils 模块）
-from drf_resource.utils.opentelemetry import (
-    OPENTELEMETRY_AVAILABLE,
-    is_opentelemetry_available,
-    get_trace_id_from_otel,
-    get_span_id_from_otel,
-    get_trace_context_from_otel,
-)
-
 __all__ = [
     # Base - 基础
     "ResourceException",
@@ -138,10 +128,4 @@ __all__ = [
     "TraceIdMiddleware",
     "get_current_trace_id",
     "set_current_trace_id",
-    # OpenTelemetry - 分布式追踪
-    "OPENTELEMETRY_AVAILABLE",
-    "is_opentelemetry_available",
-    "get_trace_id_from_otel",
-    "get_span_id_from_otel",
-    "get_trace_context_from_otel",
 ]

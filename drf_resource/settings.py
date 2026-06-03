@@ -21,8 +21,6 @@ DEFAULT = {
     "HTTP_VERIFY_SSL": True,
     # Celery 配置
     "CELERY_QUEUE": "celery_resource",
-    # OpenTelemetry 配置
-    "OPENTELEMETRY_ENABLED": False,
     # API 文档配置
     "ENABLE_API_DOCS": True,  # 是否启用 API 文档（drf-spectacular）
     "SCHEMA_CACHE_TIMEOUT": 3600,  # Schema 缓存超时时间（秒），默认 1 小时。设为 0 禁用缓存
@@ -49,8 +47,6 @@ IMPORT_STRINGS = [
     "HTTP_VERIFY_SSL",
     # Celery 配置
     "CELERY_QUEUE",
-    # OpenTelemetry 配置
-    "OPENTELEMETRY_ENABLED",
     # API 文档配置
     "ENABLE_API_DOCS",
 ]

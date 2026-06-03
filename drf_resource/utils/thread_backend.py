@@ -17,17 +17,6 @@ from drf_resource.utils.local import local
 
 logger = logging.getLogger(__name__)
 
-# 尝试导入 OpenTelemetry，如果不可用则使用空实现
-try:
-    from opentelemetry.context import attach, get_current
-except ImportError:
-
-    def get_current():
-        return None
-
-    def attach(context):
-        pass
-
 
 @contextmanager
 def ignored(*exceptions, log_exception=True):
@@ -54,7 +43,6 @@ class InheritParentThread(Thread):
     - 线程局部变量（local 对象中的所有属性）
     - 时区设置
     - 语言设置
-    - OpenTelemetry 追踪上下文
     """
 
     def __init__(self, *args, **kwargs):
@@ -71,7 +59,6 @@ class InheritParentThread(Thread):
         # 同步时区/语言
         self.timezone = timezone.get_current_timezone().zone
         self.language = translation.get_language()
-        self.trace_context = get_current()
 
     def sync(self):
         """将父线程数据同步到当前线程"""
@@ -79,8 +66,6 @@ class InheritParentThread(Thread):
             setattr(local, sync_item[0], sync_item[1])
         timezone.activate(self.timezone)
         translation.activate(self.language)
-        with ignored(Exception):
-            attach(self.trace_context)
 
     def unsync(self):
         """
@@ -117,7 +102,7 @@ def run_threads(th_list: list[InheritParentThread]):
     [th.join() for th in th_list]
 
 
-def run_func_with_local(items, tz, lang, func, trace_context, *args, **kwargs):
+def run_func_with_local(items, tz, lang, func, *args, **kwargs):
     """
     在继承父线程上下文的环境中执行函数
 
@@ -125,7 +110,6 @@ def run_func_with_local(items, tz, lang, func, trace_context, *args, **kwargs):
     :param tz: 时区
     :param lang: 语言
     :param func: 待执行函数
-    :param trace_context: OpenTelemetry 追踪上下文
     :param args: 位置参数
     :param kwargs: 关键字参数
     :return: 函数返回值
@@ -137,8 +121,6 @@ def run_func_with_local(items, tz, lang, func, trace_context, *args, **kwargs):
     # 设置时区及语言
     timezone.activate(tz)
     translation.activate(lang)
-    with ignored(Exception):
-        attach(trace_context)
     try:
         data = func(*args, **kwargs)
     except Exception as e:
@@ -172,9 +154,8 @@ class ThreadPool(_ThreadPool):
         """
         tz = timezone.get_current_timezone().zone
         lang = translation.get_language()
-        trace_context = get_current()
         items = [item for item in local]
-        return partial(run_func_with_local, items, tz, lang, func, trace_context)
+        return partial(run_func_with_local, items, tz, lang, func)
 
     def map_ignore_exception(self, func, iterable, return_exception=False):
         """
