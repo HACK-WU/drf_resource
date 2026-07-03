@@ -12,13 +12,14 @@
         "cruft",
         "cookiecutter"
       ],
-      "version": 4,
+      "version": 5,
       "depends_on": [],
       "changelog": [
         "初始创建",
         "2026-07-02 v2: 完成技术设计文档（14章），包含脚手架引擎、四层配置、drf_resource集成、功能开关四大子需求",
         "2026-07-02 v3: 提交设计文档到 git",
-        "2026-07-03 v4: 重构配置架构：default.py 拆分为 13 个功能模块 + overview.py 索引"
+        "2026-07-03 v4: 重构配置架构：default.py 拆分为 13 个功能模块 + overview.py 索引",
+        "2026-07-03 v5: 重构设计文档为父文档+4个子文档结构，新增 role/ 角色配置（web/worker）"
       ],
       "commits": [
         "2ba2a9f",
@@ -27,6 +28,22 @@
       "docs": [
         {
           "path": "design/DESIGN.md",
+          "type": "design"
+        },
+        {
+          "path": "design/S01_engine_DESIGN.md",
+          "type": "design"
+        },
+        {
+          "path": "design/S02_config_DESIGN.md",
+          "type": "design"
+        },
+        {
+          "path": "design/S03_integration_DESIGN.md",
+          "type": "design"
+        },
+        {
+          "path": "design/S04_switches_DESIGN.md",
           "type": "design"
         }
       ],
