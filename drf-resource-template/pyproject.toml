@@ -1,0 +1,19 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=61", "wheel"]
+
+[project]
+name = "drf-resource-template"
+version = "0.1.0"
+description = "Cookiecutter template for drf_resource projects"
+requires-python = ">=3.11"
+
+[dependency-groups]
+dev = [
+    "cookiecutter>=2.6",
+    "pytest>=8",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+console_output_style = "count"

@@ -1,5 +1,7 @@
 """缓存配置"""
+{% if cookiecutter.enable_redis_cache == "yes" %}
 from config.tools.redis import get_redis_cache_config
+{% endif %}
 
 CACHES = {
     "default": {

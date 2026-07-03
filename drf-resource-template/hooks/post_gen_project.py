@@ -59,5 +59,5 @@ if ENABLE_API_DOCS:
 import shutil
 {% if cookiecutter.enable_celery == "no" %}
 # 删除 Celery 相关文件
-shutil.rmtree("{{ cookiecutter.project_name }}/config/celery", ignore_errors=True)
+shutil.rmtree("config/celery", ignore_errors=True)
 {% endif %}
