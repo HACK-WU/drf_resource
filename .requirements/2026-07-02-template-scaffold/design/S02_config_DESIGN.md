@@ -222,25 +222,26 @@ from config.defaults.static_files import *  # noqa
 from config.defaults.session import *  # noqa
 # 7. 日志
 from config.defaults.logging import *  # noqa
-# 8. 环境变量覆盖（必须最后加载，可覆盖前面所有配置）
-from config.defaults.env_override import *  # noqa
 
 {% if cookiecutter.enable_celery == "yes" %}
-# 9. Celery（条件生成）
+# 8. Celery（条件生成）
 from config.defaults.celery import *  # noqa
 {% endif %}
 {% if cookiecutter.enable_cors == "yes" %}
-# 10. CORS（条件生成）
+# 9. CORS（条件生成）
 from config.defaults.cors import *  # noqa
 {% endif %}
 {% if cookiecutter.enable_i18n == "yes" %}
-# 11. 国际化（条件生成）
+# 10. 国际化（条件生成）
 from config.defaults.i18n import *  # noqa
 {% endif %}
 {% if cookiecutter.enable_api_docs == "yes" %}
-# 12. API 文档（条件生成）
+# 11. API 文档（条件生成）
 from config.defaults.api_docs import *  # noqa
 {% endif %}
+
+# 12. 环境变量覆盖（必须最后加载，可覆盖前面所有配置）
+from config.defaults.env_override import *  # noqa
 ```
 
 ---
