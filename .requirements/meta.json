@@ -4,7 +4,7 @@
       "id": "REQ-20260702-001",
       "feature": "drf-resource-template 脚手架模板仓库",
       "created": "2026-07-02",
-      "updated": "2026-07-02",
+      "updated": "2026-07-03",
       "status": "设计中",
       "tags": [
         "scaffold",
@@ -12,15 +12,17 @@
         "cruft",
         "cookiecutter"
       ],
-      "version": 3,
+      "version": 4,
       "depends_on": [],
       "changelog": [
         "初始创建",
         "2026-07-02 v2: 完成技术设计文档（14章），包含脚手架引擎、四层配置、drf_resource集成、功能开关四大子需求",
-        "2026-07-02 v3: 提交设计文档到 git"
+        "2026-07-02 v3: 提交设计文档到 git",
+        "2026-07-03 v4: 重构配置架构：default.py 拆分为 13 个功能模块 + overview.py 索引"
       ],
       "commits": [
-        "2ba2a9f"
+        "2ba2a9f",
+        "5ed6eed"
       ],
       "docs": [
         {
