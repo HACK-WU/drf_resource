@@ -457,7 +457,7 @@ class APIInvokeService:
             error_message = str(e)
             error_code = getattr(e, "code", None)
 
-            # 检查是否是 BKAPIError
+            # 检查是否是 APIError
             if hasattr(e, "result"):
                 result_data = getattr(e, "result", {})
                 if isinstance(result_data, dict):

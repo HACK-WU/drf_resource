@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 from rest_framework import serializers
 
 from drf_resource.resources.api import APIResource, APICacheResource
-from drf_resource.exceptions import BKAPIError as APIError
+from drf_resource.exceptions import APIError
 
 
 # ========== 测试用的具体实现类 ==========
@@ -299,11 +299,16 @@ class TestAPIError:
         assert "500" in error.message
         assert "Internal error" in error.message
 
-    def test_bk_api_error_alias(self):
-        """测试 BKAPIError 别名"""
-        from drf_resource.exceptions import BKAPIError
+    def test_api_error_instantiation(self):
+        """测试 APIError 实例化"""
+        from drf_resource.exceptions import APIError as APIErrorCls
 
-        assert BKAPIError is APIError
+        error = APIErrorCls(
+            system_name="test_system",
+            url="/api/test",
+            result={"code": 500, "message": "Internal error"},
+        )
+        assert "test_system" in str(error)
 
 
 class TestBulkRequest:

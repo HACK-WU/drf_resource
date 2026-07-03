@@ -38,7 +38,7 @@ from httpflex.formatter import BaseResponseFormatter
 
 from drf_resource.resources.base import Resource
 from drf_resource.resources.cache import CacheResource
-from drf_resource.exceptions.api import BKAPIError as APIError
+from drf_resource.exceptions.api import APIError
 
 logger = logging.getLogger(__name__)
 
@@ -505,5 +505,3 @@ class APICacheResource(APIResource, CacheResource):
             self._wrap_request()
 
 
-# 保留别名以兼容旧代码
-BKAPIError = APIError

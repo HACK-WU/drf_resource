@@ -185,3 +185,49 @@ class ServiceResponseError(ExternalServiceException):
         if self._response_body is not None:
             result["error"]["response_body"] = self._response_body
         return result
+
+
+class APIError(ResourceException):
+    """
+    外部 API 调用异常
+
+    用于封装调用外部 HTTP API 时发生的业务逻辑错误。
+    与 ExternalServiceException 不同，此异常专注于 API 响应中的业务错误码。
+
+    Attributes:
+        system_name: 调用方系统名称
+        url: 请求的 API 端点
+        result: 包含 code 和 message 的错误详情
+    """
+
+    default_error_code = StandardErrorCodes.EXTERNAL_API_ERROR
+
+    def __init__(
+        self,
+        system_name: str = "",
+        url: str = "",
+        result: dict | None = None,
+        **kwargs,
+    ):
+        self._system_name = system_name
+        self._url = url
+        self._result = result or {}
+
+        code = self._result.get("code", "")
+        message = self._result.get("message", "")
+        msg = f"API error from '{system_name}' at '{url}': [{code}] {message}"
+
+        super().__init__(message=msg, **kwargs)
+
+    @property
+    def system_name(self) -> str:
+        return self._system_name
+
+    @property
+    def url(self) -> str:
+        return self._url
+
+    @property
+    def result(self) -> dict:
+        return self._result
+

@@ -33,7 +33,7 @@ from drf_resource.resources.cache import (
 from drf_resource.resources.api import (
     APIResource,
     APICacheResource,
-    BKAPIError,
+    APIError,
 )
 
 __all__ = [
@@ -48,5 +48,5 @@ __all__ = [
     "DefaultCacheType",
     "using_cache",
     # 错误类型（向后兼容）
-    "BKAPIError",
+    "APIError",
 ]
