@@ -12,7 +12,7 @@
         "cruft",
         "cookiecutter"
       ],
-      "version": 8,
+      "version": 9,
       "depends_on": [],
       "changelog": [
         "初始创建",
@@ -22,13 +22,15 @@
         "2026-07-03 v5: 重构设计文档为父文档+4个子文档结构，新增 role/ 角色配置（web/worker）",
         "2026-07-03 v6: 提交多文档结构设计",
         "2026-07-03 v7: 补全遗漏配置：celery 包+CRONTAB+mysql辅助+工程文件(manage.py/.env/.gitignore/pre-commit/commitlint)+pyproject.toml完整配置",
-        "2026-07-03 v8: 完成设计评审：4 阻断 + 8 警告 + 5 建议，结论不通过"
+        "2026-07-03 v8: 完成设计评审：4 阻断 + 8 警告 + 5 建议，结论不通过",
+        "2026-07-03 v9: 设计评审通过：15项全修复 + 增量再审新增1项已修复，结论通过"
       ],
       "commits": [
         "2ba2a9f",
         "5ed6eed",
         "e342f17",
-        "7eaef6f"
+        "7eaef6f",
+        "8ff518b"
       ],
       "docs": [
         {
@@ -53,6 +55,10 @@
         },
         {
           "path": "design/design-review.md",
+          "type": "review"
+        },
+        {
+          "path": "design/design-review-incremental.md",
           "type": "review"
         }
       ],
