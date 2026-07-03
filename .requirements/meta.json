@@ -12,13 +12,16 @@
         "cruft",
         "cookiecutter"
       ],
-      "version": 2,
+      "version": 3,
       "depends_on": [],
       "changelog": [
         "初始创建",
-        "2026-07-02 v2: 完成技术设计文档（14章），包含脚手架引擎、四层配置、drf_resource集成、功能开关四大子需求"
+        "2026-07-02 v2: 完成技术设计文档（14章），包含脚手架引擎、四层配置、drf_resource集成、功能开关四大子需求",
+        "2026-07-02 v3: 提交设计文档到 git"
       ],
-      "commits": [],
+      "commits": [
+        "2ba2a9f"
+      ],
       "docs": [
         {
           "path": "design/DESIGN.md",

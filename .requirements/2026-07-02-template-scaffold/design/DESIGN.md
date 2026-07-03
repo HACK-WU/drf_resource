@@ -6,7 +6,7 @@
 |------|------|
 | cruft | 基于 cookiecutter 的增强工具，支持 `create`/`check`/`update`/`diff` 全生命周期管理 |
 | 脚手架模板 | cookiecutter 模板仓库，包含 `cookiecutter.json` + Jinja2 渲染的项目文件 |
-| 四层配置 | settings.py(入口) → config/default.py(默认) → config/{env}.py(环境) → config/tools/(辅助) |
+| 四层配置 | settings.py(入口) → config/overview.py(索引) → config/defaults/功能模块 → config/{env}.py(环境) → config/tools/(辅助) |
 | 功能开关 | 通过 cookiecutter 变量控制模板是否包含某些功能（Celery、Redis、CORS 等） |
 | 条件渲染 | Jinja2 `{% if cookiecutter.enable_xxx %}` 根据变量开关决定是否生成某段代码 |
 | Resource | drf_resource 框架的核心抽象，封装业务逻辑的 `perform_request()` 方法 |
@@ -107,7 +107,21 @@ drf-resource-template/                     # [新增] 独立仓库
     ├── requirements.txt                   # [新增] 依赖锁定
     ├── config/
     │   ├── __init__.py                    # [新增] 基础常量
-    │   ├── default.py                     # [新增] 默认配置（~250行）
+    │   ├── overview.py                    # [新增] 配置概览索引
+    │   ├── defaults/
+    │   │   ├── __init__.py                # [新增] 功能模块汇总导入
+    │   │   ├── apps.py                    # [新增] INSTALLED_APPS + MIDDLEWARE
+    │   │   ├── database.py                # [新增] 数据库配置
+    │   │   ├── cache.py                   # [新增] 缓存配置
+    │   │   ├── rest_framework.py          # [新增] REST Framework 配置
+    │   │   ├── celery.py                  # [新增] Celery 配置（条件生成）
+    │   │   ├── cors.py                    # [新增] CORS 配置（条件生成）
+    │   │   ├── i18n.py                    # [新增] 国际化配置（条件生成）
+    │   │   ├── api_docs.py                # [新增] API 文档配置（条件生成）
+    │   │   ├── static_files.py            # [新增] 静态资源配置
+    │   │   ├── session.py                 # [新增] Session 配置
+    │   │   ├── logging.py                 # [新增] 日志配置
+    │   │   └── env_override.py            # [新增] 环境变量覆盖机制
     │   ├── dev.py                         # [新增] 开发环境
     │   ├── stag.py                        # [新增] 测试环境
     │   ├── prod.py                        # [新增] 生产环境
@@ -133,20 +147,22 @@ drf-resource-template/                     # [新增] 独立仓库
 
 ```mermaid
 flowchart TB
-    Settings["settings.py<br/>入口"]
+    Settings["settings.py<br/>入口 + 聚合"]
+    Overview["config/overview.py<br/>配置索引"]
     Init["config/__init__.py<br/>基础常量"]
-    Default["config/default.py<br/>默认配置"]
+    Defaults["config/defaults/<br/>功能模块"]
     Env["config/{env}.py<br/>环境差异"]
     Tools["config/tools/<br/>辅助函数"]
     EnvVar["环境变量<br/>SETTINGS_ 前缀覆盖"]
     Local["local_settings.py<br/>开发覆盖"]
 
+    Settings --> Overview
     Settings --> Init
-    Init --> Default
-    Default --> Env
-    Default --> Tools
+    Settings --> Defaults
+    Defaults --> Tools
     Env --> EnvVar
     Env --> Local
+    Settings --> Env
 ```
 
 ### 用户使用流程
@@ -271,6 +287,28 @@ for f in ["{{ cookiecutter.project_name }}/celery.py"]:
 
 ## 6. 配置架构设计（S-02）
 
+### 设计原则
+
+原 `config/default.py` 将所有配置混在一个 ~250 行的文件中，难以维护和定位。现拆分为 **按功能域分离的模块**，每个文件职责单一，配合 `overview.py` 概览索引，开发者可快速定位和修改配置。
+
+### 配置文件与功能域的映射关系
+
+| 文件 | 功能域 | 包含的 Django Settings | 条件生成 |
+|------|--------|--------------------------|----------|
+| `overview.py` | 配置索引 | 无（纯文档） | 否 |
+| `apps.py` | Django 核心 | INSTALLED_APPS, MIDDLEWARE, ROOT_URLCONF, TEMPLATES, DEFAULT_AUTO_FIELD | 否 |
+| `database.py` | 数据库 | DATABASES, CONN_MAX_AGE | 否 |
+| `cache.py` | 缓存 | CACHES | 否 |
+| `rest_framework.py` | REST API | REST_FRAMEWORK, DRF_RESOURCE | 否 |
+| `celery.py` | 异步任务 | CELERY_BROKER_URL, CELERY_RESULT_BACKEND 等 | `enable_celery` |
+| `cors.py` | 跨域 | CORS_ALLOW_ALL_ORIGINS, CORS_ALLOW_CREDENTIALS | `enable_cors` |
+| `i18n.py` | 国际化 | LANGUAGE_CODE, USE_I18N, LOCALE_PATHS, LANGUAGES | `enable_i18n` |
+| `api_docs.py` | API 文档 | SPECTACULAR_SETTINGS | `enable_api_docs` |
+| `static_files.py` | 静态资源 | STATIC_URL, STATIC_ROOT, STATICFILES_STORAGE | 否 |
+| `session.py` | Session | SESSION_COOKIE_AGE, SESSION_ENGINE | 否 |
+| `logging.py` | 日志 | LOGGING, LOG_LEVEL | 否 |
+| `env_override.py` | 环境变量覆盖 | SETTING_ENV_PREFIX + 动态注入 | 否 |
+
 ### 6.1 config/__init__.py — 基础常量
 
 ```python
@@ -293,76 +331,114 @@ RUN_MODE = {
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 
-# Celery App（仅启用时导入）
 {% if cookiecutter.enable_celery == "yes" %}
+# Celery App（仅启用时导入）
 from config.celery import app as celery_app
 __all__ = ["celery_app"]
 {% endif %}
 ```
 
-### 6.2 config/tools/environment.py — 环境检测
-
-```python
-"""环境检测工具"""
-import os
-
-__all__ = ["ENVIRONMENT", "RUN_MODE", "IS_CONTAINER_MODE"]
-
-ENVIRONMENT = os.getenv("DJANGO_ENV", "development")
-
-RUN_MODE = {
-    "development": "DEVELOP",
-    "testing": "TEST",
-    "production": "PRODUCT",
-}.get(ENVIRONMENT, "DEVELOP")
-
-# 容器化部署检测
-IS_CONTAINER_MODE = os.getenv("DEPLOY_MODE") == "kubernetes" or os.path.exists("/.dockerenv")
-```
-
-### 6.3 config/tools/redis.py — Redis 配置辅助
-
-```python
-"""Redis 配置辅助"""
-import os
-
-def get_redis_url(db: int = 0) -> str:
-    """从环境变量构建 Redis URL"""
-    host = os.getenv("REDIS_HOST", "localhost")
-    port = os.getenv("REDIS_PORT", "6379")
-    password = os.getenv("REDIS_PASSWORD", "")
-    if password:
-        return f"redis://:{password}@{host}:{port}/{db}"
-    return f"redis://{host}:{port}/{db}"
-
-def get_redis_cache_config() -> dict | None:
-    """构建 Django CACHES 中的 Redis 配置，未配置时返回 None"""
-    host = os.getenv("REDIS_HOST")
-    port = os.getenv("REDIS_PORT")
-    if not host or not port:
-        return None
-    return {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": get_redis_url(1),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
-    }
-```
-
-### 6.4 config/default.py — 默认配置（核心 ~250 行）
-
-这是配置架构的核心，从 bk-monitor 的 1900 行中提炼出通用部分：
+### 6.2 config/overview.py — 配置概览索引
 
 ```python
 """
-默认配置 - 所有环境的公共基础
+配置概览索引
+================
+本文件说明项目中所有配置模块的用途和内容，供开发者快速定位。
+
+配置加载顺序：
+    settings.py → config/defaults/* → config/{env}.py → 环境变量覆盖 → local_settings
+
+配置模块一览：
+    config/defaults/apps.py           - Django 核心（INSTALLED_APPS, MIDDLEWARE, TEMPLATES）
+    config/defaults/database.py       - 数据库配置（DATABASES, CONN_MAX_AGE）
+    config/defaults/cache.py          - 缓存配置（CACHES）
+    config/defaults/rest_framework.py - REST Framework + drf_resource 配置
+    config/defaults/static_files.py   - 静态资源配置（STATIC_URL, STATIC_ROOT）
+    config/defaults/session.py        - Session 配置（SESSION_ENGINE, SESSION_COOKIE_AGE）
+    config/defaults/logging.py        - 日志配置（LOGGING, LOG_LEVEL）
+    config/defaults/env_override.py   - 环境变量自动覆盖机制
+
+条件生成的配置模块（由 cookiecutter 变量控制）：
+    config/defaults/celery.py         - Celery 异步任务（enable_celery）
+    config/defaults/cors.py           - CORS 跨域（enable_cors）
+    config/defaults/i18n.py           - 国际化（enable_i18n）
+    config/defaults/api_docs.py       - API 文档（enable_api_docs）
+
+环境差异配置：
+    config/dev.py                     - 开发环境覆盖
+    config/stag.py                    - 测试环境覆盖
+    config/prod.py                    - 生产环境覆盖
+
+辅助工具：
+    config/tools/environment.py       - 环境检测（ENVIRONMENT, RUN_MODE, IS_CONTAINER_MODE）
+    config/tools/redis.py             - Redis 配置辅助函数
+"""
+```
+
+### 6.3 config/defaults/__init__.py — 功能模块汇总导入
+
+```python
+"""
+功能模块汇总 - 按顺序导入所有配置模块
+加载顺序很重要：apps 必须最先加载，其他模块可能依赖 INSTALLED_APPS
+"""
+
+# 1. Django 核心（必须最先加载）
+from config.defaults.apps import *  # noqa
+
+# 2. 数据库
+from config.defaults.database import *  # noqa
+
+# 3. 缓存
+from config.defaults.cache import *  # noqa
+
+# 4. REST Framework
+from config.defaults.rest_framework import *  # noqa
+
+# 5. 静态资源
+from config.defaults.static_files import *  # noqa
+
+# 6. Session
+from config.defaults.session import *  # noqa
+
+# 7. 日志
+from config.defaults.logging import *  # noqa
+
+# 8. 环境变量覆盖（必须最后加载，确保可覆盖以上所有）
+from config.defaults.env_override import *  # noqa
+
+# ---- 条件生成的功能模块 ----
+
+{% if cookiecutter.enable_celery == "yes" %}
+# Celery 异步任务
+from config.defaults.celery import *  # noqa
+{% endif %}
+
+{% if cookiecutter.enable_cors == "yes" %}
+# CORS 跨域
+from config.defaults.cors import *  # noqa
+{% endif %}
+
+{% if cookiecutter.enable_i18n == "yes" %}
+# 国际化
+from config.defaults.i18n import *  # noqa
+{% endif %}
+
+{% if cookiecutter.enable_api_docs == "yes" %}
+# API 文档
+from config.defaults.api_docs import *  # noqa
+{% endif %}
+```
+
+### 6.4 config/defaults/apps.py — Django 核心
+
+```python
+"""
+Django 核心配置 - INSTALLED_APPS / MIDDLEWARE / TEMPLATES
 """
 import os
-from config import APP_CODE, SECRET_KEY, BASE_DIR, PROJECT_ROOT, ENVIRONMENT
-from config.tools.environment import IS_CONTAINER_MODE
-
-# ============== Django 核心 ==============
+from config import BASE_DIR, PROJECT_ROOT, ENVIRONMENT
 
 DEBUG = ENVIRONMENT == "development"
 ALLOWED_HOSTS = ["*"]
@@ -379,24 +455,34 @@ INSTALLED_APPS = [
     "rest_framework",
     # drf_resource
     "drf_resource",
-    {% if cookiecutter.enable_cors == "yes" %}# CORS
+    {% if cookiecutter.enable_cors == "yes" %}
+    # CORS
     "corsheaders",
-    {% endif %}{% if cookiecutter.enable_celery == "yes" %}# Celery
+    {% endif %}
+    {% if cookiecutter.enable_celery == "yes" %}
+    # Celery
     "django_celery_beat",
     "django_celery_results",
-    {% endif %}{% if cookiecutter.enable_api_docs == "yes" %}# API 文档
+    {% endif %}
+    {% if cookiecutter.enable_api_docs == "yes" %}
+    # API 文档
     "drf_spectacular",
-    {% endif %}# 业务 App
+    {% endif %}
+    # 业务 App
     "{{ cookiecutter.project_name }}.apps.example",
 ]
 
 MIDDLEWARE = [
-    {% if cookiecutter.enable_cors == "yes" %}"corsheaders.middleware.CorsMiddleware",
-    {% endif %}"django.middleware.security.SecurityMiddleware",
+    {% if cookiecutter.enable_cors == "yes" %}
+    "corsheaders.middleware.CorsMiddleware",
+    {% endif %}
+    "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    {% if cookiecutter.enable_i18n == "yes" %}"django.middleware.locale.LocaleMiddleware",
-    {% endif %}"django.middleware.common.CommonMiddleware",
+    {% if cookiecutter.enable_i18n == "yes" %}
+    "django.middleware.locale.LocaleMiddleware",
+    {% endif %}
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -415,13 +501,27 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                {% if cookiecutter.enable_i18n == "yes" %}"django.template.context_processors.i18n",
-                {% endif %}],
+                {% if cookiecutter.enable_i18n == "yes" %}
+                "django.template.context_processors.i18n",
+                {% endif %}
+            ],
         },
     },
 ]
 
-# ============== 数据库 ==============
+# 时区
+USE_TZ = True
+TIME_ZONE = "Asia/Shanghai"
+```
+
+### 6.5 config/defaults/database.py — 数据库
+
+```python
+"""
+数据库配置
+"""
+import os
+from config import APP_CODE, BASE_DIR
 
 {% if cookiecutter.database_backend == "sqlite" %}
 DATABASES = {
@@ -456,8 +556,17 @@ DATABASES = {
 {% endif %}
 
 CONN_MAX_AGE = int(os.getenv("CONN_MAX_AGE", 0))
+```
 
-# ============== 缓存 ==============
+### 6.6 config/defaults/cache.py — 缓存
+
+```python
+"""
+缓存配置
+"""
+{% if cookiecutter.enable_redis_cache == "yes" %}
+from config.tools.redis import get_redis_cache_config
+{% endif %}
 
 CACHES = {
     "default": {
@@ -471,14 +580,19 @@ CACHES = {
 }
 
 {% if cookiecutter.enable_redis_cache == "yes" %}
-from config.tools.redis import get_redis_cache_config
 _redis_cache = get_redis_cache_config()
 if _redis_cache:
     CACHES["redis"] = _redis_cache
     CACHES["default"] = _redis_cache
 {% endif %}
+```
 
-# ============== REST Framework ==============
+### 6.7 config/defaults/rest_framework.py — REST Framework
+
+```python
+"""
+REST Framework + drf_resource 配置
+"""
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": (
@@ -497,16 +611,64 @@ REST_FRAMEWORK = {
     ),
 }
 
-# ============== drf_resource ==============
-
 DRF_RESOURCE = {
     "ENABLE_API_DOCS": {% if cookiecutter.enable_api_docs == "yes" %}True{% else %}False{% endif %},
     "RESOURCE_DATA_COLLECT_ENABLED": False,
     "RESOURCE_DATA_COLLECT_RATIO": 0.1,
 }
+```
 
-{% if cookiecutter.enable_api_docs == "yes" %}
-# ============== API 文档 (drf-spectacular) ==============
+### 6.8 config/defaults/celery.py — Celery（条件生成）
+
+```python
+"""
+Celery 异步任务配置
+仅当 enable_celery=yes 时生成此文件
+"""
+import os
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+CELERY_TASK_ALWAYS_EAGER = False
+CELERYD_CONCURRENCY = int(os.getenv("CELERYD_CONCURRENCY", 2))
+```
+
+### 6.9 config/defaults/cors.py — CORS（条件生成）
+
+```python
+"""
+CORS 跨域配置
+仅当 enable_cors=yes 时生成此文件
+"""
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+```
+
+### 6.10 config/defaults/i18n.py — 国际化（条件生成）
+
+```python
+"""
+国际化配置
+仅当 enable_i18n=yes 时生成此文件
+"""
+import os
+from config import PROJECT_ROOT
+
+LANGUAGE_CODE = "zh-hans"
+USE_I18N = True
+USE_L10N = True
+LOCALE_PATHS = [os.path.join(PROJECT_ROOT, "locale")]
+LANGUAGES = (("en", "English"), ("zh-hans", "简体中文"))
+```
+
+### 6.11 config/defaults/api_docs.py — API 文档（条件生成）
+
+```python
+"""
+API 文档配置（drf-spectacular）
+仅当 enable_api_docs=yes 时生成此文件
+"""
 
 REST_FRAMEWORK["DEFAULT_SCHEMA_CLASS"] = "drf_spectacular.openapi.AutoSchema"
 
@@ -516,60 +678,64 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
-{% endif %}
+```
 
-{% if cookiecutter.enable_cors == "yes" %}
-# ============== CORS ==============
+### 6.12 config/defaults/static_files.py — 静态资源
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
-{% endif %}
-
-{% if cookiecutter.enable_i18n == "yes" %}
-# ============== 国际化 ==============
-
-LANGUAGE_CODE = "zh-hans"
-USE_I18N = True
-USE_L10N = True
-LOCALE_PATHS = [os.path.join(PROJECT_ROOT, "locale")]
-LANGUAGES = (("en", "English"), ("zh-hans", "简体中文"))
-{% endif %}
-
-# ============== 时区 ==============
-
-USE_TZ = True
-TIME_ZONE = "Asia/Shanghai"
-
-# ============== 静态资源 ==============
+```python
+"""
+静态资源配置
+"""
+import os
+from config import PROJECT_ROOT
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(PROJECT_ROOT, "static")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+```
 
-# ============== Session ==============
+### 6.13 config/defaults/session.py — Session
+
+```python
+"""
+Session 配置
+"""
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
+```
 
-# ============== 日志 ==============
+### 6.14 config/defaults/logging.py — 日志
+
+```python
+"""
+自适应日志配置
+- 开发/容器环境：仅 console
+- 生产环境：file + console
+"""
+import os
+from config import APP_CODE, PROJECT_ROOT, ENVIRONMENT
+from config.tools.environment import IS_CONTAINER_MODE
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+_LOG_FORMATTER = {
+    "standard": {
+        "format": "%(asctime)s %(levelname)-8s %(process)-8d %(name)-15s %(message)s",
+        "datefmt": "%Y-%m-%d %H:%M:%S",
+    },
+}
 
 if IS_CONTAINER_MODE or ENVIRONMENT == "development":
     LOGGING = {
         "version": 1,
         "disable_existing_loggers": False,
+        "formatters": _LOG_FORMATTER,
         "handlers": {
             "console": {
                 "class": "logging.StreamHandler",
                 "level": LOG_LEVEL,
                 "formatter": "standard",
-            },
-        },
-        "formatters": {
-            "standard": {
-                "format": "%(asctime)s %(levelname)-8s %(process)-8d %(name)-15s %(message)s",
-                "datefmt": "%Y-%m-%d %H:%M:%S",
             },
         },
         "loggers": {
@@ -578,12 +744,12 @@ if IS_CONTAINER_MODE or ENVIRONMENT == "development":
         },
     }
 else:
-    # 生产环境：file + console
     LOG_PATH = os.getenv("LOG_PATH", os.path.join(PROJECT_ROOT, "logs"))
     os.makedirs(LOG_PATH, exist_ok=True)
     LOGGING = {
         "version": 1,
         "disable_existing_loggers": False,
+        "formatters": _LOG_FORMATTER,
         "handlers": {
             "console": {
                 "class": "logging.StreamHandler",
@@ -598,20 +764,23 @@ else:
                 "encoding": "utf-8",
             },
         },
-        "formatters": {
-            "standard": {
-                "format": "%(asctime)s %(levelname)-8s %(process)-8d %(name)-15s %(message)s",
-                "datefmt": "%Y-%m-%d %H:%M:%S",
-            },
-        },
         "loggers": {
             "": {"level": LOG_LEVEL, "handlers": ["console", "file"]},
             "django": {"level": "WARNING", "handlers": ["console", "file"], "propagate": False},
         },
     }
+```
 
-# ============== 环境变量覆盖 ==============
-# 以 SETTINGS_ 为前缀的环境变量自动注入 Django settings
+### 6.15 config/defaults/env_override.py — 环境变量覆盖
+
+```python
+"""
+环境变量自动覆盖机制
+以 SETTINGS_ 为前缀的环境变量自动注入 Django settings
+例：SETTINGS_DEBUG=true → DEBUG = "true"
+"""
+import os
+
 SETTING_ENV_PREFIX = "SETTINGS_"
 for key, value in os.environ.items():
     upper_key = key.upper()
@@ -620,23 +789,68 @@ for key, value in os.environ.items():
         locals()[settings_key] = value
 ```
 
-### 6.5 config/dev.py — 开发环境
+### 6.16 config/tools/environment.py — 环境检测
+
+```python
+"""环境检测工具"""
+import os
+
+__all__ = ["ENVIRONMENT", "RUN_MODE", "IS_CONTAINER_MODE"]
+
+ENVIRONMENT = os.getenv("DJANGO_ENV", "development")
+
+RUN_MODE = {
+    "development": "DEVELOP",
+    "testing": "TEST",
+    "production": "PRODUCT",
+}.get(ENVIRONMENT, "DEVELOP")
+
+# 容器化部署检测
+IS_CONTAINER_MODE = os.getenv("DEPLOY_MODE") == "kubernetes" or os.path.exists("/.dockerenv")
+```
+
+### 6.17 config/tools/redis.py — Redis 配置辅助
+
+```python
+"""Redis 配置辅助"""
+import os
+
+def get_redis_url(db: int = 0) -> str:
+    """从环境变量构建 Redis URL"""
+    host = os.getenv("REDIS_HOST", "localhost")
+    port = os.getenv("REDIS_PORT", "6379")
+    password = os.getenv("REDIS_PASSWORD", "")
+    if password:
+        return f"redis://:{password}@{host}:{port}/{db}"
+    return f"redis://{host}:{port}/{db}"
+
+def get_redis_cache_config() -> dict | None:
+    """构建 Django CACHES 中的 Redis 配置，未配置时返回 None"""
+    host = os.getenv("REDIS_HOST")
+    port = os.getenv("REDIS_PORT")
+    if not host or not port:
+        return None
+    return {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": get_redis_url(1),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+```
+
+### 6.18 config/dev.py — 开发环境
 
 ```python
 """开发环境配置"""
-from config.default import *  # noqa
+import os
+from config import RUN_MODE
 
 DEBUG = True
 
 # 开发环境使用简化的静态资源路径
 STATIC_URL = "/static/"
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-
-# Celery 使用 Redis 作为 broker
-{% if cookiecutter.enable_celery == "yes" %}
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
-{% endif %}
 
 # local_settings.py 覆盖（个人开发配置，不纳入版本管理）
 if RUN_MODE == "DEVELOP":
@@ -646,31 +860,25 @@ if RUN_MODE == "DEVELOP":
         pass
 ```
 
-### 6.6 config/stag.py & config/prod.py
+### 6.19 config/stag.py & config/prod.py
 
 ```python
 # config/stag.py - 测试环境
 """测试环境配置"""
-from config.default import *  # noqa
 
 DEBUG = False
-
-{% if cookiecutter.enable_celery == "yes" %}
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
-{% endif %}
 ```
 
 ```python
 # config/prod.py - 生产环境
 """生产环境配置"""
-from config.default import *  # noqa
+import os
 
 DEBUG = False
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
-# 生产环境 Session 使用 Redis
 {% if cookiecutter.enable_redis_cache == "yes" %}
+# 生产环境 Session 使用 Redis
 if "redis" in CACHES:
     SESSION_ENGINE = "django.contrib.sessions.backends.cache"
     SESSION_CACHE_ALIAS = "redis"
@@ -683,17 +891,28 @@ CELERYD_CONCURRENCY = os.getenv("CELERYD_CONCURRENCY", 2)
 {% endif %}
 ```
 
-### 6.7 {{cookiecutter.project_name}}/settings.py — 入口
+### 6.20 {{cookiecutter.project_name}}/settings.py — 入口
 
 ```python
 """
 Django settings 入口
-加载顺序：config.default → config.{env} → 环境变量覆盖 → local_settings
+
+加载顺序：
+    1. config/__init__.py        → 基础常量（APP_CODE, SECRET_KEY, ENVIRONMENT）
+    2. config/defaults/          → 功能模块（apps, database, cache, ...）
+    3. config/{env}.py           → 环境差异（dev/stag/prod）
+    4. 环境变量覆盖               → SETTINGS_ 前缀自动注入
+    5. local_settings.py         → 开发环境个人覆盖
 """
 import os
-import sys
 
-# settings 加载顺序
+# 1. 加载基础常量
+from config import *  # noqa
+
+# 2. 加载功能模块
+from config.defaults import *  # noqa
+
+# 3. 加载环境差异配置
 DJANGO_CONF_MODULE = "config.{env}".format(
     env={"development": "dev", "testing": "stag", "production": "prod"}.get(
         os.getenv("DJANGO_ENV", "development")
@@ -709,8 +928,8 @@ for _setting in dir(_module):
     if _setting == _setting.upper():
         locals()[_setting] = getattr(_module, _setting)
 
-# MySQL 兼容处理（Django 4.2+ 对 MySQL 5.7 做了软性不兼容）
 {% if cookiecutter.database_backend == "mysql" %}
+# MySQL 兼容处理（Django 4.2+ 对 MySQL 5.7 做了软性不兼容）
 try:
     import pymysql
     pymysql.install_as_MySQLdb()
@@ -833,12 +1052,12 @@ class ExampleViewSet(ResourceViewSet):
 
 | 功能开关 | 影响的文件 | 条件渲染内容 |
 |---------|-----------|-------------|
-| `enable_celery` | `config/__init__.py`, `default.py`, `dev.py`, `prod.py`, `requirements.txt`, `pyproject.toml` | Celery app 导入、INSTALLED_APPS、broker 配置、celery 依赖 |
-| `enable_redis_cache` | `default.py`, `prod.py`, `requirements.txt` | Redis cache 配置、Session backend 切换、django-redis 依赖 |
-| `enable_cors` | `default.py`, `requirements.txt` | CorsMiddleware、CORS 配置、django-cors-headers 依赖 |
-| `enable_i18n` | `default.py`, `requirements.txt` | LocaleMiddleware、LOCALE_PATHS、LANGUAGES |
-| `enable_api_docs` | `default.py`, `urls.py`, `requirements.txt` | drf-spectacular 配置、schema/docs 端点 |
-| `database_backend` | `default.py`, `settings.py`, `requirements.txt` | 数据库引擎配置、PyMySQL/psycopg2 依赖 |
+| `enable_celery` | `config/__init__.py`, `defaults/__init__.py`, `defaults/celery.py`, `defaults/apps.py`, `requirements.txt`, `pyproject.toml` | Celery app 导入、INSTALLED_APPS、broker 配置、celery 依赖 |
+| `enable_redis_cache` | `defaults/cache.py`, `prod.py`, `requirements.txt` | Redis cache 配置、Session backend 切换、django-redis 依赖 |
+| `enable_cors` | `defaults/__init__.py`, `defaults/cors.py`, `defaults/apps.py`, `requirements.txt` | CorsMiddleware、CORS 配置、django-cors-headers 依赖 |
+| `enable_i18n` | `defaults/__init__.py`, `defaults/i18n.py`, `defaults/apps.py`, `requirements.txt` | LocaleMiddleware、LOCALE_PATHS、LANGUAGES |
+| `enable_api_docs` | `defaults/__init__.py`, `defaults/api_docs.py`, `defaults/rest_framework.py`, `urls.py`, `requirements.txt` | drf-spectacular 配置、schema/docs 端点 |
+| `database_backend` | `defaults/database.py`, `settings.py`, `requirements.txt` | 数据库引擎配置、PyMySQL/psycopg2 依赖 |
 
 ### 8.2 requirements.txt 条件渲染
 
@@ -990,7 +1209,8 @@ dependencies = [
 |------|------|---------|-----------|---------|
 | D-01 | 模板仓库位置 | 独立仓库 | 同仓库 template/ | 独立版本管理，模板可单独 fork |
 | D-02 | 脚手架工具 | cruft | 裸 cookiecutter | cruft 支持 check/update/diff，全生命周期管理 |
-| D-03 | 配置分层 | 四层分离 | 单文件 settings.py | 参考 bk-monitor 成熟模式，环境/角色可独立配置 |
+| D-03 | 配置分层 | 功能模块化分离 | 单文件 settings.py | 每个功能域独立文件，配合 overview.py 索引，可维护性强 |
+| D-03a | 配置拆分粒度 | 按功能域拆分（13个模块） | 单文件 default.py | 默认值混在一个 ~250 行文件中难以维护和定位 |
 | D-04 | 角色分离 | 不纳入模板 | web/api/worker 三角色 | bk-monitor 的角色分离是业务特性，通用模板不需要 |
 | D-05 | 数据库默认 | sqlite | MySQL | 开箱即用，零配置即可 runserver |
 | D-06 | 日志方案 | 自适应（console/file） | 仅 console | 生产环境需要文件日志 |
