@@ -1,9 +1,9 @@
 """REST Framework + drf_resource 配置"""
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
-        "drf_resource.response.renderers.CustomJSONRenderer",
+        "drf_resource.response.renderers.ResourceJSONRenderer",
     ],
-    "DEFAULT_EXCEPTION_HANDLER": "drf_resource.exceptions.handlers.custom_exception_handler",
+    "DEFAULT_EXCEPTION_HANDLER": "drf_resource.exceptions.handlers.resource_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
     ],
