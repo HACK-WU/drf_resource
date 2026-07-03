@@ -33,7 +33,7 @@ bk-resource 的模板仅有 3 个 cookiecutter 变量（app_id, project_name, py
 
 ```text
 # 核心依赖
-Django>={{ cookiecutter.python_version >= "3.13" | ternary("5.0", "4.2") }}
+Django{% if cookiecutter.python_version == "3.13" %}>=5.0{% else %}>=4.2{% endif %}
 djangorestframework>=3.14
 drf-resource>=0.1.0
 whitenoise>=6.0

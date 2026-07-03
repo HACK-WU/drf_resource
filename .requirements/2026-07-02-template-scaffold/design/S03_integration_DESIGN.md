@@ -26,6 +26,9 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_resource.views.routers import ResourceRouter
 from {{ cookiecutter.project_name }}.apps.example.viewsets import ExampleViewSet
+{% if cookiecutter.enable_api_docs == "yes" %}
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+{% endif %}
 
 router = ResourceRouter()
 router.register("example", ExampleViewSet)
@@ -39,10 +42,6 @@ urlpatterns = [
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     {% endif %}
 ]
-
-{% if cookiecutter.enable_api_docs == "yes" %}
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-{% endif %}
 ```
 
 ### 2. 示例 App — apps/example/
@@ -88,9 +87,10 @@ class ExampleResource(Resource):
     ResponseSerializer = ExampleResponseSerializer
 
     def perform_request(self, validated_request_data):
+        # 演示用：返回硬编码数据。实际项目中应从数据库获取。
         name = validated_request_data["name"]
         return {
-            "id": 1,
+            "id": 1,  # 演示值，实际应从数据库自增 ID 获取
             "name": name,
             "message": f"Hello, {name}! This is powered by drf_resource.",
         }
@@ -139,3 +139,14 @@ class ExampleViewSet(ResourceViewSet):
     "message": "success"
 }
 ```
+
+---
+
+## 异常处理
+
+| 场景 | 行为 | 对外暴露 |
+|------|------|---------|
+| Serializer 校验失败（name 为空/超长） | drf_resource 自动捕获 ValidationError，返回 400 + 错误详情 | 是，API 响应 |
+| Resource.perform_request 内部异常 | drf_resource 中间件捕获，返回 500 + 统一错误码 | 是，API 响应 |
+| 未传 name 参数 | RequestSerializer 校验失败，返回 `{"result": false, "code": 400, "message": "name is required"}` | 是，API 响应 |
+| API 文档端点未启用（enable_api_docs=no） | 访问 /api/docs/ 返回 404 | 是，HTTP 状态码 |

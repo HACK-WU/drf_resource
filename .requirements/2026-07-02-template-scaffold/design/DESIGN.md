@@ -108,6 +108,7 @@ drf-resource-template/                     # [新增] 独立仓库
         ├── wsgi.py
         ├── asgi.py
         └── apps/
+            ├── __init__.py
             └── example/                   # [S-03] 示例 App
                 ├── __init__.py
                 ├── resources.py
@@ -183,6 +184,7 @@ flowchart TB
 | D-07 | API 文档 | drf-spectacular | drf-yasg | DRF 官方推荐，OpenAPI 3.0 |
 | D-08 | 环境变量覆盖 | SETTINGS_ 前缀 | django-environ | 零额外依赖 |
 | D-09 | 静态资源 | whitenoise | nginx | 开发/生产统一 |
+| D-10 | config 包位置 | 项目根目录（与 Django 项目包同级） | 嵌入 Django 项目包内 | 与 bk-monitor 一致，settings.py 可直接 `from config import *`；潜在风险：与第三方 config 模块冲突，通过项目根目录在 sys.path 首位缓解 |
 
 ### 待定问题
 

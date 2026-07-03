@@ -87,6 +87,10 @@ import os
 
 PROJECT_NAME = "{{ cookiecutter.project_name }}"
 ENABLE_CELERY = "{{ cookiecutter.enable_celery }}" == "yes"
+ENABLE_REDIS_CACHE = "{{ cookiecutter.enable_redis_cache }}" == "yes"
+ENABLE_CORS = "{{ cookiecutter.enable_cors }}" == "yes"
+ENABLE_I18N = "{{ cookiecutter.enable_i18n }}" == "yes"
+ENABLE_API_DOCS = "{{ cookiecutter.enable_api_docs }}" == "yes"
 
 print(f"""
 ✅ 项目 {PROJECT_NAME} 已生成！
@@ -104,7 +108,7 @@ print(f"""
 3. 安装依赖：
    pip install -r requirements.txt
 
-4. 配置环境变量（可选）：
+4. 配置环境变量：
    cp .env.example .env
    # 编辑 .env 文件配置数据库等
 
@@ -119,13 +123,27 @@ if ENABLE_CELERY:
     print("""
 🔧 Celery 已启用，启动 worker：
    celery -A {{ cookiecutter.project_name }} worker -l info
+   # 启动 beat（定时任务）：
+   celery -A {{ cookiecutter.project_name }} beat -l info
+""")
+
+if ENABLE_REDIS_CACHE:
+    print("""
+📦 Redis 缓存已启用，请确保 Redis 服务可用：
+   redis-server  # 或通过 Docker 启动
+""")
+
+if ENABLE_API_DOCS:
+    print("""
+📚 API 文档已启用：
+   访问 http://localhost:8000/api/docs/ 查看 Swagger UI
 """)
 
 # 清理不需要的文件
+import shutil
 {% if cookiecutter.enable_celery == "no" %}
-for f in ["{{ cookiecutter.project_name }}/celery.py"]:
-    if os.path.exists(f):
-        os.remove(f)
+# 删除 Celery 相关文件
+shutil.rmtree("{{ cookiecutter.project_name }}/config/celery", ignore_errors=True)
 {% endif %}
 ```
 
@@ -167,6 +185,7 @@ if __name__ == "__main__":
 
 ```bash
 # Django
+# DJANGO_ENV: development | testing | production
 DJANGO_ENV=development
 SECRET_KEY=change-me-in-production
 {% if cookiecutter.database_backend == "mysql" %}
@@ -367,11 +386,82 @@ repos:
 # LOG_LEVEL = "DEBUG"
 ```
 
+### 10. README.md — 项目说明文档
+
+文件：[`{{cookiecutter.project_name}}/README.md`](file:///README.md)
+
+pyproject.toml 中引用了 `readme = "README.md"`，必须生成此文件否则 `pip install -e .` 报错。
+
+```markdown
+# {{ cookiecutter.project_name }}
+
+{{ cookiecutter.project_description }}
+
+## 快速开始
+
+### 环境要求
+
+- Python {{ cookiecutter.python_version }}+
+- {% if cookiecutter.database_backend == "mysql" %}MySQL 5.7+{% elif cookiecutter.database_backend == "postgresql" %}PostgreSQL 12+{% else %}无额外依赖（SQLite）{% endif %}
+{% if cookiecutter.enable_redis_cache == "yes" %}- Redis 6.0+{% endif %}
+
+### 安装
+
+```bash
+# 克隆项目
+git clone <your-repo-url>
+cd {{ cookiecutter.project_name }}
+
+# 创建虚拟环境
+python -m venv venv
+source venv/bin/activate
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 配置环境变量
+cp .env.example .env
+# 编辑 .env
+
+# 初始化数据库
+python manage.py migrate
+
+# 启动开发服务器
+python manage.py runserver
+```
+
+访问 http://localhost:8000/api/ 查看 API。
+{% if cookiecutter.enable_api_docs == "yes" %}
+访问 http://localhost:8000/api/docs/ 查看 API 文档。
+{% endif %}
+
+## 项目结构
+
+```
+{{ cookiecutter.project_name }}/
+├── manage.py
+├── config/          # 配置目录
+├── apps/            # 业务 App
+└── tests/           # 测试
+```
+
+## 技术栈
+
+- Django + DRF + drf_resource
+{% if cookiecutter.enable_celery == "yes" %}- Celery（异步任务）
+{% endif %}
+{% if cookiecutter.enable_redis_cache == "yes" %}- Redis（缓存）
+{% endif %}
+```
+
+---
+
 ## 异常处理
 
 | 场景 | 行为 | 对外暴露 |
-|------|------|---------|
+|------|------|--------|
 | cookiecutter 变量校验失败（项目名不合法） | 输出错误信息并 `sys.exit(1)` | 是，控制台输出 |
 | cookiecutter 变量校验失败（保留名称冲突） | 同上 | 是，控制台输出 |
 | cruft update 冲突 | cruft 自带冲突检测，提示手动合并 | 是，控制台输出 |
 | .env 文件不存在 | `dotenv.load_dotenv()` 静默跳过 | 否，使用环境变量 |
+| README.md 不存在 | pyproject.toml 的 `readme` 字段引用它，build 时报错 | 是，构建失败 |
