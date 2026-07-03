@@ -289,6 +289,20 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:63
 CELERY_TASK_ALWAYS_EAGER = False
 CELERYD_CONCURRENCY = int(os.getenv("CELERYD_CONCURRENCY", 2))
 {% endif %}
+
+# 定时任务调度表（参考 bk-monitor 的 DEFAULT_CRONTAB 模式）
+# 格式: (task_module, cron_schedule, run_type)
+# run_type: "global" 全局执行 / "cluster" 分集群执行
+DEFAULT_CRONTAB = [
+    # 示例：
+    # ("{{ cookiecutter.project_name }}.apps.example.tasks.cleanup_expired_data", "*/30 * * * *", "global"),
+]
+
+# 耗时任务单独队列
+LONG_TASK_CRONTAB = []
+
+# 排除特定任务
+EXCLUDE_WORKER_TASKS = []
 ```
 
 ---
@@ -428,3 +442,135 @@ def get_redis_cache_config() -> dict | None:
 | Redis 未配置但 enable_redis_cache=yes | `get_redis_cache_config()` 返回 None，fallback LocMem | 否，静默 |
 | DJANGO_ROLE 设置为不存在的角色 | ImportError: 无法导入角色配置 | 是，控制台 |
 | MySQL 驱动未安装 | try/except 跳过 | 否 |
+
+---
+
+## 补充：config/celery/ 包（条件生成）
+
+仅当 `enable_celery=yes` 时生成。参考 bk-monitor 的 `config/celery/` 包结构。
+
+### config/celery/__init__.py
+
+```python
+"""Celery app 包"""
+```
+
+### config/celery/celery.py — Celery app 初始化
+
+文件：[`{{cookiecutter.project_name}}/config/celery/celery.py`](file:///config/celery/celery.py)
+
+```python
+"""Celery app + autodiscover + signals"""
+import os
+
+from celery import Celery, platforms
+from celery.signals import beat_init, setup_logging
+from django.conf import settings
+from django.db import close_old_connections
+
+# 允许 root 启动 celery
+platforms.C_FORCE_ROOT = True
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "{{ cookiecutter.project_name }}.settings")
+
+app = Celery("{{ cookiecutter.project_name }}")
+
+# 从 config.celery.config 加载配置
+app.config_from_object("config.celery.config:Config")
+
+# 自动发现所有 INSTALLED_APPS 中的 tasks.py
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+
+
+@app.task(bind=True)
+def debug_task(self):
+    """调试任务"""
+    print(f"Request: {self.request!r}")
+
+
+@setup_logging.connect
+def config_loggers(*args, **kwargs):
+    """使用 Django 的 LOGGING 配置 Celery 日志"""
+    from logging.config import dictConfig
+    dictConfig(settings.LOGGING)
+
+
+@beat_init.connect
+def clean_db_connections(sender, **kwargs):
+    """beat 启动时清理旧 DB 连接"""
+    close_old_connections()
+```
+
+**借鉴 bk-monitor 的优化**：
+- `C_FORCE_ROOT = True` — 允许 root 用户启动 Celery
+- `setup_logging` 信号 — 让 Celery 使用 Django 的 LOGGING 配置
+- `beat_init` 信号 — beat 启动时清理 DB 连接，避免连接泄漏
+- `autodiscover_tasks` — 自动发现所有 App 的 tasks.py
+
+### config/celery/config.py — Celery Config 类
+
+文件：[`{{cookiecutter.project_name}}/config/celery/config.py`](file:///config/celery/config.py)
+
+```python
+"""Celery 配置类 + beat_schedule"""
+from celery.schedules import crontab
+from django.conf import settings
+
+
+class Config:
+    """Celery 配置"""
+    broker_url = settings.CELERY_BROKER_URL
+    result_backend = settings.CELERY_RESULT_BACKEND
+
+    # 使用 django_celery_beat 的调度器
+    beat_scheduler = "django_celery_beat.schedulers.DatabaseScheduler"
+
+    # 序列化
+    task_serializer = "json"
+    result_serializer = "json"
+    accept_content = ["json"]
+
+    # 如果是 Web 角色，Celery 任务同步执行（调试用）
+    task_always_eager = settings.DJANGO_ROLE != "worker" if hasattr(settings, "DJANGO_ROLE") else False
+
+    # 时区
+    timezone = "Asia/Shanghai"
+
+    # 定时任务调度（从 DEFAULT_CRONTAB 动态构建）
+    beat_schedule = {}
+    # 用户可在 role/worker.py 的 DEFAULT_CRONTAB 中添加定时任务
+    # 也可在此直接配置 beat_schedule
+```
+
+**与 bk-monitor 的差异**：
+- bk-monitor 使用 `pickle` 序列化，模板默认 `json`（更安全、跨语言兼容）
+- bk-monitor 的 `beat_schedule` 硬编码了 20+ 个监控任务，模板留空供用户填充
+- bk-monitor 使用自定义 `MonitorDatabaseScheduler`，模板使用标准的 `DatabaseScheduler`
+
+---
+
+## 补充：config/tools/mysql.py（条件生成）
+
+仅当 `database_backend=mysql` 时生成。参考 bk-monitor 的多环境变量 fallback 模式。
+
+```python
+"""MySQL 配置辅助 - 多环境变量 fallback"""
+import os
+
+
+def get_mysql_settings() -> tuple:
+    """
+    从环境变量获取 MySQL 连接配置
+    支持多个环境变量名 fallback，适配不同部署环境
+    """
+    name = os.getenv("DB_NAME") or os.getenv("MYSQL_NAME", "{{ cookiecutter.project_name }}")
+    user = os.getenv("DB_USER") or os.getenv("MYSQL_USER", "root")
+    password = os.getenv("DB_PASSWORD") or os.getenv("MYSQL_PASSWORD", "")
+    host = os.getenv("DB_HOST") or os.getenv("MYSQL_HOST", "localhost")
+    port = int(os.getenv("DB_PORT") or os.getenv("MYSQL_PORT", "3306"))
+    return name, host, port, user, password
+```
+
+**借鉴 bk-monitor 的模式**：
+- bk-monitor 的 `mysql.py` 支持多个环境变量名 fallback（`DB_*` / `MYSQL_*` / `BKAPP_*`），适配 PaaS V2/V3
+- 模板精简为 `DB_*` / `MYSQL_*` 两组 fallback，覆盖常见部署场景

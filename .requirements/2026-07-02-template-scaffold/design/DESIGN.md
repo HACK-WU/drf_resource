@@ -60,10 +60,13 @@ drf-resource-template/                     # [新增] 独立仓库
 │   ├── pre_gen_project.py                 # [S-01] 变量校验
 │   └── post_gen_project.py                # [S-01] 生成后引导
 └── {{cookiecutter.project_name}}/
-    ├── manage.py                          # Django 管理入口
-    ├── .env.example                       # 环境变量示例
-    ├── .gitignore
-    ├── pyproject.toml                     # [S-04] PEP-621 条件渲染
+    ├── manage.py                          # [S-01] Django 入口（dotenv + gevent patch）
+    ├── .env.example                       # [S-01] 环境变量模板
+    ├── .gitignore                         # [S-01] Git 忽略规则
+    ├── .pre-commit-config.yaml            # [S-01] Pre-commit hooks
+    ├── .commitlintrc.json                 # [S-01] Conventional commits 规则
+    ├── local_settings.example.py          # [S-01] 开发覆盖模板
+    ├── pyproject.toml                     # [S-04] PEP-621 + ruff/pytest/coverage
     ├── requirements.txt                   # [S-04] 依赖条件渲染
     ├── config/
     │   ├── __init__.py                    # [S-02] 基础常量
@@ -74,7 +77,7 @@ drf-resource-template/                     # [新增] 独立仓库
     │   │   ├── database.py                # [S-02] 数据库
     │   │   ├── cache.py                   # [S-02] 缓存
     │   │   ├── rest_framework.py          # [S-02] REST Framework
-    │   │   ├── celery.py                  # [S-02] Celery（条件生成）
+    │   │   ├── celery.py                  # [S-02] Celery 默认配置（条件生成）
     │   │   ├── cors.py                    # [S-02] CORS（条件生成）
     │   │   ├── i18n.py                    # [S-02] 国际化（条件生成）
     │   │   ├── api_docs.py                # [S-02] API 文档（条件生成）
@@ -82,17 +85,22 @@ drf-resource-template/                     # [新增] 独立仓库
     │   │   ├── session.py                 # [S-02] Session
     │   │   ├── logging.py                 # [S-02] 日志
     │   │   └── env_override.py            # [S-02] 环境变量覆盖
+    │   ├── celery/                        # [S-02] Celery app 包（条件生成）
+    │   │   ├── __init__.py                # [S-02] 包标记
+    │   │   ├── celery.py                  # [S-02] Celery app + autodiscover + signals
+    │   │   └── config.py                  # [S-02] Celery Config 类 + beat_schedule
     │   ├── role/
     │   │   ├── __init__.py                # [S-02] 角色包
     │   │   ├── web.py                     # [S-02] Web 角色配置
-    │   │   └── worker.py                  # [S-02] Worker 角色配置
+    │   │   └── worker.py                  # [S-02] Worker 角色配置 + CRONTAB
     │   ├── dev.py                         # [S-02] 开发环境
     │   ├── stag.py                        # [S-02] 测试环境
     │   ├── prod.py                        # [S-02] 生产环境
     │   └── tools/
     │       ├── __init__.py
     │       ├── environment.py             # [S-02] 环境检测
-    │       └── redis.py                   # [S-02] Redis 配置辅助
+    │       ├── redis.py                   # [S-02] Redis 配置辅助
+    │       └── mysql.py                   # [S-02] MySQL 配置辅助（条件生成）
     └── {{cookiecutter.project_name}}/
         ├── __init__.py
         ├── settings.py                    # [S-02] Django settings 入口

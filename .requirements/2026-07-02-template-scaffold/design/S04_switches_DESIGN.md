@@ -20,12 +20,12 @@ bk-resource 的模板仅有 3 个 cookiecutter 变量（app_id, project_name, py
 
 | 功能开关 | 影响的文件 | 条件渲染内容 |
 |---------|-----------|-------------|
-| `enable_celery` | `config/__init__.py`, `defaults/__init__.py`, `defaults/celery.py`, `defaults/apps.py`, `role/worker.py`, `requirements.txt`, `pyproject.toml` | Celery app 导入、INSTALLED_APPS、broker 配置、celery 依赖 |
-| `enable_redis_cache` | `defaults/cache.py`, `role/web.py`, `requirements.txt` | Redis cache 配置、Session backend 切换、django-redis 依赖 |
-| `enable_cors` | `defaults/__init__.py`, `defaults/cors.py`, `defaults/apps.py`, `requirements.txt` | CorsMiddleware、CORS 配置、django-cors-headers 依赖 |
+| `enable_celery` | `config/__init__.py`, `defaults/__init__.py`, `defaults/celery.py`, `defaults/apps.py`, `role/worker.py`, `config/celery/`（整个包）, `requirements.txt`, `pyproject.toml`, `manage.py`, `.env.example` | Celery app 导入、INSTALLED_APPS、broker 配置、celery 依赖、gevent patch、celery 环境变量 |
+| `enable_redis_cache` | `defaults/cache.py`, `role/web.py`, `.env.example`, `requirements.txt`, `pyproject.toml` | Redis cache 配置、Session backend 切换、Redis 环境变量、django-redis 依赖 |
+| `enable_cors` | `defaults/__init__.py`, `defaults/cors.py`, `defaults/apps.py`, `requirements.txt`, `pyproject.toml` | CorsMiddleware、CORS 配置、django-cors-headers 依赖 |
 | `enable_i18n` | `defaults/__init__.py`, `defaults/i18n.py`, `defaults/apps.py`, `requirements.txt` | LocaleMiddleware、LOCALE_PATHS、LANGUAGES |
-| `enable_api_docs` | `defaults/__init__.py`, `defaults/api_docs.py`, `defaults/rest_framework.py`, `urls.py`, `requirements.txt` | drf-spectacular 配置、schema/docs 端点 |
-| `database_backend` | `defaults/database.py`, `settings.py`, `requirements.txt` | 数据库引擎配置、PyMySQL/psycopg2 依赖 |
+| `enable_api_docs` | `defaults/__init__.py`, `defaults/api_docs.py`, `defaults/rest_framework.py`, `urls.py`, `requirements.txt`, `pyproject.toml` | drf-spectacular 配置、schema/docs 端点、drf-spectacular 依赖 |
+| `database_backend` | `defaults/database.py`, `settings.py`, `config/tools/mysql.py`, `.env.example`, `requirements.txt`, `pyproject.toml` | 数据库引擎配置、PyMySQL/psycopg2 依赖、MySQL 辅助函数、DB 环境变量 |
 
 ### requirements.txt — 条件渲染
 
@@ -68,6 +68,8 @@ drf-spectacular>=0.27
 
 文件：[`{{cookiecutter.project_name}}/pyproject.toml`](file:///pyproject.toml)
 
+参考 drf_resource 和 bk-monitor 的 pyproject.toml，提供完整的 PEP-621 元数据 + ruff/pytest/coverage 配置：
+
 ```toml
 [build-system]
 build-backend = "setuptools.build_meta"
@@ -77,10 +79,25 @@ requires = ["setuptools>=61", "wheel"]
 name = "{{ cookiecutter.project_name }}"
 version = "0.1.0"
 description = "{{ cookiecutter.project_description }}"
+readme = "README.md"
 requires-python = ">={{ cookiecutter.python_version }}"
 {% if cookiecutter.author_name %}
 authors = [{ name = "{{ cookiecutter.author_name }}" }]
 {% endif %}
+license = { text = "MIT" }
+keywords = ["django", "drf", "rest-framework", "drf-resource"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
 dependencies = [
     "Django>=4.2",
     "djangorestframework>=3.14",
@@ -92,8 +109,10 @@ dependencies = [
     {% endif %}
     {% if cookiecutter.enable_celery == "yes" %}"celery>=5.0",
     "django-celery-beat>=2.5",
+    "django-celery-results>=2.5",
     {% endif %}
     {% if cookiecutter.enable_redis_cache == "yes" %}"django-redis>=5.0",
+    "redis>=4.0",
     {% endif %}
     {% if cookiecutter.enable_cors == "yes" %}"django-cors-headers>=4.0",
     {% endif %}
@@ -101,9 +120,90 @@ dependencies = [
     {% endif %}
 ]
 
+[dependency-groups]
+dev = [
+    "pre-commit>=4.0",
+    "ruff>=0.11",
+    "pytest>=8",
+    "pytest-cov>=4",
+    "pytest-django>=4.5",
+    "pytest-mock>=3",
+    "pytest-env>=1.0",
+]
+
+# ── ruff ──────────────────────────────────────
+[tool.ruff]
+line-length = 120
+target-version = "py{{ cookiecutter.python_version | replace('.', '') }}"
+exclude = [
+    ".git",
+    "venv",
+    ".venv",
+    "__pypackages__",
+    ".ruff_cache",
+    "migrations",
+]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "UP"]
+extend-ignore = ["E402"]
+fixable = ["ALL"]
+extend-safe-fixes = ["UP"]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"config/**" = ["F405", "F403"]  # config 模块使用 import * 模式
+
+[tool.ruff.format]
+docstring-code-format = true
+
+# ── pytest ────────────────────────────────────
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "{{ cookiecutter.project_name }}.settings"
+python_files = ["test_*.py", "tests.py"]
+testpaths = ["tests"]
+console_output_style = "count"
+log_level = "ERROR"
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+    "ignore::ResourceWarning",
+]
+env = [
+    "DJANGO_ENV=testing",
+]
+
+# ── coverage ──────────────────────────────────
+[tool.coverage.run]
+omit = [
+    "*/test*",
+    "*/migrations*",
+    "*/__init__.py",
+    "manage.py",
+    "*/settings.py",
+    "*/config/**",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",]
+skip_empty = true
+show_missing = true
 ```
+
+**借鉴 drf_resource 和 bk-monitor 的优化**：
+
+| 配置项 | 来源 | 说明 |
+|--------|------|------|
+| `classifiers` | drf_resource | PyPI 分类标签，标明支持的 Django/Python 版本 |
+| `dependency-groups.dev` | drf_resource + bk-monitor | PEP 735 开发依赖组（pre-commit/ruff/pytest 全家桶） |
+| `[tool.ruff.lint]` | drf_resource + bk-monitor | E4/E7/E9/F/UP 规则集，extend-safe-fixes 启用 UP 自动修复 |
+| `extend-per-file-ignores` | bk-monitor | `config/**` 忽略 F403/F405（import * 模式） |
+| `[tool.coverage.run]` | bk-monitor | 排除测试/migrations/配置文件的覆盖率统计 |
+| `[tool.coverage.report]` | bk-monitor | `skip_empty` 跳过空文件，`show_missing` 显示未覆盖行号 |
+| `filterwarnings` | bk-monitor | warning 转 error，忽略 DeprecationWarning |
+| `env` (pytest) | bk-monitor | 测试环境自动注入 `DJANGO_ENV=testing` |
 
 ### 模板更新策略
 
