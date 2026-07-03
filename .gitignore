@@ -144,3 +144,6 @@ Thumbs.db
 
 # Pre-commit
 .pre-commit-cache/
+
+# Template (独立仓库，不在此仓库追踪)
+drf-resource-template/

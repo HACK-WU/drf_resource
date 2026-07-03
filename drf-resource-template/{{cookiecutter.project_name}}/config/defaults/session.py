@@ -1,7 +1,0 @@
-"""Session 配置"""
-SESSION_COOKIE_AGE = 7 * 24 * 60 * 60  # 7 天
-SESSION_SAVE_EVERY_REQUEST = True
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_ENGINE = "django.contrib.sessions.backends.db"
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = "Lax"
