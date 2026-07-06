@@ -147,3 +147,5 @@ Thumbs.db
 
 # Template (独立仓库，不在此仓库追踪)
 drf-resource-template/
+
+AGENTS.md 
