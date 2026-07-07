@@ -234,6 +234,30 @@ def resource_exception_handler(
     if isinstance(exc, APIException):
         return Response(formatter.format(exc, context), status=exc.status_code)
 
+    # 处理 API Explorer 异常
+    try:
+        from drf_resource.api_explorer.exceptions import APIExplorerException
+
+        if isinstance(exc, APIExplorerException):
+            code_map = {"404": 404, "403": 403, "500": 500}
+            http_status = code_map.get(str(exc.code), 500)
+            return Response(
+                {
+                    "result": False,
+                    "code": http_status,
+                    "message": exc.message,
+                    "data": None,
+                    "error": {
+                        "type": exc.__class__.__name__,
+                        "code": http_status,
+                        "message": exc.message,
+                    },
+                },
+                status=http_status,
+            )
+    except (ImportError, AttributeError):
+        pass
+
     # 处理 Django 404
     if isinstance(exc, Http404):
         return Response(

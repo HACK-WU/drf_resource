@@ -39,17 +39,37 @@ if not settings.configured:
         },
         REST_FRAMEWORK={
             "TEST_REQUEST_DEFAULT_FORMAT": "json",
+            "DEFAULT_RENDERER_CLASSES": [
+                "drf_resource.response.ResourceJSONRenderer",
+            ],
+            "EXCEPTION_HANDLER": "drf_resource.exceptions.handlers.resource_exception_handler",
         },
         CACHES={
             "default": {
                 "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
             }
         },
+        TEMPLATES=[
+            {
+                "BACKEND": "django.template.backends.django.DjangoTemplates",
+                "DIRS": [
+                    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "drf_resource", "templates"),
+                ],
+                "APP_DIRS": True,
+                "OPTIONS": {
+                    "context_processors": [
+                        "django.template.context_processors.debug",
+                        "django.template.context_processors.request",
+                    ],
+                },
+            },
+        ],
         BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
         API_DIR="api",
         PLATFORM="community",
         ROLE="web",
         APP_CODE="test_app",
+        ROOT_URLCONF="tests.api_explorer.urls",
         DRF_RESOURCE={
             "API_EXPLORER_ENABLED": True,
         },

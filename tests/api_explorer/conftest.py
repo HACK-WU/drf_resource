@@ -37,6 +37,10 @@ if not settings.configured:
         },
         REST_FRAMEWORK={
             "TEST_REQUEST_DEFAULT_FORMAT": "json",
+            "DEFAULT_RENDERER_CLASSES": [
+                "drf_resource.response.ResourceJSONRenderer",
+            ],
+            "EXCEPTION_HANDLER": "drf_resource.exceptions.handlers.resource_exception_handler",
         },
         CACHES={
             "default": {

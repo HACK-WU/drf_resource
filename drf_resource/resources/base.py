@@ -15,6 +15,7 @@ from django.db import models
 from django.http.response import HttpResponseBase
 from django.utils.translation import gettext as _
 from drf_resource.exceptions import ResourceException
+from drf_resource.exceptions.codes import StandardErrorCodes
 from drf_resource.tasks.celery import run_perform_request
 from drf_resource.utils.tools import (
     format_serializer_errors,
@@ -263,7 +264,8 @@ class Resource(abc.ABC):
                     _("Resource[{}] 请求参数格式错误：{}").format(
                         self.get_resource_name(),
                         format_serializer_errors(request_serializer),
-                    )
+                    ),
+                    error_code=StandardErrorCodes.VALIDATION_ERROR,
                 )
             return request_serializer.validated_data
 
@@ -293,7 +295,8 @@ class Resource(abc.ABC):
                     _("Resource[{}] 返回参数格式错误：{}").format(
                         self.get_resource_name(),
                         format_serializer_errors(response_serializer),
-                    )
+                    ),
+                    error_code=StandardErrorCodes.VALIDATION_ERROR,
                 )
             return response_serializer.validated_data
 
