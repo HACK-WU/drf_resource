@@ -8,12 +8,18 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 """
 
+from __future__ import annotations
+
 import abc
 import logging
+import types
+from typing import Any, ClassVar
 
 from django.db import models
 from django.http.response import HttpResponseBase
 from django.utils.translation import gettext as _
+from rest_framework.serializers import Serializer
+
 from drf_resource.exceptions import ResourceException
 from drf_resource.exceptions.codes import StandardErrorCodes
 from drf_resource.tasks.celery import run_perform_request
@@ -141,30 +147,32 @@ result = resource.request({'user_id': 123})
 
 
 class Resource(abc.ABC):
-    RequestSerializer = None
-    ResponseSerializer = None
+    # 注意：RequestSerializer 和 ResponseSerializer 会在 __init__ 中通过
+    # _search_serializer_class() 解析为实例属性，因此不使用 ClassVar
+    RequestSerializer: type[Serializer] | None = None
+    ResponseSerializer: type[Serializer] | None = None
 
     # 提供一个serializers模块，在实例化某个Resource时，在该模块内自动查找符合命名
     # 规则的serializers，并进行自动配置
-    serializers_module = None
+    serializers_module: ClassVar[types.ModuleType | None] = None
 
     # 数据是否为对象的列表
-    many_request_data = False
-    many_response_data = False
+    many_request_data: ClassVar[bool] = False
+    many_response_data: ClassVar[bool] = False
 
     # 支持记录请求参数(settings开启：ENABLE_RESOURCE_DATA_COLLECT后，
     # 记录所有`support_data_collect`为True的resource请求)
-    support_data_collect = True
+    support_data_collect: ClassVar[bool] = True
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.RequestSerializer, self.ResponseSerializer = (
             self._search_serializer_class()
         )
-        self.context = kwargs.get("context", kwargs)
-        self._task_manager = None
-        self._current_request = None
+        self.context: dict[str, Any] = kwargs.get("context", kwargs)
+        self._task_manager: Any = None
+        self._current_request: Any = None
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         # thread safe
         tmp_resource = self.__class__()
         from drf_resource.models import ResourceData
@@ -172,7 +180,7 @@ class Resource(abc.ABC):
         return ResourceData.objects.request(tmp_resource, args, kwargs)
 
     @property
-    def request_serializer(self):
+    def request_serializer(self) -> Serializer | None:
         """
         :rtype: serializers.Serializer
         """
@@ -182,7 +190,7 @@ class Resource(abc.ABC):
         return self._request_serializer
 
     @property
-    def response_serializer(self):
+    def response_serializer(self) -> Serializer | None:
         """
         :rtype: serializers.Serializer
         """
@@ -192,18 +200,20 @@ class Resource(abc.ABC):
         return self._response_serializer
 
     @classmethod
-    def get_resource_name(cls):
+    def get_resource_name(cls) -> str:
         return f"{cls.__module__}.{cls.__qualname__}"
 
     @classmethod
-    def _search_serializer_class(cls):
+    def _search_serializer_class(
+        cls,
+    ) -> tuple[type[Serializer] | None, type[Serializer] | None]:
         """
         搜索该Resource对应的两个Serializer
         """
 
         # 若类的内部声明了RequestSerializer和ResponseSerializer，则优先使用
-        request_serializer_class = cls.RequestSerializer
-        response_serializer_class = cls.ResponseSerializer
+        request_serializer_class: type[Serializer] | None = cls.RequestSerializer
+        response_serializer_class: type[Serializer] | None = cls.ResponseSerializer
 
         # 若类中没有声明，则对指定模块进行搜索
         resource_name = cls.get_resource_name()
@@ -224,7 +234,7 @@ class Resource(abc.ABC):
         return request_serializer_class, response_serializer_class
 
     @abc.abstractmethod
-    def perform_request(self, validated_request_data):
+    def perform_request(self, validated_request_data: Any) -> Any:
         """
         此处为Resource的业务逻辑，由子类实现
         将request_data通过一定的逻辑转化为response_data
@@ -234,11 +244,11 @@ class Resource(abc.ABC):
         """
         raise NotImplementedError
 
-    def validate_request_data(self, request_data):
+    def validate_request_data(self, request_data: Any) -> Any:
         """
         校验请求数据
         """
-        self._request_serializer = None
+        self._request_serializer: Serializer | None = None
         if not self.RequestSerializer:
             return request_data
 
@@ -269,11 +279,11 @@ class Resource(abc.ABC):
                 )
             return request_serializer.validated_data
 
-    def validate_response_data(self, response_data):
+    def validate_response_data(self, response_data: Any) -> Any:
         """
         校验返回数据
         """
-        self._response_serializer = None
+        self._response_serializer: Serializer | None = None
         if not self.ResponseSerializer:
             return response_data
 
@@ -300,7 +310,7 @@ class Resource(abc.ABC):
                 )
             return response_serializer.validated_data
 
-    def request(self, request_data=None, **kwargs):
+    def request(self, request_data: Any = None, **kwargs: Any) -> Any:
         """
         执行请求，并对请求数据和返回数据进行数据校验
         """
@@ -315,7 +325,11 @@ class Resource(abc.ABC):
         validated_response_data = self.validate_response_data(response_data)
         return validated_response_data
 
-    def bulk_request(self, request_data_iterable=None, ignore_exceptions=False):
+    def bulk_request(
+        self,
+        request_data_iterable: list[Any] | tuple[Any, ...] | None = None,
+        ignore_exceptions: bool = False,
+    ) -> list[Any]:
         """
         基于多线程的批量并发请求
         """
@@ -330,8 +344,8 @@ class Resource(abc.ABC):
         pool.close()
         pool.join()
 
-        results = []
-        exceptions = []
+        results: list[Any] = []
+        exceptions: list[Exception] = []
         for future in futures:
             try:
                 results.append(future.get())
@@ -348,7 +362,9 @@ class Resource(abc.ABC):
 
         return results
 
-    def update_state(self, state, message=None, data=None):
+    def update_state(
+        self, state: str, message: str | None = None, data: Any = None
+    ) -> None:
         """
         更新执行状态
         """
@@ -364,14 +380,14 @@ class Resource(abc.ABC):
         }
         self._task_manager.update_state(state=state, meta=meta)
 
-    def delay(self, request_data=None, **kwargs):
+    def delay(self, request_data: Any = None, **kwargs: Any) -> dict[str, str]:
         """
         执行celery异步任务
         """
         request_data = request_data or kwargs
         return self.apply_async(request_data)
 
-    def apply_async(self, request_data, **kwargs):
+    def apply_async(self, request_data: Any, **kwargs: Any) -> dict[str, str]:
         """
         执行celery异步任务（高级）
         """
@@ -381,7 +397,7 @@ class Resource(abc.ABC):
         return {"task_id": async_task.id}
 
     @classmethod
-    def generate_doc(cls):
+    def generate_doc(cls) -> dict[str, Any]:
         request_serializer_class, response_serializer_class = (
             cls._search_serializer_class()
         )
