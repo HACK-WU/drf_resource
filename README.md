@@ -71,9 +71,6 @@ INSTALLED_APPS = [
 
 # DRF Resource 配置（可选）
 DRF_RESOURCE = {
-    # 是否启用自动发现
-    'AUTO_DISCOVERY': True,
-    
     # 是否启用资源数据收集
     'RESOURCE_DATA_COLLECT_ENABLED': False,
     
@@ -122,32 +119,43 @@ class UserResource(Resource):
 
 #### 2. 使用 Resource
 
+通过自动发现机制调用（推荐）：
+
 ```python
-# 直接调用
-resource = UserResource()
-result = resource.request({'user_id': 123})
+from drf_resource import resource
+
+# 假设 users/resources.py 中定义了 UserResource
+# 自动发现后通过 resource.模块名.资源名 调用
+result = resource.users.user({'user_id': 123})
 # 返回: {'id': 123, 'username': 'john', 'email': 'john@example.com'}
 
 # 批量请求
-results = resource.bulk_request([
+results = resource.users.user.bulk_request([
     {'user_id': 1},
     {'user_id': 2},
 ])
 # 返回: [{'id': 1, ...}, {'id': 2, ...}]
 ```
 
+> **也可以使用显式导入方式**：
+> ```python
+> from users.resources import UserResource
+> result = UserResource().request({'user_id': 123})
+> ```
+
 #### 3. 暴露为 API
 
 ```python
 from rest_framework.routers import DefaultRouter
 from drf_resource.views.viewsets import ResourceViewSet, ResourceRoute
+from drf_resource import resource
 
 # 定义 ViewSet
 class UserViewSet(ResourceViewSet):
     resource_routes = [
         ResourceRoute(
             method='GET',
-            resource_class=UserResource,
+            resource_class=resource.users.user,
             endpoint='detail',
             pk_field='id',
         )
@@ -295,37 +303,56 @@ result = api.bkdata.query_data(...)
 result = adapter.cc.get_business_list(...)
 ```
 
+> **显式导入同样可用**：除了自动发现，也可以直接导入 Resource 类进行调用：
+>
+> ```python
+> from users.resources import UserResource
+>
+> # 直接调用
+> result = UserResource().request({'user_id': 123})
+>
+> # 在 ViewSet 中使用
+> class UserViewSet(ResourceViewSet):
+>     resource_routes = [
+>         ResourceRoute(method='GET', resource_class=UserResource),
+>     ]
+> ```
+>
+> 自动发现适合需要全局复用的场景；显式导入适合局部使用或需要 IDE 类型提示的场景。
+
 ### ResourceViewSet 路由配置
 
 #### 标准方法
 
 ```python
+from drf_resource import resource
+
 class UserViewSet(ResourceViewSet):
     resource_routes = [
         # GET /api/users/ (列表)
-        ResourceRoute(method='GET', resource_class=UserListResource),
+        ResourceRoute(method='GET', resource_class=resource.users.user_list),
         
         # POST /api/users/ (创建)
-        ResourceRoute(method='POST', resource_class=UserCreateResource),
+        ResourceRoute(method='POST', resource_class=resource.users.user_create),
         
         # GET /api/users/{id}/ (详情)
         ResourceRoute(
             method='GET',
-            resource_class=UserDetailResource,
+            resource_class=resource.users.user_detail,
             pk_field='id'
         ),
         
         # PUT /api/users/{id}/ (更新)
         ResourceRoute(
             method='PUT',
-            resource_class=UserUpdateResource,
+            resource_class=resource.users.user_update,
             pk_field='id'
         ),
         
         # DELETE /api/users/{id}/ (删除)
         ResourceRoute(
             method='DELETE',
-            resource_class=UserDeleteResource,
+            resource_class=resource.users.user_delete,
             pk_field='id'
         ),
     ]
@@ -334,17 +361,19 @@ class UserViewSet(ResourceViewSet):
 #### 自定义端点
 
 ```python
+from drf_resource import resource
+
 class UserViewSet(ResourceViewSet):
     resource_routes = [
         ResourceRoute(
             method='GET',
-            resource_class=UserProfileResource,
+            resource_class=resource.users.user_profile,
             endpoint='profile',  # 自定义端点
             pk_field='id',      # 详情路由
         ),
         ResourceRoute(
             method='POST',
-            resource_class=UserLoginResource,
+            resource_class=resource.users.user_login,
             endpoint='login',   # 列表路由
         ),
     ]
@@ -357,9 +386,11 @@ class UserViewSet(ResourceViewSet):
 #### 分页支持
 
 ```python
+from drf_resource import resource
+
 ResourceRoute(
     method='GET',
-    resource_class=UserListResource,
+    resource_class=resource.users.user_list,
     enable_paginate=True,  # 启用分页
 )
 ```
@@ -368,10 +399,11 @@ ResourceRoute(
 
 ```python
 from django.views.decorators.cache import cache_control
+from drf_resource import resource
 
 ResourceRoute(
     method='GET',
-    resource_class=UserListResource,
+    resource_class=resource.users.user_list,
     decorators=[cache_control(max_age=300)],  # 应用装饰器
 )
 ```
@@ -381,12 +413,14 @@ ResourceRoute(
 使用 Celery 执行异步任务：
 
 ```python
+from drf_resource import resource
+
 # 发起异步任务
-result = UserResource().delay({'user_id': 123})
+result = resource.users.user.delay({'user_id': 123})
 # 返回: {'task_id': 'xxx-xxx-xxx'}
 
 # 高级用法
-result = UserResource().apply_async(
+result = resource.users.user.apply_async(
     {'user_id': 123},
     countdown=60,  # 60 秒后执行
     expires=300,   # 300 秒后过期
@@ -396,17 +430,17 @@ result = UserResource().apply_async(
 ### 批量请求
 
 ```python
-resource = UserResource()
+from drf_resource import resource
 
 # 批量请求（并发执行）
-results = resource.bulk_request([
+results = resource.users.user.bulk_request([
     {'user_id': 1},
     {'user_id': 2},
     {'user_id': 3},
 ])
 
 # 忽略异常
-results = resource.bulk_request(
+results = resource.users.user.bulk_request(
     [{'user_id': i} for i in range(1, 101)],
     ignore_exceptions=True
 )
@@ -418,9 +452,6 @@ results = resource.bulk_request(
 
 ```python
 DRF_RESOURCE = {
-    # ========== 自动发现配置 ==========
-    'AUTO_DISCOVERY': True,  # 是否启用自动发现
-    
     # ========== 资源数据收集 ==========
     'RESOURCE_DATA_COLLECT_ENABLED': False,  # 是否启用数据收集
     'RESOURCE_DATA_COLLECT_RATIO': 0.1,     # 采样比例
@@ -499,10 +530,12 @@ class UserAllInfoResource(Resource):
 在 ViewSet 中复用相同的 Resource：
 
 ```python
+from drf_resource import resource
+
 class UserViewSet(ResourceViewSet):
     resource_routes = [
-        ResourceRoute(method='GET', resource_class=UserDetailResource, pk_field='id'),
-        ResourceRoute(method='GET', resource_class=UserDetailResource, endpoint='info', pk_field='id'),
+        ResourceRoute(method='GET', resource_class=resource.users.user_detail, pk_field='id'),
+        ResourceRoute(method='GET', resource_class=resource.users.user_detail, endpoint='info', pk_field='id'),
     ]
 ```
 
@@ -531,13 +564,133 @@ class UserResource(Resource):
         return user
 ```
 
-## 📖 API Explorer
+## 📖 接口文档与 API Explorer
 
-drf_resource 内置了 API Explorer，提供可视化的 API 调试界面。
+drf_resource 提供了两种 API 相关功能，用途不同：
 
-### 启用 API Explorer
+### 功能对比
 
-在 `settings.py` 中添加：
+| 功能 | 用途 | 调试对象 | 访问路径 |
+|------|------|---------|----------|
+| **接口文档** | 查看、调试本项目 API | 本项目的 RESTful API | `/docs/` |
+| **API Explorer** | 调试第三方 HTTP API | 外部服务的 HTTP 接口 | `/api_explorer/` |
+
+### 接口文档配置
+
+接口文档基于 OpenAPI 规范，提供 Swagger UI 和 ReDoc 两种文档界面，支持标签过滤和缓存优化。
+
+#### 1. 安装依赖
+
+```bash
+pip install drf-spectacular
+```
+
+#### 2. 配置 settings.py
+
+```python
+INSTALLED_APPS = [
+    # ...
+    'drf_resource',
+    'drf_resource.contrib',  # drf-spectacular 扩展
+    'drf_spectacular',
+]
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Your Project API',
+    'VERSION': '1.0.0',
+    'DESCRIPTION': '项目接口文档',
+    # 其他配置...
+}
+```
+
+#### 3. 配置 urls.py
+
+框架已封装所有文档路由，只需一行 `include` 即可完成配置：
+
+```python
+from django.urls import path, re_path, include
+from drf_resource.api_explorer.views import ApiHomeResourceViewSet
+from drf_resource.views.routers import ResourceRouter
+
+# 注册 API Explorer ViewSet（用于第三方 API 调试）
+_api_explorer_router = ResourceRouter()
+_api_explorer_router.register("", ApiHomeResourceViewSet, basename="api-home")
+
+urlpatterns = [
+    # 本项目接口文档（一行导入所有文档路由）
+    path("", include("drf_resource.contrib.urls")),
+
+    # 第三方 API Explorer
+    re_path(
+        r"^api_explorer/",
+        include((_api_explorer_router.urls, "api_explorer"), namespace="api_explorer"),
+    ),
+]
+```
+
+`drf_resource.contrib.urls` 自动注册以下路由（命名空间 `drf_resource_docs`）：
+
+| 路由路径 | 视图 | 说明 |
+|----------|------|------|
+| `schema/` | `FilterableSpectacularAPIView` | OpenAPI Schema（支持标签过滤和缓存） |
+| `docs/` | `ApiDocsView` | API 文档首页 |
+| `docs/swagger/` | `FilterableSwaggerView` | Swagger UI（支持标签过滤） |
+| `docs/tags/` | `ApiTagsView` | API 标签统计接口 |
+| `docs/clear-cache/` | 内置视图 | 清除 Schema 缓存（本地开发用） |
+| `redoc/` | `FilterableSpectacularRedocView` | ReDoc 文档（支持缓存和标签过滤） |
+
+> **路径冲突？** 如果 `docs/`、`schema/` 等路径与项目中已有路由冲突，
+> 可以通过 `include` 时指定前缀来避免：
+> ```python
+> path("api/", include("drf_resource.contrib.urls"))
+> ```
+> 所有文档路由将变为 `/api/docs/`、`/api/schema/` 等。
+>
+> **URL 反转** 使用命名空间避免冲突：
+> ```python
+> from django.urls import reverse
+> schema_url = reverse("drf_resource_docs:schema")
+> ```
+>
+> **未安装 drf-spectacular？** 文档路由将返回友好的安装提示（HTTP 501），
+> 不会影响项目正常运行。
+
+#### 4. 访问接口文档
+
+- **文档首页**: `/docs/` - 统一的 API 文档入口
+- **Swagger UI**: `/docs/swagger/` - 交互式 API 调试界面
+- **ReDoc**: `/redoc/` - 精美的 API 文档界面
+- **OpenAPI Schema**: `/schema/` - 原始 OpenAPI JSON/YAML
+- **标签统计**: `/docs/tags/` - API 标签分类统计
+- **清除缓存**: `/docs/clear-cache/` - 开发调试时清除 schema 缓存
+
+#### 5. 标签过滤
+
+接口文档支持按标签过滤，方便按业务模块查看 API：
+
+```bash
+# 只查看 users 相关 API
+/docs/swagger/?tags=users
+
+# 查看 users 和 orders 相关 API
+/docs/swagger/?tags=users,orders
+
+# 路径前缀过滤
+/schema/?tags=apm&prefix=/api/v1
+
+# 强制刷新缓存
+/schema/?refresh=1
+```
+
+### API Explorer 配置
+
+API Explorer 用于调试**第三方 HTTP API**，不是本项目的 API。适用于需要调用外部服务接口的场景。
+
+#### 1. 配置 settings.py
 
 ```python
 INSTALLED_APPS = [
@@ -546,18 +699,21 @@ INSTALLED_APPS = [
 ]
 ```
 
-在 `urls.py` 中添加：
+#### 2. 在 urls.py 中添加（已在上方示例中包含）
 
 ```python
-from django.urls import include, path
-
-urlpatterns = [
-    # ...
-    path('api-explorer/', include('drf_resource.api_explorer.urls')),
-]
+# 第三方 API Explorer
+re_path(r"^api_explorer/", include((_api_explorer_router.urls, "api_explorer"), namespace="api_explorer"))
 ```
 
-访问 `/api-explorer/` 即可使用 API Explorer。
+#### 3. 访问 API Explorer
+
+访问 `/api_explorer/` 即可使用 API Explorer 调试第三方 API。
+
+### 两者区别总结
+
+- **接口文档** (`/docs/`)：展示本项目所有 RESTful API，供前端开发者、测试人员查看和调试
+- **API Explorer** (`/api_explorer/`)：用于调试外部第三方服务的 HTTP API，供后端开发者调用外部接口时使用
 
 ## 🤝 贡献
 
@@ -566,6 +722,13 @@ urlpatterns = [
 ## 📄 许可证
 
 本项目基于 MIT 协议开源，详见 [LICENSE](LICENSE) 文件。
+
+## 📚 进阶文档
+
+更多详细文档请查看 [docs](docs/) 目录：
+
+- [Resource 框架自动发现与使用](docs/Resource框架自动发现与使用.md) - 自动发现机制、扫描规则、全局入口使用
+- [Resource 框架使用小技巧](docs/Resource框架使用小技巧.md) - 线程安全、批量请求、异步任务、调试技巧等
 
 ## 🔗 相关链接
 

@@ -5,8 +5,6 @@ from rest_framework.settings import APISettings
 DEFAULT = {
     # 缓存配置
     "DEFAULT_USING_CACHE": "drf_resource.cache.DefaultUsingCache",
-    # 自动发现配置
-    "AUTO_DISCOVERY": True,
     "RESOURCE_DATA_COLLECT_ENABLED": False,
     "RESOURCE_DATA_COLLECT_RATIO": 0.1,
     # 认证配置
@@ -33,7 +31,6 @@ DEFAULT = {
 IMPORT_STRINGS = [
     # 核心配置
     "DEFAULT_USING_CACHE",
-    "AUTO_DISCOVERY",
     "RESOURCE_DATA_COLLECT_ENABLED",
     "RESOURCE_DATA_COLLECT_RATIO",
     "USERNAME_FIELD",

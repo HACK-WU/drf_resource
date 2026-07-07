@@ -29,27 +29,27 @@ SPECTACULAR_SETTINGS = {
 }
 ```
 
-在 urls.py 中配置文档路由：
+在 urls.py 中配置文档路由（一行导入）：
 
 ```python
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularSwaggerView,
-    SpectacularRedocView,
-)
+from django.urls import include, path
 
 urlpatterns = [
-    # OpenAPI Schema
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    # Swagger UI
-    path(
-        "api/docs/",
-        SpectacularSwaggerView.as_view(url_name="schema"),
-        name="swagger-ui",
-    ),
-    # ReDoc（可选）
-    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    # 接口文档（自动注册 schema/swagger/redoc/docs/tags/clear-cache 路由）
+    path("", include("drf_resource.contrib.urls")),
 ]
+```
+
+如需自定义路由，可手动导入各视图类：
+
+```python
+from drf_resource.contrib.spectacular import (
+    FilterableSpectacularAPIView,
+    FilterableSwaggerView,
+    FilterableSpectacularRedocView,
+    ApiDocsView,
+    ApiTagsView,
+)
 ```
 """
 
@@ -916,11 +916,17 @@ class ApiDocsView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # 构建 API 端点 URL
+        # 动态获取命名空间，兼容 include 和手动配置两种方式
         from django.urls import reverse
 
-        context["tags_url"] = reverse("api-tags")
-        context["schema_url"] = reverse("schema")
-        context["swagger_url"] = reverse("swagger-ui")
+        namespace = ""
+        if self.request and self.request.resolver_match:
+            namespace = self.request.resolver_match.namespace
+        prefix = f"{namespace}:" if namespace else ""
+
+        context["tags_url"] = reverse(f"{prefix}api-tags")
+        context["schema_url"] = reverse(f"{prefix}schema")
+        context["swagger_url"] = reverse(f"{prefix}swagger-ui")
         return context
 
 
