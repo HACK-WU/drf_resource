@@ -101,16 +101,17 @@ task_info = resource.alert.some_resource.apply_async(
 
 **用法**：排查线上问题时可以直接查 `resource_data` 表看历史入参和返回。
 
-## 6. Serializer 自动发现规则
+## 6. Serializer 声明方式
 
-如果不显式在 Resource 类内定义 `RequestSerializer` / `ResponseSerializer`，会按以下命名规则自动查找：
+在 Resource 类中通过类属性显式声明 `RequestSerializer` / `ResponseSerializer`：
 
-| Resource 类名 | 自动查找的 RequestSerializer | 自动查找的 ResponseSerializer |
-|--------------|---------------------------|----------------------------|
-| SearchAlertResource | SearchAlertRequestSerializer | SearchAlertResponseSerializer |
-| UserResource | UserRequestSerializer | UserResponseSerializer |
+```python
+class SearchAlertResource(Resource):
+    RequestSerializer = SearchAlertRequestSerializer
+    ResponseSerializer = SearchAlertResponseSerializer
+```
 
-通过 `serializers_module` 配置可以指定搜索模块范围。
+两个 Serializer 都是可选的——未声明时跳过对应的校验步骤。
 
 ## 7. many_request_data / many_response_data 批量校验
 
