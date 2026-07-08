@@ -23,7 +23,6 @@ specific language governing permissions and limitations under the License.
     - CacheResource: 支持缓存的 Resource 基类
 """
 
-import abc
 import functools
 import json
 import logging
@@ -32,13 +31,15 @@ from collections.abc import Callable
 from typing import Any
 
 from django.core.cache import cache, caches
-from django.utils.encoding import force_bytes
 
 from drf_resource.utils.common import count_md5
 from drf_resource.utils.request import get_request
 
 logger = logging.getLogger(__name__)
 
+# 尝试使用 locmem 作为内存级快缓存；若未配置则回退到默认 cache。
+# 注意：Django 在 alias 未配置时抛出 InvalidCacheBackendError (Exception 子类)，
+# 故此处需捕获 Exception 以确保回退生效。
 try:
     mem_cache = caches["locmem"]
 except Exception:
@@ -50,7 +51,13 @@ class CacheTypeItem:
     缓存类型定义
     """
 
-    def __init__(self, key, timeout, user_related=None, label=""):
+    def __init__(
+        self,
+        key: str,
+        timeout: int,
+        user_related: bool | None = None,
+        label: str = "",
+    ):
         """
         :param key: 缓存名称
         :param timeout: 缓存超时，单位：s
@@ -89,7 +96,12 @@ class BaseUsingCache:
     def __call__(self, target_fun: Callable) -> Callable:
         """
         返回经过缓存装饰的函数。
-        后面
+
+        装饰后的函数附带三种调用模式：
+            - func(*args, **kwargs): 默认缓存模式（先读缓存，未命中则执行并回写）
+            - func.cached(*args, **kwargs): 同默认模式
+            - func.refresh(*args, **kwargs): 强制刷新模式（跳过缓存读，执行后回写）
+            - func.cacheless(*args, **kwargs): 忽略缓存模式（直接执行，不回写）
         """
 
         @functools.wraps(target_fun)
@@ -165,14 +177,26 @@ class DefaultUsingCache(BaseUsingCache):
         else:
             self.user_related = False
 
-    def _refresh(self, target_fun: Callable, args: tuple, kwargs: dict) -> Any:
+    def _refresh(
+        self,
+        target_fun: Callable,
+        args: tuple,
+        kwargs: dict,
+        user_info: str | None = None,
+        using_cache_type: CacheTypeItem | None = None,
+    ) -> Any:
         """
         【强制刷新模式】
-        不使用缓存的数据，将函数执行返回结果回写缓存
+        不使用缓存的数据，将函数执行返回结果回写缓存。
+
+        :param user_info: 用户信息（可选，由 _cached 传入以避免重复获取）
+        :param using_cache_type: 缓存类型（可选，由 _cached 传入以避免重复获取）
         """
-        # 运行时获取缓存类型和用户信息（只获取一次）
-        user_info = self.get_user_info()
-        using_cache_type = self.get_using_cache_type(user_info)
+        # 若未提供则运行时获取（保持公共 API 兼容）
+        if user_info is None:
+            user_info = self.get_user_info()
+        if using_cache_type is None:
+            using_cache_type = self.get_using_cache_type(user_info)
         cache_key = self.generate_cache_key(
             target_fun, args, kwargs, user_info, using_cache_type
         )
@@ -203,17 +227,26 @@ class DefaultUsingCache(BaseUsingCache):
         若不存在，则执行函数，并将结果回写到缓存中
         """
         if self.is_use_cache():
-            cache_key = self.generate_cache_key(target_fun, args, kwargs)
+            # 提前获取用户信息和缓存类型，避免 _refresh 中重复调用
+            user_info = self.get_user_info()
+            using_cache_type = self.get_using_cache_type(user_info)
+            cache_key = self.generate_cache_key(
+                target_fun, args, kwargs, user_info, using_cache_type
+            )
         else:
             cache_key = None
+            user_info = None
+            using_cache_type = None
 
         if cache_key:
             # 使用哨兵值来区分"缓存不存在"和"缓存值是None"
             return_value = self.get_value(cache_key, default=self._CACHE_MISS)
 
             if return_value is self._CACHE_MISS:
-                # 缓存不存在，需要刷新
-                return_value = self._refresh(target_fun, args, kwargs)
+                # 缓存不存在，需要刷新（传入已获取的 user_info / using_cache_type）
+                return_value = self._refresh(
+                    target_fun, args, kwargs, user_info, using_cache_type
+                )
         else:
             return_value = self._cacheless(target_fun, args, kwargs)
         return return_value
@@ -279,8 +312,7 @@ class DefaultUsingCache(BaseUsingCache):
         if using_cache_type:
             if not isinstance(using_cache_type, CacheTypeItem):
                 raise TypeError(
-                    "param 'cache_type' must be an "
-                    "instance of <utils.cache.CacheTypeItem>"
+                    "cache_type / backend_cache_type must be an instance of CacheTypeItem"
                 )
 
         return using_cache_type
@@ -307,7 +339,7 @@ class DefaultUsingCache(BaseUsingCache):
         if user_info is None:
             user_info = self.get_user_info()
         if using_cache_type is None:
-            using_cache_type = self.get_using_cache_type()
+            using_cache_type = self.get_using_cache_type(user_info)
 
         if using_cache_type:
             return (
@@ -328,15 +360,16 @@ class DefaultUsingCache(BaseUsingCache):
             return default
 
         if self.compress:
+            # 先尝试解压（set_value 中 len > min_length 的值会被压缩）
             try:
                 value = zlib.decompress(value)
-            except (zlib.error, TypeError) as e:
-                logger.warning(
-                    f"Failed to decompress cache value for key {cache_key}: {e}"
-                )
-                return default
+            except (zlib.error, TypeError):
+                # 短值（len <= min_length）在 set_value 中跳过了压缩，
+                # 存储为原始 JSON 字符串，此处直接使用即可。
+                pass
+            # 反序列化（json.loads 原生支持 str 和 bytes）
             try:
-                value = json.loads(force_bytes(value))
+                value = json.loads(value)
             except (json.JSONDecodeError, TypeError, UnicodeDecodeError) as e:
                 logger.warning(
                     f"Failed to deserialize cache value for key {cache_key}: {e}"
@@ -384,13 +417,13 @@ using_cache = DefaultUsingCache
 # ============================================================================
 
 
-class CacheResource(metaclass=abc.ABCMeta):
+class CacheResource:
     """
-    支持缓存的resource，开发环境下缓存默认不生效。
+    支持缓存的 Resource Mixin。
 
     注意：此类设计为 Mixin，应与 Resource 基类一起使用。
     实际使用时继承顺序应为：class MyResource(CacheResource, Resource)
-    或直接导入并使用已经组合好的 CacheResource。
+    或直接导入并使用已经组合好的 APICacheResource。
 
     属性:
         cache_type: 缓存类型，启用缓存需要设置此属性或 backend_cache_type 属性
@@ -400,7 +433,7 @@ class CacheResource(metaclass=abc.ABCMeta):
 
     使用示例:
         class MyResource(CacheResource, Resource):
-            cache_type = CacheTypeItem(timeout=60)
+            cache_type = CacheTypeItem(key="my_resource", timeout=60)
 
             def perform_request(self, validated_request_data):
                 return {"data": "result"}
@@ -416,10 +449,11 @@ class CacheResource(metaclass=abc.ABCMeta):
     cache_compress = True
 
     def __init__(self, *args, **kwargs):
-        # 若cache_type为None则视为关闭缓存功能
+        # 先完成基类初始化（设置 context、serializer 等），再包装 request 方法。
+        # 此顺序与 APICacheResource.__init__ 保持一致，确保包装时实例已就绪。
+        super().__init__(*args, **kwargs)
         if self._need_cache_wrap():
             self._wrap_request()
-        super().__init__(*args, **kwargs)
 
     def _need_cache_wrap(self):
         """
@@ -441,8 +475,7 @@ class CacheResource(metaclass=abc.ABCMeta):
             # 检查cache_type是否为CacheTypeItem的实例，如果不是则抛出TypeError
             if not isinstance(self.cache_type, CacheTypeItem):
                 raise TypeError(
-                    "param 'cache_type' must be an"
-                    "instance of <utils.cache.CacheTypeItem>"
+                    "param 'cache_type' must be an instance of CacheTypeItem"
                 )
             # 如果cache_type符合条件，设置need_cache为True
             need_cache = True
@@ -452,8 +485,7 @@ class CacheResource(metaclass=abc.ABCMeta):
             # 检查backend_cache_type是否为CacheTypeItem的实例，如果不是则抛出TypeError
             if not isinstance(self.backend_cache_type, CacheTypeItem):
                 raise TypeError(
-                    "param 'cache_type' must be an"
-                    "instance of <utils.cache.CacheTypeItem>"
+                    "param 'backend_cache_type' must be an instance of CacheTypeItem"
                 )
             # 如果backend_cache_type符合条件，设置need_cache为True
             need_cache = True
@@ -466,9 +498,10 @@ class CacheResource(metaclass=abc.ABCMeta):
         将原有的request方法替换为支持缓存的request方法
         """
 
-        def func_key_generator(resource):
-            key = f"{resource.__self__.__class__.__module__}.{resource.__self__.__class__.__name__}"
-            return key
+        def func_key_generator(target_fun):
+            # target_fun 是绑定的 request 方法，通过 __self__ 获取所属实例的类信息
+            cls = target_fun.__self__.__class__
+            return f"{cls.__module__}.{cls.__name__}"
 
         self.request = using_cache(
             cache_type=self.cache_type,

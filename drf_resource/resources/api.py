@@ -484,7 +484,7 @@ class APICacheResource(APIResource, CacheResource):
             method = "GET"
 
             # 启用缓存，过期时间 60 秒
-            cache_type = CacheTypeItem(timeout=60)
+            cache_type = CacheTypeItem(key="user_cache", timeout=60)
     """
 
     def __init__(self, context=None):
